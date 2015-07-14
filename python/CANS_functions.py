@@ -21,7 +21,7 @@ def neighbours(pos,NRow,NCol):
     return([coords for coords in candidates if 1<=coords[0] and 1<=coords[1] and coords[0]<=NRow and coords[1]<=NCol])
 
 def distance(posA,posB):
-    '''Returns the distance between two coordinates'''
+    '''Returns the Euclidean distance between two coordinates'''
     return(np.sqrt((posA[0]-posB[0])**2+(posA[1]-posB[1])**2))
 
 ##print(neighbours((2,2),3,3))
@@ -58,4 +58,3 @@ def makeModel(nrow,ncol,rparams,rA,rC,rS,kN,kS):
         dS=[rS*C-kS*sum([S-Svals[neighbind] for neighbind in neighbs]) for C,S,neighbs,ndists in zip(Cvals,Nvals,neighbinds,dists)]
         return(dC+dA+dN+dS)
     return(f)
-
