@@ -10,6 +10,21 @@ CANS models are ODEs which we solve using the odeint function in Python.
 On the way to developing a full-blown competition model, we developed some simpler versions, using the same tools:
 
 ##### Exponential model
+C is number of cells
+C0 is the initial condition (number of cells at t=0)
+r is the rate parameter
+
+Assuming [mass-action kinetics](https://en.wikipedia.org/wiki/Law_of_mass_action) and assuming that the number of cells is continuous, we model the cell dynamics as a simple first order reaction in a well-stirred vessel:
+
+  C -> 2C
+  rate = r*C
+
+The reaction above can be written in ODE form:
+
+  dC/dt = r * C
+  C(0) = C0
+
+
 
 ##### Nutrient limited model
 
