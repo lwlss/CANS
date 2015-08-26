@@ -19,7 +19,7 @@ def convertind(ind, NRow):
 
 
 def neighbours(pos, NRow, NCol):
-    '''Returns valid list of neighbours for cell at row i, col h'''
+    '''Returns valid list of neighbours for cell at row i, col j'''
     i = pos[0]
     j = pos[1]
     candidates = [(i+1, j), (i-1, j), (i, j+1), (i, j-1)]
@@ -32,8 +32,8 @@ def distance(posA, posB):
     return(np.sqrt((posA[0] - posB[0])**2 + (posA[1] - posB[1]) ** 2))
 
 
-# print(neighbours((2,2),3,3))
-# print(neighbours((1,1),3,3))
+print(neighbours((2,2),3,3))
+print(neighbours((1,1),3,3))
 # print(convertij((3,3),3))
 # print(convertind(9,3))
 
