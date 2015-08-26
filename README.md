@@ -16,13 +16,13 @@ r is the rate parameter
 
 Assuming [mass-action kinetics](https://en.wikipedia.org/wiki/Law_of_mass_action) and assuming that the number of cells is continuous, we model the cell dynamics as a simple first order reaction in a well-stirred vessel:
 
-  C -> 2C
-  rate = r*C
+    C -> 2C
+    rate = r*C
 
 The reaction above can be written in ODE form:
 
-  dC/dt = r * C
-  C(0) = C0
+    dC/dt = r * C
+    C(0) = C0
 
 
 
