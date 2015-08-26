@@ -13,6 +13,7 @@ On the way to developing a full-blown competition model, we developed some simpl
 
 See code in exponentialModel.py
 
+    t is time since inoculation
     C is number of cells
     C0 is the initial condition (number of cells at t=0)
     r is the rate parameter
