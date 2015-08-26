@@ -4,17 +4,17 @@ import matplotlib.pyplot as plt
 import random
 
 
-def convertij(pos, NRow):
+def convertij(pos, NCol):
     '''Converts row i, col j into row-major vector index'''
     i = pos[0]
     j = pos[1]
-    return((i-1)*NRow+(j-1))
+    return((i-1)*NCol+(j-1))
 
 
-def convertind(ind, NRow):
+def convertind(ind, NCol):
     '''Converts row-major vector index into row i and col j'''
-    row = ind//NRow
-    col = ind-row*NRow
+    row = ind//NCol
+    col = ind-row*NCol
     return((row+1, col+1))
 
 
@@ -32,10 +32,10 @@ def distance(posA, posB):
     return(np.sqrt((posA[0] - posB[0])**2 + (posA[1] - posB[1]) ** 2))
 
 
-print(neighbours((2,2),3,3))
-print(neighbours((1,1),3,3))
-# print(convertij((3,3),3))
-# print(convertind(9,3))
+#print(neighbours((2,2),3,3))
+#print(neighbours((1,1),3,3))
+#print(convertij((2,2),2))
+#print(convertind(9,3))
 
 
 def makeModel(nrow, ncol, rparams, rA, rC, rS, kN, kS):
