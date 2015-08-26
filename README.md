@@ -10,6 +10,9 @@ CANS models are ODEs which we solve using the odeint function in Python.
 On the way to developing a full-blown competition model, we developed some simpler versions, using the same tools:
 
 ##### Exponential model
+
+See code in exponentialModel.py
+
     C is number of cells
     C0 is the initial condition (number of cells at t=0)
     r is the rate parameter
