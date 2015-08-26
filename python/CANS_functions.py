@@ -38,7 +38,7 @@ def distance(posA, posB):
 #print(convertind(9,3))
 
 
-def makeModel(nrow, ncol, rparams, rA, rC, rS, kN, kS):
+def makeModelCANS(nrow, ncol, rparams, rA, rC, rS, kN, kS):
     '''Set up variables and return a function suitable for simulating CANS dynamics with scipy.odeint'''
     # Convert between indices and coordinates generate neighbourhoods and calculate distances
     inds = [x for x in range(0, nrow * ncol)]
@@ -67,4 +67,29 @@ def makeModel(nrow, ncol, rparams, rA, rC, rS, kN, kS):
         dS = [rS * C - kS * sum([S-Svals[neighbind] for neighbind in neighbs]) for C, S, neighbs, ndists in zip(Cvals, Nvals, neighbinds, dists)]
         return(dC + dA + dN + dS)
     return(f)
+
+
+def makeModelComp(nrow, ncol, rparams, k):
+    '''Set up variables and return a function suitable for simulating competition model dynamics with scipy.odeint'''
+    # Convert between indices and coordinates generate neighbourhoods and calculate distances
+    inds = range(0, nrow * ncol)
+    coords = [convertind(i, ncol) for i in inds]
+    neighbcoords = [neighbours(coord, nrow, ncol) for coord in coords]
+    neighbinds = [[convertij(neighb, nrow) for neighb in neighblist] for neighblist in neighbcoords]
+
+    # Indices to convert from long vector to species-specific vectors
+    Cinds = inds
+    Ninds = [ind + len(inds) for ind in inds]
+
+    def f(y, t):
+        '''Calculates rate of change of variables for competition model given current value of variables (and time t)'''
+        # Cannot have negative cell numbers or concentrations
+        y = np.maximum(0, y)
+        Cvals = y[Cinds]
+        Nvals = y[Ninds]
+        dC = [r * C * N for r, C, N in zip(rparams, Cvals, Nvals)]
+        dN = [-r * C * N - k * sum([N - Nvals[neighbind] for neighbind in neighbs]) for r, C, N, neighbs in zip(rparams, Cvals, Nvals, neighbinds)]
+        return(dC + dN)
+    return(f)
+
 
