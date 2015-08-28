@@ -35,7 +35,21 @@ Which does have an anlytical solution:
 However, for consistency with more complicated models to come, we solve this using the [odeint](http://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.odeint.html) function in Python.
 ##### Nutrient limited model
 
+Cells need nutrients to divide and the reaction C -> 2C is proportional to the availability of N
+
+    C + N -> 2C
+    rate = r*N*C
+
+The rate of change of N and C can be written in the ODE form:
+
+    dC/dt = r * N * C
+    dN/dt = -(r * N * C)
+    C(0) = C0
+    N(0) = N0
+
 ##### Compeition model
+
+The competition model takes into account the fact that nutrients can diffuse accross agar, therefore spots with large neighbours will be at a disadvantage when compared to spots with small neighbours. 
 
 ##### Competition model with signalling (full CANS model)
 

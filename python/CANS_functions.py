@@ -74,9 +74,8 @@ def makeModelComp(nrow, ncol, rparams, k):
     # Convert between indices and coordinates generate neighbourhoods and calculate distances
     inds = range(0, nrow * ncol)
     coords = [convertind(i, ncol) for i in inds]
-    neighbcoords = [neighbours(coord, nrow, ncol) for coord in coords]
+    neighbcoords = [neighbours(coord, nrow, ncol) for coord in coords] 
     neighbinds = [[convertij(neighb, nrow) for neighb in neighblist] for neighblist in neighbcoords]
-
     # Indices to convert from long vector to species-specific vectors
     Cinds = inds
     Ninds = [ind + len(inds) for ind in inds]
