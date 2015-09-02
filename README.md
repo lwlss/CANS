@@ -47,7 +47,7 @@ The rate of change of N and C can be written in the ODE form:
     C(0) = C0
     N(0) = N0
 
-##### Compeition model
+##### Competition model
 
 The competition model takes into account the fact that nutrients can diffuse accross agar, therefore spots with large neighbours will be at a disadvantage when compared to spots with small neighbours. 
 
