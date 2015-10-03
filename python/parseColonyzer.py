@@ -3,9 +3,9 @@ import numpy as np
 import os
 
 imOutDir="../data/Output_Data"
-exptDesc="../data/ExptDescription.txt"
-libDesc="../data/LibraryDescription.txt"
-geneToORF="../data/ORF2GENE.txt"
+exptDesc="../data/Auxiliary/ExptDescription.txt"
+libDesc="../data/Auxiliary/LibraryDescription.txt"
+geneToORF="../data/Auxiliary/ORF2GENE.txt"
 fout="../data/RawData.txt"
 fmt="%Y-%m-%d_%H-%M-%S"
 
@@ -60,9 +60,3 @@ ims["Gene"]=[orf2g[orf] for orf in ims.ORF]
 
 # Write data, metadata and newly calulated times to file
 ims.to_csv(fout,sep="\t")
-
-
-
-
-
-
