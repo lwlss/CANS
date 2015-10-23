@@ -2,12 +2,6 @@ import pandas as pd
 import numpy as np
 import os
 
-imOutDir="../data/Output_Data"
-exptDesc="../data/Auxiliary/ExptDescription.txt"
-libDesc="../data/Auxiliary/LibraryDescription.txt"
-geneToORF="../data/Auxiliary/ORF2GENE.txt"
-fout="../data/RawData.txt"
-fmt="%Y-%m-%d_%H-%M-%S"
 
 def parseColonyzer(fname):
     '''Read in Colonyzer .out file and parse some info from filename.'''
@@ -25,38 +19,67 @@ def getORF(libs,Library,Plate,Row,Column):
     filt=libs.ORF[(libs.Library==Library)&(libs.Plate==Plate)&(libs.Row==Row)&(libs.Column==Column)]
     return(filt.get_values()[0])
 
-# Read in and combine all .out files
-imList=os.listdir(imOutDir)
-outs=[parseColonyzer(os.path.join(imOutDir,out)) for out in imList if ".out" in out]
-ims=pd.concat(outs)
+def parseAndCombine(imOutDir=".",exptDesc="ExptDescription.txt",libDesc="LibraryDescription.txt",geneToORF="ORF2GENE.txt",fout="ColonyzerOutput.txt",fmt="%Y-%m-%d_%H-%M-%S"):
+    '''Read in a list of colonyzer output files, together with optional metadata files describing inoculation times, strains, treatments applied etc. to produce one summary output file.'''
+    # Read in and combine all .out files
+    imList=os.listdir(imOutDir)
+    outs=[parseColonyzer(os.path.join(imOutDir,out)) for out in imList if ".out" in out]
+    ims=pd.concat(outs)
+    
+    try:
+        # Read in experimental metadata
+        expt=pd.read_csv(exptDesc,sep="\t",header=0)
+    except:
+        print(exptDesc+" not found, carrying on...")
+        expt=None
+        
+    try:
+        # Read in library description file
+        libs=pd.read_csv(libDesc,sep="\t",header=0)
+        libs.columns=[x.rstrip() for x in libs.columns]
+    except:
+        print(libDesc+" not found, carrying on...")
+        libs=None
 
-# Read in experimental metadata
-expt=pd.read_csv(exptDesc,sep="\t",header=0)
+    try:
+        # Read in file describing link between standard gene name and systematic gene name (ORF) as python dictionary orf2g
+        g2orf_df=pd.read_csv(geneToORF,sep="\t",header=None)
+        orf2g=dict(zip(g2orf_df[0],g2orf_df[1]))
+    except:
+        print(geneToORF+" not found, carrying on...")
+        orf2g=None
 
-# Read in library description file
-libs=pd.read_csv(libDesc,sep="\t",header=0)
-libs.columns=[x.rstrip() for x in libs.columns]
+    if expt is not None:
+        # Add metadata from expt to ims
+        ims["Start.Time"]=[expt["Start.Time"][expt.Barcode==barc].get_values()[0] for barc in ims["Barcode"]]
+        ims["Treatment"]=[expt["Treatment"][expt.Barcode==barc].get_values()[0] for barc in ims["Barcode"]]
+        ims["Medium"]=[expt["Medium"][expt.Barcode==barc].get_values()[0] for barc in ims["Barcode"]]
+        ims["Screen"]=[expt["Screen"][expt.Barcode==barc].get_values()[0] for barc in ims["Barcode"]]
+        ims["Library"]=[expt["Library"][expt.Barcode==barc].get_values()[0] for barc in ims["Barcode"]]
+        ims["Plate"]=[expt["Plate"][expt.Barcode==barc].get_values()[0] for barc in ims["Barcode"]]
+        ims["RepQuad"]=[expt["RepQuad"][expt.Barcode==barc].get_values()[0] for barc in ims["Barcode"]]
 
-# Read in file describing link between standard gene name and systematic gene name (ORF) as python dictionary orf2g
-g2orf_df=pd.read_csv(geneToORF,sep="\t",header=None)
-orf2g=dict(zip(g2orf_df[0],g2orf_df[1]))
+        # Calculate time since inoculation date time (from expt metadata) that image was taken
+        ims["ExptTime"]=(pd.to_datetime(ims["DateTime"],format=fmt)-pd.to_datetime(ims["Start.Time"],format=fmt))/np.timedelta64(1,"D")
 
-# Add metadata from expt to ims
-ims["Start.Time"]=expt["Start.Time"][expt.Barcode==ims.Barcode.unique()[0]].get_values()[0]
-ims["Treatment"]=expt["Treatment"][expt.Barcode==ims.Barcode.unique()[0]].get_values()[0]
-ims["Medium"]=expt["Medium"][expt.Barcode==ims.Barcode.unique()[0]].get_values()[0]
-ims["Screen"]=expt["Screen"][expt.Barcode==ims.Barcode.unique()[0]].get_values()[0]
-ims["Library"]=expt["Library"][expt.Barcode==ims.Barcode.unique()[0]].get_values()[0]
-ims["Plate"]=expt["Plate"][expt.Barcode==ims.Barcode.unique()[0]].get_values()[0]
-ims["RepQuad"]=expt["RepQuad"][expt.Barcode==ims.Barcode.unique()[0]].get_values()[0]
+        # Get ORFs at each position from relevant library description
+        ims["ORF"]=[getORF(libs,l,p,r,c) for l,p,r,c in zip(ims.Library,ims.Plate,ims.Row,ims.Column)]
 
-# Calculate time since inoculation date time (from expt metadata) that image was taken
-ims["ExptTime"]=(pd.to_datetime(ims["DateTime"],format=fmt)-pd.to_datetime(ims["Start.Time"],format=fmt))/np.timedelta64(1,"D")
+    if orf2g is not None and expt is not None:
+        # Get standard gene names for each ORF
+        ims["Gene"]=[orf2g[orf] for orf in ims.ORF]
 
-# Get ORFs at each position from relevant library description
-ims["ORF"]=[getORF(libs,l,p,r,c) for l,p,r,c in zip(ims.Library,ims.Plate,ims.Row,ims.Column)]
-# Get standard gene names for each ORF
-ims["Gene"]=[orf2g[orf] for orf in ims.ORF]
+    # Write data, metadata and newly calulated times to file
+    ims.to_csv(fout,sep="\t")
+    return(ims)
 
-# Write data, metadata and newly calulated times to file
-ims.to_csv(fout,sep="\t")
+if __name__ == "__main__":
+
+    imOutDir="../data/Output_Data"
+    exptDesc="../data/Auxiliary/ExptDescription.txt"
+    libDesc="../data/Auxiliary/LibraryDescription.txt"
+    geneToORF="../data/Auxiliary/ORF2GENE.txt"
+    fout="../data/RawData.txt"
+    fmt="%Y-%m-%d_%H-%M-%S"
+
+    res=parseAndCombine(imOutDir,exptDesc,libDesc,geneToORF,fout,fmt)
