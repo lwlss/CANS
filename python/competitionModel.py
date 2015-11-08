@@ -27,19 +27,39 @@ soln=odeint(f,C+N,t)
 
 # Read in some real data
 data=pd.read_csv("..\data\ColonyzerOutput.txt",sep="\t")
+data=data[(data.Column<=ncol)&(data.Row<=nrow)]
+data["ID"]=['R{r:02d}C{c:02d}'.format(r=row,c=col) for row,col in zip(data.Row,data.Column)]
+dmat=data.pivot("ExptTime","ID","Intensity")
+# Simulate from model at times corresponding to expt. obs. only
+et=data.ExptTime.unique()
+et.sort()
+esoln=odeint(f,C+N,et)[:,0:(nrow*ncol)]
+
+def calcErr(C,N,r,k,dmat):
+    '''Given set of model parameters & data, calulates the squared error between model prediction and observed data.'''
+    f=makeModelComp(nrow,ncol,r,k)
+    esoln=odeint(f,C+N,et)[:,0:(nrow*ncol)]
+    return(np.sqrt(np.square(esoln-dmat).sum().sum()))
 
 # Plotting results
 fig,ax=plt.subplots(nrow,ncol,figsize=(20,10))
+setot=0
 for row in range(nrow):
     for col in range(ncol):
         dat=data[(data.Column==(col+1))&(data.Row==(row+1))]
         i=convertij((row+1,col+1),ncol)
+        se=sum([(x-y)**2 for x,y in zip(dat.Intensity,soln[:,i])])
+        setot+=se
         ax[row,col].scatter(dat.ExptTime,dat.Intensity,c="red")
+        ax[row,col].scatter(dat.ExptTime,esoln[:,i],c="blue")
         ax[row,col].plot(t,soln[:,i],c="black")
         ax[row,col].plot(t,soln[:,i+(nrow*ncol)],c="blue")
         ax[row,col].set_ylim([-0.02,0.3])
-        ax[row,col].text(4, 0.275, 'R{r:02d}C{c:02d}'.format(r=row+1,c=col+1))
+        ax[row,col].text(3.6, 0.275, 'R{r:02d}C{c:02d}'.format(r=row+1,c=col+1))
+        ax[row,col].text(3.6, 0.255, 'SqErr: %.3f'%se)
         ax[row,col].set_xlabel('Time since inoculation (d)')
         ax[row,col].set_ylabel('Population size (AU)')
 plt.show()
+
+print(setot)
 
