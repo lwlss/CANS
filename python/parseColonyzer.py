@@ -25,6 +25,7 @@ def parseAndCombine(imOutDir=".",exptDesc="ExptDescription.txt",libDesc="Library
     imList=os.listdir(imOutDir)
     outs=[parseColonyzer(os.path.join(imOutDir,out)) for out in imList if ".out" in out]
     ims=pd.concat(outs)
+
     
     try:
         # Read in experimental metadata
@@ -71,15 +72,27 @@ def parseAndCombine(imOutDir=".",exptDesc="ExptDescription.txt",libDesc="Library
 
     # Write data, metadata and newly calulated times to file
     ims.to_csv(fout,sep="\t")
+    ims.to_csv(anotherfile,sep="\t")
+    print ims
     return(ims)
 
 if __name__ == "__main__":
 
-    imOutDir="../data/Output_Data"
-    exptDesc="../data/Auxiliary/ExptDescription.txt"
-    libDesc="../data/Auxiliary/LibraryDescription.txt"
-    geneToORF="../data/Auxiliary/ORF2GENE.txt"
-    fout="../data/RawData.txt"
+    imOutDir=  "/Users/victoriatorrance/Documents/CANS/data/Output_Data" #"../data/Output_Data"
+    exptDesc="/Users/victoriatorrance/Documents/CANS/data/Auxiliary/ExptDescription.txt"
+    libDesc=  "/Users/victoriatorrance/Documents/CANS/data/Auxiliary/LibraryDescription.txt" #"../data/Auxiliary/LibraryDescription.txt"
+    geneToORF= "/Users/victoriatorrance/Documents/CANS/data/Auxiliary/ORF2GENE.txt"
+    fout= "/Users/victoriatorrance/Documents/CANS/data/RawData.txt"
+    anotherfile= "/Users/victoriatorrance/Documents/CANS/data/anotherfile.txt"
     fmt="%Y-%m-%d_%H-%M-%S"
+    #imOutDir="../data/Output_Data"
+    #exptDesc="../data/Auxiliary/ExptDescription.txt"
+    #libDesc="../data/Auxiliary/LibraryDescription.txt"
+    #geneToORF="../data/Auxiliary/ORF2GENE.txt"
+    #fout="../data/RawData.txt"
+    #fmt="%Y-%m-%d_%H-%M-%S"
 
     res=parseAndCombine(imOutDir,exptDesc,libDesc,geneToORF,fout,fmt)
+
+
+    print 'wow no errors'

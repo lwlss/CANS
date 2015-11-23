@@ -2,17 +2,33 @@ from CANS_functions import *
 import pandas as pd
 
 # Timepoints at which we would like to simulate cell densities (& remaining nutrients)
+<<<<<<< Updated upstream
 t=np.linspace(0,4.5,100)
+=======
+t=np.linspace(0,20,100)
+>>>>>>> Stashed changes
 
-nrow,ncol=3,3
+nrow,ncol=16,24
 
 # Initial conditions
+<<<<<<< Updated upstream
 C0=0.001
 N0=0.23
 
 # Parameter value
 r=[3,3,3,3,10,3,3,3,3]
 k=0.05
+=======
+C0=0.2
+N0=5
+
+# Parameter value
+#r=[0.1,0.2,0.3,0.2,0.1,0.15,0.15,0.5,0.4]
+r=[0.5 for x in range(0,nrow*ncol)]
+r[2]= 0.99
+k=0.5
+>>>>>>> Stashed changes
+
 
 # Initial conditions
 C=[C0 for x in range(0,nrow*ncol)]
@@ -22,6 +38,7 @@ N=[N0 for x in range(0,nrow*ncol)]
 # y is a list of variables (only one variable in this case: C)
 # t is a list of times at which we will calculate variables
 f=makeModelComp(nrow,ncol,r,k)
+<<<<<<< Updated upstream
 
 soln=odeint(f,C+N,t)
 
@@ -57,6 +74,28 @@ for row in range(nrow):
         ax[row,col].set_ylim([-0.02,0.3])
         ax[row,col].text(3.6, 0.275, 'R{r:02d}C{c:02d}'.format(r=row+1,c=col+1))
         ax[row,col].text(3.6, 0.255, 'SqErr: %.3f'%se)
+=======
+# with open(r"C:\Users\Vicky\Desktop\blanktextfile.txt", "w") as fp:
+#     soln=odeint(f,C+N,t)
+#     for row in range(nrow):
+#         for col in range(ncol):
+#             i=convertij((row,col),ncol)
+#             g = soln[:,i]
+#             print type(g)
+    #        print t,soln[:,i+(nrow*ncol)]
+
+#             fp.write("%i\t%i\t%i") % (i, t, g) 
+       #     fp.write("%s\n%s\n" % p)
+
+# fp.write(("%s\t%.15f\t%i\t%i\n") % (p[0], p[1][0], p[1][1], p[1][2]))       
+# Plotting results
+fig,ax=plt.subplots(nrow,ncol,figsize=(20,10)) #nrow, ncol
+for row in range(nrow): #nrow
+    for col in range(ncol): #ncol
+        i=convertij((row,col),ncol)
+        ax[row,col].plot(t,soln[:,i])
+        ax[row,col].plot(t,soln[:,i+(nrow*ncol)])
+>>>>>>> Stashed changes
         ax[row,col].set_xlabel('Time since inoculation (d)')
         ax[row,col].set_ylabel('Population size (AU)')
 plt.show()
