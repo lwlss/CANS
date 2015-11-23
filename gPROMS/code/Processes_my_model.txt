@@ -3,10 +3,10 @@ Flowsheet AS my_model
 
 SET
 
-Flowsheet.rprams := 49;
+Flowsheet.rprams := 144;
 
-Flowsheet.nROW := 7;
-Flowsheet.nCOL := 7;
+Flowsheet.nROW := 12;
+Flowsheet.nCOL := 12;
 
 
 ASSIGN

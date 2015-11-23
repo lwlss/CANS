@@ -3,10 +3,10 @@ Flowsheet AS Flowsheet
 
 SET
 
-Flowsheet.my_model.rprams := 49;
+Flowsheet.my_model.rprams := 144;
 
-Flowsheet.my_model.nROW := 7;
-Flowsheet.my_model.nCOL := 7;
+Flowsheet.my_model.nROW := 12;
+Flowsheet.my_model.nCOL := 12;
 
 ASSIGN
 Flowsheet.my_model.k := 0.35;
