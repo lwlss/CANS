@@ -6,7 +6,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-wb2 = op.load_workbook('gPROMS_output constant.xlsx')
+wb2 = op.load_workbook('../gPROMS_output/gPROMS_output constant.xlsx')
 print wb2.get_sheet_names()
 
 def convertind(ind, NCol):
@@ -42,7 +42,7 @@ for i in listInts:
     IntNew = convertij(IJ, 24)
     listInts_new.append(IntNew+1)
 
-f=pd.read_csv("/Users/victoriatorrance/Desktop/ColonyzerOutput_2.txt",sep="\t")
+f=pd.read_csv("../../data/ColonyzerOutput.txt",sep="\t")
 intensity, ExptTime, Column, Row, geneName  = f["Intensity"], f["ExptTime"], f["Column"], f["Row"], f["Gene"]
 
 # convert columns to indexes
