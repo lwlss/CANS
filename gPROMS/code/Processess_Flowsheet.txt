@@ -1,0 +1,40 @@
+UNIT
+Flowsheet AS Flowsheet
+
+SET
+
+Flowsheet.my_model.rprams := 49;
+
+Flowsheet.my_model.nROW := 7;
+Flowsheet.my_model.nCOL := 7;
+
+ASSIGN
+Flowsheet.my_model.k := 0.35;
+# Start Unit Specifications
+    WITHIN Flowsheet DO
+        WITHIN my_model DO
+            pos := 1.5 ; # 1.5 kmol
+        END # WITHIN my_model
+    END # WITHIN Flowsheet
+# End Unit Specifications
+
+INITIAL
+FOR x := 1 to Flowsheet.my_model.rprams DO
+Flowsheet.my_model.C(x) = 0.01;
+END
+
+FOR x := 1 to Flowsheet.my_model.rprams DO
+Flowsheet.my_model.N(x) = 0.25 ;
+END
+
+INITIALISATION_PROCEDURE
+# Start Default Initialisation Procedure
+    USE
+            : DEFAULT;
+    END
+    SAVE "Flowsheet_InitialGuess";
+# End Default Initialisation Procedure
+
+
+SCHEDULE
+  CONTINUE FOR 4.12

@@ -1,0 +1,39 @@
+UNIT
+Flowsheet AS my_model
+
+SET
+
+Flowsheet.rprams := 49;
+
+Flowsheet.nROW := 7;
+Flowsheet.nCOL := 7;
+
+
+ASSIGN
+WITHIN Flowsheet DO
+pos := 1.5;
+END
+
+Flowsheet.k := 0.05;
+
+INITIAL
+FOR x := 1 to Flowsheet.rprams DO
+Flowsheet.C(x) = 0.01;
+END
+
+
+FOR x := 1 to Flowsheet.rprams DO
+Flowsheet.N(x) = 0.25 ;
+END
+
+INITIALISATION_PROCEDURE
+# Start Default Initialisation Procedure
+    USE
+            : DEFAULT;
+    END
+    SAVE "my_model_InitialGuess";
+# End Default Initialisation Procedure
+
+
+SCHEDULE
+  CONTINUE FOR 4.12

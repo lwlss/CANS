@@ -1,0 +1,70 @@
+PARAMETER
+rprams AS INTEGER # number of samples
+
+
+
+nROW AS INTEGER
+nCOL AS INTEGER
+
+
+
+VARIABLE
+C AS ARRAY (rprams) OF moles # the number of cells as an OD
+N AS ARRAY (rprams) OF moles # the amount of nutrients
+
+pos AS ARRAY(rprams) OF moles # this is the array of all the rate parameters
+
+k AS reaction_rate # a value used in the competition model
+
+EQUATION
+
+FOR x := 1 TO (nROW*nCOL) DO 
+IF x>1 AND X < nCOL THEN 
+   $C(x) = pos(x) * C(x) * N(x); 
+   $N(x) = -pos(x) * C(x) * N(x) - k * SIGMA((N(x)-N(x-1)),(N(x)-N(x+1)), (N(x)-N(x+nCOL))) ;  # dN = -rate * C * N
+ELSE 
+IF x >(nROW*nCOL-nCOL+1) AND X < (nROW*nCOL) THEN
+    $C(x) = pos(x) * C(x) * N(x); # dC = rate * C * N
+    $N(x) = -pos(x) * C(x) * N(x) - k * SIGMA((N(x)-N(x-1)),(N(x)-N(x+1)), (N(x)-N(x-nCOL))) ;  # dN = -rate * C * N
+ELSE
+IF x = 1 THEN
+   $C(x) = pos(x) * C(x) * N(x); # dC = rate * C * N
+   $N(x) = -pos(x) * C(x) * N(x) - k * SIGMA((N(x)-N(x+1)), (N(x)-N(x+nCOL))) ;  # dN = -rate * C * N
+ELSE
+IF x =nCOL THEN
+   $C(x) = pos(x) * C(x) * N(x); # dC = rate * C * N
+   $N(x) = -pos(x) * C(x) * N(x) - k * SIGMA((N(x)-N(x-1)), (N(x)-N(x+nCOL))) ;  # dN = -rate * C * N
+ELSE
+IF x = (nROW*nCOL-nCOL+1) THEN #57
+   $C(x) = pos(x) * C(x) * N(x); # dC = rate * C * N
+   $N(x) = -pos(x) * C(x) * N(x) - k * SIGMA((N(x)-N(x+1)), (N(x)-N(x-nCOL))) ;  # dN = -rate * C * N
+ELSE
+IF x = (nROW*nCOL) THEN
+   $C(x) = pos(x) * C(x) * N(x); # dC = rate * C * N
+   $N(x) = -pos(x) * C(x) * N(x) - k * SIGMA((N(x)-N(x-1)), (N(x)-N(x-nCOL))) ;  # dN = -rate * C * N
+ELSE
+IF x =(nCOL+1) OR x =(2*nCOL+1) OR x =(3*nCOL+1) OR x= (4*nCOL+1) OR x= (5*nCOL+1) OR x= (6*nCOL+1) OR x= (7*nCOL+1) OR x= (8*nCOL+1) OR x= (9*nCOL+1) OR x= (10*nCOL+1)   THEN
+   $C(x) = pos(x) * C(x) * N(x); # dC = rate * C * N
+   $N(x) = -pos(x) * C(x) * N(x) - k * SIGMA((N(x)-N(x+1)), (N(x)-N(x+nCOL)), (N(x)-N(x-nCOL))) ;  # dN = -rate * C * N
+ELSE
+ 
+IF x= (2*nCOL) OR x= (3*nCOL) OR x= (4*nCOL) OR x= (5*nCOL) OR x= (6*nCOL) OR x= (7*nCOL) OR x= (8*nCOL)OR x= (9*nCOL)OR x= (10*nCOL)OR x= (11*nCOL) THEN   
+   $C(x) = pos(x) * C(x) * N(x); # dC = rate * C * N
+   $N(x) = -pos(x) * C(x) * N(x) - k * SIGMA((N(x)-N(x-1)), (N(x)-N(x+nCOL)), (N(x)-N(x-nCOL))) ;  # dN = -rate * C * N
+
+ELSE
+   $C(x) = pos(x) * C(x) * N(x); # dC = rate * C * N
+   $N(x) = -pos(x) * C(x) * N(x) - k * SIGMA((N(x)-N(x-1)),(N(x)-N(x+1)), (N(x)-N(x-nCOL)), (N(x)-N(x+nCOL))) ;  # dN = -rate * C * N
+
+END 
+END 
+END 
+END 
+END 
+END 
+END 
+END 
+END # LOOP
+
+
+  
