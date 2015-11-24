@@ -1,6 +1,5 @@
 __author__ = 'victoriatorrance'
 
-
 import openpyxl as op
 import pandas as pd
 import seaborn as sns
@@ -82,8 +81,12 @@ geneNamesUnique = set(listGeneNames2)
 
 zippedInfo = zip(listInts, listGeneNames2, listRvalues)
 mydataframe3 = pd.DataFrame(zippedInfo, columns=['pos', 'Gene', 'Fitness'] )
-mydataframeSort =mydataframe3.sort('Fitness', ascending=0)
+#mydataframeSort =mydataframe3.sort('Fitness', ascending=0)
 
+medfits=mydataframe3.groupby("Gene")["Fitness"].median().sort(ascending=False,inplace=False)
+sortedgenes=medfits.index.values
+mydataframe3["sortcat"]=pd.Categorical(mydataframe3["Gene"],categories=sortedgenes,ordered=True)
+mydataframeSort=mydataframe3.sort("sortcat")
 
 
 '''
@@ -97,12 +100,14 @@ for thegene in dictnames:
     m = sum(dictnames[thegene]) / float(len(dictnames[thegene]))
 '''
 
-
-
-ax = sns.boxplot(x="Gene", y="Fitness", data=mydataframeSort)
-plt.xlabel('Gene', fontsize=7)
+bp = sns.boxplot(x="Gene", y="Fitness", data=mydataframeSort)
+locs, labels = plt.xticks()
+plt.setp(labels, rotation=90)
+plt.xlabel("")
+plt.yticks(fontsize=15)
+plt.xticks(fontsize=15)
+plt.ylabel("Growth rate r (1/d)",fontsize=20)
 plt.show()
-
 
 #for name in listGeneNames:
 
