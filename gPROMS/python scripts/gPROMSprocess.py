@@ -54,7 +54,7 @@ for i in tot:
 # open up gPROMS output text file!
 #f = open("/Users/victoriatorrance/Desktop/gPROMS example Parameter Estimation copy.txt")
 #f = open("my_model.txt")
-f = open("../../data/gPROMS example Parameter Estimation.txt")
+f = open("../gPROMS_output/gPROMS_example_Parameter_Estimation.txt")
 f=list(f)
 
 
