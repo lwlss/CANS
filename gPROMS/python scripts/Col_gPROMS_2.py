@@ -26,7 +26,7 @@ listOfInts = [x for x in range(0, totalSpots)]
 
 list_indexes = [convertind(x, ncol) for x in listOfInts]
 
-f=pd.read_csv("/Users/victoriatorrance/Desktop/ColonyzerOutput_2.txt",sep="\t")
+f=pd.read_csv("../../data/ColonyzerOutput.txt" ,sep="\t")
 intensity, ExptTime, Column, Row  = f["Intensity"], f["ExptTime"], f["Column"], f["Row"]
 
 # convert columns to indexes
