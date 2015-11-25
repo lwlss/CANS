@@ -133,8 +133,8 @@ dictnames = {}
 for name in geneNamesUnique:
     dictnames[str(name)] = []
 
-for i in zippedInfo:
-    dictnames[str(i[0])] = dictnames[str(i[0])] + ([(i[2])])
+for geneName,param,value in zippedInfo:
+    dictnames[str(geneName)] = dictnames[str(geneName)] + ([(value)])
 
 # we loop through our dict and calculate the median for each set of r estimates corresponding to each gene
 # we end up with a zipped list containing GeneName and med value of the r estimates for that given gene
