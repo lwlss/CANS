@@ -21,7 +21,7 @@ fit=control.fit<-qfa.fit(raw,inocguess=1E-4,ORF2gene=file.path("data","Auxiliary
 fit=makeFitness(fit)
 qfa.plot(file.path("R_qfa","R_qfa_GrowthCurves.pdf"),fit,raw,maxt=5)
 
-write.table(fit,file="R_qfa_results.txt",sep="\t",row.names=FALSE,quote=FALSE)
+write.table(fit,file=file.path("R_qfa","R_qfa_results.txt"),sep="\t",row.names=FALSE,quote=FALSE)
 
 
 
