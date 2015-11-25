@@ -176,5 +176,5 @@ ax = sns.boxplot(x="Fitness", y="Gene", data=myDFsort, orient= "h")
 ax = sns.stripplot(x="Fitness", y="Gene", data=myDFsort,size=3, jitter=True, edgecolor="gray")
 
 plt.xlim(-0.05, 4)
-plt.savefig("Boxplot of Fitness estimates.pdf")
+plt.savefig("BoxplotFitness.pdf")
 plt.show()
