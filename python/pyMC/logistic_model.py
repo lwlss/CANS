@@ -17,7 +17,7 @@ x_obs=np.random.normal(x_exp,sqrt(1/tau_true))
 # Specify priors for model parameters (stochastic nodes)
 r=Normal('r',1.5,1/2.0)
 K=Normal('K',2,1/2.5)
-x0=Normal('x0',0,1/0.1)
+x0=Uniform('x0',0,0.01)
 tau=Normal('tau',0,1/2.0)
 
 # Deterministic nodes in the model (output from logistic model in this case)
