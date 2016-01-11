@@ -11,41 +11,43 @@ def logistic(x0,r,K,t):
 
 # Solution of dx/dt = r*x*(1-(x/K)^v)
 def glogistic(x0,r,K,t,v=1.0):
-    '''Vectorisesd generalised logistic growth model'''
+    '''Vectorised generalised logistic growth model'''
     return(K/(1+(-1+(K/x0)**v)*np.exp(-r*v*t))**(1/v))
 
 # Define function specifying what ODE is
 # y is a list of variables (only one variable in this case: C)
 # t is a list of times at which we will calculate variables
 def logisticode(x0,r,K,t):
+    rc = r/K
     def f(y,t):
         C,N=y
-        dC=r*C*N
-        dN=-r*C*N
+        dC=rc*C*N
+        dN=-rc*C*N
         return([dC,dN])
-    iconds=[x0,1-x0/float(K)]
+    iconds=[x0,K-x0]
     return(odeint(f,iconds,t))
 
-# To convert from N-C competition model to logistic model, think about K
-# dC=r*C*(N0-(C-C0))
-# -> r*C*(N0-(C-C0)) = r*C*(1-C/K)
-# N0+C0-C=1-C/K
-# True at t=0
-# N0 = 1-C0/K
-# or
-# K = (1-N0)/C0
-
-
-
-
-
-
+# To convert from N-C competition model to logistic model, think about matching rates at t=0
+# Competition:
+# dC/dt @t0 = rc*C0*N0
+# Logistic
+# dC/dt @t0 = rl*C0*(1-C0/K)
+# In order for growth curves to be identical:
+# rc*C0*N0 = rl*C0*(1-C0/K)
+# -> rc = rl*(1-C0/K)/N0
+# Also need same population size at steady-state:
+# Logistic carrying capacity is initial pop size plus increase from nutrient consumption
+# K=C0+N0
+# -> N0=K-C0
+# Therefore:
+# rc = rl*(1-C0/K)/(K-C0)
+# -> rc = rl/K
 
 # Simulate some observation times and experimental data, with measurement error
 class sim():
     rnd=np.random
     '''Parameters used for generating simulated data, together with simulated data'''
-    def __init__(self,x0=0.001,r=2.5,K=0.6,tau=300.0,v=1.0,tmax=5,n_exp=10,n_pred=100):
+    def __init__(self,x0=0.001,r=2.5,K=0.6,tau=300.0,v=1.0,tmax=5,n_exp=10,n_pred=10):
         self.seed = random.randint(0,4294967295)
         self.K_true=K
         self.r_true=r
