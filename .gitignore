@@ -58,3 +58,4 @@ target/
 
 # pymc
 python/pyMC/*.png
+python/pyMC/*.pdf
