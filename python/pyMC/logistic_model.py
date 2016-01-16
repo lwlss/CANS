@@ -1,8 +1,10 @@
+import random
+import time
+import datetime
 import pymc as mc
 import numpy as np
 import multiprocessing as mp
 from scipy.integrate import odeint
-import random
 from diagnostics import *
 
 def logistic(x0,r,K,t):
@@ -25,7 +27,9 @@ def logisticode(x0,r,K,t):
         dN=-rc*C*N
         return([dC,dN])
     iconds=[x0,K-x0]
-    return(odeint(f,iconds,t))
+    res=odeint(f,iconds,t)
+    # Return cell column only, to match logistic output
+    return(res[:,0])
 
 # To convert from N-C competition model to logistic model, think about matching rates at t=0
 # Competition:
@@ -60,11 +64,6 @@ class sim():
         self.rnd.seed(self.seed)
         self.x_obs=self.rnd.normal(self.x_exp,np.sqrt(1.0/self.tau_true))
 
-data=sim()
-print(logistic(data.x0_true,data.r_true,data.K_true,data.t_pred))
-print(logisticode(data.x0_true,data.r_true,data.K_true,data.t_pred))
-
-
 # Stochastic nodes in the model (prior specifications)
 class par:
     '''Prior parameters (ranges for uniform distributions)'''
@@ -73,7 +72,7 @@ class par:
     x0_min,x0_max=0.0,0.1
     tau_min,tau_max=0,5000
 
-def inference(sim,par,iter=250000,burn=1000,thin=100,fixInoc=False,genLog=False):
+def inference(sim,par,iter=250000,burn=1000,thin=100,fixInoc=False,genLog=False,logfun=logistic):
     print("Building priors...")
     if not fixInoc:
         x0=mc.Uniform('x0',par.x0_min,par.x0_max)
@@ -86,19 +85,19 @@ def inference(sim,par,iter=250000,burn=1000,thin=100,fixInoc=False,genLog=False)
     if fixInoc:
         @mc.deterministic(plot=False)
         def logisticobs(r=r,K=K):
-            return(logistic(sim.x0_true,r,K,sim.t_exp))
+            return(logfun(sim.x0_true,r,K,sim.t_exp))
 
         @mc.deterministic(plot=False)
         def logisticpred(r=r,K=K):
-            return(logistic(sim.x0_true,r,K,sim.t_pred))
+            return(logfun(sim.x0_true,r,K,sim.t_pred))
     else:
         @mc.deterministic(plot=False)
         def logisticobs(x0=x0,r=r,K=K):
-            return(logistic(x0,r,K,sim.t_exp))
+            return(logfun(x0,r,K,sim.t_exp))
 
         @mc.deterministic(plot=False)
         def logisticpred(x0=x0,r=r,K=K):
-            return(logistic(x0,r,K,sim.t_pred))
+            return(logfun(x0,r,K,sim.t_pred))
 
     # Posterior predictive and measurement error models
     pred=mc.Normal('pred',mu=logisticpred,tau=tau)
@@ -112,14 +111,39 @@ def inference(sim,par,iter=250000,burn=1000,thin=100,fixInoc=False,genLog=False)
     M.sample(iter=iter, burn=burn, thin=thin,progress_bar=False)
     return(M)
 
-def makeRes(fixInoc):
-    return(inference(data,par,2500,1000,100,fixInoc))
+data=sim()
+print(logistic(data.x0_true,data.r_true,data.K_true,data.t_pred))
+print(logisticode(data.x0_true,data.r_true,data.K_true,data.t_pred))
 
-#p=mp.Pool(2)
-#Mvals=p.map(makeRes,[False,True])
+iters=2500
+burnin=1000
+thinning=100
 
-#M=inference(sim,par,iter=2500,burn=1000,thin=100,fixInoc=False)
-#Mfix=inference(sim,par,iter=2500,burn=1000,thin=100,fixInoc=True)
+def sinceStart(start):
+    '''Returns a string reporting nicely formatted time since start (s)'''
+    raws=time.time()-start
+    m,s=divmod(raws,60)
+    h,m=divmod(m,60)
+    d,h=divmod(h,24)
+    string=""
+    if d>0:
+        string+="{} days ".format(int(d))
+    if h>0:
+        string+="{} hours ".format(int(h))
+    if m>0:
+        string+="{} mins ".format(int(m))
+    string+="{} secs".format(int(round(s)))
+    return(string)
+
+start=time.time()
+M=inference(data,par,iter=iters,burn=burnin,thin=thinning,fixInoc=False,logfun=logistic)
+Mfix=inference(data,par,iter=iters,burn=burnin,thin=thinning,fixInoc=True,logfun=logistic)
+print("Time taken for vectorised logistic model: %s"%(time.time()-start)
+
+start=time.time()
+M_ode=inference(data,par,iter=iters,burn=burnin,thin=thinning,fixInoc=False,logfun=logisticode)
+Mfix_ode=inference(data,par,iter=iters,burn=burnin,thin=thinning,fixInoc=True,logfun=logisticode)
+print("Time taken for numerical solution of competition ode: %s"%)
 
 # Diagnostic and posterior plots
 #mc.Matplot.plot(M)
@@ -128,5 +152,7 @@ def makeRes(fixInoc):
 #predictPlots(M,splitPlots=False)
 #predictPlots(Mfix,splitPlots=False)
 
-#posteriorPriorPlots(M,sim,par,50)
-#posteriorPriorPlots(Mfix,sim,par,50)
+posteriorPriorPlots(M,data,par,50)
+posteriorPriorPlots(Mfix,data,par,50)
+posteriorPriorPlots(M_ode,data,par,50)
+posteriorPriorPlots(Mfix_ode,data,par,50)
