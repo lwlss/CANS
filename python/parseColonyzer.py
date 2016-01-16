@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 import os
 
-
 def parseColonyzer(fname):
     '''Read in Colonyzer .out file and parse some info from filename.'''
     froot=os.path.basename(fname).split(".")[0]
@@ -26,7 +25,6 @@ def parseAndCombine(imOutDir=".",exptDesc="ExptDescription.txt",libDesc="Library
     outs=[parseColonyzer(os.path.join(imOutDir,out)) for out in imList if ".out" in out]
     ims=pd.concat(outs)
 
-    
     try:
         # Read in experimental metadata
         expt=pd.read_csv(exptDesc,sep="\t",header=0)
@@ -63,36 +61,29 @@ def parseAndCombine(imOutDir=".",exptDesc="ExptDescription.txt",libDesc="Library
         # Calculate time since inoculation date time (from expt metadata) that image was taken
         ims["ExptTime"]=(pd.to_datetime(ims["DateTime"],format=fmt)-pd.to_datetime(ims["Start.Time"],format=fmt))/np.timedelta64(1,"D")
 
-        # Get ORFs at each position from relevant library description
-        ims["ORF"]=[getORF(libs,l,p,r,c) for l,p,r,c in zip(ims.Library,ims.Plate,ims.Row,ims.Column)]
+        if libs is not None:
+            # Get ORFs at each position from relevant library description
+            ims["ORF"]=[getORF(libs,l,p,r,c) for l,p,r,c in zip(ims.Library,ims.Plate,ims.Row,ims.Column)]
 
-    if orf2g is not None and expt is not None:
+    if orf2g is not None and expt is not None and libs is not None:
         # Get standard gene names for each ORF
         ims["Gene"]=[orf2g[orf] for orf in ims.ORF]
 
     # Write data, metadata and newly calulated times to file
     ims.to_csv(fout,sep="\t")
-    ims.to_csv(anotherfile,sep="\t")
-    print ims
     return(ims)
 
 if __name__ == "__main__":
 
-    imOutDir=  "/Users/victoriatorrance/Documents/CANS/data/Output_Data" #"../data/Output_Data"
-    exptDesc="/Users/victoriatorrance/Documents/CANS/data/Auxiliary/ExptDescription.txt"
-    libDesc=  "/Users/victoriatorrance/Documents/CANS/data/Auxiliary/LibraryDescription.txt" #"../data/Auxiliary/LibraryDescription.txt"
-    geneToORF= "/Users/victoriatorrance/Documents/CANS/data/Auxiliary/ORF2GENE.txt"
-    fout= "/Users/victoriatorrance/Documents/CANS/data/RawData.txt"
-    anotherfile= "/Users/victoriatorrance/Documents/CANS/data/anotherfile.txt"
+    rootDir="../data/"
+    #rootDir="/Users/victoriatorrance/Documents/CANS/data"
+
+    imOutDir=os.path.join(rootDir,"Output_Data")
+    exptDesc=os.path.join(rootDir,"Auxiliary","ExptDescription.txt")
+    libDesc=os.path.join(rootDir,"Auxiliary","LibraryDescription.txt")
+    geneToORF=os.path.join(rootDir,"Auxiliary","ORF2GENE.txt")
+    fout=os.path.join(rootDir,"RawData.txt")
     fmt="%Y-%m-%d_%H-%M-%S"
-    #imOutDir="../data/Output_Data"
-    #exptDesc="../data/Auxiliary/ExptDescription.txt"
-    #libDesc="../data/Auxiliary/LibraryDescription.txt"
-    #geneToORF="../data/Auxiliary/ORF2GENE.txt"
-    #fout="../data/RawData.txt"
-    #fmt="%Y-%m-%d_%H-%M-%S"
 
     res=parseAndCombine(imOutDir,exptDesc,libDesc,geneToORF,fout,fmt)
-
-
-    print 'wow no errors'
+    print(res.head())
