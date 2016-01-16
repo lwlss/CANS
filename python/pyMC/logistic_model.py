@@ -3,7 +3,7 @@ import time
 import datetime
 import pymc as mc
 import numpy as np
-import multiprocessing as mp
+import pandas as pd
 from scipy.integrate import odeint
 from diagnostics import *
 
@@ -16,11 +16,12 @@ def glogistic(x0,r,K,t,v=1.0):
     '''Vectorised generalised logistic growth model'''
     return(K/(1+(-1+(K/x0)**v)*np.exp(-r*v*t))**(1/v))
 
-# Define function specifying what ODE is
-# y is a list of variables (only one variable in this case: C)
-# t is a list of times at which we will calculate variables
 def logisticode(x0,r,K,t):
+    '''Set of ODEs equivalent to logistic model. Population consumes nutrients, self-limiting when nutrients exhausted.'''
     rc = r/K
+    # Define function specifying ODE
+    # y: list of species values (C first, then N)
+    # t: list of times at which we will calculate variables
     def f(y,t):
         C,N=y
         dC=rc*C*N
@@ -28,7 +29,7 @@ def logisticode(x0,r,K,t):
         return([dC,dN])
     iconds=[x0,K-x0]
     res=odeint(f,iconds,t)
-    # Return cell column only, to match logistic output
+    # Return C results only, to match logistic output
     return(res[:,0])
 
 # To convert from N-C competition model to logistic model, think about matching rates at t=0
@@ -46,31 +47,6 @@ def logisticode(x0,r,K,t):
 # Therefore:
 # rc = rl*(1-C0/K)/(K-C0)
 # -> rc = rl/K
-
-# Simulate some observation times and experimental data, with measurement error
-class sim():
-    rnd=np.random
-    '''Parameters used for generating simulated data, together with simulated data'''
-    def __init__(self,x0=0.001,r=2.5,K=0.6,tau=300.0,v=1.0,tmax=5,n_exp=10,n_pred=10):
-        self.seed = random.randint(0,4294967295)
-        self.K_true=K
-        self.r_true=r
-        self.x0_true=x0
-        self.v_true=v
-        self.tau_true=tau
-        self.t_exp=np.linspace(0,tmax,n_exp)
-        self.t_pred=np.linspace(0,tmax,n_pred)
-        self.x_exp=glogistic(self.x0_true,self.r_true,self.K_true,self.t_exp,self.v_true)
-        self.rnd.seed(self.seed)
-        self.x_obs=self.rnd.normal(self.x_exp,np.sqrt(1.0/self.tau_true))
-
-# Stochastic nodes in the model (prior specifications)
-class par:
-    '''Prior parameters (ranges for uniform distributions)'''
-    r_min,r_max=0.0,10.0
-    K_min,K_max=0.0,1.0
-    x0_min,x0_max=0.0,0.1
-    tau_min,tau_max=0,5000
 
 def inference(sim,par,iter=250000,burn=1000,thin=100,fixInoc=False,genLog=False,logfun=logistic):
     print("Building priors...")
@@ -111,48 +87,39 @@ def inference(sim,par,iter=250000,burn=1000,thin=100,fixInoc=False,genLog=False,
     M.sample(iter=iter, burn=burn, thin=thin,progress_bar=False)
     return(M)
 
-data=sim()
-print(logistic(data.x0_true,data.r_true,data.K_true,data.t_pred))
-print(logisticode(data.x0_true,data.r_true,data.K_true,data.t_pred))
-
-iters=2500
-burnin=1000
-thinning=100
-
 def sinceStart(start):
     '''Returns a string reporting nicely formatted time since start (s)'''
     raws=time.time()-start
     m,s=divmod(raws,60)
     h,m=divmod(m,60)
     d,h=divmod(h,24)
+    w,d=divmod(d,7)
+
+    labs=["week","day","hour","min","sec"]
+    vals=[w,d,h,m,s]
     string=""
-    if d>0:
-        string+="{} days ".format(int(d))
-    if h>0:
-        string+="{} hours ".format(int(h))
-    if m>0:
-        string+="{} mins ".format(int(m))
-    string+="{} secs".format(int(round(s)))
-    return(string)
+    for (i,val) in enumerate(vals):
+        if(val>0): string+="{} {} ".format(int(round(val)),labs[i]+"s")
+    return(string.rstrip())
 
-start=time.time()
-M=inference(data,par,iter=iters,burn=burnin,thin=thinning,fixInoc=False,logfun=logistic)
-Mfix=inference(data,par,iter=iters,burn=burnin,thin=thinning,fixInoc=True,logfun=logistic)
-print("Time taken for vectorised logistic model: %s"%(time.time()-start)
+# Simulate some observation times and experimental data, with measurement error
+class sim():
+    rnd=np.random
+    '''Parameters used for generating simulated data, together with simulated data'''
+    def __init__(self,x0=0.001,r=2.5,K=0.6,tau=300.0,v=1.0,tmax=5,n_exp=10,n_pred=10):
+        self.seed = random.randint(0,4294967295)
+        self.K_true=K
+        self.r_true=r
+        self.x0_true=x0
+        self.v_true=v
+        self.tau_true=tau
+        self.t_exp=np.linspace(0,tmax,n_exp)
+        self.t_pred=np.linspace(0,tmax,n_pred)
+        self.x_exp=glogistic(self.x0_true,self.r_true,self.K_true,self.t_exp,self.v_true)
+        self.rnd.seed(self.seed)
+        self.x_obs=self.rnd.normal(self.x_exp,np.sqrt(1.0/self.tau_true))      
 
-start=time.time()
-M_ode=inference(data,par,iter=iters,burn=burnin,thin=thinning,fixInoc=False,logfun=logisticode)
-Mfix_ode=inference(data,par,iter=iters,burn=burnin,thin=thinning,fixInoc=True,logfun=logisticode)
-print("Time taken for numerical solution of competition ode: %s"%)
-
-# Diagnostic and posterior plots
-#mc.Matplot.plot(M)
-#mc.Matplot.plot(Mfix)
-
-#predictPlots(M,splitPlots=False)
-#predictPlots(Mfix,splitPlots=False)
-
-posteriorPriorPlots(M,data,par,50)
-posteriorPriorPlots(Mfix,data,par,50)
-posteriorPriorPlots(M_ode,data,par,50)
-posteriorPriorPlots(Mfix_ode,data,par,50)
+if __name__ == "__main__":      
+    data=sim(n_pred=50)
+    print(logistic(data.x0_true,data.r_true,data.K_true,data.t_pred))
+    print(logisticode(data.x0_true,data.r_true,data.K_true,data.t_pred))
