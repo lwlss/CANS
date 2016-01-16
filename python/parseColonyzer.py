@@ -69,6 +69,12 @@ def parseAndCombine(imOutDir=".",exptDesc="ExptDescription.txt",libDesc="Library
         # Get standard gene names for each ORF
         ims["Gene"]=[orf2g[orf] for orf in ims.ORF]
 
+    def makeStr(num,string,nchar=2):
+        formspec=string+"{:0"+str(nchar)+"d}"
+        return(formspec.format(num))
+
+    ims["ID"]=ims["Barcode"]+"_"+[makeStr(x,string="R",nchar=2) for x in ims["Row"]]+[makeStr(x,string="C",nchar=2) for x in ims["Column"]]
+
     # Write data, metadata and newly calulated times to file
     ims.to_csv(fout,sep="\t")
     return(ims)
