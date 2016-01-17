@@ -1,5 +1,6 @@
 from logistic_model import *
-from pandas.tools.plotting import scatter_matrix as scatmat
+import matplotlib
+from matplotlib.backends.backend_pdf import PdfPages
 
 # Stochastic nodes in the model (prior specifications)
 class par:
@@ -36,25 +37,18 @@ M_fix=inference(data,par,iter=iters,burn=burnin,thin=thinning,fixInoc=True,logfu
 dead=sim(r=0,K=0.001,n_pred=50)
 M_dead=inference(dead,par,iter=iters,burn=burnin,thin=thinning,fixInoc=False,logfun=logistic)
 
-plotCorrs(M,"Healthy strain (simulated data)")
-plotCorrs(M_dead,"Dead or missing strain (simulated data)")
-
-mc.Matplot.plot(M_diag)
-from matplotlib.backends.backend_pdf import PdfPages
+mc.Matplot.plot(M_diag,format="pdf")
 with PdfPages("MCMCReport.pdf") as pdf:
-    posteriorPriorPlots(M,data,par,50,show=False)
+    posteriorPriorPlots(M,data,par,50,show=False,main="Healthy strain, inferring x0, simulated data")
     pdf.savefig()
     plt.close()
-    mc.Matplot.plot(M_diag)
+    posteriorPriorPlots(M_diag,data,par,50,show=False,main="Healthy strain, inferring x0, simulated data")
     pdf.savefig()
     plt.close()
-    posteriorPriorPlots(M_diag,data,par,50,show=False)
+    posteriorPriorPlots(M_fix,data,par,50,show=False,main="Healthy strain, fixing x0, simulated data")
     pdf.savefig()
     plt.close()
-    posteriorPriorPlots(M,data,par,50,show=False)
-    pdf.savefig()
-    plt.close()
-    posteriorPriorPlots(M_dead,dead,par,50,show=False)
+    posteriorPriorPlots(M_dead,dead,par,50,show=False,main="Dead/missing strain, inferring x0, simulated data")
     pdf.savefig()
     plt.close()
     plotCorrs(M,"Healthy strain (simulated data)",show=False)
@@ -63,7 +57,9 @@ with PdfPages("MCMCReport.pdf") as pdf:
     plotCorrs(M_dead,"Dead or missing strain (simulated data)",show=False)
     pdf.savefig()
     plt.close()
-
+    comparePosteriors(M,M_fix,data,main="Effect of fixing initial condition",lab1="IC varies",lab2="IC fixed")
+    pdf.savefig()
+    plt.close()
 
 # Read in some read Colonyzer data for inference
 class realData():
