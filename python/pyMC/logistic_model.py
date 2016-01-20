@@ -48,7 +48,7 @@ def logisticode(x0,r,K,t):
 # rc = rl*(1-C0/K)/(K-C0)
 # -> rc = rl/K
 
-def inference(sim,par,iter=250000,burn=1000,thin=100,fixInoc=False,genLog=False,logfun=logistic):
+def inference(sim,par,iter=250000,burn=1000,thin=100,fixInoc=False,inocVal=0.0,genLog=False,logfun=logistic):
     print("Building priors...")
     if not fixInoc:
         x0=mc.Uniform('x0',par.x0_min,par.x0_max)
@@ -61,11 +61,11 @@ def inference(sim,par,iter=250000,burn=1000,thin=100,fixInoc=False,genLog=False,
     if fixInoc:
         @mc.deterministic(plot=False)
         def logisticobs(r=r,K=K):
-            return(logfun(sim.x0_true,r,K,sim.t_exp))
+            return(logfun(inocVal,r,K,sim.t_exp))
 
         @mc.deterministic(plot=False)
         def logisticpred(r=r,K=K):
-            return(logfun(sim.x0_true,r,K,sim.t_pred))
+            return(logfun(inocVal,r,K,sim.t_pred))
     else:
         @mc.deterministic(plot=False)
         def logisticobs(x0=x0,r=r,K=K):
@@ -117,7 +117,18 @@ class sim():
         self.t_pred=np.linspace(0,tmax,n_pred)
         self.x_exp=glogistic(self.x0_true,self.r_true,self.K_true,self.t_exp,self.v_true)
         self.rnd.seed(self.seed)
-        self.x_obs=self.rnd.normal(self.x_exp,np.sqrt(1.0/self.tau_true))      
+        self.x_obs=self.rnd.normal(self.x_exp,np.sqrt(1.0/self.tau_true))
+
+# Read in some read Colonyzer data for inference
+class realData():
+    def getSpot(self,row,col):
+        self.filt=self.raw[(self.raw.Row==row)&(self.raw.Column==col)]
+        self.t_exp=self.filt.ExptTime.values
+        self.x_obs=self.filt.Intensity.values
+    def __init__(self,row=1,col=1,fname="../../data/RawData.txt",n_pred=5):
+        self.raw=pd.read_csv(fname,sep="\t")
+        self.getSpot(row,col)
+        self.t_pred=np.linspace(0,max(self.t_exp),n_pred)
 
 if __name__ == "__main__":      
     data=sim(n_pred=50)

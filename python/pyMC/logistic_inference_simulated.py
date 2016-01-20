@@ -8,14 +8,15 @@ class par:
     r_min,r_max=0.0,10.0
     K_min,K_max=0.0,1.0
     x0_min,x0_max=0.0,0.1
-    tau_min,tau_max=0,5000
+    tau_min,tau_max=0,1500000
 
-iters=250000
-burnin=10000
-thinning=100
+iters=25000
+burnin=1000
+thinning=10
 
 # Comparing performance of ode and vectorised logistic using simulated, fairly typical data
 data=sim(n_pred=50)
+inocVal=data.x0_true
 
 start=time.time()
 M=inference(data,par,iter=iters,burn=burnin,thin=thinning,fixInoc=False,logfun=logistic)
@@ -31,7 +32,7 @@ diag=sim(n_pred=0)
 M_diag=inference(data,par,iter=iters,burn=burnin,thin=thinning,fixInoc=False,logfun=logistic)
 
 # Comparing fixed and varying inoculum density using simulated, fairly typical data
-M_fix=inference(data,par,iter=iters,burn=burnin,thin=thinning,fixInoc=True,logfun=logistic)
+M_fix=inference(data,par,iter=iters,burn=burnin,thin=thinning,fixInoc=True,inocVal=inocVal,logfun=logistic)
 
 # Demonstrating identifiability problems for dead/missing strains
 dead=sim(r=0,K=0.001,n_pred=50)
@@ -60,8 +61,3 @@ with PdfPages("MCMCReport.pdf") as pdf:
     comparePosteriors(M,M_fix,data,main="Effect of fixing initial condition",lab1="IC varies",lab2="IC fixed")
     pdf.savefig()
     plt.close()
-
-# Read in some read Colonyzer data for inference
-class realData():
-    def __init__(self,fname="../../data/RawData.txt"):
-        self.raw=pd.read_csv(fname,sep="\t")
