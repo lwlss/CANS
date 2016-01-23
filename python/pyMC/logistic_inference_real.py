@@ -10,9 +10,9 @@ class par:
     x0_min,x0_max=0.0,0.1
     tau_min,tau_max=0,1500000
 
-iters=25000
-burnin=1000
-thinning=10
+iters=250000
+burnin=10000
+thinning=100
 
 data=realData(row=12,col=12,n_pred=50)
 inocVal=0.00001
