@@ -6,7 +6,7 @@ import numpy as np
 import pymc as mc
 import pandas as pd
 from pandas.tools.plotting import scatter_matrix as scatmat
-import seaborn as sb
+#import seaborn as sb
 
 def summarisePred(p,conf=0.95):
     lowerperc=100.0*(1.0-conf)/2.0
