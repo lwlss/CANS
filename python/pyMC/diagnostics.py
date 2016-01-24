@@ -38,33 +38,89 @@ def comparePosteriors(M1,M2,sim,main="",lab1="",lab2="",lwd=2,show=False,simulat
     if show:
         plt.show()
 
+def mdr(K,r,g,v):
+    return((r*v)/np.log(1-(np.power(2,v)-1)/((np.power(2,v)*np.power(g/K,v)-1))))
+
+def mdp(K,r,g,v):
+    return(np.log(K/g)/np.log(2))
+
+def mdrmdp(K,r,g,v):
+    return(mdr(K,r,g,v)*mdp(K,r,g,v))
+
+def comparePosteriors2(Mlist,labs,clist,main="",lwd=2,show=False,inocVal=0.001):
+    fig,ax=plt.subplots(2,2,figsize=(21,21))
+    for M in Mlist:
+        nodenames=[x.__name__ for x in M._variables_to_tally]
+        nodenames=[n for n in nodenames if n not in ["pred","tau"]]
+        if "v" not in nodenames:
+            M.v_vals=1.0
+        else:
+            M.v_vals=M.v.trace[:]
+        if "x0" not in nodenames:
+            M.x0_vals=inocVal
+        else:
+            M.x0_vals=M.x0.trace[:]
+        M.mdr=mdr(M.K.trace[:],M.r.trace[:],M.x0_vals,M.v_vals)
+        M.mdp=mdp(M.K.trace[:],M.r.trace[:],M.x0_vals,M.v_vals)
+        M.mdrmdp=M.mdr*M.mdp        
+    
+    for i,M in enumerate(Mlist):
+        scol=clist[i]
+        pd.Series(M.r.trace[:]).plot(kind="kde",ax=ax[0,0],color=scol,label=labs[i],lw=lwd)
+        pd.Series(M.K.trace[:]).plot(kind="kde",ax=ax[0,1],color=scol,label=labs[i],lw=lwd)
+        pd.Series(M.mdr[:]).plot(kind="kde",ax=ax[1,0],color=scol,label=labs[i],lw=lwd,xlim=[0,20])
+        pd.Series(M.mdrmdp[:]).plot(kind="kde",ax=ax[1,1],color=scol,label=labs[i],lw=lwd,xlim=[0,50])
+
+    ax[0,0].set_xlabel('r')
+    ax[0,1].set_xlabel('K')
+    ax[1,0].set_xlabel('MDR')
+    ax[1,1].set_xlabel('MDRMDP')
+    ax[1,1].legend()
+    plt.suptitle(main)
+    if show:
+        plt.show()
+
 def posteriorPriorPlots(M,sim,par,bnum=50,show=True,main="",lwd=2,simulated=True):
     nodenames=[x.__name__ for x in M._variables_to_tally]
     pred=summarisePred(M.pred)
     fig,ax=plt.subplots(2,3,figsize=(21,14))
 
-    ax[0,1].scatter(sim.t_exp,sim.x_obs,color="blue")
+    ax[0,0].scatter(sim.t_exp,sim.x_obs,color="blue")
     if simulated: ax[0,1].scatter(sim.t_exp,sim.x_exp,color="red")
-    ax[0,1].plot(sim.t_pred,pred["med"],color="blue",lw=lwd)
-    ax[0,1].plot(sim.t_pred,pred["low"],color="blue",linestyle="dashed",lw=lwd)
-    ax[0,1].plot(sim.t_pred,pred["up"],color="blue",linestyle="dashed",lw=lwd)
-    ax[0,1].set_xlabel('Time since inoculation (d)')
-    ax[0,1].set_ylabel('Population size (AU)')
-    ax[0,1].set_ylim([min(pred["low"]),max(pred["up"])])
+    ax[0,0].plot(sim.t_pred,pred["med"],color="blue",lw=lwd)
+    ax[0,0].plot(sim.t_pred,pred["low"],color="blue",linestyle="dashed",lw=lwd)
+    ax[0,0].plot(sim.t_pred,pred["up"],color="blue",linestyle="dashed",lw=lwd)
+    ax[0,0].set_xlabel('Time since inoculation (d)')
+    ax[0,0].set_ylabel('Population size (AU)')
+    ax[0,0].set_ylim([min(pred["low"]),max(pred["up"])])
 
     if 'x0' in nodenames: 
         x0_pdf=gaussian_kde(M.trace('x0')[:])
         x0_min,x0_max=np.percentile(M.trace('x0')[:],[0,100])
         x0_range=np.linspace(par.x0_min,par.x0_max,500)
         x0_dens=x0_pdf(x0_range)
-        ax[0,2].hist(M.trace('x0')[:],bins=np.linspace(par.x0_min,par.x0_max,bnum),normed=True,color="skyblue")
-        ax[0,2].plot(x0_range,x0_dens,'r',color="blue",lw=lwd)
-        if simulated: ax[0,2].axvline(sim.x0_true,linestyle="dashed",color="black",lw=lwd)
-        ax[0,2].set_xlabel('x0 (AU)')
-        ax[0,2].set_ylabel('Density')
+        ax[0,1].hist(M.trace('x0')[:],bins=np.linspace(par.x0_min,par.x0_max,bnum),normed=True,color="skyblue")
+        ax[0,1].plot(x0_range,x0_dens,'r',color="blue",lw=lwd)
+        if simulated: ax[0,1].axvline(sim.x0_true,linestyle="dashed",color="black",lw=lwd)
+        ax[0,1].set_xlabel('x0 (AU)')
+        ax[0,1].set_ylabel('Density')
         yval=1.0/(par.x0_max-par.x0_min)
-        ax[0,2].vlines([par.x0_min,par.x0_max],0,yval,color="red",lw=lwd)
-        ax[0,2].hlines(yval,par.x0_min,par.x0_max,color="red",lw=lwd)
+        ax[0,1].vlines([par.x0_min,par.x0_max],0,yval,color="red",lw=lwd)
+        ax[0,1].hlines(yval,par.x0_min,par.x0_max,color="red",lw=lwd)
+
+    if 'v' in nodenames: 
+        v_pdf=gaussian_kde(M.trace('v')[:])
+        v_min,v_max=np.percentile(M.trace('v')[:],[0,100])
+        v_range=np.linspace(par.v_min,par.v_max,500)
+        v_dens=v_pdf(v_range)
+        ax[0,2].hist(M.trace('v')[:],bins=np.linspace(par.v_min,par.v_max,bnum),normed=True,color="skyblue")
+        ax[0,2].plot(v_range,v_dens,'r',color="blue",lw=lwd)
+        if simulated: ax[0,2].axvline(sim.v_true,linestyle="dashed",color="black",lw=lwd)
+        ax[0,2].set_xlabel('v')
+        ax[0,2].set_ylabel('Density')
+        yval=1.0/(par.v_max-par.v_min)
+        ax[0,2].vlines([par.v_min,par.v_max],0,yval,color="red",lw=lwd)
+        ax[0,2].hlines(yval,par.v_min,par.v_max,color="red",lw=lwd)
 
     r_pdf=gaussian_kde(M.trace('r')[:])
     r_min,r_max=np.percentile(M.trace('r')[:],[0,100])
@@ -111,7 +167,12 @@ def posteriorPriorPlots(M,sim,par,bnum=50,show=True,main="",lwd=2,simulated=True
 def plotCorrs(M,main="",maxsamp=3000,show=True):
     '''Plot scatterplot matrix showing correlation between posterior samples for each variable'''
     mxsmp=min(maxsamp,M.r.trace.length())
-    M_df=pd.DataFrame({"x0":M.x0.trace[0:mxsmp],"r":M.r.trace[0:mxsmp],"K":M.K.trace[0:mxsmp]})
+    nodenames=[x.__name__ for x in M._variables_to_tally]
+    nodenames=[n for n in nodenames if n not in ["pred","tau"]]
+    
+    M_df=pd.DataFrame()
+    for n in nodenames:
+        M_df[n]=getattr(M,n).trace[0:mxsmp]
     scat=scatmat(M_df,diagonal="kde")
     plt.suptitle(main)
     if show:

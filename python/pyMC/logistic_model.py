@@ -52,13 +52,15 @@ def inference(sim,par,iter=250000,burn=1000,thin=100,fixInoc=False,inocVal=0.0,g
     print("Building priors...")
     if not fixInoc:
         x0=mc.Uniform('x0',par.x0_min,par.x0_max)
+    if genLog:
+        v=mc.Uniform('v',par.v_min,par.v_max)
     r=mc.Uniform('r',par.r_min,par.r_max)
     K=mc.Uniform('K',par.K_min,par.K_max)
     tau=mc.Uniform('tau',par.tau_min,par.tau_max)
 
     print("Building model...")
     # Deterministic nodes in the model (output from logistic model in this case)
-    if fixInoc:
+    if fixInoc and not genLog:
         @mc.deterministic(plot=False)
         def logisticobs(r=r,K=K):
             return(logfun(inocVal,r,K,sim.t_exp))
@@ -66,7 +68,7 @@ def inference(sim,par,iter=250000,burn=1000,thin=100,fixInoc=False,inocVal=0.0,g
         @mc.deterministic(plot=False)
         def logisticpred(r=r,K=K):
             return(logfun(inocVal,r,K,sim.t_pred))
-    else:
+    if not fixInoc and not genLog:
         @mc.deterministic(plot=False)
         def logisticobs(x0=x0,r=r,K=K):
             return(logfun(x0,r,K,sim.t_exp))
@@ -74,16 +76,35 @@ def inference(sim,par,iter=250000,burn=1000,thin=100,fixInoc=False,inocVal=0.0,g
         @mc.deterministic(plot=False)
         def logisticpred(x0=x0,r=r,K=K):
             return(logfun(x0,r,K,sim.t_pred))
+    if fixInoc and genLog:
+        @mc.deterministic(plot=False)
+        def logisticobs(r=r,K=K,v=v):
+            return(glogistic(inocVal,r,K,sim.t_exp,v))
 
+        @mc.deterministic(plot=False)
+        def logisticpred(r=r,K=K,v=v):
+            return(glogistic(inocVal,r,K,sim.t_pred,v))
+    if not fixInoc and genLog:
+        @mc.deterministic(plot=False)
+        def logisticobs(x0=x0,r=r,K=K,v=v):
+            return(glogistic(inocVal,r,K,sim.t_exp,v))
+
+        @mc.deterministic(plot=False)
+        def logisticpred(x0=x0,r=r,K=K,v=v):
+            return(glogistic(inocVal,r,K,sim.t_pred,v))
     # Posterior predictive and measurement error models
     pred=mc.Normal('pred',mu=logisticpred,tau=tau)
     obs=mc.Normal('obs',mu=logisticobs,tau=tau,value=sim.x_obs,observed=True)
 
     print("Sampling from posterior...")
-    if fixInoc:
+    if fixInoc and not genLog:
         M=mc.MCMC(dict({"r":r,"K":K,"tau":tau,"pred":pred,"obs":obs}))
-    else:
+    if not fixInoc and not genLog:
         M=mc.MCMC(dict({"x0":x0,"r":r,"K":K,"tau":tau,"pred":pred,"obs":obs}))
+    if fixInoc and genLog:
+        M=mc.MCMC(dict({"r":r,"K":K,"v":v,"tau":tau,"pred":pred,"obs":obs}))
+    if not fixInoc and genLog:
+        M=mc.MCMC(dict({"x0":x0,"r":r,"K":K,"v":v,"tau":tau,"pred":pred,"obs":obs}))
     M.sample(iter=iter, burn=burn, thin=thin,progress_bar=False)
     return(M)
 
