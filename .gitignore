@@ -57,5 +57,5 @@ docs/_build/
 target/
 
 # pymc
-python/pyMC/*.png
-python/pyMC/*.pdf
+python/pyMC/**/*.png
+python/pyMC/**/*.pdf
