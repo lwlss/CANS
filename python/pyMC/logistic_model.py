@@ -6,6 +6,9 @@ import numpy as np
 import pandas as pd
 from scipy.integrate import odeint
 from diagnostics import *
+import os
+from pymc.Matplot import plot
+
 
 def logistic(x0,r,K,t):
     '''Vectorised logistic model'''
@@ -108,6 +111,55 @@ def inference(sim,par,iter=250000,burn=1000,thin=100,fixInoc=False,inocVal=0.0,g
     M.sample(iter=iter, burn=burn, thin=thin,progress_bar=False)
     return(M)
 
+def hierarchy_inf(data,par,iter=250000,burn=1000,thin=100):
+    priors={}
+    x0=mc.Uniform('x0',par.x0_min,par.x0_max)
+    tau=mc.Uniform('tau',par.tau_min,par.tau_max)
+
+    priors["x0"]=x0
+    priors["tau"]=tau
+  
+    r=mc.Uniform('r',par.r_min,par.r_max)
+    r_delta=mc.Uniform('r_delta',0,(par.r_max-par.r_min)/2)
+    
+    K=mc.Uniform('K',par.K_min,par.K_max)
+    K_delta=mc.Uniform('K_delta',0,(par.K_max-par.K_min)/2)
+    
+    priors["r"]=r
+    priors["r_delta"]=r_delta
+    priors["K"]=K
+    priors["K_delta"]=K_delta
+
+    grps=data.groupby("Gene")
+    for grp in grps:
+        grplab,reps=grp
+
+        r_gen=mc.Uniform("r_{}".format(grplab),r-r_delta,r+r_delta)
+        r_gen_delta=mc.Uniform("r_delta_{}".format(grplab),0,r_delta)
+        K_gen=mc.Uniform("K_{}".format(grplab),K-K_delta,K+K_delta)
+        K_gen_delta=mc.Uniform("K_delta_{}".format(grplab),0,K_delta)
+
+        priors["r_{}".format(grplab)]=r_gen
+        priors["r_delta_{}".format(grplab)]=r_gen_delta
+        priors["K_{}".format(grplab)]=K_gen
+        priors["K_delta_{}".format(grplab)]=K_gen_delta
+        
+        reps=reps.groupby("ID")
+        for rep in reps:
+            replab,repdf=rep
+            r_rep=mc.Uniform("r_{0}_{1}".format(grplab,replab),r_gen-r_gen_delta,r_gen+r_gen_delta)
+            K_rep=mc.Uniform("K_{0}_{1}".format(grplab,replab),K_gen-K_gen_delta,K_gen+K_gen_delta)
+            @mc.deterministic(plot=False)
+            def logisticobs(x0=x0,r=r_rep,K=K_rep):
+                return(logistic(x0,r,K,repdf.ExptTime))
+            obs=mc.Normal('obs_{0}_{1}'.format(grplab,replab),mu=logisticobs,tau=tau,value=repdf.Intensity,observed=True)
+            priors["r_{0}_{1}".format(grplab,replab)]=r_rep
+            priors["K_{0}_{1}".format(grplab,replab)]=K_rep
+            priors['obs_{0}_{1}'.format(grplab,replab)]=obs
+    M=mc.MCMC(priors)
+    M.sample(iter=iter, burn=burn, thin=thin,progress_bar=False)
+    return(M)        
+
 def sinceStart(start):
     '''Returns a string reporting nicely formatted time since start (s)'''
     raws=time.time()-start
@@ -140,7 +192,7 @@ class sim():
         self.rnd.seed(self.seed)
         self.x_obs=self.rnd.normal(self.x_exp,np.sqrt(1.0/self.tau_true))
 
-# Read in some read Colonyzer data for inference
+# Read in some real Colonyzer data for inference
 class realData():
     def getSpot(self,row,col):
         self.filt=self.raw[(self.raw.Row==row)&(self.raw.Column==col)]
@@ -151,7 +203,34 @@ class realData():
         self.getSpot(row,col)
         self.t_pred=np.linspace(0,max(self.t_exp),n_pred)
 
+class par:
+    '''Prior parameters (ranges for uniform distributions)'''
+    r_min,r_max=0.0,10.0
+    K_min,K_max=0.0,1.0
+    x0_min,x0_max=0.0,0.1
+    tau_min,tau_max=0,1500000
+    v_min,v_max=0.1,10.0
+
+def make_sure_path_exists(path):
+    try: 
+        os.makedirs(path)
+    except OSError:
+        if not os.path.isdir(path):
+            raise
+
 if __name__ == "__main__":      
-    data=sim(n_pred=50)
-    print(logistic(data.x0_true,data.r_true,data.K_true,data.t_pred))
-    print(logisticode(data.x0_true,data.r_true,data.K_true,data.t_pred))
+    #data=sim(n_pred=50)
+    #print(logistic(data.x0_true,data.r_true,data.K_true,data.t_pred))
+    #print(logisticode(data.x0_true,data.r_true,data.K_true,data.t_pred))
+    #data=[sim(n_pred=10) for x in range(1,4)]
+    fname="../../data/RawData.txt"
+    raw=pd.read_csv(fname,sep="\t")
+    raw=raw[~(raw.Row.isin([1,16]) & raw.Column.isin([1,24]))]
+    raw=raw[raw.Gene.isin(["MRE11","EXO1"])]
+    fname="TwoStrains"
+    make_sure_path_exists(fname)
+    print(fname)
+    M=hierarchy_inf(raw,par,iter=1010000,burn=10000,thin=1000)
+    plot(M,path=fname)
+    
+
