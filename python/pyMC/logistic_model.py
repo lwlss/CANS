@@ -198,7 +198,7 @@ class realData():
         self.filt=self.raw[(self.raw.Row==row)&(self.raw.Column==col)]
         self.t_exp=self.filt.ExptTime.values
         self.x_obs=self.filt.Intensity.values
-    def __init__(self,row=1,col=1,fname="../../data/RawData.txt",n_pred=5):
+    def __init__(self,row=1,col=1,fname="../../data/p15/RawData.txt",n_pred=5):
         self.raw=pd.read_csv(fname,sep="\t")
         self.getSpot(row,col)
         self.t_pred=np.linspace(0,max(self.t_exp),n_pred)
@@ -217,20 +217,46 @@ def make_sure_path_exists(path):
     except OSError:
         if not os.path.isdir(path):
             raise
-
-if __name__ == "__main__":      
+def P15():
     #data=sim(n_pred=50)
     #print(logistic(data.x0_true,data.r_true,data.K_true,data.t_pred))
     #print(logisticode(data.x0_true,data.r_true,data.K_true,data.t_pred))
     #data=[sim(n_pred=10) for x in range(1,4)]
-    fname="../../data/RawData.txt"
+    fname="../../data/p15/RawData.txt"
     raw=pd.read_csv(fname,sep="\t")
     raw=raw[~(raw.Row.isin([1,16]) & raw.Column.isin([1,24]))]
-    raw=raw[raw.Gene.isin(["MRE11","EXO1"])]
-    fname="TwoStrains"
-    make_sure_path_exists(fname)
+    #raw=raw[raw.Gene.isin(["MRE11","EXO1"])]
+    dirname="AllStrains"
+    make_sure_path_exists(dirname)
     print(fname)
-    M=hierarchy_inf(raw,par,iter=1010000,burn=10000,thin=1000)
-    plot(M,path=fname)
+    M=hierarchy_inf(raw,par,iter=101000,burn=1000,thin=1000)
+    plot(M,path=dirname)
+
+if __name__ == "__main__":
+    colnum=1
+    print("Column {}".format(colnum))
+    fname="../../data/dilution/RawData.txt"
+    raw=pd.read_csv(fname,sep="\t")
+    raw=raw[raw.Column==colnum]
+    root="Dilutions"
+    make_sure_path_exists(root)
+    dirname=os.path.join(root,"C{0:02d}".format(colnum))
+    make_sure_path_exists(dirname)
+    M=hierarchy_inf(raw,par,iter=750000,burn=50000,thin=1000)
+    plot(M,path=dirname)
+    df=pd.DataFrame()
+    genes=np.sort(raw.Gene.unique())
+    for gene in genes:
+        df["r_{0}_C{1:02d}".format(gene,colnum)]=getattr(M,"r_"+gene).trace[:]
+        df["K_{0}_C{1:02d}".format(gene,colnum)]=getattr(M,"K_"+gene).trace[:]
+    df["x0_C{0:02d}".format(colnum)]=getattr(M,"x0").trace[:]
+    df.to_csv(os.path.join(root,"C{0:02d}.txt".format(colnum)),sep="\t",index=False)
+    frac_r=float(np.sum(df["r_{0}_C{1:02d}".format(genes[0],colnum)]>df["r_{0}_C{1:02d}".format(genes[1],colnum)]))/len(df["r_{0}_C{1:02d}".format(genes[0],colnum)])
+    print("Probability that "+genes[0]+" is fitter than "+genes[1]+" in terms of r: "+str(frac_r))
+    frac_K=float(np.sum(df["K_{0}_C{1:02d}".format(genes[0],colnum)]>df["K_{0}_C{1:02d}".format(genes[1],colnum)]))/len(df["K_{0}_C{1:02d}".format(genes[0],colnum)])
+    print("Probability that "+genes[0]+" is fitter than "+genes[1]+" in terms of K: "+str(frac_K))  
+    
+    
+    
     
 

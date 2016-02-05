@@ -79,11 +79,8 @@ def parseAndCombine(imOutDir=".",exptDesc="ExptDescription.txt",libDesc="Library
     ims.to_csv(fout,sep="\t")
     return(ims)
 
-if __name__ == "__main__":
-
-    rootDir="../data/"
-    #rootDir="/Users/victoriatorrance/Documents/CANS/data"
-
+def parseCombDir(rootDir):
+    '''Associate metadata with image analysis files, assuming specific directory structure.'''
     imOutDir=os.path.join(rootDir,"Output_Data")
     exptDesc=os.path.join(rootDir,"Auxiliary","ExptDescription.txt")
     libDesc=os.path.join(rootDir,"Auxiliary","LibraryDescription.txt")
@@ -93,3 +90,9 @@ if __name__ == "__main__":
 
     res=parseAndCombine(imOutDir,exptDesc,libDesc,geneToORF,fout,fmt)
     print(res.head())
+    
+if __name__ == "__main__":
+    parseCombDir("../data/p15/")
+    parseCombDir("../data/dilution/")
+
+
