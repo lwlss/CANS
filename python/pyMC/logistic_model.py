@@ -158,7 +158,64 @@ def hierarchy_inf(data,par,iter=250000,burn=1000,thin=100):
             priors['obs_{0}_{1}'.format(grplab,replab)]=obs
     M=mc.MCMC(priors)
     M.sample(iter=iter, burn=burn, thin=thin,progress_bar=False)
-    return(M)        
+    return(M)
+
+def hierarchy_inf_x0(data,par,iter=250000,burn=1000,thin=100):
+    priors={}
+    tau=mc.Uniform('tau',par.tau_min,par.tau_max)
+    priors["tau"]=tau
+
+    x0=mc.Uniform('x0',par.x0_min,par.x0_max)
+    x0_delta=mc.Uniform('x0_delta',0,(par.x0_max-par.x0_min)/2)
+  
+    r=mc.Uniform('r',par.r_min,par.r_max)
+    r_delta=mc.Uniform('r_delta',0,(par.r_max-par.r_min)/2)
+    
+    K=mc.Uniform('K',par.K_min,par.K_max)
+    K_delta=mc.Uniform('K_delta',0,(par.K_max-par.K_min)/2)
+
+    priors["x0"]=x0
+    priors["x0_delta"]=x0_delta
+    priors["r"]=r
+    priors["r_delta"]=r_delta
+    priors["K"]=K
+    priors["K_delta"]=K_delta
+
+    grps=data.groupby("Gene")
+    for grp in grps:
+        grplab,reps=grp
+
+        x0_gen=mc.Uniform("x0_{}".format(grplab),x0-x0_delta,x0+x0_delta)
+        x0_gen_delta=mc.Uniform("x0_delta_{}".format(grplab),0,x0_delta)
+        r_gen=mc.Uniform("r_{}".format(grplab),r-r_delta,r+r_delta)
+        r_gen_delta=mc.Uniform("r_delta_{}".format(grplab),0,r_delta)
+        K_gen=mc.Uniform("K_{}".format(grplab),K-K_delta,K+K_delta)
+        K_gen_delta=mc.Uniform("K_delta_{}".format(grplab),0,K_delta)
+
+        priors["x0_{}".format(grplab)]=x0_gen
+        priors["x0_delta_{}".format(grplab)]=x0_gen_delta
+        priors["r_{}".format(grplab)]=r_gen
+        priors["r_delta_{}".format(grplab)]=r_gen_delta
+        priors["K_{}".format(grplab)]=K_gen
+        priors["K_delta_{}".format(grplab)]=K_gen_delta
+        
+        reps=reps.groupby("ID")
+        for rep in reps:
+            replab,repdf=rep
+            x0_rep=mc.Uniform("x0_{0}_{1}".format(grplab,replab),x0_gen-x0_gen_delta,x0_gen+x0_gen_delta)
+            r_rep=mc.Uniform("r_{0}_{1}".format(grplab,replab),r_gen-r_gen_delta,r_gen+r_gen_delta)
+            K_rep=mc.Uniform("K_{0}_{1}".format(grplab,replab),K_gen-K_gen_delta,K_gen+K_gen_delta)
+            @mc.deterministic(plot=False)
+            def logisticobs(x0=x0_rep,r=r_rep,K=K_rep):
+                return(logistic(x0,r,K,repdf.ExptTime))
+            obs=mc.Normal('obs_{0}_{1}'.format(grplab,replab),mu=logisticobs,tau=tau,value=repdf.Intensity,observed=True)
+            priors["x0_{0}_{1}".format(grplab,replab)]=x0_rep
+            priors["r_{0}_{1}".format(grplab,replab)]=r_rep
+            priors["K_{0}_{1}".format(grplab,replab)]=K_rep
+            priors['obs_{0}_{1}'.format(grplab,replab)]=obs
+    M=mc.MCMC(priors)
+    M.sample(iter=iter, burn=burn, thin=thin,progress_bar=False)
+    return(M)  
 
 def sinceStart(start):
     '''Returns a string reporting nicely formatted time since start (s)'''
@@ -232,29 +289,30 @@ def P15():
     M=hierarchy_inf(raw,par,iter=101000,burn=1000,thin=1000)
     plot(M,path=dirname)
 
-if __name__ == "__main__":
-    colnum=1
-    print("Column {}".format(colnum))
-    fname="../../data/dilution/RawData.txt"
-    raw=pd.read_csv(fname,sep="\t")
-    raw=raw[raw.Column==colnum]
-    root="Dilutions"
-    make_sure_path_exists(root)
-    dirname=os.path.join(root,"C{0:02d}".format(colnum))
-    make_sure_path_exists(dirname)
-    M=hierarchy_inf(raw,par,iter=750000,burn=50000,thin=1000)
-    plot(M,path=dirname)
-    df=pd.DataFrame()
-    genes=np.sort(raw.Gene.unique())
-    for gene in genes:
-        df["r_{0}_C{1:02d}".format(gene,colnum)]=getattr(M,"r_"+gene).trace[:]
-        df["K_{0}_C{1:02d}".format(gene,colnum)]=getattr(M,"K_"+gene).trace[:]
-    df["x0_C{0:02d}".format(colnum)]=getattr(M,"x0").trace[:]
-    df.to_csv(os.path.join(root,"C{0:02d}.txt".format(colnum)),sep="\t",index=False)
-    frac_r=float(np.sum(df["r_{0}_C{1:02d}".format(genes[0],colnum)]>df["r_{0}_C{1:02d}".format(genes[1],colnum)]))/len(df["r_{0}_C{1:02d}".format(genes[0],colnum)])
-    print("Probability that "+genes[0]+" is fitter than "+genes[1]+" in terms of r: "+str(frac_r))
-    frac_K=float(np.sum(df["K_{0}_C{1:02d}".format(genes[0],colnum)]>df["K_{0}_C{1:02d}".format(genes[1],colnum)]))/len(df["K_{0}_C{1:02d}".format(genes[0],colnum)])
-    print("Probability that "+genes[0]+" is fitter than "+genes[1]+" in terms of K: "+str(frac_K))  
+##if __name__ == "__main__":
+##    colnum=1
+##    print("Column {}".format(colnum))
+##    fname="../../data/dilution/RawData.txt"
+##    raw=pd.read_csv(fname,sep="\t")
+##    raw=raw[raw.Column==colnum]
+##    root="Dilutions"
+##    make_sure_path_exists(root)
+##    dirname=os.path.join(root,"C{0:02d}".format(colnum))
+##    make_sure_path_exists(dirname)
+##    M=hierarchy_inf_x0(raw,par,iter=7500,burn=500,thin=10)
+##    plot(M,path=dirname)
+##    df=pd.DataFrame()
+##    genes=np.sort(raw.Gene.unique())
+##    for gene in genes:
+##        df["x0_{0}_C{1:02d}".format(gene,colnum)]=getattr(M,"r_"+gene).trace[:]
+##        df["r_{0}_C{1:02d}".format(gene,colnum)]=getattr(M,"r_"+gene).trace[:]
+##        df["K_{0}_C{1:02d}".format(gene,colnum)]=getattr(M,"K_"+gene).trace[:]
+##    df["x0_C{0:02d}".format(colnum)]=getattr(M,"x0").trace[:]
+##    df.to_csv(os.path.join(root,"C{0:02d}.txt".format(colnum)),sep="\t",index=False)
+##    frac_r=float(np.sum(df["r_{0}_C{1:02d}".format(genes[0],colnum)]>df["r_{0}_C{1:02d}".format(genes[1],colnum)]))/len(df["r_{0}_C{1:02d}".format(genes[0],colnum)])
+##    print("Probability that "+genes[0]+" is fitter than "+genes[1]+" in terms of r: "+str(frac_r))
+##    frac_K=float(np.sum(df["K_{0}_C{1:02d}".format(genes[0],colnum)]>df["K_{0}_C{1:02d}".format(genes[1],colnum)]))/len(df["K_{0}_C{1:02d}".format(genes[0],colnum)])
+##    print("Probability that "+genes[0]+" is fitter than "+genes[1]+" in terms of K: "+str(frac_K))  
     
     
     

@@ -41,18 +41,17 @@ fname="../../data/dilution/RawData.txt"
 if args.column:
     colnum=int(args.column)
     print("Column {}".format(colnum))
-    
     raw=pd.read_csv(fname,sep="\t")
     raw=raw[raw.Column==colnum]
-    
     make_sure_path_exists(root)
     dirname=os.path.join(root,"C{0:02d}".format(colnum))
     make_sure_path_exists(dirname)
-    M=hierarchy_inf(raw,par,iter=750000,burn=50000,thin=1000)
+    M=hierarchy_inf_x0(raw,par,iter=750000,burn=50000,thin=1000)
     plot(M,path=dirname)
     df=pd.DataFrame()
     genes=np.sort(raw.Gene.unique())
     for gene in genes:
+        df["x0_{0}_C{1:02d}".format(gene,colnum)]=getattr(M,"r_"+gene).trace[:]
         df["r_{0}_C{1:02d}".format(gene,colnum)]=getattr(M,"r_"+gene).trace[:]
         df["K_{0}_C{1:02d}".format(gene,colnum)]=getattr(M,"K_"+gene).trace[:]
     df["x0_C{0:02d}".format(colnum)]=getattr(M,"x0").trace[:]
@@ -60,9 +59,7 @@ if args.column:
     frac_r=float(np.sum(df["r_{0}_C{1:02d}".format(genes[0],colnum)]>df["r_{0}_C{1:02d}".format(genes[1],colnum)]))/len(df["r_{0}_C{1:02d}".format(genes[0],colnum)])
     print("Probability that "+genes[0]+" is fitter than "+genes[1]+" in terms of r: "+str(frac_r))
     frac_K=float(np.sum(df["K_{0}_C{1:02d}".format(genes[0],colnum)]>df["K_{0}_C{1:02d}".format(genes[1],colnum)]))/len(df["K_{0}_C{1:02d}".format(genes[0],colnum)])
-    print("Probability that "+genes[0]+" is fitter than "+genes[1]+" in terms of K: "+str(frac_K))
-
-args.report=True
+    print("Probability that "+genes[0]+" is fitter than "+genes[1]+" in terms of K: "+str(frac_K)) 
 
 if args.report:
     pdf=PdfPages("DilutionReport.pdf")
@@ -76,7 +73,8 @@ if args.report:
     print(res.head())
     rcols=makeLong(res[[c for c in res.columns if "r_" in c]])
     Kcols=makeLong(res[[c for c in res.columns if "K_" in c]])
-    x0cols=makeLong(res[[c for c in res.columns if "x0_" in c]])
+    x0cols=makeLong(res[[c for c in res.columns if "x0_" in c and c.count("_")==1]])
+    x0genes=makeLong(res[[c for c in res.columns if "x0_" in c and c.count("_")==2]])
     makeBoxplot(rcols)
     pdf.savefig()
     plt.close()
@@ -86,18 +84,30 @@ if args.report:
     makeBoxplot(x0cols)
     pdf.savefig()
     plt.close()
+    makeBoxplot(x0genes)
+    pdf.savefig()
+    plt.close()
     rfrac=[np.mean(rcols.r[(rcols.column==col)&(rcols.gene=="HIS3")]>rcols.r[(rcols.column==col)&(rcols.gene=="RAD52")]) for col in rcols.column.unique()]
     Kfrac=[np.mean(Kcols.K[(Kcols.column==col)&(Kcols.gene=="HIS3")]>Kcols.K[(Kcols.column==col)&(Kcols.gene=="RAD52")]) for col in Kcols.column.unique()]
     fracs=pd.DataFrame({"K":Kfrac,"r":rfrac})
     fracs=pd.melt(fracs)
     fracs["column"]=range(1,13)+range(1,13)
     fracs.columns=["Fitness","Fraction HIS3 > RAD52","Column"]
-    sns.set_context("poster",font_scale=1.5)
-    ax=sns.lmplot("Column","Fraction HIS3 > RAD52",data=fracs,hue="Fitness", fit_reg=False, scatter_kws={"s": 100})
+    sns.set_context("poster",font_scale=1.0)
+    ax=sns.lmplot("Column","Fraction HIS3 > RAD52",data=fracs,hue="Fitness", fit_reg=False, scatter_kws={"s": 50})
     ax.set(ylim=(0,1.05))
     ax.set(xlim=(0,13))
     pdf.savefig()
     plt.close()
+    # Correlation plots for each column
+    sns.set_context("paper",font_scale=0.6)
+    for res,fname in zip(reslist,files):
+        res.columns=[r[0:-4] for r in res.columns]
+        scat=scatmat(res,diagonal="kde",s=10)
+        plt.suptitle(fname)
+        pdf.savefig()
+        plt.close()
+        
     pdf.close()
     
 
