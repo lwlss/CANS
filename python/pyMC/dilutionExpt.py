@@ -51,7 +51,7 @@ if args.column:
     df=pd.DataFrame()
     genes=np.sort(raw.Gene.unique())
     for gene in genes:
-        df["x0_{0}_C{1:02d}".format(gene,colnum)]=getattr(M,"r_"+gene).trace[:]
+        df["x0_{0}_C{1:02d}".format(gene,colnum)]=getattr(M,"x0_"+gene).trace[:]
         df["r_{0}_C{1:02d}".format(gene,colnum)]=getattr(M,"r_"+gene).trace[:]
         df["K_{0}_C{1:02d}".format(gene,colnum)]=getattr(M,"K_"+gene).trace[:]
     df["x0_C{0:02d}".format(colnum)]=getattr(M,"x0").trace[:]
@@ -91,7 +91,7 @@ if args.report:
     Kfrac=[np.mean(Kcols.K[(Kcols.column==col)&(Kcols.gene=="HIS3")]>Kcols.K[(Kcols.column==col)&(Kcols.gene=="RAD52")]) for col in Kcols.column.unique()]
     fracs=pd.DataFrame({"K":Kfrac,"r":rfrac})
     fracs=pd.melt(fracs)
-    fracs["column"]=range(1,13)+range(1,13)
+    fracs["column"]=list(range(1,13))+list(range(1,13))
     fracs.columns=["Fitness","Fraction HIS3 > RAD52","Column"]
     sns.set_context("poster",font_scale=1.0)
     ax=sns.lmplot("Column","Fraction HIS3 > RAD52",data=fracs,hue="Fitness", fit_reg=False, scatter_kws={"s": 50})
