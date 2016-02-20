@@ -46,7 +46,7 @@ if args.column:
     make_sure_path_exists(root)
     dirname=os.path.join(root,"C{0:02d}".format(colnum))
     make_sure_path_exists(dirname)
-    M=hierarchy_inf_x0(raw,par,iter=750000,burn=50000,thin=1000)
+    M=hierarchy_inf_x0(raw,par,iter=4*750000,burn=4*50000,thin=4*1000)
     plot(M,path=dirname)
     df=pd.DataFrame()
     genes=np.sort(raw.Gene.unique())
