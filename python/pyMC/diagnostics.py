@@ -1,6 +1,6 @@
 import matplotlib
 import matplotlib.pyplot as plt
-matplotlib.rcParams.update({'font.size': 22})
+matplotlib.rcParams.update({'font.size': 12})
 from scipy.stats import gaussian_kde
 import numpy as np
 import pymc as mc

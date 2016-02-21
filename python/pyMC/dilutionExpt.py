@@ -18,10 +18,12 @@ def makeBoxplot(longdf):
     var=longdf["var"][0]
     if "gene" in longdf.columns:
         ax = sns.boxplot(x="column",y=var,hue="gene",data=longdf,palette="Set3")
-        if var=="K":
+        if "K" in var:
             ax.set_ylim(0,0.2)
-        else:
+        if "r" in var:
             ax.set_ylim(0,6.5)
+        if "x0" in var:
+            ax.set_ylim(0,0.006)
     else:
         ax = sns.boxplot(x="column",y=var,data=longdf)
         ax.set(yscale="log")
@@ -37,6 +39,7 @@ args = parser.parse_args()
 
 root="Dilutions"
 fname="../../data/dilution/RawData.txt"
+maxc=8 # Highest column number to consider in report
 
 if args.column:
     colnum=int(args.column)
@@ -70,6 +73,9 @@ if args.report:
     print(files)
     reslist=[pd.read_csv(os.path.join(root,f),sep="\t") for f in files]
     res=pd.concat(reslist,axis=1,ignore_index=False)
+    # Discard high dilutions
+    
+    res=res[[c for c in res.columns if int(c[-2:])<=maxc]]
     print(res.head())
     rcols=makeLong(res[[c for c in res.columns if "r_" in c]])
     Kcols=makeLong(res[[c for c in res.columns if "K_" in c]])
@@ -91,7 +97,7 @@ if args.report:
     Kfrac=[np.mean(Kcols.K[(Kcols.column==col)&(Kcols.gene=="HIS3")]>Kcols.K[(Kcols.column==col)&(Kcols.gene=="RAD52")]) for col in Kcols.column.unique()]
     fracs=pd.DataFrame({"K":Kfrac,"r":rfrac})
     fracs=pd.melt(fracs)
-    fracs["column"]=list(range(1,13))+list(range(1,13))
+    fracs["column"]=list(range(1,maxc+1))+list(range(1,maxc+1))
     fracs.columns=["Fitness","Fraction HIS3 > RAD52","Column"]
     sns.set_context("poster",font_scale=1.0)
     ax=sns.lmplot("Column","Fraction HIS3 > RAD52",data=fracs,hue="Fitness", fit_reg=False, scatter_kws={"s": 50})
@@ -100,10 +106,14 @@ if args.report:
     pdf.savefig()
     plt.close()
     # Correlation plots for each column
-    sns.set_context("paper",font_scale=0.6)
+    sns.set_context("paper",font_scale=0.5)
+    plt.rcParams.update({'font.size': 5})
     for res,fname in zip(reslist,files):
         res.columns=[r[0:-4] for r in res.columns]
-        scat=scatmat(res,diagonal="kde",s=10)
+        scat=scatmat(res.head(500),diagonal="kde",s=5)
+        fntsize=4
+        [plt.setp(item.xaxis.get_majorticklabels(), 'size', fntsize) for item in scat.ravel()]
+        [plt.setp(item.yaxis.get_majorticklabels(), 'size', fntsize) for item in scat.ravel()]
         plt.suptitle(fname)
         pdf.savefig()
         plt.close()
