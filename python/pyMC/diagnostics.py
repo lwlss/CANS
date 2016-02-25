@@ -38,15 +38,6 @@ def comparePosteriors(M1,M2,sim,main="",lab1="",lab2="",lwd=2,show=False,simulat
     if show:
         plt.show()
 
-def mdr(K,r,g,v):
-    return((r*v)/np.log(1-(np.power(2,v)-1)/((np.power(2,v)*np.power(g/K,v)-1))))
-
-def mdp(K,r,g,v):
-    return(np.log(K/g)/np.log(2))
-
-def mdrmdp(K,r,g,v):
-    return(mdr(K,r,g,v)*mdp(K,r,g,v))
-
 def comparePosteriors2(Mlist,labs,clist,main="",lwd=2,show=False,inocVal=0.001):
     fig,ax=plt.subplots(2,2,figsize=(21,21))
     for M in Mlist:

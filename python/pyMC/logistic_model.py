@@ -9,6 +9,14 @@ from diagnostics import *
 import os
 from pymc.Matplot import plot
 
+def mdr(x0,r,K,v):
+    '''Vectorised Maximum Doubling Rate for generalised logistic model.
+Recover value for logistic model by setting v=1.'''
+    return(np.divide((r*v),np.log(1.0-(np.power(2.0,v)-1.0)/(np.power(2.0,v)*np.power(np.divide(x0,K),v)-1.0))))
+
+def mdp(x0,K):
+    '''Vectorised Maximum Doubling Potential for generalised logistic and logistic models.'''
+    return(np.log(np.divide(K,x0))/np.log(2.0))    
 
 def logistic(x0,r,K,t):
     '''Vectorised logistic model'''
