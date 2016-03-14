@@ -120,6 +120,7 @@ def inference(sim,par,iter=250000,burn=1000,thin=100,fixInoc=False,inocVal=0.0,g
     return(M)
 
 def hierarchy_inf(data,par,iter=250000,burn=1000,thin=100):
+    '''Learn about r and K in full hierarchy, learn about x0 separately for each column.'''
     priors={}
     x0=mc.Uniform('x0',par.x0_min,par.x0_max)
     tau=mc.Uniform('tau',par.tau_min,par.tau_max)
@@ -169,6 +170,7 @@ def hierarchy_inf(data,par,iter=250000,burn=1000,thin=100):
     return(M)
 
 def hierarchy_inf_x0(data,par,iter=250000,burn=1000,thin=100):
+    '''Learn about x0,r,K in full hierarchy'''
     priors={}
     tau=mc.Uniform('tau',par.tau_min,par.tau_max)
     priors["tau"]=tau

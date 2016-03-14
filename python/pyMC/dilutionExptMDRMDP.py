@@ -39,11 +39,19 @@ def makeBoxplot(longdf):
 parser = argparse.ArgumentParser(description='Dilution Experiment')
 parser.add_argument("-c","--column", type=int ,help='Plate column number')
 parser.add_argument("-r","--report", help="Summarise completed inference",action="store_true")
+parser.add_argument("-f","--fixed", help="Fix inoculum density estimate for all spots in a column",action="store_true")
 args = parser.parse_args()
 
-root="DilutionsFixed"
+if args.fixed:
+    root="DilutionsFixed"
+else:
+    root="Dilutions"
+    
 fname="../../data/dilution/RawData.txt"
 maxc=8 # Highest column number to consider in report
+
+#args.column=1
+#args.fixed=False
 
 if args.column:
     colnum=int(args.column)
@@ -53,15 +61,20 @@ if args.column:
     make_sure_path_exists(root)
     dirname=os.path.join(root,"C{0:02d}".format(colnum))
     make_sure_path_exists(dirname)
-    if root=="Dilutions":
-        M=hierarchy_inf(raw,par,iter=6*750000,burn=6*50000,thin=6*1000)
-    if root=="DilutionsFixed":
-        M=hierarchy_inf_x0(raw,par,iter=6*750000,burn=6*50000,thin=6*1000)
+    if args.fixed:
+        M=hierarchy_inf(raw,par,iter=100000,burn=10000,thin=100)
+    else:
+        M=hierarchy_inf_x0(raw,par,iter=100000,burn=10000,thin=100)
+
+    print("Diagnostic plots")
     plot(M,path=dirname)
     df=pd.DataFrame()
     genes=np.sort(raw.Gene.unique())
     for gene in genes:
-        df["x0_{0}_C{1:02d}".format(gene,colnum)]=getattr(M,"x0_"+gene).trace[:]
+        if args.fixed:
+            df["x0_{0}_C{1:02d}".format(gene,colnum)]=getattr(M,"x0").trace[:]
+        else:
+            df["x0_{0}_C{1:02d}".format(gene,colnum)]=getattr(M,"x0_"+gene).trace[:]
         df["r_{0}_C{1:02d}".format(gene,colnum)]=getattr(M,"r_"+gene).trace[:]
         df["K_{0}_C{1:02d}".format(gene,colnum)]=getattr(M,"K_"+gene).trace[:]
     df["x0_C{0:02d}".format(colnum)]=getattr(M,"x0").trace[:]
@@ -87,9 +100,9 @@ if args.report:
     rcols=makeLong(res[[c for c in res.columns if "r_" in c]])
     Kcols=makeLong(res[[c for c in res.columns if "K_" in c]])
     x0cols=makeLong(res[[c for c in res.columns if "x0_" in c and c.count("_")==1]])
-    if root=="Dilutions":
+    if not args.fixed:
         x0genes=makeLong(res[[c for c in res.columns if "x0_" in c and c.count("_")==2]])
-    if root=="DilutionsFixed":
+    if args.fixed:
         x0his3=x0cols.copy()
         x0his3["gene"]="HIS3"
         x0rad52=x0cols.copy()
@@ -141,11 +154,10 @@ if args.report:
     plt.xlabel("Column number (dilution)")
     plt.ylabel("Proportion HIS3 > RAD52")
     plt.ylim(0.0,1.0)
-    if root=="Dilutions":
-        plt.suptitle("Learning about x0 for each column and each spot",fontsize=20)
-    if root=="DilutionsFixed":
+    if args.fixed:
         plt.suptitle("Learning about x0 for each column only",fontsize=20)
-    
+    else:
+        plt.suptitle("Learning about x0 for each column and each spot",fontsize=20)
     
     pdf.savefig()
     plt.close()
