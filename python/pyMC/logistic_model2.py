@@ -63,62 +63,53 @@ def logisticode(x0,r,K,t):
 
 def inference(sim,par,iter=250000,burn=1000,thin=100,fixInoc=False,inocVal=0.0,genLog=False,logfun=logistic):
     print("Building priors...")
-    if not fixInoc:
+    if fixInoc:
+        x0=inocVal
+    else:
         x0=mc.Uniform('x0',par.x0_min,par.x0_max)
     if genLog:
         v=mc.Uniform('v',par.v_min,par.v_max)
+    else:
+        v=1.0
     r=mc.Uniform('r',par.r_min,par.r_max)
     K=mc.Uniform('K',par.K_min,par.K_max)
     tau=mc.Uniform('tau',par.tau_min,par.tau_max)
 
     print("Building model...")
     # Deterministic nodes in the model (output from logistic model in this case)
-    if fixInoc and not genLog:
-        @mc.deterministic(plot=False)
-        def logisticobs(r=r,K=K):
-            return(logfun(inocVal,r,K,sim.t_exp))
+    @mc.deterministic(plot=False)
+    def logisticobs(x0=x0,r=r,K=K,v=v):
+        return(glogistic(x0,r,K,sim.t_exp,v))
 
-        @mc.deterministic(plot=False)
-        def logisticpred(r=r,K=K):
-            return(logfun(inocVal,r,K,sim.t_pred))
-    if not fixInoc and not genLog:
-        @mc.deterministic(plot=False)
-        def logisticobs(x0=x0,r=r,K=K):
-            return(logfun(x0,r,K,sim.t_exp))
+    @mc.deterministic(plot=False)
+    def logisticpred(x0=x0,r=r,K=K,v=v):
+        return(glogistic(x0,r,K,sim.t_pred,v))
 
-        @mc.deterministic(plot=False)
-        def logisticpred(x0=x0,r=r,K=K):
-            return(logfun(x0,r,K,sim.t_pred))
-    if fixInoc and genLog:
-        @mc.deterministic(plot=False)
-        def logisticobs(r=r,K=K,v=v):
-            return(glogistic(inocVal,r,K,sim.t_exp,v))
+    @mc.deterministic(plot=False)
+    def mdrF(x0=x0,r=r,K=K,v=v):
+        return(mdr(x0,r,K,v))
 
-        @mc.deterministic(plot=False)
-        def logisticpred(r=r,K=K,v=v):
-            return(glogistic(inocVal,r,K,sim.t_pred,v))
-    if not fixInoc and genLog:
-        @mc.deterministic(plot=False)
-        def logisticobs(x0=x0,r=r,K=K,v=v):
-            return(glogistic(inocVal,r,K,sim.t_exp,v))
+    @mc.deterministic(plot=False)
+    def mdpF(x0=x0,r=r,K=K,v=v):
+        return(mdp(x0,K))
 
-        @mc.deterministic(plot=False)
-        def logisticpred(x0=x0,r=r,K=K,v=v):
-            return(glogistic(inocVal,r,K,sim.t_pred,v))
+    @mc.deterministic(plot=False)
+    def mdrmdpF(x0=x0,r=r,K=K,v=v):
+        return(mdr(x0,r,K,v)*mdp(x0,K))  
 
     # Posterior predictive and measurement error models
     pred=mc.Normal('pred',mu=logisticpred,tau=tau)
-    obs=mc.Normal('obs',mu=logisticobs,tau=tau,value=sim.x_obs,observed=True)
+    obs=mc.Normal('obs',mu=logisticobs,tau=tau,value=sim.x_obs,observed=True)   
 
     print("Sampling from posterior...")
     if fixInoc and not genLog:
-        M=mc.MCMC(dict({"r":r,"K":K,"tau":tau,"pred":pred,"obs":obs}))
+        M=mc.MCMC(dict({"r":r,"K":K,"tau":tau,"pred":pred,"obs":obs,"MDRMDP":mdrmdpF}))
     if not fixInoc and not genLog:
-        M=mc.MCMC(dict({"x0":x0,"r":r,"K":K,"tau":tau,"pred":pred,"obs":obs}))
+        M=mc.MCMC(dict({"x0":x0,"r":r,"K":K,"tau":tau,"pred":pred,"obs":obs,"MDRMDP":mdrmdpF}))
     if fixInoc and genLog:
-        M=mc.MCMC(dict({"r":r,"K":K,"v":v,"tau":tau,"pred":pred,"obs":obs}))
+        M=mc.MCMC(dict({"r":r,"K":K,"v":v,"tau":tau,"pred":pred,"obs":obs,"MDRMDP":mdrmdpF}))
     if not fixInoc and genLog:
-        M=mc.MCMC(dict({"x0":x0,"r":r,"K":K,"v":v,"tau":tau,"pred":pred,"obs":obs}))
+        M=mc.MCMC(dict({"x0":x0,"r":r,"K":K,"v":v,"tau":tau,"pred":pred,"obs":obs,"MDRMDP":mdrmdpF}))
     M.sample(iter=iter, burn=burn, thin=thin,progress_bar=False)
     return(M)
 
@@ -142,6 +133,11 @@ def hierarchy_inf(data,par,iter=250000,burn=1000,thin=100):
     priors["K"]=K
     priors["K_delta"]=K_delta
 
+    @mc.deterministic(plot=False)
+    def mdrmdp_glob(x0=x0,r=r,K=K):
+        return(mdr(x0,r,K,1.0)*mdp(x0,K))
+    priors["MDRMDP"]=mdrmdp_glob
+
     grps=data.groupby("Gene")
     for grp in grps:
         grplab,reps=grp
@@ -155,6 +151,10 @@ def hierarchy_inf(data,par,iter=250000,burn=1000,thin=100):
         priors["r_delta_{}".format(grplab)]=r_gen_delta
         priors["K_{}".format(grplab)]=K_gen
         priors["K_delta_{}".format(grplab)]=K_gen_delta
+        @mc.deterministic(plot=False)
+        def mdrmdp_gen(x0=x0,r=r_gen,K=K_gen):
+            return(mdr(x0,r,K,1.0)*mdp(x0,K))
+        priors["MDRMDP_{}".format(grplab)]=mdrmdp_gen
         
         reps=reps.groupby("ID")
         for rep in reps:
@@ -164,10 +164,14 @@ def hierarchy_inf(data,par,iter=250000,burn=1000,thin=100):
             @mc.deterministic(plot=False)
             def logisticobs(x0=x0,r=r_rep,K=K_rep):
                 return(logistic(x0,r,K,repdf.ExptTime))
+            @mc.deterministic(plot=False)
+            def mdrmdp_rep(x0=x0,r=r_rep,K=K_rep):
+                return(mdr(x0,r,K,1.0)*mdp(x0,K)) 
             obs=mc.Normal('obs_{0}_{1}'.format(grplab,replab),mu=logisticobs,tau=tau,value=repdf.Intensity,observed=True)
             priors["r_{0}_{1}".format(grplab,replab)]=r_rep
             priors["K_{0}_{1}".format(grplab,replab)]=K_rep
             priors['obs_{0}_{1}'.format(grplab,replab)]=obs
+            priors['MDRMDP_{0}_{1}'.format(grplab,replab)]=mdrmdp_rep
     M=mc.MCMC(priors)
     M.sample(iter=iter, burn=burn, thin=thin,progress_bar=False)
     return(M)
@@ -302,31 +306,44 @@ def P15():
     M=hierarchy_inf(raw,par,iter=101000,burn=1000,thin=1000)
     plot(M,path=dirname)
 
+if __name__ == "__main__":
+    colnum=1
+    print("Column {}".format(colnum))
+    fname="../../data/dilution/RawData.txt"
+    raw=pd.read_csv(fname,sep="\t")
+    raw=raw[raw.Column==colnum]
+    root="Dilutions"
+    make_sure_path_exists(root)
+    dirname=os.path.join(root,"C{0:02d}".format(colnum))
+    make_sure_path_exists(dirname)
+    M=hierarchy_inf(raw,par,iter=7500,burn=500,thin=10)
+    plot(M,path=dirname)
+    df=pd.DataFrame()
+    genes=np.sort(raw.Gene.unique())
+    for gene in genes:
+        df["x0_{0}_C{1:02d}".format(gene,colnum)]=getattr(M,"r_"+gene).trace[:]
+        df["r_{0}_C{1:02d}".format(gene,colnum)]=getattr(M,"r_"+gene).trace[:]
+        df["K_{0}_C{1:02d}".format(gene,colnum)]=getattr(M,"K_"+gene).trace[:]
+        df["MDRMDP_{0}_C{1:02d}".format(gene,colnum)]=getattr(M,"MDRMDP_"+gene).trace[:]
+    df["x0_C{0:02d}".format(colnum)]=getattr(M,"x0").trace[:]
+    df.to_csv(os.path.join(root,"C{0:02d}.txt".format(colnum)),sep="\t",index=False)
+    frac_r=float(np.sum(df["r_{0}_C{1:02d}".format(genes[0],colnum)]>df["r_{0}_C{1:02d}".format(genes[1],colnum)]))/len(df["r_{0}_C{1:02d}".format(genes[0],colnum)])
+    print("Probability that "+genes[0]+" is fitter than "+genes[1]+" in terms of r: "+str(frac_r))
+    frac_K=float(np.sum(df["K_{0}_C{1:02d}".format(genes[0],colnum)]>df["K_{0}_C{1:02d}".format(genes[1],colnum)]))/len(df["K_{0}_C{1:02d}".format(genes[0],colnum)])
+    print("Probability that "+genes[0]+" is fitter than "+genes[1]+" in terms of K: "+str(frac_K))  
+
 ##if __name__ == "__main__":
 ##    colnum=1
-##    print("Column {}".format(colnum))
+##    rownum=1
+##    print("Row {0} Column {1}".format(rownum,colnum))
 ##    fname="../../data/dilution/RawData.txt"
 ##    raw=pd.read_csv(fname,sep="\t")
-##    raw=raw[raw.Column==colnum]
-##    root="Dilutions"
-##    make_sure_path_exists(root)
-##    dirname=os.path.join(root,"C{0:02d}".format(colnum))
-##    make_sure_path_exists(dirname)
-##    M=hierarchy_inf_x0(raw,par,iter=7500,burn=500,thin=10)
-##    plot(M,path=dirname)
-##    df=pd.DataFrame()
-##    genes=np.sort(raw.Gene.unique())
-##    for gene in genes:
-##        df["x0_{0}_C{1:02d}".format(gene,colnum)]=getattr(M,"r_"+gene).trace[:]
-##        df["r_{0}_C{1:02d}".format(gene,colnum)]=getattr(M,"r_"+gene).trace[:]
-##        df["K_{0}_C{1:02d}".format(gene,colnum)]=getattr(M,"K_"+gene).trace[:]
-##    df["x0_C{0:02d}".format(colnum)]=getattr(M,"x0").trace[:]
-##    df.to_csv(os.path.join(root,"C{0:02d}.txt".format(colnum)),sep="\t",index=False)
-##    frac_r=float(np.sum(df["r_{0}_C{1:02d}".format(genes[0],colnum)]>df["r_{0}_C{1:02d}".format(genes[1],colnum)]))/len(df["r_{0}_C{1:02d}".format(genes[0],colnum)])
-##    print("Probability that "+genes[0]+" is fitter than "+genes[1]+" in terms of r: "+str(frac_r))
-##    frac_K=float(np.sum(df["K_{0}_C{1:02d}".format(genes[0],colnum)]>df["K_{0}_C{1:02d}".format(genes[1],colnum)]))/len(df["K_{0}_C{1:02d}".format(genes[0],colnum)])
-##    print("Probability that "+genes[0]+" is fitter than "+genes[1]+" in terms of K: "+str(frac_K))  
-    
+##    raw=raw[(raw.Column==colnum)&(raw.Row==rownum)]
+##    root="SingleSpot"
+##    #make_sure_path_exists(root)
+##    #M=inference(raw,par,iter=7500,burn=500,thin=10)
+
+   
     
     
     

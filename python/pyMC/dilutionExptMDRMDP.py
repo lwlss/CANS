@@ -42,6 +42,10 @@ parser.add_argument("-r","--report", help="Summarise completed inference",action
 parser.add_argument("-f","--fixed", help="Fix inoculum density estimate for all spots in a column",action="store_true")
 args = parser.parse_args()
 
+#args.column=1
+#args.fixed=True
+#args.report=True
+
 if args.fixed:
     root="DilutionsFixed"
 else:
@@ -49,9 +53,6 @@ else:
     
 fname="../../data/dilution/RawData.txt"
 maxc=8 # Highest column number to consider in report
-
-#args.column=1
-#args.fixed=False
 
 if args.column:
     colnum=int(args.column)
@@ -62,9 +63,9 @@ if args.column:
     dirname=os.path.join(root,"C{0:02d}".format(colnum))
     make_sure_path_exists(dirname)
     if args.fixed:
-        M=hierarchy_inf(raw,par,iter=100000,burn=10000,thin=100)
+        M=hierarchy_inf(raw,par,iter=500000,burn=10000,thin=500)
     else:
-        M=hierarchy_inf_x0(raw,par,iter=100000,burn=10000,thin=100)
+        M=hierarchy_inf_x0(raw,par,iter=500000,burn=10000,thin=500)
 
     print("Diagnostic plots")
     plot(M,path=dirname)
@@ -109,8 +110,10 @@ if args.report:
         x0rad52["gene"]="RAD52"
         x0genes=pd.concat([x0his3,x0rad52])
         x0genes=x0genes.reset_index(drop=True)
-        
-    mdrvec=mdr(x0genes.x0,rcols.r,Kcols.K,np.repeat(1.0,len(x0genes.x0)))
+    print(len(x0genes.x0))
+    print(len(rcols.r))
+    print(len(Kcols.K))
+    mdrvec=mdr(x0genes.x0,rcols.r,Kcols.K,1.0)
     mdpvec=mdp(x0genes.x0,Kcols.K)
     mdrmdpvec=mdrvec*mdpvec
     mdrcols=pd.DataFrame({"fname":rcols.fname,"mdr":mdrvec,"var":"mdr","gene":rcols.gene,"column":rcols.column})
