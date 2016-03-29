@@ -1,0 +1,103 @@
+\documentclass[11pt]{article}
+
+%opening
+\title{A Network Model of...}
+\author{Daniel Boocock}
+
+\usepackage{geometry}
+\geometry{
+  a4paper,
+  headsep={5mm},
+  tmargin={12.9mm},
+  bmargin={13.9mm},
+  includeheadfoot,
+  margin={17mm},
+  %textwidth={178mm},
+  twoside,
+  columnsep={6mm},
+}
+
+% multicol settings
+\usepackage{multicol}
+\setcounter{columnbadness}{7000}
+\setcounter{finalcolumnbadness}{7000}
+
+% In order to use column width figures with multicol.
+\usepackage{caption}
+\usepackage[demo]{graphicx}   % In order to demo this.
+\newenvironment{Figure}
+  {\par\medskip\noindent\minipage{\linewidth}}
+  {\endminipage\par\medskip}
+
+% Edit the document title.
+\usepackage{titling}
+\setlength{\droptitle}{-1.5cm}
+\pretitle{\begin{flushleft}\LARGE\sffamily\bfseries}
+\posttitle{\par\end{flushleft}\vspace{-3ex}}
+\preauthor{\begin{flushleft}\large\sffamily}
+\postauthor{\par\end{flushleft}\vspace{-3.5ex}}
+\predate{\begin{flushleft}\normalsize\sffamily}
+\postdate{\par\end{flushleft}\vspace{-4ex}}
+
+% fancyhdr settings
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\newcommand{\helv}{%
+  \fontfamily{phv}\fontseries{b}\fontsize{9}{11}\selectfont
+}
+\fancyhf[HLE]{\rule[-3mm]{0pt}{3mm} \helv \textbf{D. Boocock}}
+\fancyhf[HRO]{\rule[-3mm]{0pt}{3mm} \helv \textbf{A Network Model of Colony Growth on Solid Agar}}
+\fancyhf[HRE, HLO]{}
+\chead[]{}
+\lfoot[\helv \thepage]{}
+\cfoot[]{}
+\rfoot[]{\helv \thepage}
+% Make a new pagestyle for the title page which removes the project
+% title from the header.
+\fancypagestyle{title}{%
+  \rhead[]{}
+}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+
+% Load all necessary packages
+\RequirePackage{inputenc,crop,graphicx,amsmath,array,color,amssymb,flushend,stfloats,amsthm,chngpage,times}
+\RequirePackage[LY1]{fontenc}
+
+
+% Change title fonts , sizes and spacing.
+\usepackage{titlesec}
+\titleformat{\chapter}[display]
+{\normalfont\sffamily\huge\uppercase\bfseries}{\chaptertitlename\ \thechapter}{20pt}{\Huge}
+\titleformat{\section}
+{\normalfont\sffamily\large\bfseries}{\thesection}{1em}{\uppercase}
+\titleformat{\subsection}
+{\normalfont\sffamily\normalsize\bfseries}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}
+{\normalfont\sffamily\small\bfseries}{\thesubsubsection}{1em}{}
+\titleformat{\paragraph}[runin]
+{\normalfont\sffamily\normalsize\bfseries}{\theparagraph}{1em}{}
+\titleformat{\subparagraph}[runin]
+{\normalfont\sffamily\normalsize\bfseries}{\thesubparagraph}{1em}{}
+\titlespacing*{\chapter}{0pt}{50pt}{40pt}
+\titlespacing*{\section}{0pt}{1.25ex plus 1ex minus .2ex}{0.5ex plus .2ex}
+\titlespacing*{\subsection}{0pt}{1.25ex plus 1ex minus .2ex}{0.5ex plus .2ex}
+\titlespacing*{\subsubsection}{0pt}{1.25ex plus 1ex minus .2ex}{0.5ex plus .2ex}
+\titlespacing*{\paragraph}{0pt}{3.25ex plus 1ex minus .2ex}{1em}
+\titlespacing*{\subparagraph}{\parindent}{3.25ex plus 1ex minus .2ex}{1em}
+\renewcommand{\refname}{REFERENCES}    % Also make references title uppercase.
+
+
+%Import the natbib package and sets a bibliography  and citation styles
+\usepackage{natbib}
+\bibliographystyle{bioinfo}
+% \bibliographystyle{boostyle}
+% \bibliographystyle{abbrvnat}
+% No spaces allowed between arguments to setcitestyle.
+\setcitestyle{authoryear,round,simicolon}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "proposal"
+%%% End:
