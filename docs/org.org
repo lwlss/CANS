@@ -1,4 +1,4 @@
-* TODO LaTeX Template [2/5]
+* TODO LaTeX Template [5/6]
   - [X] Fonts and titles
     + [X] Titles should be helvetica
     + [X] Space between title and text should be reduced
@@ -14,10 +14,50 @@
     + [X] Headers should also be italic
     + [X] Footers should be page number
     + [X] More spacing for header and line
-  - [ ] Bibliography
-    + [ ] Cite by author and date in round brackets
-    + [ ] Use style named natbib.bst
-  - [ ] Try multifile
-    + [ ] include
-    + [ ] input
-  - [ ] Try refs (may need to use reftex)
+  - [X] Bibliography
+    + [X] Cite by author and date in round brackets
+    + [X] Choose a style option
+  - [X] Try multifile
+  - [X] Try refs (may need to use reftex)
+  - [ ] Add a spell checker to emacs
+
+* TODO Proposal [0/2]
+  - [ ] Read refs
+  - [ ] Add content from Conors notes
+** Aims
+  - [ ] What could the results of the project be used for?
+    - [ ] To design assays to minimize competition and signalling
+      effects
+    - [ ] To account for these affects in the analysis of the data
+      - [ ] Create a package(s) to do this for future experiments
+      - [ ] Reanalyse some existing data
+** Objectives
+
+** Background
+  - [ ] Explain why we expect competition
+  - [ ] What difference to results do we likely expect when modelling
+    competition? I.e how large an effect is expected?
+  - [ ] Explain benefit of bayesian approach and find counter-example
+    from probes
+  - [ ] Explain differences/benefits bewteen spot and probe approaches
+  - [ ] Example uses of QFA
+** Approach
+   - Create independent model
+     - Test for a small grid
+       - Generate a small set of data (growth curves)
+       - Analyse to recover growth rates
+   - Model competition for nutrients
+     - Create a small set of artifical data (perhaps for nine spots at
+       first) from the model and analyse this to see how long the
+       analysis takes and how well we can recover the underlying
+       parameters.
+     - We can also write tests for the code at this stage which should
+       scale to larger simulations.
+     - Extend this to study experimental data.
+       - A larger array (384 spots)
+       - Reanalyse data
+       - Compare with independent model
+** Plan
+   - This refers to the timescale of different parts of the project
+     - Could create a Gantt chart
+
