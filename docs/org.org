@@ -1,0 +1,23 @@
+* TODO LaTeX Template [2/5]
+  - [X] Fonts and titles
+    + [X] Titles should be helvetica
+    + [X] Space between title and text should be reduced
+    + [X] Main titles should be left aligned
+    + [X] Main title fonts need changing
+  - [X] Header and footer
+    + [X] Header should be left side for even page and right side for
+      odd.
+    + [X] Same with footer
+    + [X] Left header should be author
+    + [X] Right side should be Manuscript name
+    + [X] Header and footer font should be helvetica and bold
+    + [X] Headers should also be italic
+    + [X] Footers should be page number
+    + [X] More spacing for header and line
+  - [ ] Bibliography
+    + [ ] Cite by author and date in round brackets
+    + [ ] Use style named natbib.bst
+  - [ ] Try multifile
+    + [ ] include
+    + [ ] input
+  - [ ] Try refs (may need to use reftex)

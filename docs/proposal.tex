@@ -1,0 +1,236 @@
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
+
+
+\documentclass[11pt]{article}
+
+%opening
+\title{The Stochastic Simulation Algorithm}
+\author{Daniel Boocock}
+
+\usepackage{geometry}
+\geometry{
+  a4paper,
+ %# fontsize={12pt},
+  headsep={5mm},
+  tmargin={12.9mm},
+  bmargin={13.9mm},
+  includeheadfoot,
+  margin={17mm},
+  %textwidth={178mm},
+  twoside,
+  columnsep={6mm},
+}
+
+% multicol settings
+\usepackage{multicol}
+\setcounter{columnbadness}{7000}
+\setcounter{finalcolumnbadness}{7000}
+
+% In order to use column width figures with multicol.
+\usepackage{caption}
+\usepackage[demo]{graphicx}   % In order to demo this.
+\newenvironment{Figure}
+  {\par\medskip\noindent\minipage{\linewidth}}
+  {\endminipage\par\medskip}
+
+% Edit the document title.
+\usepackage{titling}
+\setlength{\droptitle}{-1.5cm}
+\pretitle{\begin{flushleft}\LARGE\sffamily\bfseries}
+\posttitle{\par\end{flushleft}\vspace{-3ex}}
+\preauthor{\begin{flushleft}\large\sffamily}
+\postauthor{\par\end{flushleft}\vspace{-3.5ex}}
+\predate{\begin{flushleft}\normalsize\sffamily}
+\postdate{\par\end{flushleft}\vspace{-4ex}}
+
+% fancyhdr settings
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\newcommand{\helv}{%
+  \fontfamily{phv}\fontseries{b}\fontsize{9}{11}\selectfont
+}
+\fancyhf[HLE]{\rule[-3mm]{0pt}{3mm} \helv \textbf{D. Boocock}}
+\fancyhf[HRO]{\rule[-3mm]{0pt}{3mm} \helv \textbf{A Network Model of Colony Growth on Solid Agar}}
+\fancyhf[HRE, HLO]{}
+%\lhead[\textbf{D. Boocock}]{}
+\chead[]{}
+%\rhead[]{\helv \textbf{A Network Model of Colony Growth on Solid Agar}}
+\lfoot[\helv \thepage]{}
+\cfoot[]{}
+\rfoot[]{\helv \thepage}
+% Make a new pagestyle for the title page which removes the project
+% title from the header.
+\fancypagestyle{title}{%
+  \rhead[]{}
+}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+
+% Load all necessary packages
+\RequirePackage{inputenc,crop,graphicx,amsmath,array,color,amssymb,flushend,stfloats,amsthm,chngpage,times}
+\RequirePackage[LY1]{fontenc}
+
+
+% Change title fonts , sizes and spacing.
+\usepackage{titlesec}
+\titleformat{\chapter}[display]
+{\normalfont\sffamily\huge\uppercase\bfseries}{\chaptertitlename\ \thechapter}{20pt}{\Huge}
+\titleformat{\section}
+{\normalfont\sffamily\large\bfseries}{\thesection}{1em}{\uppercase}
+\titleformat{\subsection}
+{\normalfont\sffamily\normalsize\bfseries}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}
+{\normalfont\sffamily\small\bfseries}{\thesubsubsection}{1em}{}
+\titleformat{\paragraph}[runin]
+{\normalfont\sffamily\normalsize\bfseries}{\theparagraph}{1em}{}
+\titleformat{\subparagraph}[runin]
+{\normalfont\sffamily\normalsize\bfseries}{\thesubparagraph}{1em}{}
+\titlespacing*{\chapter}{0pt}{50pt}{40pt}
+\titlespacing*{\section}{0pt}{1.25ex plus 1ex minus .2ex}{0.5ex plus .2ex}
+\titlespacing*{\subsection}{0pt}{1.25ex plus 1ex minus .2ex}{0.5ex plus .2ex}
+\titlespacing*{\subsubsection}{0pt}{1.25ex plus 1ex minus .2ex}{0.5ex plus .2ex}
+\titlespacing*{\paragraph}{0pt}{3.25ex plus 1ex minus .2ex}{1em}
+\titlespacing*{\subparagraph}{\parindent}{3.25ex plus 1ex minus .2ex}{1em}
+\renewcommand{\refname}{REFERENCES}    % Also make references title uppercase.
+
+
+%Import the natbib package and sets a bibliography  and citation styles
+\usepackage{natbib}
+\bibliographystyle{boostyle}
+%\bibliographystyle{abbrvnat}
+% No spaces allowed between arguments to setcitestyle.
+\setcitestyle{authoryear,round,simicolon}
+
+\begin{document}
+\maketitle
+\thispagestyle{title}
+\noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
+\begin{multicols}{2}
+
+\section{Section Title}
+Lots of text We have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers.
+\subsection{Hello subsection}
+We have also discussed how the SSA performs more slowly for systems
+with many specieWe have seen that outputs of stochastic and
+deterministic models differ, particularly at low species numbers. We
+have also discussed how the SSA performs more slowly for systems with
+many specieWe have seen that outputs of stochastic and deterministic
+models differ,
+\begin{Figure}
+ \centering
+ \includegraphics[width=\linewidth]{foo}
+ \captionof{figure}{my caption of the figure}
+\end{Figure}
+particularly at low species numbers. We have also discussed how the
+SSA performs more slowly for systems with many specieWe have seen that
+outputs of stochastic and deterministic models differ, particularly at
+low species numbers.
+\subsubsection{Hello subsubsection}
+We have also discussed how the SSA performs more slowly for systems
+with many specieWe have seen that outputs of stochastic and
+deterministic models differ, particularly at low species numbers. We
+have also discussed how the SSA performs more slowly for systems with
+many specieWe have seen that outputs of stochastic and deterministic
+models differ, particularly at low species numbers. We have also
+discussed how the SSA performs more slowly for systems with many
+specieWe have seen that outputs of stochastic and deterministic models
+differ, particularly at low species numbers. We have also discussed
+how the SSA performs more slowly for systems with many specieWe have
+\rule[-2ex]{0pt}{2ex}
+seen that outputs of stochastic and deterministic models differ,
+particularly at low species numbers. We have also discussed how the
+SSA performs more slowly for systems with many specieWe have seen that
+outputs of stochastic and deterministic models differ, particularly at
+low species numbers. We have also discussed how the SSA performs more
+slowly for systems with many specieWe have seen that outputs of
+stochastic and deterministic models differ, particularly at low
+species numbers. We have also discussed how the SSA performs more
+slowly for systems with many specieWe have seen that outputs of
+stochastic and deterministic models differ, particularly at low
+species numbers. We have also discussed how the SSA performs more
+slowly for systems with many specieWe have seen that outputs of
+stochastic and deterministic models differ, particularly at low
+species numbers.
+
+
+We have also discussed how the SSA performs more
+slowly for systems with many specieWe have seen that outputs of
+stochastic and deterministic models differ, particularly at low
+species numbers. We have also discussed how the SSA performs more
+slowly for systems with many specieWe have seen that outputs of
+stochastic and deterministic models differ, particularly at low
+species numbers. We have also discussed how the SSA performs more
+slowly for systems with many specieWe have seen that outputs of
+stochastic and deterministic models differ, particularly at low
+species numbers. We have also discussed how the SSA performs more
+slowly for systems with many specieWe have seen that outputs of
+stochastic and deterministic models differ, particularly at low
+species numbers. We have also discussed how the SSA performs more
+slowly for systems with many specieWe have seen that outputs of
+stochastic and deterministic models differ, particularly at low.
+Insert a columnbreak with multiocl.
+We have also discussed how the SSA performs more
+slowly for systems with many specieWe have seen that outputs of
+stochastic and deterministic models differ, particularly at low
+species numbers. We have also discussed how the SSA performs more
+slowly for systems with many specieWe have seen that outputs of
+stochastic and deterministic models differ, particularly at low
+species numbers. We have also discussed how the SSA performs more
+slowly for systems with many specieWe have seen that outputs of
+stochastic and deterministic models differ, particularly at low
+species numbers. We have also discussed how the SSA performs more
+slowly for systems with many specieWe have seen that outputs of
+stochastic and deterministic models differ, particularly at low
+species numbers. We have also discussed how the SSA performs more
+slowly for systems with many specieWe have seen that outputs of
+stochastic and deterministic models differ, particularly at low
+species numbers. We have also discussed how the SSA performs more
+slowly for systems with many specieWe have seen that outputs of
+stochastic and deterministic models differ, particularly at low
+species numbers. We have also discussed how the SSA performs more
+slowly for systems with many specieWe have seen that outputs of
+stochastic and deterministic models differ, particularly at low
+species numbers. We have also discussed how the SSA performs more
+slowly for systems with many specieWe have seen that outputs of
+stochastic and deterministic models differ, particularly at low
+species numbers. We have also discussed how the SSA performs more
+slowly for systems with many specieWe have seen that outputs of
+stochastic and deterministic models differ, particularly at low
+species numbers. We have also discussed how the SSA performs more
+slowly for systems with many specieWe have seen that outputs of
+stochastic and deterministic models differ, particularly at low
+species numbers. We have also discussed how the SSA performs more
+slowly for systems with many specieWe have seen that outputs of
+stochastic and deterministic models differ, particularly at low
+species numbers. We have also discussed how the SSA performs more
+slowly for systems with many specieWe have seen that outputs of
+stochastic and deterministic models differ, particularly at low
+species numbers. We have also discussed how the SSA performs more
+slowly for systems with many specieWe have seen that outputs of
+stochastic and deterministic models differ, particularly at low
+species numbers.
+\end{multicols}
+ We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers.
+\begin{multicols}{2}
+ We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specieWe have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many specie
+\section{Summary}
+% Other instances where stochastic models behave differently to deterministic.
+hello \citep{Lawless2010}.
+world \citet{Aamport:1986a}.
+We have seen that outputs of stochastic and deterministic models differ, particularly at low species numbers. We have also discussed how the SSA performs more slowly for systems with many species.
+
+\end{multicols}
+
+
+%\bibliographystyle{natbib}
+%\bibliographystyle{ieeetr}
+\bibliography{proposal}
+\end{document}
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
