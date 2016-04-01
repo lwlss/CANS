@@ -53,6 +53,7 @@
     competition? I.e how large an effect is expected?
   - [ ] Explain benefit of bayesian approach and compare with
     normalization approach in SGA Baryshnikova 2010.
+    - [ ] Heirarchical models
   - [ ] Compare the QFA and SGA approaches
     - [ ] Lower density possible in QFA so we can capture more of the growth
       curve, esp. the initial exponential phase. There is a figure for
@@ -80,6 +81,8 @@
      - Use in a reanalysis of (telomere?) data to discover genetic
        interactions.
    - [ ] Statistical methods
+     - [ ] Least Squares
+     - [ ] Heirarchical Bayesian model.
    - [ ] Computational tools
    - [ ] PACKAGING, SBML and MIRIAM
 
