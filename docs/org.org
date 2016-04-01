@@ -21,31 +21,49 @@
   - [X] Try refs (may need to use reftex)
   - [ ] Add a spell checker to emacs
 
-* TODO Proposal [0/2]
-  - [ ] Read refs
+* TODO Proposal [1/2]
+  - [X] Read refs
   - [ ] Add content from Conors notes
 ** Aims
+  - [ ] HYPOTHESES [0/2]
+    - [ ] QFA experiments are affected by competition for nutreints
+      and/or signalling.
+    - [ ] Reanalysis of telomere(?) data accounting for these effects
+      will improve the reliability of predicted interactions and could
+      provide evidence of new interactions.
   - [ ] What could the results of the project be used for?
+    - [ ] To better understand systematic effects on population growth
+      in agar assays.
     - [ ] To design assays to minimize competition and signalling
       effects
-    - [ ] To account for these affects in the analysis of the data
+    - [ ] To account for these effects in the analysis of the data
       - [ ] Create a package(s) to do this for future experiments
-      - [ ] Reanalyse some existing data
+      - [ ] Reanalyse some existing data - Specifically telomere?
+	- [ ] The potential applications of QFA are broad and the
+          approach could be used to study interactions with any viable
+          query gene in bacteria or (what do we call the group of
+          single celled eukaryotic organisms for which this is
+          appropriate?) in high-throughput or smaller scale manual
+          experiments.
 ** Objectives
-
+  - [ ] Should be bullet point format.
 ** Background
   - [ ] Explain why we expect competition
   - [ ] What difference to results do we likely expect when modelling
     competition? I.e how large an effect is expected?
-  - [ ] Explain benefit of bayesian approach and find counter-example
-    from probes
-  - [ ] Explain differences/benefits bewteen spot and probe approaches
+  - [ ] Explain benefit of bayesian approach and compare with
+    normalization approach in SGA Baryshnikova 2010.
+  - [ ] Compare the QFA and SGA approaches
+    - [ ] Lower density possible in QFA so we can capture more of the growth
+      curve, esp. the initial exponential phase. There is a figure for
+      this in
   - [ ] Example uses of QFA
+  - [ ] Logistic model
+  - [ ] Nutrient diffusion and signalling
+    - [ ] Models
+    - [ ] Evidence for the types of signalling
+      - [ ] ethanol
 ** Approach
-   - Create independent model
-     - Test for a small grid
-       - Generate a small set of data (growth curves)
-       - Analyse to recover growth rates
    - Model competition for nutrients
      - Create a small set of artifical data (perhaps for nine spots at
        first) from the model and analyse this to see how long the
@@ -57,6 +75,10 @@
        - A larger array (384 spots)
        - Reanalyse data
        - Compare with independent model
+   - [ ] Statistical methods
+   - [ ] Computational tools
+   - [ ] PACKAGING, SBML and MIRIAM
+
 ** Plan
    - This refers to the timescale of different parts of the project
      - Could create a Gantt chart
