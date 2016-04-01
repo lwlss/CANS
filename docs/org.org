@@ -73,8 +73,12 @@
        scale to larger simulations.
      - Extend this to study experimental data.
        - A larger array (384 spots)
-       - Reanalyse data
-       - Compare with independent model
+       - Fit competition model to growth curve data.
+       - Compare with independent model (a special case of the
+         competition model.)
+     - Revise the model if necessary or add signalling factor.
+     - Use in a reanalysis of (telomere?) data to discover genetic
+       interactions.
    - [ ] Statistical methods
    - [ ] Computational tools
    - [ ] PACKAGING, SBML and MIRIAM
