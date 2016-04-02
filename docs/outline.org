@@ -68,23 +68,37 @@
     standards and publish in the biomodels database.
   - [X] Document and package other analysis tools in python in order
     to distribute.
-** Background
-  - [ ] Explain why we expect competition
-  - [ ] What difference to results do we likely expect when modelling
-    competition? I.e how large an effect is expected?
-  - [ ] Explain benefit of bayesian approach and compare with
-    normalization approach in SGA Baryshnikova 2010.
-    - [ ] Heirarchical models
-  - [ ] Compare the QFA and SGA approaches
-    - [ ] Lower density possible in QFA so we can capture more of the growth
-      curve, esp. the initial exponential phase. There is a figure for
-      this in
-  - [ ] Example uses of QFA
-  - [ ] Logistic model
-  - [ ] Nutrient diffusion and signalling
-    - [ ] Models
-    - [ ] Evidence for the types of signalling
+** Background [0/4]
+  - [ ] A comparison of methods for screening strain fitness
+    - [ ] SGA
+    - [ ] QFA
+      - [ ] Lower densities possible so capture more of the growth
+        curve
+      - [ ] More than one colony per spot so will average out lag and
+        stochastic effects/variance.
+	- [ ] Possibility of competition within a spot.x
+    - [ ] liquid cultures
+    - [ ] Also explain why we want to model competition in order to
+      get data from more of the growth curve
+      - [ ] Batch variance (ref Bary2010) - want to fit as many plates
+        into a batch as possible which limits the frequency of
+        observations we can make.
+  - [ ] Evidence of competition and signalling
+    - [ ] Diffusion in agar
+    - [ ] Types of signalling in yeast
       - [ ] ethanol
+    - [ ] Evidence of competition in SGA and QFA
+      - [ ] How large is the predicted effect
+  - [ ] Modelling approaches
+    - [ ] Fishers multiplicative model of genetic interactions (independence)
+    - [ ] Continuity equation and diffusion equation
+    - [ ] Mass action kinetics
+    - [ ] Logistic model
+    - [ ] Bayesian inference and heirarciacal bayesian models
+      - [ ] With an explanation of the advantage of Bayesian approach
+	- [ ] Over normalization in Baryshnikova 2010
+	- [ ] Between Addinall2011 and Heydari2016
+  - [ ] Inference of genetic interactions from fitness screening and telomeres
 ** Approach
    - Model competition for nutrients
      - Create a small set of artifical data (perhaps for nine spots at
@@ -105,6 +119,9 @@
      - [ ] Least Squares
      - [ ] Heirarchical Bayesian model.
    - [ ] Computational tools
+     - [ ] scipy for least squares
+     - [ ] pyMC vs pySTAN for Bayesian inference. For pySTAN we would
+       have to rewrite the ode model in Stan but it could be faster.
    - [ ] PACKAGING, SBML and MIRIAM
 
 ** Plan
