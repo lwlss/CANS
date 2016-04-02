@@ -4,7 +4,7 @@ import pandas as pd
 # Timepoints at which we would like to simulate cell densities (& remaining nutrients)
 t=np.linspace(0,4.5,100)
 
-nrow,ncol=10,10
+nrow,ncol=5,5
 
 # Initial conditions
 C0=0.001
@@ -27,7 +27,7 @@ f=makeModelComp(nrow,ncol,r,k)
 soln=odeint(f,C+N,t)
 
 # Read in some real data
-data=pd.read_csv("..\data\ColonyzerOutput.txt",sep="\t")
+data=pd.read_csv("..\data\p15\ColonyzerOutput.txt",sep="\t")
 data=data[(data.Column<=ncol)&(data.Row<=nrow)]
 data["ID"]=['R{r:02d}C{c:02d}'.format(r=row,c=col) for row,col in zip(data.Row,data.Column)]
 dmat=data.pivot("ExptTime","ID","Intensity")
