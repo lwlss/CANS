@@ -56,6 +56,8 @@
     - [ ] Compare competition effects in different experimental
       designs in order to design experiments which minimze competition
       effects.
+      - For instance, compare spot and agar geometries and initial nutrient
+        densities.
     - [ ] Develop a model of competition in terms of parameters of the
       logistic model of population growth in oder to compare fitness
       measurements to previous studies.
