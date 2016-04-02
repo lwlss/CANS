@@ -47,6 +47,25 @@
           experiments.
 ** Objectives
   - [ ] Should be bullet point format.
+  - [ ] Develop a model of competition for nutrients and/or signalling
+    between cultures on a QFA agar gel.
+    - [ ] Reanalyse telemere data from (ref), comparing the
+      competition and independence models (a special case of the
+      competition model), to determine the effect of competition on
+      the experiments.
+    - [ ] Compare competition effects in different experimental
+      designs in order to design experiments which minimze competition
+      effects.
+    - [ ] Develop a model of competition in terms of parameters of the
+      logistic model of population growth in oder to compare fitness
+      measurements to previous studies.
+    - [ ] Reanalyse telomere data with using the modified logistic
+      model in order to determine the effects on gene interaction.
+    - [ ] Package the model in SBML.
+      - [ ] Conform to minimum information standards and publish in
+        the biomodels database.
+    - [ ] Document and package other analysis tools in python in order
+      to distribute.
 ** Background
   - [ ] Explain why we expect competition
   - [ ] What difference to results do we likely expect when modelling
