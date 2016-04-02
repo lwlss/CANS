@@ -1,5 +1,6 @@
 from CANS_functions import *
 import pandas as pd
+import scipy.optimize as opt
 
 # Timepoints at which we would like to simulate cell densities (& remaining nutrients)
 t=np.linspace(0,4.5,100)
@@ -12,8 +13,6 @@ N0=0.23
 
 # Parameter value
 r=[3 for x in range(0,nrow*ncol)]
-r[5]=5
-r[8]=5
 k=0.05
 
 # Initial conditions
@@ -42,6 +41,24 @@ def calcErr(C,N,r,k,dmat):
     esoln=odeint(f,C+N,et)[:,0:(nrow*ncol)]
     return(np.sqrt(np.square(esoln-dmat).sum().sum()))
 
+def ObjFun(x):
+    Cvals=[x[0] for i in range(nrow*ncol)]
+    Nvals=[x[1] for i in range(nrow*ncol)]
+    rvals=x[2:(2+nrow*ncol)]
+    k=x[2+nrow*ncol]
+    return(calcErr(Cvals,Nvals,rvals,k,dmat))
+
+print(ObjFun([C[0]]+[N[0]]+r+[k]))
+
+res=opt.minimize(ObjFun,[C[0]]+[N[0]]+r+[k])
+
+C=[res.x[0] for i in range(nrow*ncol)]
+N=[res.x[1] for i in range(nrow*ncol)]
+r=res.x[2:(2+nrow*ncol)]
+k=res.x[2+nrow*ncol]
+f=makeModelComp(nrow,ncol,r,k)
+soln=odeint(f,C+N,t)
+
 # Plotting results
 fig,ax=plt.subplots(nrow,ncol,figsize=(20,10))
 setot=0
@@ -52,12 +69,12 @@ for row in range(nrow):
         se=sum([(x-y)**2 for x,y in zip(dat.Intensity,soln[:,i])])
         setot+=se
         ax[row,col].scatter(dat.ExptTime,dat.Intensity,c="red")
-        ax[row,col].scatter(dat.ExptTime,esoln[:,i],c="blue")
+        #ax[row,col].scatter(dat.ExptTime,esoln[:,i],c="blue")
         ax[row,col].plot(t,soln[:,i],c="black")
         ax[row,col].plot(t,soln[:,i+(nrow*ncol)],c="blue")
         ax[row,col].set_ylim([-0.02,0.3])
-        ax[row,col].text(3.6, 0.275, 'R{r:02d}C{c:02d}'.format(r=row+1,c=col+1))
-        ax[row,col].text(3.6, 0.255, 'SqErr: %.3f'%se)
+        ax[row,col].text(2.6, 0.275, 'R{r:02d}C{c:02d}'.format(r=row+1,c=col+1))
+        ax[row,col].text(2.6, 0.255, 'SqErr: %.3f'%se)
 
 ##with open(r"C:\Users\Vicky\Desktop\blanktextfile.txt", "w") as fp:
 ##     soln=odeint(f,C+N,t)
@@ -71,16 +88,16 @@ for row in range(nrow):
 ##     fp.write("%s\n%s\n" % p)
 ##fp.write(("%s\t%.15f\t%i\t%i\n") % (p[0], p[1][0], p[1][1], p[1][2]))
 
-# Plotting results
-fig,ax=plt.subplots(nrow,ncol,figsize=(20,10)) #nrow, ncol
-for row in range(nrow):
-    for col in range(ncol):
-        i=convertij((row+1,col+1),ncol)
-        ax[row,col].plot(t,soln[:,i],c="black")
-        ax[row,col].plot(t,soln[:,i+(nrow*ncol)],c="blue")
-        ax[row,col].set_xlabel('Time since inoculation (d)')
-        ax[row,col].set_ylabel('Population size (AU)')
-plt.show()
-
-print(setot)
+### Plotting results
+##fig,ax=plt.subplots(nrow,ncol,figsize=(20,10)) #nrow, ncol
+##for row in range(nrow):
+##    for col in range(ncol):
+##        i=convertij((row+1,col+1),ncol)
+##        ax[row,col].plot(t,soln[:,i],c="black")
+##        ax[row,col].plot(t,soln[:,i+(nrow*ncol)],c="blue")
+##        ax[row,col].set_xlabel('Time since inoculation (d)')
+##        ax[row,col].set_ylabel('Population size (AU)')
+##plt.show()
+##
+##print(setot)
 
