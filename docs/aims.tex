@@ -4,48 +4,50 @@
 
 
 Quantitative fitness analysis (QFA) is a method for inferring the
-fitness of microbial genetic variants from their growth curves (see
-refs). In this approach, genetic variants are grown on solid agar in
-an array up to (number) colonies. Nutrients are known to diffuse
-through agar (ref) and microbial organisms, including
-\textit{Saccharomyces cerevisiae}, are known to have mechanisms for
-signalling between cultures/colonies (ref). There is evidence, from
-past QFA experiments (ref) and SGA experiments
-\citep{Baryshnikova2010}, that either competition, or signalling, or
-both is affecting the growth of colonies in the assays. An analysis by
-\citet{Baryshnikova2010} of data from synthetic genetic arrays (SGAs),
-a related experimental method, attempts to normalise for systematic
-variation, including from competition effects, using non-mechanistic
-statistical techniques aimed at improving the correlation between
-repeats of identical mutant strains at different locations.
-(Could mention advantages of the Bayesian
-approach of Heydari et al.)
+fitness of microbial genetic variants from their growth curves and can be
+used for genome-wide screening of genetic interaction or drug response
+(see \citet{Addinall2008,Addinall2011,Lawless2010,Banks2012} (drug
+ref)). When performed using a high-throughput protocol, growth curves are
+automatically captured for mixed arrays of typically 384 independent
+genetic strains grown on solid agar. There is evidence, from previous
+QFA experiments (ref), that growth of cultures is affected by
+competition for nutrients and/or signalling between cultures.
+An analysis by \citet{Baryshnikova2010}, of data obtained using synthetic
+genetic array (SGA), an alternative procedure also using a solid
+agar array, attempts to normalise for systematic variation in growth
+curve observations, which may including variation from competition and
+signalling effects, using non-mechanistic statistical techniques aimed
+at improving the correlation between repeats of identical mutant
+strains at different locations. (Could mention advantages
+of the Bayesian approach of Heydari et al.)
 
-% This project aims to investigate whether competition and/or signalling
-% is affecting the results of quantitative fitness ananlysis (QFA)
-% experiments and how th.
 This project aims to account for competition and signalling
-mechanistically in order to investigate the following hypotheses:
-This project aims to investigate the following hypotheses:
-%Specifically the aim is to investigate the following hypotheses:
+mechanistically in order to learn more about the sources of systematic
+variation in these procedures and to develop experimental designs and
+analyses for dealing with them. Specifically, the project aims to
+investigate the following hypotheses:
 \begin{itemize}
-\item Growth of colonies in QFA experiments is not independent and is
-  affected by competition and/or signalling.
+\item Growth of colonies in QFA experiments is affected by competition
+  and/or signalling.
 \item By accounting mechanistically for competition and signalling effects, it
   will be possible to design experiments which minimise these effects.
-\item Reanalysis of QFA data from (ref), using a model accounting for
-  competition effects, will better predict genetic interaction
-  strength and (possibly) provide evidence of new genetic interactions.
+\item Reanalysis of QFA data from \citet{Addinall2011}, using a model accounting for
+  competition and signalling effects, will better predict genetic interaction
+  strength and (may also) provide evidence of new genetic interactions.
 \end{itemize}
 
 
-Telomeres (the whatever gene) are believed involved cancer and aging
-(ref). Knowledge of interactions could improve our understanding of...
+\citet{Addinall2011} aim to discover genes interacting with a
+temperature-sensitive mutant of \textit{cdc13} in
+\textit{Saccharomyces cerevisiae} because of \textit{cdc13}'s function in telomere
+capping and the link between telomere shortening, ageing, and cancer.
 
-If, in the data from (ref), modelling competition improves the
-prediction of genetic interactions, this is also likely to be relevant
-to assays of other mibrobial organisms and investigations of other
-types or genetic interaction.
+
+If the power to predict genetic interactions is improved in the
+reanalysis of data from \citet{Addinall2011}, this may provide clues
+t will be
+relevant for investigations of other types of genetic interaction and
+investigations using other types of microbial organism.
 
 
 %%% Local Variables:
