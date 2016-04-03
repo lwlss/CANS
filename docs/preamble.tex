@@ -4,6 +4,12 @@
 \title{A Network Model of...}
 \author{Daniel Boocock}
 
+
+% Load all necessary packages
+\RequirePackage{inputenc,crop,graphicx,amsmath,array,color,amssymb,flushend,stfloats,amsthm,chngpage,times}
+\RequirePackage[LY1]{fontenc}
+
+
 \usepackage{geometry}
 \geometry{
   a4paper,
@@ -17,17 +23,18 @@
   columnsep={6mm},
 }
 
+
 % multicol settings
 \usepackage{multicol}
 \setcounter{columnbadness}{7000}
 \setcounter{finalcolumnbadness}{7000}
-
 % In order to use column width figures with multicol.
 \usepackage{caption}
-\usepackage[demo]{graphicx}   % In order to demo this.
+\usepackage{graphicx}
 \newenvironment{Figure}
   {\par\medskip\noindent\minipage{\linewidth}}
   {\endminipage\par\medskip}
+
 
 % Edit the document title.
 \usepackage{titling}
@@ -38,6 +45,7 @@
 \postauthor{\par\end{flushleft}\vspace{-3.5ex}}
 \predate{\begin{flushleft}\normalsize\sffamily}
 \postdate{\par\end{flushleft}\vspace{-4ex}}
+
 
 % fancyhdr settings
 \usepackage{fancyhdr}
@@ -59,11 +67,6 @@
 }
 \renewcommand{\headrulewidth}{0.4pt}
 \renewcommand{\footrulewidth}{0.4pt}
-
-
-% Load all necessary packages
-\RequirePackage{inputenc,crop,graphicx,amsmath,array,color,amssymb,flushend,stfloats,amsthm,chngpage,times}
-\RequirePackage[LY1]{fontenc}
 
 
 % Change title fonts , sizes and spacing.
