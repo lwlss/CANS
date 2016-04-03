@@ -1,4 +1,4 @@
-* TODO LaTeX Template [5/6]
+* TODO LaTeX Template [6/6]
   - [X] Fonts and titles
     + [X] Titles should be helvetica
     + [X] Space between title and text should be reduced
@@ -19,11 +19,19 @@
     + [X] Choose a style option
   - [X] Try multifile
   - [X] Try refs (may need to use reftex)
-  - [ ] Add a spell checker to emacs
+  - [X] Add a spell checker to emacs
 
-* TODO Proposal [1/2]
+* TODO Proposal [2/10]
   - [X] Read refs
   - [ ] Add content from Conors notes
+  - [X] Find images for Background
+  - [ ] Add refs to aims and images
+  - [ ] Outline the Approach
+  - [ ] Make a diagram/schematic of the model
+  - [ ]	Make a Gantt chart / maybe just a rough one on paper
+  - [ ] Write out equations for models in rst, markdown, or orgmode
+  - [ ] Add detail to the approach
+  - [ ] Add detail to the background
 ** Aims
   - [ ] HYPOTHESES [0/2]
     - [ ] QFA experiments are affected by competition for nutreints
