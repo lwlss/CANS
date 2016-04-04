@@ -108,31 +108,6 @@
 	- [ ] Between Addinall2011 and Heydari2016
   - [ ] Inference of genetic interactions from fitness screening and telomeres
 ** Approach
-   - Model competition for nutrients
-     - Create a small set of artifical data (perhaps for nine spots at
-       first) from the model and analyse this to see how long the
-       analysis takes and how well we can recover the underlying
-       parameters.
-     - We can also write tests for the code at this stage which should
-       scale to larger simulations.
-     - Extend this to study experimental data.
-       - A larger array (384 spots)
-       - Fit competition model to growth curve data.
-       - Compare with independent model (a special case of the
-         competition model.)
-     - Revise the model if necessary or add signalling factor.
-     - Use in a reanalysis of (telomere?) data to discover genetic
-       interactions.
-   - [ ] Statistical methods
-     - [ ] Least Squares
-     - [ ] Heirarchical Bayesian model.
-   - [ ] Computational tools
-     - [ ] scipy for least squares
-     - [ ] pyMC vs pySTAN for Bayesian inference. For pySTAN we would
-       have to rewrite the ode model in Stan but it could be faster.
-   - [ ] PACKAGING, SBML and MIRIAM
-
-
   - [ ] Develop a model of competition for nutrients and/or signalling
     between cultures on a QFA agar gel.
     - Nutrient dependent growth
@@ -160,12 +135,26 @@
       and signalling model with diffusion constants set to zero (If
       discretized in a finer grid we would have to set boundaries at
       the edge of each location).
+    - How to treat the edges.
+      - These have a larger area (yes) and does that effect the
+        diffusoin constant we use?
+      - Identical strains are grown all around the edge. What can be
+        learnt from variance within these strains?
+  - [ ] To what extent and in what ways should we test the code.
+    - Unittests?
+    - As fitting and analysis will take a long time should we use
+      smaller arrays of artifical data to debug.
+    - Do we see how well we can recover parameters from artifical
+      data sets or just study actual data?
   - [ ] Test the model by reanalysing telomere data from (ref),
     comparing the competition and independence models (a special case
     of the competition model), to determine the effect of competition
     on the experiments.
-    - Data points are obtained automatically by Colonyzer.
-      - Colonyzer can fit a logistic growth model using what method?
+    - Time course data points for growth curves are obtained
+      automatically by Colonyzer.
+      - With the QFA R package this data can be fitted to a
+        ?generalised? logistic growth model by maximum likelihood
+        (although qfaBayes package is in development)
       - Heydari et al. 2016 use a Bayesian heirarchical approach to
         simultaneously fit population dynamics (logistic growth
         model) and genetic interaction.
@@ -178,8 +167,8 @@
 	- odeint - integrates a system of differential equations.
       - Bayesian inference
 	- Not sure how we go about this yet.
-	- But we would use pyMC or pySTAN. For pySTAN we would
-	have to rewrite the ode model in Stan but it could be faster.
+	- But we would use pyMC or pySTAN. For pySTAN we would have to
+          rewrite the ode model in Stan but it could be faster.
       - This is expected to take a long time so we need to find
         something else to do in the meantime
 	- Write up sections of the research in a report or in a blog
@@ -188,16 +177,18 @@
 	  - Will a linear dependence of development limit this sort of
             activity.
 	- Optimize and package code.
-	- Work on some other aspect such as testing experimental design.
-  - [ ] Assess the results and if needed Improve the model and
-    analysis. This will depend on whether we find an improved fit but
-    the following is likely to be considered:
+	- Work on some other aspect such as testing experimental
+          designs (see below).
+  - [ ] If needed Improve the model and analysis. This will depend on
+    whether we find an improved fit but the following is likely to be
+    considered:
     - Diffusion - We are using a simplified space-discretised 2d
       model of diffusion
       - Use a finer grid?
       - Use a 3d grid?
     - Competition vs signalling
       - Are we correctly describing nutrient dependent growth and
+        signalling?
     - Is the data in fact not dependent on competition or signalling?
       - Is growth actually independent?
       - Is there another factor which is introducing variance?
@@ -209,6 +200,10 @@
     effects.
     - For instance, compare spot and agar geometries and initial nutrient
       densities.
+    - Addjusting for the diagonals (would we have to scale diffusion
+      constants to account for the difference in length?) or just make
+      a finer square grid.
+    - Could look at a hexagonal array.
     - It may help to model diffusion accross agar height using a
       barcode experimental desing because we then remain in 2d.
   - [ ] Develop a model of competition in terms of parameters of the
@@ -229,6 +224,15 @@
         the way to genetic interaction measure?
   - [ ] Reanalyse telomere data using the modified logistic
     model in order to determine the effects on gene interaction.
+    - We could alternatively use a different measure of fitness, not
+      related to previous analyses, and just compare gene interactions
+      predicted by our competition model and the special case
+      (independence) of the same.
+    - The QFA R package contains fns for inferring genetic interaction
+      using the following tests for significange: mean/Students's t-test (preferable),
+      median/Mann-Whitney test (where there are issues with data
+      quality).
+    - iRVis: inteRactive Visualisation of finess comparisons.
   - [ ] Package the model in SBML. Conform to minimum information
     standards and publish in the biomodels database.
   - [ ] Document and package other analysis tools in python in order
