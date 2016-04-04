@@ -225,7 +225,9 @@
     - Fit this model to the raw timecourse data using the time course
       of nutrient fluxes found by first fitting the mass action
       kinetics model to the same data.
-  - [ ] Reanalyse telomere data with using the modified logistic
+      - Can this be done simultaneosly/hierarchically, possibly all
+        the way to genetic interaction measure?
+  - [ ] Reanalyse telomere data using the modified logistic
     model in order to determine the effects on gene interaction.
   - [ ] Package the model in SBML. Conform to minimum information
     standards and publish in the biomodels database.
