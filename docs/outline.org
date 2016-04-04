@@ -158,25 +158,73 @@
 	- Are models already available for diffusion which we could use?
     - The independent model is just a special case of the competition
       and signalling model with diffusion constants set to zero (If
-      discretized in a finer grid we would have to set boundaries).
-
+      discretized in a finer grid we would have to set boundaries at
+      the edge of each location).
   - [ ] Test the model by reanalysing telomere data from (ref),
     comparing the competition and independence models (a special case
     of the competition model), to determine the effect of competition
     on the experiments.
-    - Fitting model to data
-      - Data points are obtained automatically by Colonyzer.
-	- Colonyzer can fit a logistic growth model.
-  - [ ] Improve the model
-    - Diffusion: We are using a simplified discretised 2d model of diffusion
+    - Data points are obtained automatically by Colonyzer.
+      - Colonyzer can fit a logistic growth model using what method?
+      - Heydari et al. 2016 use a Bayesian heirarchical approach to
+        simultaneously fit population dynamics (logistic growth
+        model) and genetic interaction.
+    - Fitting model to data.
+      - If the model is written in SBML, how does this interface with python?
+      - Soliving the model.
+	- Constrain parameters with realistic values which are to
+          be determined/guessed or discovered in the literature.
+      - We will first fit our model for using a least squares method.
+	- odeint - integrates a system of differential equations.
+      - Bayesian inference
+	- Not sure how we go about this yet.
+	- But we would use pyMC or pySTAN. For pySTAN we would
+	have to rewrite the ode model in Stan but it could be faster.
+      - This is expected to take a long time so we need to find
+        something else to do in the meantime
+	- Write up sections of the research in a report or in a blog
+	- Analyse past results and develop the next model while the
+          current one is running.
+	  - Will a linear dependence of development limit this sort of
+            activity.
+	- Optimize and package code.
+	- Work on some other aspect such as testing experimental design.
+  - [ ] Assess the results and if needed Improve the model and
+    analysis. This will depend on whether we find an improved fit but
+    the following is likely to be considered:
+    - Diffusion - We are using a simplified space-discretised 2d
+      model of diffusion
+      - Use a finer grid?
+      - Use a 3d grid?
+    - Competition vs signalling
+      - Are we correctly describing nutrient dependent growth and
+    - Is the data in fact not dependent on competition or signalling?
+      - Is growth actually independent?
+      - Is there another factor which is introducing variance?
+    - Does the analysis allow capture of the variance present in the
+      data. c.f. (Addinall et al. 2011 &) Heydari et al. 2016 for an
+      explanation.
   - [ ] Compare competition effects in different experimental
     designs in order to design experiments which minimze competition
     effects.
     - For instance, compare spot and agar geometries and initial nutrient
       densities.
+    - It may help to model diffusion accross agar height using a
+      barcode experimental desing because we then remain in 2d.
   - [ ] Develop a model of competition in terms of parameters of the
     logistic model of population growth in oder to compare fitness
     measurements to previous studies.
+    - Adjust carying capacity (now time dependent) of the logistic
+      growth model to depend on the net amount of nutrients available
+      to each culture: ammount of nutrients already converted to dry
+      mass plus remaining nutrients in the location. Ammount of
+      nutrients starts at N0 and carrying capacity is normalized as
+      such.
+    - I have not thought about how to addapt the logistic growth model
+      to account for singalling yet.
+    - Fit this model to the raw timecourse data using the time course
+      of nutrient fluxes found by first fitting the mass action
+      kinetics model to the same data.
   - [ ] Reanalyse telomere data with using the modified logistic
     model in order to determine the effects on gene interaction.
   - [ ] Package the model in SBML. Conform to minimum information
