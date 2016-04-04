@@ -21,11 +21,11 @@
   - [X] Try refs (may need to use reftex)
   - [X] Add a spell checker to emacs
 
-* TODO Proposal [2/10]
+* TODO Proposal [3/10]
   - [X] Read refs
   - [ ] Add content from Conors notes
   - [X] Find images for Background
-  - [ ] Add refs to aims and images
+  - [X] Add refs to aims and images
   - [ ] Outline the Approach
   - [ ] Make a diagram/schematic of the model
   - [ ]	Make a Gantt chart / maybe just a rough one on paper
@@ -58,7 +58,7 @@
   - [ ] Should be S.M.A.R.T. - I think they are.
   - [X] Develop a model of competition for nutrients and/or signalling
     between cultures on a QFA agar gel.
-  - [X] Reanalyse telemere data from (ref), comparing the
+  - [X] Reanalyse telomere data from (ref), comparing the
     competition and independence models (a special case of the
     competition model), to determine the effect of competition on
     the experiments.
@@ -131,6 +131,58 @@
      - [ ] pyMC vs pySTAN for Bayesian inference. For pySTAN we would
        have to rewrite the ode model in Stan but it could be faster.
    - [ ] PACKAGING, SBML and MIRIAM
+
+
+  - [ ] Develop a model of competition for nutrients and/or signalling
+    between cultures on a QFA agar gel.
+    - Nutrient dependent growth
+      - Use deterministic mass action kinetics (already have model).
+    - Singal dependent growth
+      - Inhibiting
+      - Rate of colony growth in mass action kinetic model of nutrient
+        dependent growth reduces linearly up to some critical signal
+        concentration where growth stops.
+	- Here a yeast culture is inhibiting its own growth. Need to
+          investigate in the literature what are the mechanisms of
+          signalling and inhibition so that we can develop a
+          physically accurate model as this is just my first guess.
+    - Diffusion of nutrients and signal
+      - Split the agar into a grid and model diffusion rate as
+        lineraly dependent on the difference in the ammount of
+        nurients/signal between spot locations.
+      - This is a very simplified spatially-discretised 2d model of
+        diffusion. (Similar to that used in imaging but with sinks.)
+	- Is it accurate?
+	- Could we use a finer grid (perhaps hexagonal)?
+	- Is agar height important (3d grid)?
+	- Are models already available for diffusion which we could use?
+    - The independent model is just a special case of the competition
+      and signalling model with diffusion constants set to zero (If
+      discretized in a finer grid we would have to set boundaries).
+
+  - [ ] Test the model by reanalysing telomere data from (ref),
+    comparing the competition and independence models (a special case
+    of the competition model), to determine the effect of competition
+    on the experiments.
+    - Fitting model to data
+      - Data points are obtained automatically by Colonyzer.
+	- Colonyzer can fit a logistic growth model.
+  - [ ] Improve the model
+    - Diffusion: We are using a simplified discretised 2d model of diffusion
+  - [ ] Compare competition effects in different experimental
+    designs in order to design experiments which minimze competition
+    effects.
+    - For instance, compare spot and agar geometries and initial nutrient
+      densities.
+  - [ ] Develop a model of competition in terms of parameters of the
+    logistic model of population growth in oder to compare fitness
+    measurements to previous studies.
+  - [ ] Reanalyse telomere data with using the modified logistic
+    model in order to determine the effects on gene interaction.
+  - [ ] Package the model in SBML. Conform to minimum information
+    standards and publish in the biomodels database.
+  - [ ] Document and package other analysis tools in python in order
+    to distribute.
 
 ** Plan
    - This refers to the timescale of different parts of the project
