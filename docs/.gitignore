@@ -28,3 +28,4 @@ auto/
 *.pdf
 /images/
 _region_.tex
+*.html
