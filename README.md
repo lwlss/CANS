@@ -69,10 +69,5 @@ Output_Images contains analysed previews demonstrating success of automatic colo
 * Fit models to data (parameter inference) 
 * Compare inferred paramter values from competition model with values from regular QFA
 
-
-
-
-
-
-
-
+#### Links:
+* Universally Sloppy Parameter Sensitivities in Systems Biology Models  http://dx.doi.org/10.1371/journal.pcbi.0030189  
