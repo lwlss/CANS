@@ -22,9 +22,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.2248635"
-     inkscape:cx="303.77991"
-     inkscape:cy="304.07084"
+     inkscape:zoom="0.86610927"
+     inkscape:cx="175.29809"
+     inkscape:cy="3.7070807"
      inkscape:document-units="px"
      inkscape:current-layer="svg2"
      showgrid="false"
@@ -446,16 +446,6 @@
      style="opacity:0.5;fill:#00b0ff;stroke:#000000;stroke-width:3.48097837999999982;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:5;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;fill-opacity:1"
      sodipodi:type="arc" />
   <path
-     style="fill:none;stroke:#000000;stroke-width:0.95434064px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-     d="m 279.89495,253.3033 c 198.96786,9.04328 199.04567,9.04566 199.04567,9.04566"
-     id="path7986"
-     inkscape:connector-curvature="0" />
-  <path
-     style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-     d="m 160.01783,332.28193 297.19931,-0.38311"
-     id="path7988"
-     inkscape:connector-curvature="0" />
-  <path
      style="fill:none;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:url(#TriangleInL);marker-mid:none;marker-end:url(#TriangleOutL)"
      d="m 179.96081,752.36241 39.9369,0"
      id="path7990"
@@ -495,4 +485,22 @@
      d="M 446.28502,898.64692 353.71527,806.07743"
      id="path9397-1-8-7"
      inkscape:connector-curvature="0" />
+  <text
+     xml:space="preserve"
+     style="font-size:40.00001144px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+     x="225.936"
+     y="767.23419"
+     id="text10517"
+     sodipodi:linespacing="125%"><tspan
+       sodipodi:role="line"
+       id="tspan10519"
+       x="225.936"
+       y="767.23419"
+       style="font-size:48px;font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:FreeSerif;-inkscape-font-specification:FreeSerif Italic">C<tspan
+   style="font-size:48px;font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;baseline-shift:sub;font-family:FreeSerif;-inkscape-font-specification:FreeSerif Italic"
+   id="tspan10521">i</tspan> N<tspan
+   style="font-size:48px;font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;baseline-shift:sub;font-family:FreeSerif;-inkscape-font-specification:FreeSerif Italic"
+   id="tspan10523">i</tspan> S<tspan
+   style="font-size:48px;font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;baseline-shift:sub;font-family:FreeSerif;-inkscape-font-specification:FreeSerif Italic"
+   id="tspan10525">i</tspan></tspan></text>
 </svg>
