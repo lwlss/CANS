@@ -107,7 +107,7 @@
 	- [ ] Over normalization in Baryshnikova 2010
 	- [ ] Between Addinall2011 and Heydari2016
   - [ ] Inference of genetic interactions from fitness screening and telomeres
-** Approach
+** Approach [0/9]
   - [ ] Develop a model of competition for nutrients and/or signalling
     between cultures on a QFA agar gel.
     - Nutrient dependent growth
@@ -241,4 +241,3 @@
 ** Plan
    - This refers to the timescale of different parts of the project
      - Could create a Gantt chart
-

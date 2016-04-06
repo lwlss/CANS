@@ -1,7 +1,10 @@
 <?xml version="1.0"?>
 <project name="" company="" manager="" phase="" project-start="20160418T000000Z" mrproject-version="2" calendar="1">
   <properties/>
-  <phases/>
+  <phases>
+    <phase name="Model Development"/>
+    <phase name="Model Testing"/>
+  </phases>
   <calendars>
     <day-types>
       <day-type id="0" name="Working" description="A default working day"/>
@@ -28,7 +31,7 @@
         </predecessors>
       </task>
     </task>
-    <task id="4" name="Analyse experimental data" note="" work="806400" start="20160501T170000Z" end="20160529T170000Z" work-start="20160502T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-work">
+    <task id="4" name="Analyse data" note="" work="806400" start="20160501T170000Z" end="20160529T170000Z" work-start="20160502T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-work">
       <task id="5" name="Test for competition and signalling effects (important)" note="" work="201600" start="20160501T170000Z" end="20160508T170000Z" work-start="20160502T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-work">
         <predecessors>
           <predecessor id="1" predecessor-id="3" type="FS"/>
@@ -66,20 +69,30 @@
       <task id="13" name="QFA vs SGA" note="" work="201600" start="20160619T170000Z" end="20160626T170000Z" work-start="20160620T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-work">
         <predecessors>
           <predecessor id="1" predecessor-id="12" type="FS"/>
+          <predecessor id="1" predecessor-id="4" type="FS"/>
         </predecessors>
       </task>
     </task>
-    <task id="14" name="Writing and Distribution" note="" work="1612800" start="20160418T000000Z" end="20160821T170000Z" work-start="20160418T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-work">
-      <constraint type="must-start-on" time="20160711T000000Z"/>
-      <task id="15" name="Distribute models and code" note="" work="403200" start="20160626T170000Z" end="20160710T170000Z" work-start="20160627T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-work">
-        <predecessors>
-          <predecessor id="1" predecessor-id="9" type="FS" lag="1814400"/>
-        </predecessors>
-        <task id="16" name="Publish SBML models to BioModels database" note="" work="201600" duration="403200" start="20160626T170000Z" end="20160710T170000Z" work-start="20160627T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-duration"/>
-        <task id="17" name="Document and package Python analysis tools" note="" work="201600" duration="403200" start="20160626T170000Z" end="20160710T170000Z" work-start="20160627T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-duration"/>
+    <task id="14" name="Bonus" note="" work="0" start="20160626T170000Z" end="20160627T080000Z" work-start="20160627T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-work">
+      <predecessors>
+        <predecessor id="1" predecessor-id="11" type="FS"/>
+      </predecessors>
+      <task id="15" name="Three dimensional models of diffusion" note="" work="0" start="20160626T170000Z" end="20160627T080000Z" work-start="20160627T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-work">
+        <task id="16" name="Spatially-discretised" note="" work="0" start="20160626T170000Z" end="20160627T080000Z" work-start="20160627T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-work"/>
+        <task id="17" name="Continuous P.D.E" note="" work="0" start="20160626T170000Z" end="20160627T080000Z" work-start="20160627T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-work"/>
       </task>
-      <task id="18" name="Write blog posts" note="" work="0" duration="3628800" start="20160418T000000Z" end="20160821T170000Z" work-start="20160418T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-duration"/>
-      <task id="19" name="Write report" note="" work="1209600" duration="1209600" start="20160711T000000Z" end="20160821T170000Z" work-start="20160711T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-duration">
+    </task>
+    <task id="18" name="Writing and Distribution" note="" work="1612800" start="20160418T000000Z" end="20160821T170000Z" work-start="20160418T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-work">
+      <constraint type="must-start-on" time="20160711T000000Z"/>
+      <task id="19" name="Distribute models and code" note="" work="403200" start="20160626T170000Z" end="20160710T170000Z" work-start="20160627T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-work">
+        <predecessors>
+          <predecessor id="1" predecessor-id="8" type="FS" lag="1209600"/>
+        </predecessors>
+        <task id="20" name="Publish SBML models to BioModels database" note="" work="201600" duration="403200" start="20160626T170000Z" end="20160710T170000Z" work-start="20160627T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-duration"/>
+        <task id="21" name="Document and package python analysis tools" note="" work="201600" duration="403200" start="20160626T170000Z" end="20160710T170000Z" work-start="20160627T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-duration"/>
+      </task>
+      <task id="22" name="Write blog posts" note="" work="0" duration="3628800" start="20160418T000000Z" end="20160821T170000Z" work-start="20160418T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-duration"/>
+      <task id="23" name="Write report" note="" work="1209600" duration="1209600" start="20160711T000000Z" end="20160821T170000Z" work-start="20160711T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-duration">
         <constraint type="must-start-on" time="20160711T000000Z"/>
       </task>
     </task>
