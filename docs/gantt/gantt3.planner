@@ -1,0 +1,100 @@
+<?xml version="1.0"?>
+<project name="" company="" manager="" phase="" project-start="20160418T000000Z" mrproject-version="2" calendar="1">
+  <properties/>
+  <phases>
+    <phase name="Model Development"/>
+    <phase name="Model Testing"/>
+  </phases>
+  <calendars>
+    <day-types>
+      <day-type id="0" name="Working" description="A default working day"/>
+      <day-type id="1" name="Nonworking" description="A default non working day"/>
+      <day-type id="2" name="Use base" description="Use day from base calendar"/>
+    </day-types>
+    <calendar id="1" name="Default">
+      <default-week mon="0" tue="0" wed="0" thu="0" fri="0" sat="0" sun="0"/>
+      <overridden-day-types>
+        <overridden-day-type id="0">
+          <interval start="0800" end="1200"/>
+          <interval start="1300" end="1700"/>
+        </overridden-day-type>
+      </overridden-day-types>
+      <days/>
+    </calendar>
+  </calendars>
+  <tasks>
+    <task id="1" name="Develop initial model with a least squares fit" note="" work="403200" start="20160418T000000Z" end="20160424T170000Z" work-start="20160418T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-work">
+      <task id="2" name="Write code" note="" work="201600" start="20160418T000000Z" end="20160424T170000Z" work-start="20160418T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-work"/>
+      <task id="3" name="Generate artificial data and  test using a least squares fit" note="" work="201600" start="20160418T000000Z" end="20160424T170000Z" work-start="20160418T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-work"/>
+    </task>
+    <task id="4" name="Analyse data" note="" work="806400" start="20160425T000000Z" end="20160522T170000Z" work-start="20160425T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-work">
+      <predecessors>
+        <predecessor id="1" predecessor-id="1" type="FS"/>
+      </predecessors>
+      <task id="5" name="Test for competition and signalling effects (important)" note="" work="201600" start="20160425T000000Z" end="20160501T170000Z" work-start="20160425T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-work">
+        <constraint type="must-start-on" time="20160425T000000Z"/>
+      </task>
+      <task id="6" name="Assess first hypothesis" note="" work="0" start="20160501T170000Z" end="20160501T170000Z" work-start="20160501T170000Z" percent-complete="0" priority="0" type="milestone" scheduling="fixed-work">
+        <predecessors>
+          <predecessor id="1" predecessor-id="5" type="FS"/>
+        </predecessors>
+      </task>
+      <task id="7" name="Assess effect on fitness measures" note="" work="201600" start="20160501T170000Z" end="20160508T170000Z" work-start="20160502T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-work">
+        <predecessors>
+          <predecessor id="1" predecessor-id="5" type="FS"/>
+        </predecessors>
+      </task>
+      <task id="8" name="Develop method of Bayesian inference and reanalyse" note="" work="403200" start="20160509T000000Z" end="20160522T170000Z" work-start="20160509T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-work">
+        <constraint type="must-start-on" time="20160509T000000Z"/>
+      </task>
+    </task>
+    <task id="9" name="Develop model further" note="" work="403200" start="20160522T170000Z" end="20160605T170000Z" work-start="20160523T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-work">
+      <predecessors>
+        <predecessor id="1" predecessor-id="4" type="FS"/>
+      </predecessors>
+      <task id="10" name="If needed improve models of nutrient dependence and signalling" note="" work="201600" start="20160522T170000Z" end="20160529T170000Z" work-start="20160523T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-work"/>
+      <task id="11" name="Two-dimensional spatially-discretised model of diffusion" note="" work="201600" start="20160529T170000Z" end="20160605T170000Z" work-start="20160530T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-work">
+        <predecessors>
+          <predecessor id="1" predecessor-id="10" type="FS"/>
+        </predecessors>
+      </task>
+    </task>
+    <task id="12" name="Compare Experimental Designs" note="" work="403200" start="20160605T170000Z" end="20160619T170000Z" work-start="20160606T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-work">
+      <task id="13" name="Use MiniQFA to study dependence on agar height" note="" work="201600" start="20160605T170000Z" end="20160612T170000Z" work-start="20160606T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-work">
+        <predecessors>
+          <predecessor id="1" predecessor-id="11" type="FS"/>
+        </predecessors>
+      </task>
+      <task id="14" name="QFA vs SGA" note="" work="201600" start="20160612T170000Z" end="20160619T170000Z" work-start="20160613T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-work">
+        <predecessors>
+          <predecessor id="1" predecessor-id="13" type="FS"/>
+          <predecessor id="1" predecessor-id="4" type="FS"/>
+        </predecessors>
+      </task>
+    </task>
+    <task id="15" name="Writing and Distribution" note="" work="4896000" start="20160418T000000Z" end="20160821T170000Z" work-start="20160418T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-work">
+      <constraint type="must-start-on" time="20160711T000000Z"/>
+      <task id="16" name="Distribute models and code" note="" work="57600" start="20160605T170000Z" end="20160606T170000Z" work-start="20160606T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-work">
+        <predecessors>
+          <predecessor id="1" predecessor-id="9" type="FS"/>
+        </predecessors>
+        <task id="17" name="Publish SBML models to BioModels database" note="" work="28800" start="20160605T170000Z" end="20160606T170000Z" work-start="20160606T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-work"/>
+        <task id="18" name="Document and package python analysis tools" note="" work="28800" start="20160605T170000Z" end="20160606T170000Z" work-start="20160606T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-work"/>
+      </task>
+      <task id="19" name="Write report" note="" work="1209600" start="20160711T000000Z" end="20160821T170000Z" work-start="20160711T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-work">
+        <constraint type="must-start-on" time="20160711T000000Z"/>
+      </task>
+      <task id="20" name="Write blog posts" note="" work="3628800" start="20160418T000000Z" end="20160821T170000Z" work-start="20160418T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-work"/>
+    </task>
+    <task id="21" name="If time is available" note="" work="86400" start="20160418T000000Z" end="20160418T170000Z" work-start="20160418T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-work">
+      <task id="22" name="Three dimensional models of diffusion" note="" work="57600" start="20160418T000000Z" end="20160418T170000Z" work-start="20160418T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-work">
+        <task id="23" name="Spatially-discretised" note="" work="28800" start="20160418T000000Z" end="20160418T170000Z" work-start="20160418T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-work"/>
+        <task id="24" name="Continuous P.D.E" note="" work="28800" start="20160418T000000Z" end="20160418T170000Z" work-start="20160418T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-work"/>
+      </task>
+      <task id="25" name="Develop a Bayesian heirarchical model" note="" work="28800" start="20160418T000000Z" end="20160418T170000Z" work-start="20160418T080000Z" percent-complete="0" priority="0" type="normal" scheduling="fixed-work"/>
+    </task>
+  </tasks>
+  <resource-groups/>
+  <resources/>
+  <allocations/>
+</project>
