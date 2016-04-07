@@ -1,52 +1,51 @@
 
 \section{Aims}
 \label{sec:aims}
-
-
 Quantitative fitness analysis (QFA) is a method for inferring the
-fitness of microbial genetic variants from their growth curves and can be
-used for genome-wide screening of genetic interaction or drug response
-(see \citet{Addinall2008,Addinall2011,Lawless2010,Banks2012} (drug
-ref)). When performed using a high-throughput protocol, growth curves are
-automatically captured for mixed arrays of typically 384 independent
-genetic strains grown on solid agar. There is evidence, from previous
-QFA experiments (ref), that growth of cultures is affected by
-competition for nutrients and/or signalling between cultures.
-An analysis by \citet{Baryshnikova2010}, of data obtained using synthetic
-genetic array (SGA), an alternative procedure also using a solid
-agar array, attempts to normalise for systematic variation in growth
-curve observations, which may including variation from competition and
-signalling effects, using non-mechanistic statistical techniques aimed
-at improving the correlation between repeats of identical mutant
-strains at different locations. (Could mention advantages
-of the Bayesian approach of \citet{Heydari2016} from a statistical and
-computational perspective.)
+fitness of microbial cultures from their growth curves and can be used
+for genome-wide screening of genetic interaction or drug response (see
+\citet{Addinall2008,Addinall2011,Lawless2010,Banks2012} (drug
+ref)). In QFA, cultures are grown on solid agar plates. When performed
+using a high-throughput protocol, growth curves are automatically
+captured for mixed arrays of typically 384 (independent genetic
+strains)/(cultures). It is possible that growth curves are affected by
+competition for nutrients and/or signalling between cultures which is
+not accounted for in past analyses of QFA data.
 
-This project aims instead to account for competition and signalling
-mechanistically in order to learn more about the sources of systematic
-variation in QFA and to develop experimental designs and analyses for
-dealing with them. Specifically, the project aims to determine whether
+An analysis by \citet{Baryshnikova2010}, of data obtained using
+1536-pin synthetic genetic array (SGA), an alternative procedure also
+using an array of cultures on solid agar, attempts to normalise for
+systematic variation in growth curve observations, which may include
+variation from competition and signalling effects, using statistical
+techniques aimed at improving the correlation between repeats of
+identical mutant strains at different locations. In order to learn
+more about the sources of systematic variation in both QFA and SGA
+experiments, and to develop analyses and experimental designs for
+dealing with them, this project aims to account for competition and
+signalling mechanistically. We will study unpublished QFA and SGA data
+for the model organism \textit{Saccharomyces cerevisiae}, also studied
+by \citet{Addinall2008,Addinall2011} and \citet{Baryshnikova2010}.  We
+aim to package all models and analysis tools so that they may be used
+in future QFA and SGA studies or to reanalyse data from past
+studies. We also aim to determine what effect accounting for
+competition and signalling will have on measures of genetic
+interaction strength.
+
+
+
+\subsection{Hypotheses}
+This project aims to determine whether
 the following hypotheses are correct:
 \begin{itemize}
-\item Growth of colonies in QFA experiments is affected by competition
-  and/or signalling.
-\item By accounting mechanistically for competition and signalling effects, it
-  will be possible to design experiments which minimise these effects.
-\item Reanalysis of QFA data from \citet{Addinall2011}, using a model accounting for
-  competition and signalling effects, will better predict genetic interaction
-  strength and (may also) provide evidence of new genetic interactions.
+\item Nutrient and/or signal molecules diffuse through agar at a rate
+  sufficient to induce competition between adjacent cultures.
+  % Growth of cultures in QFA and SGA experiments is affected by competition for nutrients and/or signalling.
+\item By accounting mechanistically for competition effects, it will
+  be possible to design analyses and experiments which minimise them.
+\item Accounting for competition effects will improve the power to
+  infer genetic interactions in genome wide screens.
 \end{itemize}
 
-
-Motivated by the link between telomere shortening, ageing, and cancer
-(refs?), \citet{Addinall2011} study the genetic interactions of
-\textit{cdc13} which functions in telomere capping in the model
-organism \textit{Saccharomyces cerevisiae}. If the power to predict
-genetic interactions is improved in the reanalysis of data from
-\citet{Addinall2011}, this may highlight new genes involved in these
-processes and will also be relevant for investigations of other types
-of genetic interaction and investigations using other types of
-microbial organism.
 
 
 %%% Local Variables:
