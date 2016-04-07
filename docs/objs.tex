@@ -1,33 +1,25 @@
 
 \section{Objectives}
 \label{sec:objectives}
-
+The project can be broken down into the following set of objectives:
 \begin{itemize}
-\item Develop a model of colony/culture growth (on QFA agar) which accounts for
-  competition for nutrients and/or signalling between spots.
-\item Reanalyse QFA data from (ref) (which investigates genetic
-  interactions relating to telomere function in yeast), comparing the
-  competition model with the independence model (a special case of the
-  competition model), to determine how much competition affects colony
-  growth.
-\item Compare competition effects in different experimental designs in
-  order to design experiments which minimise these effects. (For
-  instance, compare spot and agar geometries and initial nutrient
-  densities. Also look at barcode design to investigate the effect of
-  agar height.)
-\item Develop a model of competition in terms of parameters of the
-  logistic model of population growth in oder to compare fitness
-  measures which account for competition, to measures from previous
-  studies which assume independence.
-\item Using the competition-adjusted logistic model, reanalyse the
-  data from (ref) in order to determine whether modelling
-  competition has a significant effect on interaction score and
-  whether new interactions can be discovered.
-\item Package the model in SBML, conform to minimum information
-  standards, and publish in the biomodels database.
-\item Document, package, and distribute other models and analysis
-  tools (most likely written in python). Conform to minimum
-  information standards.
+\item Develop models of culture growth on solid agar which account for
+  competition for nutrients and signalling between cultures.
+\item Analyse experimental data to determine whether competition for nutrients and signalling
+  affects colony growth. If so, determine size of the effect on different fitness measures.
+\item Compare competition and signalling effects in different
+  experimental designs in order to design experiments which minimise
+  these effects. For instance, compare culture and agar geometries,
+  initial culture and nutrient densities, and the effect of randomisation. Also
+  look at MiniQFA data to investigate the effect of diffusion across agar height.
+\item Develop a model of competition and signalling in terms of
+  parameters of the logistic model of population growth in oder to
+  compare fitness measures to measures from previous studies which
+  assume independence.
+\item Continuously package SBML models and Python analysis tools so
+  that they may be used in subsequent stages of the project and
+  eventually by other researchers. Conform to minimum information standards so
+  that SBML models may be published in the BioModels database.
 \end{itemize}
 
 %%% Local Variables:
