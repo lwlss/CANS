@@ -222,8 +222,8 @@
       kinetics model to the same data.
       - Can this be done simultaneosly/hierarchically, possibly all
         the way to genetic interaction measure?
-  - [ ] Reanalyse telomere data using the modified logistic
-    model in order to determine the effects on gene interaction.
+  - [ ] Reanalyse telomere data using the modified logistic model in
+    order to determine the effects on gene interaction.
     - We could alternatively use a different measure of fitness, not
       related to previous analyses, and just compare gene interactions
       predicted by our competition model and the special case
