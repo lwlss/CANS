@@ -1,0 +1,2 @@
+* TODO sections [1/1]
+ - [X] Talk about approaches to dealing with boundary conditions.
