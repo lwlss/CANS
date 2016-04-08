@@ -16,7 +16,7 @@ We will describe nutrient dependent growth at each location using mass action ki
   C + N \xrightarrow[]{r_{i}} 2C,\\
 \end{equation}
 where \(r_{i}\) is the rate constant of conversion at location \(i\).
-As a first approach, assuming that the number of cells is continuous, we will incorporate the effect of signal molecules on growth and the diffusion of both nutrient and signal molecules using the following ODEs:
+As a first approach, assuming that the number of cells is continuous, we will incorporate the effect of signal molecules on growth and the diffusion of both nutrient and signal molecules using the following ODEs (CANS model):
 \begin{subequations}
   \label{eq:2}
   \begin{align}
@@ -25,7 +25,7 @@ As a first approach, assuming that the number of cells is continuous, we will in
     \frac{dS_{i}}{dt}& = \alpha C_{i} - k_{s}\sum_{j}(S_{i} - S_{j}),
   \end{align}
 \end{subequations}
-where, \(j\) indicates the closest neighbours, \(k_{n}\) and \(k_{s}\) are nutrient and signal diffusion constants, \(\alpha\) is the rate of secretion of signal, and \(\beta\) is a constant for the effect of signal on culture population. Alternative models for signalling effect could be used; initially, we have chosen to use the simplest. Setting diffusion constants to zero reduces \ref{eq:2} to the independence model. We may also study the effects of signalling and competition for nutrients separately by setting other parameters to zero. If necessary, diagonal neighbours could be incorporated into this model by adding or scaling diffusion constants. In section~\ref{sec:dev-mod-further}, we discuss the possibility of using finer-grain spatially-discretised or continuous models of diffusion.
+where, \(j\) indicates the closest neighbours, \(k_{n}\) and \(k_{s}\) are nutrient and signal diffusion constants, \(\alpha\) is the rate of secretion of signal, and \(\beta\) is a constant for the effect of signal on culture population. Alternative models of signalling effect could be used, depending on the mechanism of signalling under investigation (see background section); initially, we have chosen to use the simplest modelling approach. Setting diffusion constants to zero reduces \ref{eq:2} to the independence model. We may also study the effects of signalling and competition for nutrients separately by setting other parameters to zero. If necessary, diagonal neighbours could be incorporated into this model by adding or scaling diffusion constants. In section~\ref{sec:dev-mod-further}, we discuss the possibility of using finer-grain spatially-discretised or continuous models of diffusion.
 % \begin{equation}
 %   \label{eq:3}
 %   \frac{dC_{i}}{dt}& = r_{i}N_{i}C_{i}(1 - \frac{S_{i}}{S_{crit}})
@@ -39,13 +39,56 @@ where, \(j\) indicates the closest neighbours, \(k_{n}\) and \(k_{s}\) are nutri
 \end{Figure}
 
 
-Models will be written in SBML (ref), using SBML shorthand (ref), so that they may eventually be published in the BioModels database (ref) and reused by the scientific community. This will require conformation to the minimum information standard MIRIAM (ref). (Simulation experiments should also conform to MIASE (ref).) We will write code for the rest of the project in Python as this has several advantages: it is used widely by the scientific community, has libraries which will be of use to us, and related tools such as Colonyzer (ref) are already written in Python. To interface SBML models with Python we will use the libSBMLO library \citep{Bornstein2008}. ODEs will be solved using odeint from the SciPy library \citep{SciPy}. We will use git as version control and use GitHub as a remote repository to allow collaboration and so that tools may eventually be released publicly.
+Models will be written in SBML (ref), using SBML shorthand (ref), so
+that they may eventually be published in the BioModels database (ref)
+and reused by the scientific community. This will require conformation
+to the minimum information standard MIRIAM (ref). (Simulation
+experiments should also conform to MIASE (ref).) We will write code
+for the rest of the project in Python as this has several advantages:
+it is used widely by the scientific community, has libraries which
+will be of use to us, and related tools such as Colonyzer (ref) are
+already written in Python. To interface SBML models with Python we
+will use the libSBMLO library \citep{Bornstein2008}. ODEs will be
+solved using odeint from the SciPy library \citep{SciPy}. We will use
+git as version control and use GitHub as a remote repository to allow
+collaboration and so that tools may eventually be released publicly.
 
-It is anticipated that solving sets of ODEs for typically 384 cultures in QFA and 1536 cultures in SGA will be take a long time. Therefore, while testing, we will simulate smaller sets of artificial data from the ODE models and attempt to fit these. We will also incorporate unittesting into the development to try to ensure that the code will still work when scaled up to larger arrays used in experiments.
+It is anticipated that solving sets of ODEs for typically 384 cultures
+in QFA and 1536 cultures in SGA will be take a long time. Therefore,
+while testing, we will simulate smaller sets of artificial data from
+the ODE models and attempt to fit these. We will also incorporate
+unittesting into the development to try to ensure that the code will
+still work when scaled up to larger arrays used in experiments.
 
 \subsection{Analyse Experimental Data}
 \label{sec:analyse-data}
 We have access to unpublished QFA and SGA data for the model organism \textit{S. Cerevisiae}. Some data (Figure~\ref{fig:gaps}), with uncultured gaps, is specifically designed for the study of competition.
+
+When dealing with experimental data we must also consider how to treat
+cultures around the edge of the agar. These have access to
+proportionally more nutrients because there is a large area at the
+edge of the plate which is unoccupied. In photographic images, these
+sites are also affected by reflections from plate walls which cause
+errors in intensity measurements, a proxy for cell density, which
+cannot be fully corrected for by Colonyzer ?\citep{Lawless2010}?. In
+experiments, an identical culture is grown in these locations and the
+results are discarded (see refs). We may choose to adjust for the
+increased nutrient availability and include these sites in our model
+and analysis. This would introduce a systematic error for sites close
+to the plate edges and is an argument for the use of repeats and
+randomisation of location (see \ref{sec:comp-exper-designs}). A
+simpler modelling approach is to discard the first outer layer
+entirely from the model and the second outer layer from the final
+results. However, this is undesirable as it reduces the amount of
+information that is gathered from each plate without fully removing
+the systematic error.
+
+\begin{Figure}
+  \label{fig:gaps}
+  \centering
+  \includegraphics[width=\linewidth]{DLR00012647-2009-07-02_23-12-49}
+  \captionof{figure}{An agar with locations left empty (``gaps'') designed to exhibit effects of competition and signalling.}
+\end{Figure}
 
 
 \subsection{Develop Model Further}
@@ -75,15 +118,13 @@ We have access to unpublished QFA and SGA data for the model organism \textit{S.
 
 
 
-\begin{Figure}
-  \centering
-  \includegraphics[width=\linewidth]{gaps}
-  \captionof{figure}{An agar, with locations left empty (``gaps''), designed to exhibit effects of competition and signalling.}
-\end{Figure}
+
+
 
 \begin{Figure}
+  \label{stripes}
   \centering
-  \includegraphics[width=\linewidth]{stripes}
+  \includegraphics[width=\linewidth]{K000343_027_001_2015-02-21_19-38-08}
   \captionof{figure}{A miniQFA agar in which lines of locations (``stripes'') are left uncultured. We can use a similar experimental setup, with uniform cultures in one dimension, to study diffusion across agar height in only two dimensions.}
 \end{Figure}
 
