@@ -166,15 +166,18 @@ agar height we will need to develop a two-dimensional
 spatially-discretised model of diffusion (section
 \ref{sec:dev-mod-further}.
 
-We will also determine the effect of competition on different measures
-of fitness discussed in section \ref{sec:genetic-interaction}. In
-previous studies, which use fits of the (independent) logistic growth
-model (refs), we believe that fitness estimates based on the carrying
-capacity \(Z\) might be more affected by competition and signalling
-than those based on the rate constant \(r\).  To asses this
-possibility, an initial attempt to model competition for nutrients in
-terms of parameters of the logistic growth model uses a time dependent
-carrying capacity,
+We will also determine the effect of competition on the different
+measures of fitness discussed in section
+\ref{sec:genetic-interaction}. In previous studies, which use fits of
+the (independent) logistic growth model (refs), fitness estimates
+based on carrying capacity \(Z\) might be more affected by competition
+and signalling than those based on rate constant \(r\). This is
+because gradients in nutrient and signal density will likely be
+greater towards the end of growth curves, after the exponential growth
+phase, when cultures are larger and have grown for longer. To asses
+this possibility, we initially attempt to model competition for
+nutrients in terms of parameters of the logistic growth model using a
+time dependent carrying capacity,
 \begin{equation}
   \label{eq:5}
   Z_{i}(t) = Z_{0,i}\left(\frac{N_{0,i} + \Delta N_{i}(t)}{N_{0,i}}\right),
@@ -182,52 +185,61 @@ carrying capacity,
 where \(Z_{0}\) is the carrying capacity under the assumption of
 independence, and is modified by the ratio of net nutrients available
 at time \(t\) to the initial amount of nutrients available under the
-assumption of independence \(N_{0}\). In this model, rate constants
-\(r_{i}\) in \ref{eq:1} are unchanged. To fit this model to data, we
-would first need to find \(\Delta N_{i}(t)\), the integral of the
-second term in \ref{eq:3}b, by fitting a nutrient only version of
-\ref{eq:3}. It would take further work to find exact relationships
-between parameters of \ref{eq:1} and \ref{eq:3}. ?Conor, you said you
-might have done this previously?  ?Also, is what I have suggested
-above sensible?
+assumption of independence \(N_{0}\). In this model, the form of rate
+constants \(r_{i}\) in \ref{eq:1} is unaltered. Before fitting this
+model to data, we would first need to find \(\Delta N_{i}(t)\), the
+integral of the second term in \ref{eq:3}b, by fitting a nutrient only
+version of \ref{eq:3}. It would take further work to find exact
+relationships between parameters of \ref{eq:1} and \ref{eq:3} and to
+include signalling in the model. ?Conor,
+you said you might have done this previously?  ?Also, is what I have
+suggested above sensible?
 
 
 \subsection{Develop Model Further}
 \label{sec:dev-mod-further}
-If inaccurate consider a different signal for instance. If our first
-approach to modelling signal does not fit the data but we suspect that
-an effect still exists we may try another simple model such as,
+If we find that our initial CANS model offers no improvement over the
+independent model, or is in some other way inaccurate, we could
+consider improving the model in several ways. For instance, we may
+propose a different model of signalling effect and instead model
+culture growth rate as,
 \begin{equation}
   \label{eq:6}
   \frac{dC_{i}}{dt} = r_{i}N_{i}C_{i}\left(1 - \frac{S_{i}}{S_{crit}}\right),\\
 \end{equation}
 where \(S_{crit}\) is some critical concentration of signal above
-which cultures will not grow. We must however be careful to avoid
-over-fitting by adding too much complexity to our model when we are
-unsure of the underlying mechanism.
+which cultures do not grow. We must, however, be careful to avoid
+adding too much complexity to models when we are unsure of the
+underlying mechanism as this could result in over-fitting.
 
 We may also model diffusion more realistically, and incorporate
 interactions between diagonal neighbours, using a
 spatially-discretised model of diffusion with a finer grid (see
-Figure~\ref{fig:grid}). We will begin using a two-dimensional model as
+Figure~\ref{fig:grid}). We would begin using a two-dimensional model as
 this is simpler. Validating against data from miniQFA
 (Figure~\ref{fig:stripes}), Figure~\ref{fig:height_dependence}
 (middle) illustrates how we may remain in two-dimensions and
-investigate how diffusion varies across agar height. We shall do this
+investigate how diffusion varies across agar height. We should do this
 for different agar geometries, varying \(d\) and \(w\) in
 Figure~\ref{fig:exp_vars}. If height dependence is found to be
 unimportant, we may apply a two-dimensional grid as in
-Figure~\ref{fig:grid}. Otherwise, we will have to use a three
+Figure~\ref{fig:grid}. Otherwise, we would have to use a three
 dimensional model of diffusion. It may suffice to model nutrient
 diffusion in three-dimensions and signal diffusion in only
 two-dimensions, as nutrients are assumed to be distributed evenly
 throughout the agar at time zero, whereas signal molecules will be
-secreted by cultures at the agar surface as they grow. We could also
+secreted by cultures growing at the agar surface. We could also
 consider using a continuous PDE model of diffusion, although this is
 ?likely to take more computational time? and be more difficult to
 implement. Because of the generality of the problem, it is
 possible that computational models of diffusion already exist
-publicly, and we will explore the possibility of using them.
+publicly, and we would explore the possibility of using them.
+
+We may also remove either signalling or competition for nutreints from
+our model entirely if no effect is found. Ultimately, if neither effect
+is discovered we may reject our initial hypothesis and accept that
+growth is independent.
+
 
 \begin{Figure}
   \centering
@@ -271,7 +283,7 @@ systematic error.
   \captionof{figure}{A miniQFA agar in which lines of locations
     (``stripes'') are left uncultured. We can use a similar
     experimental setup, with uniform cultures in one dimension, to
-    study diffusion across agar height in only two dimensions.}
+    study diffusion at different agar heights in only two dimensions.}
   \label{fig:stripes}
 \end{Figure}
 
