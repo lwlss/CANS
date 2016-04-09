@@ -16,11 +16,12 @@ Cultures in QFA and SGA agars are arranged in a square array, each
 culture having eight neighbours with which they could conceivably
 interact with directly. Initially, we will model diffusion between
 only the four closest neighbours, in the vertical and horizontal
-directions (darker blue circles in Figure~\ref{fig:simple_model}).  We
+directions (darker blue circles in
+Figure~\ref{fig:simple_model}). Assuming a well stirred mixture, we
 will describe nutrient dependent growth at each location using mass
 action kinetics and the following reaction equation:
 \begin{equation}
-  \label{eq:1}
+  \label{eq:2}
   C + N \xrightarrow[]{r_{i}} 2C,\\
 \end{equation}
 where \(r_{i}\) is the rate constant of conversion at location \(i\).
@@ -29,7 +30,7 @@ we will incorporate the effect of signal molecules on growth and the
 diffusion of both nutrient and signal molecules using the following
 ODEs (CANS model):
 \begin{subequations}
-  \label{eq:2}
+  \label{eq:3}
   \begin{align}
     \frac{dC_{i}}{dt}& = r_{i}N_{i}C_{i} - \beta S_{i},\\
     \frac{dN_{i}}{dt}& = - r_{i}N_{i}C_{i} - k_{n}\sum_{j}(N_{i} - N_{j}),\\
@@ -43,7 +44,7 @@ signal on culture population. Alternative models of signalling effect
 could be used, depending on the mechanism of signalling under
 investigation (see background section); initially, we have chosen to
 use the simplest modelling approach. Setting diffusion constants to
-zero reduces \ref{eq:2} to the independence model. We may also study
+zero reduces \ref{eq:3} to the independence model. We may also study
 the effects of signalling and competition for nutrients separately by
 setting other parameters to zero. If necessary, diagonal neighbours
 could be incorporated into this model by adding or scaling diffusion
@@ -51,7 +52,7 @@ constants. In section~\ref{sec:dev-mod-further}, we discuss the
 possibility of using finer-grain spatially-discretised or continuous
 models of diffusion.
 % \begin{equation}
-%   \label{eq:3}
+%   \label{eq:4}
 %   \frac{dC_{i}}{dt}& = r_{i}N_{i}C_{i}(1 - \frac{S_{i}}{S_{crit}})
 % \end{equation}
 
@@ -118,19 +119,19 @@ fitting the independent logistic growth model and there is development
 underway of a qfaBayes package (ref) which will carry out a Bayesian
 inference of parameters of the same model. We plan to develop a method
 for Bayesian inference using the CANS model which will account for our
-prior knowledge about parameters (?from the independent model?)/the
-distributions of parameters (?any other advantages?) (?and allow us to
-conduct model comparison?). In an analysis of high-throughput QFA data
-from a genetic interaction study by \citet{Addinall2011},
-\citet{Heydari2016} use a Bayesian hierarchical model which mirrors
-the exerimental structure (from the time-point to population level)
-and simultaneously estimates growth parameters and genetic interaction
-strength by sharing information between levels. This approach accounts
-for differences in replicate fitness variances between different
-mutant strains which cannot be efficiently factored into statistical
-analyses \citep{Heydari2016}. When looking at the most significant
-genetic interactions, for the increased computational time that it
-takes (4 weeks vs 3 hours), this analysis does not offer a significant
+prior knowledge/?belief? about parameters distributions (?any other
+advantages?) (?and allow us to conduct model comparison?). In an
+analysis of high-throughput QFA data from a genetic interaction study
+by \citet{Addinall2011}, \citet{Heydari2016} use a Bayesian
+hierarchical model which mirrors the exerimental structure (from the
+time-point to population level) and simultaneously estimates growth
+parameters and genetic interaction strength by sharing information
+between levels. This approach accounts for differences in replicate
+fitness variances between different mutant strains which cannot be
+efficiently factored into statistical analyses
+\citep{Heydari2016}. When looking at the most significant genetic
+interactions, for the increased computational time that it takes (4
+weeks vs 3 hours), this analysis does not offer a significant
 advantage over an earlier statistical analysis carried out by
 \citet{Addinall2011}. However, \citet{Heydari2016} do identify weakly
 interacting genes for which there is no previous evidence, and a
@@ -165,7 +166,28 @@ agar height we will need to develop a two-dimensional
 spatially-discretised model of diffusion (section
 \ref{sec:dev-mod-further}. We will also determine the effect of
 competition on different measures of fitness discussed in section
-\ref{sec:genetic-interaction}.
+\ref{sec:genetic-interaction}. (r and Z)
+
+An initial attempt to model competition for nutrients in terms of
+parameters of the logistic growth model uses a time dependent
+carrying capacity,
+\begin{equation}
+  \label{eq:5}
+  K_{i}(t) = K_{0,i}\left(\frac{N_{0} + \Delta N_{i}(t)}{N_{0}}\right),
+\end{equation}
+where \(K_{0}\) is the carrying capacity under the assumption of
+independence and is modified by the ratio of net nutrients available
+to the culture at time \(t\) to the initial amount of nutrients
+available under the assumption of independence. In this model, rate
+constants \(r_{i}\) in \ref{eq:1} are unaffected. \(\Delta N_{i}(t)\),
+the integral of the second term in \ref{eq:3}b, would need to be found
+first, by fitting a nutrient only version of \ref{eq:3}, before being
+used to fit \ref{eq:5}. It would take further work to find exact
+relationships between parameters of \ref{eq:1} and \ref{eq:3}. ?Conor,
+you said you might have done this previously? ?Also, is what I have
+done above sensible?
+
+
 \subsection{Develop Model Further}
 \label{sec:dev-mod-further}
 
