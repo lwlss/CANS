@@ -40,7 +40,8 @@ ODEs (CANS model):
 where, \(j\) indicates the closest neighbours, \(k_{n}\) and \(k_{s}\)
 are nutrient and signal diffusion constants, \(\alpha\) is the rate of
 secretion of signal, and \(\beta\) is a constant for the effect of
-signal on culture population. Alternative models of signalling effect
+signal on culture population. ?do we assume no cell death as we can
+detect dead cells on the agar? Alternative models of signalling effect
 could be used, depending on the mechanism of signalling under
 investigation (see background section); initially, we have chosen to
 use the simplest modelling approach. Setting diffusion constants to
@@ -62,7 +63,6 @@ models of diffusion.
   \captionof{figure}{Schematic of simple modelling approach.}
   \label{fig:simple_model}
 \end{Figure}
-
 
 Models will be written in SBML (ref), using SBML shorthand (ref), so
 that they may eventually be published in the BioModels database (ref)
@@ -107,6 +107,9 @@ possibly allowing it to propagate further.
 
 \subsection{Analyse Experimental Data}
 \label{sec:analyse-data}
+
+List of strains of known fitness??
+
 We have access to unpublished QFA and SGA data for the model organism
 \textit{S. Cerevisiae}. Some data (Figure~\ref{fig:gaps}), with vacant
 gaps, is specifically designed for the study of
@@ -152,7 +155,6 @@ not?).
   \label{fig:gaps}
 \end{Figure}
 
-
 If we fail to discover competition or signalling effects by fitting
 the CANS model, we may need to improve aspects of our modelling
 approach (see section \ref{sec:dev-mod-further}), study different
@@ -194,7 +196,6 @@ relationships between parameters of \ref{eq:1} and \ref{eq:3} and to
 include signalling in the model. ?Conor,
 you said you might have done this previously?  ?Also, is what I have
 suggested above sensible?
-
 
 \subsection{Develop Model Further}
 \label{sec:dev-mod-further}
@@ -240,7 +241,6 @@ our model entirely if no effect is found. Ultimately, if neither effect
 is discovered we may reject our initial hypothesis and accept that
 growth is independent.
 
-
 \begin{Figure}
   \centering
   \includegraphics[width=\linewidth]{square_array_grid}
@@ -256,14 +256,23 @@ growth is independent.
   \label{fig:height_dependence}
 \end{Figure}
 % Could model movement of vertical or movement across it.
+
 \subsection{Compare Experimental Designs}
 \label{sec:comp-exper-designs}
 
 If competition is present, without randomisation of culture location,
-repeated observations may lead to overconfidence in fitness
-estimates. As discussed in (sec), difficulties in measuring growth curves
-for cultures at the agar boundaries would introduce a further
-systematic error.
+repeated observations of growth curve may lead to overconfidence in
+fitness estimates. As discussed in section~\ref{sec:initial_model}),
+difficulties in measuring growth curves for cultures at the agar
+boundaries would introduce a further systematic error. We will compare
+growth parameters and fitness measures estimated from fits of the
+competition and independence models for repeats with and without
+randomisation and expect to find closer agreement between models when
+randomisation is used. ?Or do we just do this using simulations? In
+the case that the competition model is too slow to use in analysis of
+large sets of data from high-throughput experiments, we still will be
+able to determine how large a reduction in error can be achieved
+through randomisation just using the independence model.
 
 \begin{Figure}
   \centering
@@ -272,10 +281,19 @@ systematic error.
   \label{fig:exp_vars}
 \end{Figure}
 
-
-
-
-
+If time allows, we also wish to compare differences in competition and
+signalling effect between QFA and SGA designs. We can vary some of the
+parameters shown in Figure~\ref{fig:exp_vars}, particularly looking at
+\(\rho_{0}\) the initial concentration of cells, \(d\) the distance
+between cultures, and \(w\) the diameter of cultures. For SGA, we also
+have to consider that the diameter of cultures changes with time (and,
+rather than light intensity as in QFA, is our proxy for culture
+density) and account for this in our models. size of arrays and normalizing. Here
+simulations may have a beneffit as they would allow us to vary only
+one variable at a time. It is probaly of more
+It is cheaper to use gells with a higher initial nutrient density
+\(n_{0}\), but this has the drawback that cultures grow faster and
+cannot be observed for as long which increases error in meaurements.
 
 \begin{Figure}
   \centering
