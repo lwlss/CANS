@@ -7,7 +7,7 @@
 
 Figure~\ref{fig:simple_model} shows a schematic of our initial
 approach to modelling (nutrient dependent growth with nutrient and
-signal diffusion).  Each culture on the agar is given a label, \(i\),
+signal diffusion). Each culture on the agar is given a label, \(i\),
 and has three variables associated with it: one observed variable,
 \(C_{i}\), the amount of cells in the culture at location \(i\), and
 two hidden variables, \(N_{i}\), the amount of nutrients at location
@@ -261,8 +261,8 @@ growth is independent.
 \label{sec:comp-exper-designs}
 
 If competition is present, without randomisation of culture location,
-repeated observations of growth curve may lead to overconfidence in
-fitness estimates. As discussed in section~\ref{sec:initial_model}),
+repeat observations may lead to overconfidence in fitness
+estimates. As discussed in section~\ref{sec:initial_model}),
 difficulties in measuring growth curves for cultures at the agar
 boundaries would introduce a further systematic error. We will compare
 growth parameters and fitness measures estimated from fits of the
@@ -281,19 +281,36 @@ through randomisation just using the independence model.
   \label{fig:exp_vars}
 \end{Figure}
 
-If time allows, we also wish to compare differences in competition and
-signalling effect between QFA and SGA designs. We can vary some of the
-parameters shown in Figure~\ref{fig:exp_vars}, particularly looking at
-\(\rho_{0}\) the initial concentration of cells, \(d\) the distance
-between cultures, and \(w\) the diameter of cultures. For SGA, we also
-have to consider that the diameter of cultures changes with time (and,
-rather than light intensity as in QFA, is our proxy for culture
-density) and account for this in our models. size of arrays and normalizing. Here
-simulations may have a beneffit as they would allow us to vary only
-one variable at a time. It is probaly of more
-It is cheaper to use gells with a higher initial nutrient density
-\(n_{0}\), but this has the drawback that cultures grow faster and
-cannot be observed for as long which increases error in meaurements.
+If time allows, we wish to compare differences in CANS effects
+between QFA and SGA designs. To do this we change the following variables:
+\(\rho_{0}\), the initial concentration of cells, \(d\), the distance
+between cultures, and \(w\), the diameter of cultures (see
+Figure~\ref{fig:exp_vars}). For SGA, we also have to consider that the
+diameter/area of cultures changes with time and account for this in
+our models. In many SGA studies, culture area, rather than integrated
+optical density (IOD), as in QFA, is used as a proxy for culture
+density. \citet{Lawless2010} found that direct area measurements are
+more noisy than IOD measurements and provide a worse fit to the
+logistic model, introducing a bias to our data. Using
+Colonyzer, we would instead take IOD measurements of SGA plates. We
+should also account for the statistical advantage of SGA, in that
+roughly five times more cultures that can be grown on SGA plates,
+allowing for more repeats.
+
+Simulations may be of use in comparing experimental variables, to study
+the effect of one variable at a time. However, it is of greater
+priority to compare SGA and QFA as they are currently performed,
+because data and machinery already exists for these designs.
+
+(?Pesumably already done somewhere? It is cheaper to use YEPD agars
+than CSM agars, but these have a higher initial nutrient density
+\(n_{0}\) and this reduces the time available to observe culture
+growth. We could also choose to study this trade-off and see if there
+is any reduction in CANS effects due to there being a shorter time
+for diffusion to occur. ?(A guess) However, we expect that CANS effects would be
+small compared to the error from shorter observation time and that a
+better approach would be to correct for CANS in CMS data either
+directly or using randomisation.?)
 
 \begin{Figure}
   \centering
@@ -307,7 +324,8 @@ cannot be observed for as long which increases error in meaurements.
 
 \subsection{Package and Distribute}
 \label{sec:package-distribute}
-
+Already mentioned much of this in other parts of the
+approach. Anything missing?
 
 %%% Local Variables:
 %%% mode: latex
