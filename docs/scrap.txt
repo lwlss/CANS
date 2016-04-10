@@ -1,0 +1,39 @@
+Sections which I have removed but which might come in usefull at some
+point.
+
+\\\\
+** Not the right place for this and questionable to include it at all.
+\\
+We will also determine the effect of competition on the different
+measures of fitness discussed in section
+\ref{sec:genetic-interaction}. In previous studies, which use fits of
+the (independent) logistic growth model (refs), fitness estimates
+based on carrying capacity \(Z\) might be more affected by competition
+and signalling than those based on rate constant \(r\). This is
+because gradients in nutrient and signal density will likely be
+greater towards the end of growth curves, after the exponential growth
+phase, when cultures are larger and have grown for longer.
+\\
+(To asses
+this possibility, we initially attempt to model competition for
+nutrients in terms of parameters of the logistic growth model using a
+time dependent carrying capacity,
+\begin{equation}
+  \label{eq:5}
+  Z_{i}(t) = Z_{0,i}\left(\frac{N_{0,i} + \Delta N_{i}(t)}{N_{0,i}}\right),
+\end{equation}
+where \(Z_{0}\) is the carrying capacity under the assumption of
+independence, and is modified by the ratio of net nutrients available
+at time \(t\) to the initial amount of nutrients available under the
+assumption of independence \(N_{0}\). In this model, the form of rate
+constants \(r_{i}\) in \ref{eq:1} is unaltered. Before fitting this
+model to data, we would first need to find \(\Delta N_{i}(t)\), the
+integral of the second term in \ref{eq:3}b, by fitting a nutrient only
+version of \ref{eq:3}. This is just a model, perhaps not a good
+one. Another alternative is this model with time dependence removed.
+\\
+**
+\\
+It would take further work to find exact relationships between
+parameters of \ref{eq:1} and \ref{eq:3} and to include signalling in
+the model.
