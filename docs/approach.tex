@@ -19,7 +19,7 @@ stirred mixture, we will describe nutrient dependent growth at each
 location using mass action kinetics and the following reaction
 equation:
 \begin{equation}
-  \label{eq:2}
+  \label{eq:4}
   C + N \xrightarrow[]{r_{i}} 2C,\\
 \end{equation}
 where \(r_{i}\) is the rate constant of conversion at location \(i\).
@@ -28,7 +28,7 @@ we will incorporate the effect of signal molecules on growth and the
 diffusion of both signal molecules and nutrients using the following
 ODEs (CANS model):
 \begin{subequations}
-  \label{eq:3}
+  \label{eq:5}
   \begin{align}
     \frac{dC_{i}}{dt}& = r_{i}N_{i}C_{i} - \beta S_{i},\\
     \frac{dN_{i}}{dt}& = - r_{i}N_{i}C_{i} - k_{n}\sum_{j}(N_{i} - N_{j}),\\
@@ -43,7 +43,7 @@ cells on the agar/ times are short? Alternative models of signalling
 effect could be used, depending on the mechanism of signalling under
 investigation (see background section); initially, we have chosen to
 use the simplest modelling approach. Setting diffusion constants to
-zero reduces \ref{eq:3} to the independence model. We may also study
+zero reduces \ref{eq:5} to the independence model. We may also study
 the effects of signalling and competition for nutrients separately by
 setting other parameters to zero. If necessary, diagonal neighbours
 could be incorporated by adding or scaling diffusion constants. In
@@ -51,7 +51,7 @@ section~\ref{sec:dev-mod-further}, we discuss the possibility of using
 finer-grain spatially-discretised or continuous models of diffusion
 which would also achieve this.
 % \begin{equation}
-%   \label{eq:4}
+%   \label{eq:6}
 %   \frac{dC_{i}}{dt}& = r_{i}N_{i}C_{i}(1 - \frac{S_{i}}{S_{crit}})
 % \end{equation}
 
@@ -174,7 +174,7 @@ consider improving the model in several ways. For instance, we may
 propose a different model of signalling effect and instead model
 culture growth rate as,
 \begin{equation}
-  \label{eq:6}
+  \label{eq:7}
   \frac{dC_{i}}{dt} = r_{i}N_{i}C_{i}\left(1 - \frac{S_{i}}{S_{crit}}\right),\\
 \end{equation}
 where \(S_{crit}\) is some critical concentration of signal above
