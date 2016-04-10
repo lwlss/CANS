@@ -60,9 +60,16 @@ competition or signalling effects. However, this approach has lower throughput (
 
 \subsection{Competition and Signalling}
 
-ethanol poisoning
-quorum sensing
-
+At the beginning of QFA and SGA nutrients are distributed uniformly throughout the
+agar. During incubation, cultures grow, consuming nutrients and creating gradients in
+nutrient density. A QFA plate taken partway through (at the end of?) incubation can be
+seen in Figure~\ref{fig:15_spots}. As some cultures grow much faster than their
+neighbours, using more nutrients, we believe that diffusion of nutrients along gradients
+between cultures might cause a significant competition effect. Growth of yeast cultures
+may also be affected by signal molecules, produced by cultures, which diffuse through the
+agar or travel across its surface. Candidates are ethanol \citep{fujita2006}, a poison
+produced by fermentation, and chemicals involved in quorum sensing, a regulatory response
+to changes in cell density (see \citet{sprague2006,honigberg2011}).
 
 \begin{Figure}
   \centering
@@ -70,11 +77,14 @@ quorum sensing
   \captionof{figure}{An image of 15 cultures on a section of solid agar from a QFA
     procedure. Image taken with permission from the Colonyzer \citep{Lawless2010} GitHub
     repo https://github.com/CnrLwlss/Colonyzer}
+  \label{fig:15_spots}
 \end{Figure}
 
 \subsection{Modelling Approaches}
 
 \subsubsection{Mass Action Kinetics}
+
+
 \subsubsection{The Logistic Growth Model}
 
 The logistic growth model,
@@ -106,13 +116,13 @@ derives an ODE of equivalent form to \ref{eq:1},
   \label{eq:8}
   \frac{dN_{Cell}}{dt} = rN_{Cell}\left(1 - \frac{N_{Cell}}{K}\right),
 \end{equation}
-where...
-If we can extend this to include include competition and signalling effects then this will
-allow us to compare the affect on existing fitness measures.
+where...  If we extend this approach to a mass action kinetics model with competition and
+signalling, this will allow us to compare the effect on existing fitness
+measures.
 
-\subsubsection{Fishers multiplicative model of genetic interaction}
+
 \subsubsection{Hierarchical models and Bayesian inference}
-
+\subsubsection{Fishers multiplicative model of genetic interaction}
 \subsection{Inference of Genetic Interactions / Telomere Cap Defects}
 \label{sec:genetic-interaction}
 (Move to background section.
