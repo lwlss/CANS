@@ -109,7 +109,7 @@ The assumption of a well stirred reaction mixture is perhaps not valid for a cul
 growing on agar. However, a mass action approximation has been used with some success to
 model predator-prey dynamics of animal populations \citep{Berryman1992} and signalling and
 reactions in the spatially heterogeneous environment inside cells
-\citet{Aldridge2006,Chen2010} where this assumption is also questionable. If nutrient
+\citep{Aldridge2006,Chen2010} where this assumption is also questionable. If nutrient
 gradients within cultures are too large then a PDE model may be required. Reactions that
 occur at a surface are better modelled using fractal kinetics \citep{savageau1995}.
 \subsubsection{The Logistic Growth Model}
@@ -143,27 +143,26 @@ derives an ODE of equivalent form to \ref{eq:1},
   \label{eq:8}
   \frac{dN_{Cell}}{dt} = rN_{Cell}\left(1 - \frac{N_{Cell}}{K}\right),
 \end{equation}
-where...  If we do this for a mass action kinetic model with competition and signalling,
-this will allow us to compare the effect of competition and signalling on existing fitness
-measures.
+where...(maybe don't include this equation explicitly as it could take too much room to
+explain?) If we can do this for a mass action kinetic model with competition and
+signalling, this will allow us to compare the effect of competition and signalling on
+existing fitness measures.
 
-
-\subsubsection{Hierarchical models and Bayesian inference}
-\subsubsection{Fishers multiplicative model of genetic interaction}
-\subsection{Inference of Genetic Interactions / Telomere Cap Defects}
+\subsection{Fitness Screening in Functional Genomics}
 \label{sec:genetic-interaction}
 Fitness screening using cultures grown on solid agar has important uses in functional
-genomics for infering genetic interactions and drug response and can even be used for
-inferring pathways (ref).
+genomics for inferring genetic interactions and response to environmental
+conditions. \citet{Costanzo2010} use SGA data to construct a genetic interaction map for
+\textit{S. cerevisiae} containing \textasciitilde 75\% of the genome. Mutants!
 
-In a QFA study investigating the link between telomere shortening, ageing, and cancer,
-\citet{Addinall2011} study the genetic interactions of \textit{cdc13} which functions in
-telomere capping in the model organism \textit{Saccharomyces cerevisiae}. If the power to
-predict genetic interactions is improved in the reanalysis of data from
-\citet{Addinall2011}, this may highlight new genes involved in these processes and will
-also be relevant for investigations of other types of genetic interaction and
-investigations using other types of microbial organism.)
-
+Using QFA and \textit{Saccharomyces cerevisiae}, \citet{Addinall2011} study the genetic
+interactions of a mutant \textit{cdc13}, which functions in telomere capping. This offers
+a way to discover genes involved in telomere shortening, which is linked to cancer and
+ageing, and could lead to health benefits for humans. Important new discoveries could be
+made if the power to predict genetic interactions is improved by accounting for
+competition and signalling in reanalysis of data from such studies. If competition and
+signalling has an affect in yeast this is also likely to be relevant for fitness screening
+using other types of microbial organisms.
 
 %%% Local Variables:
 %%% mode: latex
