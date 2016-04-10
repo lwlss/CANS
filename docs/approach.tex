@@ -164,42 +164,6 @@ effects. Otherwise, if we find evidence of a significant competition
 and/or signalling effect, we have proved our main hypothesis and can
 move on to comparing experimental designs (section
 \ref{sec:comp-exper-designs}).
-\\\\
-
-**
-In order to compare diffusion across
-agar height we will need to develop a two-dimensional
-spatially-discretised model of diffusion (section
-\ref{sec:dev-mod-further}.
-
-We will also determine the effect of competition on the different
-measures of fitness discussed in section
-\ref{sec:genetic-interaction}. In previous studies, which use fits of
-the (independent) logistic growth model (refs), fitness estimates
-based on carrying capacity \(Z\) might be more affected by competition
-and signalling than those based on rate constant \(r\). This is
-because gradients in nutrient and signal density will likely be
-greater towards the end of growth curves, after the exponential growth
-phase, when cultures are larger and have grown for longer. To asses
-this possibility, we initially attempt to model competition for
-nutrients in terms of parameters of the logistic growth model using a
-time dependent carrying capacity,
-\begin{equation}
-  \label{eq:5}
-  Z_{i}(t) = Z_{0,i}\left(\frac{N_{0,i} + \Delta N_{i}(t)}{N_{0,i}}\right),
-\end{equation}
-where \(Z_{0}\) is the carrying capacity under the assumption of
-independence, and is modified by the ratio of net nutrients available
-at time \(t\) to the initial amount of nutrients available under the
-assumption of independence \(N_{0}\). In this model, the form of rate
-constants \(r_{i}\) in \ref{eq:1} is unaltered. Before fitting this
-model to data, we would first need to find \(\Delta N_{i}(t)\), the
-integral of the second term in \ref{eq:3}b, by fitting a nutrient only
-version of \ref{eq:3}. It would take further work to find exact
-relationships between parameters of \ref{eq:1} and \ref{eq:3} and to
-include signalling in the model. ?Conor,
-you said you might have done this previously?  ?Also, is what I have
-suggested above sensible?
 
 \subsection{Develop Model Further}
 \label{sec:dev-mod-further}
@@ -220,14 +184,16 @@ underlying mechanism as this could result in over-fitting.
 We may also model diffusion more realistically, and incorporate
 interactions between diagonal neighbours, using a
 spatially-discretised model of diffusion with a finer grid (see
-Figure~\ref{fig:grid}). We would begin using a two-dimensional model as
-this is simpler. Validating against data from miniQFA
-(Figure~\ref{fig:stripes}), Figure~\ref{fig:height_dependence}
-(middle) illustrates how we may remain in two-dimensions and
-investigate how diffusion varies across agar height. We should do this
-for different agar geometries, varying \(d\) and \(w\) in
-Figure~\ref{fig:exp_vars}. If height dependence is found to be
-unimportant, we may apply a two-dimensional grid as in
+Figure~\ref{fig:grid}). We would begin using a two-dimensional model
+as this is simpler. Although variance between cultures on the same
+line will still be an issue, we may attempt to validate against data
+from miniQFA (Figure~\ref{fig:stripes}), and remain in two-dimensions,
+to investigate how diffusion varies across agar height (see
+Figure~\ref{fig:height_dependence} middle). We should do this for
+different agar geometries, varying \(d\) and \(w\) in
+Figure~\ref{fig:exp_vars}, to represent QFA and SGA experiments. If
+height dependence is found to be unimportant, we may apply a
+two-dimensional grid in the plane of the agar surface as in
 Figure~\ref{fig:grid}. Otherwise, we would have to use a three
 dimensional model of diffusion. It may suffice to model nutrient
 diffusion in three-dimensions and signal diffusion in only
@@ -236,14 +202,10 @@ throughout the agar at time zero, whereas signal molecules will be
 secreted by cultures growing at the agar surface. We could also
 consider using a continuous PDE model of diffusion, although this is
 ?likely to take more computational time? and be more difficult to
-implement. Because of the generality of the problem, it is
-possible that computational models of diffusion already exist
-publicly, and we would explore the possibility of using them.
+implement. Because of the generality of the problem, it is possible
+that computational models of diffusion already exist publicly, and we
+would explore the possibility of using them.
 
-We may also remove either signalling or competition for nutreints from
-our model entirely if no effect is found. Ultimately, if neither effect
-is discovered we may reject our initial hypothesis and accept that
-growth is independent.
 
 \begin{Figure}
   \centering
@@ -255,28 +217,58 @@ growth is independent.
 
 \begin{Figure}
   \centering
+  \includegraphics[width=\linewidth]{K000343_027_001_2015-02-21_19-38-08}
+  \captionof{figure}{A miniQFA agar in which lines of locations
+    (``stripes'') are left vacant. We can use a similar
+    experimental setup, with uniform cultures in one dimension, to
+    study diffusion at different agar heights in only two dimensions.}
+  \label{fig:stripes}
+\end{Figure}
+
+\begin{Figure}
+  \centering
   \includegraphics[width=\linewidth]{height_dep_miniqfa_delta_z}
   \captionof{figure}{Schematics of diffusion across agar height.}
   \label{fig:height_dependence}
 \end{Figure}
-% Could model movement of vertical or movement across it.
+% Top: Could model movement of vertical or movement across it.
+
+We may also remove either signalling or competition for nutreints from
+our model entirely if no effect is found. Ultimately, if neither effect
+is discovered we may reject our initial hypothesis and accept that
+growth is independent.
+
+We also intend to determine the effect of competition on the different
+measures of fitness discussed in section
+\ref{sec:genetic-interaction}. In previous studies, which use fits of
+the independent logistic growth model (refs), fitness estimates based
+on carrying capacity \(Z\) might be more affected by competition and
+signalling than those based on rate constant \(r\), because gradients
+in nutrient and signal density will likely be greater towards the end
+of growth curves, after the exponential growth phase, when cultures
+are larger (and have grown for longer). If it is possible to relate
+parameters in our model to those of the independent logistic model
+(\ref{eq:1}) we will carry out this comparison. ?Conor, you said you
+might have done this previously?
+
 
 \subsection{Compare Experimental Designs}
 \label{sec:comp-exper-designs}
 
+(?Previous analyses rely on repeats for statistical analysis (refs)?)
 If competition is present, without randomisation of culture location,
 repeat observations may lead to overconfidence in fitness
 estimates. As discussed in section~\ref{sec:initial_model}),
-difficulties in measuring growth curves for cultures at the agar
-boundaries would introduce a further systematic error. We will compare
-growth parameters and fitness measures estimated from fits of the
-competition and independence models for repeats with and without
-randomisation and expect to find closer agreement between models when
-randomisation is used. ?Or do we just do this using simulations? In
-the case that the competition model is too slow to use in analysis of
-large sets of data from high-throughput experiments, we still will be
-able to determine how large a reduction in error can be achieved
-through randomisation just using the independence model.
+reflections from plate edges at agar boundaries introduces a further
+systematic error, which persists even when we are trying to correct
+for competition. We will compare growth parameters and fitness
+measures estimated from fits of the CANS and independence models for
+repeats with and without randomisation and expect to find closer
+agreement between models when randomisation is used. In the case that
+the CANS model is too slow to use in analysis of large sets of
+data from high-throughput experiments, we will still be able to
+determine how large a reduction in error can be achieved through
+randomisation when using the independence model.
 
 \begin{Figure}
   \centering
@@ -285,26 +277,31 @@ through randomisation just using the independence model.
   \label{fig:exp_vars}
 \end{Figure}
 
-If time allows, we wish to compare differences in CANS effects
-between QFA and SGA designs. To do this we change the following variables:
+If time allows, we wish to compare differences in CANS effects between
+QFA and SGA designs. To do this we change the following variables:
 \(\rho_{0}\), the initial concentration of cells, \(d\), the distance
 between cultures, and \(w\), the diameter of cultures (see
 Figure~\ref{fig:exp_vars}). For SGA, we also have to consider that the
 diameter/area of cultures changes with time and account for this in
-our models. In many SGA studies, culture area, rather than integrated
-optical density (IOD), as in QFA, is used as a proxy for culture
+our models.
+\\
+** Can move to the background.
+\\
+In many SGA studies, culture area, rather than integrated optical
+density (IOD), as in QFA, is used as a proxy for culture
 density. \citet{Lawless2010} found that direct area measurements are
 more noisy than IOD measurements and provide a worse fit to the
-logistic model, introducing a bias to our data. Using
-Colonyzer, we would instead take IOD measurements of SGA plates. We
-should also account for the statistical advantage of SGA, in that
-roughly five times more cultures that can be grown on SGA plates,
-allowing for more repeats.
-
-Simulations may be of use in comparing experimental variables, to study
-the effect of one variable at a time. However, it is of greater
-priority to compare SGA and QFA as they are currently performed,
-because data and machinery already exists for these designs.
+logistic model, introducing a bias to our data. Using Colonyzer, we
+would instead take IOD measurements of SGA plates.
+\\
+**
+\\
+We should also account for the statistical advantage of SGA, in that
+roughly five times more cultures can be grown on SGA plates, allowing
+for more repeats. Simulations may be of use to study the effect of one
+variable at a time. However, it is of greater priority to compare SGA
+and QFA as they are currently performed, because data and machinery
+already exists for these designs.
 
 (?Pesumably already done somewhere? It is cheaper to use YEPD agars
 than CSM agars, but these have a higher initial nutrient density
@@ -316,15 +313,6 @@ would be small compared to the error from shorter observation time and
 that a better approach would be to correct for CANS in CMS data either
 directly or using randomisation.?)
 
-\begin{Figure}
-  \centering
-  \includegraphics[width=\linewidth]{K000343_027_001_2015-02-21_19-38-08}
-  \captionof{figure}{A miniQFA agar in which lines of locations
-    (``stripes'') are left vacant. We can use a similar
-    experimental setup, with uniform cultures in one dimension, to
-    study diffusion at different agar heights in only two dimensions.}
-  \label{fig:stripes}
-\end{Figure}
 
 \subsection{Package and Distribute}
 \label{sec:package-distribute}
