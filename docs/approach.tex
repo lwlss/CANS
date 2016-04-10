@@ -206,7 +206,7 @@ would explore the possibility of using them.
 \begin{Figure}
   \centering
   \includegraphics[width=\linewidth]{square_array_grid}
-  \captionof{figure}{Schematic of a spatially-discretized
+  \captionof{figure}{Schematic of a spatially-discretised
     two-dimensional model.}
   \label{fig:grid}
 \end{Figure}
@@ -230,25 +230,23 @@ would explore the possibility of using them.
 % Top: Could model movement of vertical or movement across it.
 
 We may also remove either signalling or competition for nutreints from
-our model entirely if no effect is found. Ultimately, if neither effect
-is discovered we may reject our initial hypothesis and accept that
-growth is independent.
+our model entirely if no effect is found. Ultimately, if neither
+effect is discovered we may reject our initial hypothesis and accept
+that growth is independent.
 \\\\
-** Probably being too speculative here and could move some of this to
-the background
+** Probably being too speculative here.
 \\
 We also intend to determine the effect of competition on the different
-measures of fitness discussed in section
-\ref{sec:genetic-interaction}. In previous studies, which use fits of
-the independent logistic growth model (refs), fitness estimates based
-on carrying capacity \(Z\) might be more affected by competition and
-signalling than those based on rate constant \(r\), because gradients
-in nutrient and signal density will likely be greater towards the end
-of growth curves, after the exponential growth phase, when cultures
-are larger (and have grown for longer). If it is possible to relate
-parameters in our model to those of the independent logistic model
-(\ref{eq:1}) we will carry out this comparison. ?Conor, you said you
-might have done this previously?
+measures of fitness discussed in section \ref{sec:logistic_model}. In
+previous studies, which use fits of the independent logistic growth
+model (e.g. \citet{Addinall2011}), fitness estimates based on carrying
+capacity \(Z\) might be more affected by competition and signalling
+than those based on rate constant \(r\), because gradients in nutrient
+and signal density will likely be greater towards the end of growth
+curves, after the exponential growth phase, when cultures are larger
+(and have grown for longer). If it is possible to relate parameters in
+our model to those of the independent logistic model (\ref{eq:1}) we
+will carry out this comparison.
 \\
 **
 
@@ -256,15 +254,14 @@ might have done this previously?
 \subsection{Compare Experimental Designs}
 \label{sec:comp-exper-designs}
 
-(?Previous analyses rely on repeats for statistical analysis (refs)?)
 If competition is present, without randomisation of culture location,
 repeat observations may lead to overconfidence in fitness
 estimates. As discussed in section~\ref{sec:initial_model}),
 reflections from plate edges at agar boundaries introduces a further
 systematic error, which persists even when we are trying to correct
 for competition. We will compare growth parameters and fitness
-measures estimated from fits of the CANS and independence models for
-repeats with and without randomisation and expect to find closer
+measures estimated from fits of the CANS and independence models, for
+repeats with and without randomisation, and expect to find closer
 agreement between models when randomisation is used. In the case that
 the CANS model is too slow to use in analysis of large sets of
 data from high-throughput experiments, we will still be able to
@@ -284,25 +281,12 @@ QFA and SGA designs. To do this we change the following variables:
 between cultures, and \(w\), the diameter of cultures (see
 Figure~\ref{fig:exp_vars}). For SGA, we also have to consider that the
 diameter/area of cultures changes with time and account for this in
-our models.
-\\
-** Can move to the background.
-\\
-In many SGA studies, culture area, rather than integrated optical
-density (IOD), as in QFA, is used as a proxy for culture
-density. \citet{Lawless2010} found that direct area measurements are
-more noisy than IOD measurements and provide a worse fit to the
-logistic model, introducing a bias to our data. Using Colonyzer, we
-would instead take IOD measurements of SGA plates.
-\\
-**
-\\
-We should also account for the statistical advantage of SGA, in that
-roughly five times more cultures can be grown on SGA plates, allowing
-for more repeats. Simulations may be of use to study the effect of one
-variable at a time. However, it is of greater priority to compare SGA
-and QFA as they are currently performed, because data and machinery
-already exists for these designs.
+our models. We should also account for the statistical advantage of
+SGA, in that roughly five times more cultures can be grown on SGA
+plates, allowing for more repeats. Simulations may be of use to study
+the effect of one variable at a time. However, it is of greater
+priority to compare SGA and QFA as they are currently performed,
+because data and machinery already exists for these designs.
 
 (?Pesumably already done somewhere? It is cheaper to use YEPD agars
 than CSM agars, but these have a higher initial nutrient density
