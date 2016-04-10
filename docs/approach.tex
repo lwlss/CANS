@@ -12,17 +12,12 @@ three variables: one observed variable, \(C_{i}\), the amount of cells
 \(i\), and two hidden variables, \(N_{i}\) and \(S_{i}\), the amount
 of nutrients, and signal. Cultures in QFA and SGA agars are arranged
 in a square array, each culture having eight neighbours with which
-they could conceivably interact directly. Initially, we will
-model diffusion between only the four closest neighbours, indicated by the
+they could conceivably interact directly. Initially, we will model
+diffusion between only the four closest neighbours, indicated by the
 darker blue circles in Figure~\ref{fig:simple_model}. Assuming a well
-stirred mixture, we will describe nutrient dependent growth at each
-location using mass action kinetics and the following reaction
-equation:
-\begin{equation}
-  \label{eq:4}
-  C + N \xrightarrow[]{r_{i}} 2C,\\
-\end{equation}
-where \(r_{i}\) is the rate constant of conversion at location \(i\).
+stirred mixture, we will begin by describing nutrient dependent growth
+at each location using mass action kinetics and the reaction equation
+\ref{eq:9}a.
 As a first approach, assuming that the number of cells is continuous,
 we will incorporate the effect of signal molecules on growth and the
 diffusion of both signal molecules and nutrients using the following
