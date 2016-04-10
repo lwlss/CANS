@@ -66,7 +66,7 @@ nutrient density. A QFA plate taken partway through (at the end of?) incubation 
 seen in Figure~\ref{fig:15_spots}. As some cultures grow much faster than their
 neighbours, using more nutrients, we believe that diffusion of nutrients along gradients
 between cultures might cause a significant competition effect. Growth of yeast cultures
-may also be affected by signal molecules, produced by cultures, which diffuse through the
+may also be affected by signal molecules produced by cells, which diffuse through the
 agar or travel across its surface. Candidates are ethanol \citep{fujita2006}, a poison
 produced by fermentation, and chemicals involved in regulatory response
 to changes in cell density (quorum sensing) (see \citet{sprague2006,honigberg2011}).
@@ -113,7 +113,7 @@ reactions in the spatially heterogeneous environment inside cells
 gradients within cultures are too large then a PDE model may be required. Reactions that
 occur at a surface are better modelled using fractal kinetics \citep{savageau1995}.
 \subsubsection{The Logistic Growth Model}
-
+\label{sec:logistic_model}
 The logistic growth model,
 \begin{equation}
   \label{eq:1}
@@ -144,25 +144,45 @@ derives an ODE of equivalent form to \ref{eq:1},
   \frac{dN_{Cell}}{dt} = rN_{Cell}\left(1 - \frac{N_{Cell}}{K}\right),
 \end{equation}
 where...(maybe don't include this equation explicitly as it could take too much room to
-explain?) If we can do this for a mass action kinetic model with competition and
+explain and is not essential?) If we can do this for a mass action kinetic model with competition and
 signalling, this will allow us to compare the effect of competition and signalling on
 existing fitness measures.
 
 \subsection{Fitness Screening in Functional Genomics}
 \label{sec:genetic-interaction}
 Fitness screening using cultures grown on solid agar has important uses in functional
-genomics for inferring genetic interactions and response to environmental
-conditions. \citet{Costanzo2010} use SGA data to construct a genetic interaction map for
-\textit{S. cerevisiae} containing \textasciitilde 75\% of the genome. Mutants!
+genomics for inferring genetic interactions and response to environmental conditions and
+can be done on a genome wide scale. For example, \citet{Costanzo2010} use SGA data to
+construct a genetic interaction map for \textasciitilde 75\% of the \textit{S. cerevisiae}
+genome.
 
-Using QFA and \textit{Saccharomyces cerevisiae}, \citet{Addinall2011} study the genetic
-interactions of a mutant \textit{cdc13}, which functions in telomere capping. This offers
-a way to discover genes involved in telomere shortening, which is linked to cancer and
-ageing, and could lead to health benefits for humans. Important new discoveries could be
-made if the power to predict genetic interactions is improved by accounting for
-competition and signalling in reanalysis of data from such studies. If competition and
-signalling has an affect in yeast this is also likely to be relevant for fitness screening
-using other types of microbial organisms.
+There exist several methods for inferring genetic interaction strength from fitness
+measures (see \citet{Mani2008}). Fishers multiplicative model of genetic independence
+\citep{fisher1919}, used, among others, by \citet{Addinall2011}, states that if two genes,
+\textit{a} and \textit{b}, are non-interacting, then the product of the double-mutant and
+wild-type fitnesses is equal to the product of the single-mutant fitnesses.
+\begin{equation}
+  \label{eq:11}
+  [wt][ab] = [a][b],
+\end{equation}
+where [~] indicates a fitness measure. For fixed wild-type and query genes, \textit{wt} and
+\textit{a}, we have the linear relationship,
+\begin{equation}
+  \label{eq:12}
+  [ab] = k[b]
+\end{equation}
+where \(k = [a]/[wt]\) is a constant \citep{Addinall2011}. For a mutant \textit{b}
+interacting with \textit{a}, if the fitness [ab] falls above the predicted straight line
+then the genetic interaction is positive; if it falls below then the interaction is
+negative. Using this approach with QFA data from mutants in \textit{Saccharomyces
+  cerevisiae}, \citet{Addinall2011} study the genetic interactions of a mutant of
+\textit{cdc13}, which functions in telomere capping, in an attempt to discover genes
+involved in telomere shortening, which is linked to cancer and ageing. Important
+discoveries could be made, leading to health benefits for humans, if the power to predict
+genetic interactions is improved by accounting for competition and signalling in
+reanalysis of data from such studies. If competition and signalling has an affect in
+yeast this is also likely to be relevant for fitness screening using other types of
+microbial organisms.
 
 %%% Local Variables:
 %%% mode: latex
