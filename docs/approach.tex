@@ -108,22 +108,25 @@ complicated approach, possibly allowing it to propagate further.
 
 List of strains of known fitness??
 
-We have access to unpublished QFA and SGA data for the model organism
-\textit{S. Cerevisiae}. Some data (Figure~\ref{fig:gaps}), with vacant
-gaps, is specifically designed for the study of
-competition. ?presumable some with the same variants grown on the
-plate?. We will analyse data from single plates to avoid having to
+We will investigate unpublished QFA and SGA data for the model
+organism \textit{S. Cerevisiae}. Some data (Figure~\ref{fig:gaps}),
+with vacant gaps, is specifically designed for the study of
+competition. ?presumable some with the same variants grown at every
+location?. We will analyse data from single plates to avoid having to
 deal with batch variance which can be a major source of error (see
-\citet{Baryshnikova2010}). We will at first fit our model to data
+\citet{Baryshnikova2010}). At first, we will fit our model to data
 using least squares. The QFA R package (ref) contains functions for
 fitting the independent logistic growth model and there is development
 underway of a qfaBayes package (ref) which will carry out a Bayesian
 inference of parameters of the same model. We plan to develop a method
 for Bayesian inference using the CANS model which will account for our
-prior knowledge/?belief? about parameters distributions (?any other
-advantages?) (?and allow us to conduct model comparison?). In an
-analysis of high-throughput QFA data from a genetic interaction study
-by \citet{Addinall2011}, \citet{Heydari2016} use a Bayesian
+prior belief about parameters distributions (?and allow us to conduct
+model comparison?). For this, we will use either of the Python
+libraries pyMC (ref) or pySTAN (ref). For pySTAN we would have to
+rewrite the ODE model in Stan (ref) but it could be faster.
+
+In an analysis of high-throughput QFA data from a genetic interaction
+study by \citet{Addinall2011}, \citet{Heydari2016} use a Bayesian
 hierarchical model which mirrors the exerimental structure (from the
 time-point to population level) and simultaneously estimates growth
 parameters and genetic interaction strength by sharing information
@@ -133,15 +136,15 @@ efficiently factored into statistical analyses
 \citep{Heydari2016}. When looking at the most significant genetic
 interactions, for the increased computational time that it takes (4
 weeks vs 3 hours), this analysis does not offer a significant
-advantage over an earlier statistical analysis carried out by
+advantage over the original statistical analysis carried out by
 \citet{Addinall2011}. However, \citet{Heydari2016} do identify weakly
 interacting genes for which there is no previous evidence, and a
 hierarchical model which only modelled population dynamics took
 significantly less time (1 week). As we are only studying single
-plates and not going on to infer genetic interaction strength, there
-will be fewer levels in our hierarchy, allowing for a faster
-computational time, and the analysis may provide more significant
-evidence in identifying competition effects than it does for genetic
+plates, and not going on to infer genetic interaction strength, there
+will be fewer levels in our hierarchy allowing for a faster
+computational time, and this type of analysis may prove more effective in
+identifying competition and signalling effects than it is in identifying genetic
 interactions (?is this last bit true? ?should we discard this or
 not?).
 
@@ -156,12 +159,15 @@ not?).
 If we fail to discover competition or signalling effects by fitting
 the CANS model, we may need to improve aspects of our modelling
 approach (see section \ref{sec:dev-mod-further}), study different
-data, or consider that the data is not subject to these effects. (The
-latter conclusion would raise questions about other sources of
-variance.) Otherwise, if we find evidence of a significant competition
+data, or consider that the data is not subject to these
+effects. Otherwise, if we find evidence of a significant competition
 and/or signalling effect, we have proved our main hypothesis and can
 move on to comparing experimental designs (section
-\ref{sec:comp-exper-designs}). In order to compare diffusion across
+\ref{sec:comp-exper-designs}).
+\\\\
+
+**
+In order to compare diffusion across
 agar height we will need to develop a two-dimensional
 spatially-discretised model of diffusion (section
 \ref{sec:dev-mod-further}.
