@@ -6,20 +6,18 @@
 \label{sec:initial_model}
 
 Figure~\ref{fig:simple_model} shows a schematic of our initial
-approach to modelling (nutrient dependent growth with nutrient and
-signal diffusion). Each culture on the agar is given a label, \(i\),
-and has three variables associated with it: one observed variable,
-\(C_{i}\), the amount of cells in the culture at location \(i\), and
-two hidden variables, \(N_{i}\), the amount of nutrients at location
-\(i\), and \(S_{i}\), the amount of signal molecule location \(i\).
-Cultures in QFA and SGA agars are arranged in a square array, each
-culture having eight neighbours with which they could conceivably
-interact with directly. Initially, we will model diffusion between
-only the four closest neighbours, in the vertical and horizontal
-directions (darker blue circles in
-Figure~\ref{fig:simple_model}). Assuming a well stirred mixture, we
-will describe nutrient dependent growth at each location using mass
-action kinetics and the following reaction equation:
+approach to consttucting a competition for nutrients and signalling
+(CANS) model. Each culture at location, \(i\), is associated with
+three variables: one observed variable, \(C_{i}\), the amount of cells
+\(i\), and two hidden variables, \(N_{i}\) and \(S_{i}\), the amount
+of nutrients, and signal. Cultures in QFA and SGA agars are arranged
+in a square array, each culture having eight neighbours with which
+they could conceivably interact directly. Initially, we will
+model diffusion between only the four closest neighbours, indicated by the
+darker blue circles in Figure~\ref{fig:simple_model}. Assuming a well
+stirred mixture, we will describe nutrient dependent growth at each
+location using mass action kinetics and the following reaction
+equation:
 \begin{equation}
   \label{eq:2}
   C + N \xrightarrow[]{r_{i}} 2C,\\
@@ -27,7 +25,7 @@ action kinetics and the following reaction equation:
 where \(r_{i}\) is the rate constant of conversion at location \(i\).
 As a first approach, assuming that the number of cells is continuous,
 we will incorporate the effect of signal molecules on growth and the
-diffusion of both nutrient and signal molecules using the following
+diffusion of both signal molecules and nutrients using the following
 ODEs (CANS model):
 \begin{subequations}
   \label{eq:3}
@@ -48,10 +46,10 @@ use the simplest modelling approach. Setting diffusion constants to
 zero reduces \ref{eq:3} to the independence model. We may also study
 the effects of signalling and competition for nutrients separately by
 setting other parameters to zero. If necessary, diagonal neighbours
-could be incorporated into this model by adding or scaling diffusion
-constants. In section~\ref{sec:dev-mod-further}, we discuss the
-possibility of using finer-grain spatially-discretised or continuous
-models of diffusion.
+could be incorporated by adding or scaling diffusion constants. In
+section~\ref{sec:dev-mod-further}, we discuss the possibility of using
+finer-grain spatially-discretised or continuous models of diffusion
+which would also achieve this.
 % \begin{equation}
 %   \label{eq:4}
 %   \frac{dC_{i}}{dt}& = r_{i}N_{i}C_{i}(1 - \frac{S_{i}}{S_{crit}})
@@ -66,44 +64,44 @@ models of diffusion.
 
 Models will be written in SBML (ref), using SBML shorthand (ref), so
 that they may eventually be published in the BioModels database (ref)
-and reused by the scientific community. This will require conformation
-to the minimum information standard MIRIAM (ref). (Simulation
-experiments should also conform to MIASE (ref).) We will write code
-for the rest of the project in Python as this has several advantages:
-it is used widely by the scientific community, has libraries which
-will be of use to us, and related tools such as Colonyzer (ref) are
-already written in Python. To interface SBML models with Python we
-will use the libSBMLO library \citep{Bornstein2008}. ODEs will be
-solved using odeint from the SciPy library \citep{SciPy}. We will use
-git as version control and use GitHub as a remote repository to allow
-collaboration and so that tools may eventually be released publicly.
+and available publicly. This will require conformation to the minimum
+information standard MIRIAM (ref). (Simulation experiments should also
+conform to MIASE (ref).) We will write code for the rest of the
+project in Python as this has several advantages: it is used widely by
+the scientific community, has libraries which will be of use to us,
+and related tools such as Colonyzer \citet{Lawless2010} are already
+written in Python. To interface SBML models with Python we will use
+the libSBMLO library \citep{Bornstein2008}. ODEs will be solved using
+odeint from the SciPy library \citep{SciPy}. We will use git as
+version control and GitHub as a remote repository where packages will
+eventually be released publicly.
 
 It is anticipated that solving sets of ODEs for typically 384 cultures
 in QFA and 1536 cultures in SGA will be take a long time. Therefore,
-while testing, we will simulate smaller sets of artificial data from
-the ODE models and attempt to fit these. We will also incorporate
-unittesting into the development to try to ensure that the code will
+in the testing stage, we will simulate smaller sets of artificial data
+from the ODE models and attempt to fit these. We will also incorporate
+unittesting into the development to try to ensure that code will
 still work when scaled up to larger arrays used in experiments.
 
 When dealing with experimental data we must also consider how to treat
 cultures around the edge of the agar. These have access to
-proportionally more nutrients because there is a large area at the
-edge of the plate which is unoccupied. In photographic images, these
-sites are also affected by reflections from plate walls which cause
-errors in intensity measurements, a proxy for cell density, which
-cannot be fully corrected for by Colonyzer \citep{Lawless2010}. In
-experiments, an identical culture is grown in these locations and the
-results are discarded (see refs). We may choose to adjust for the
-increased nutrient availability and include these sites in our model
-and analysis. This would introduce a systematic error for sites close
-to the plate edges and is an argument for the use of repeats and
-randomisation of location (see \ref{sec:comp-exper-designs}). A
-simpler modelling approach is to discard the first outer layer
-entirely from the model and the second outer layer from the final
-results. However, this is undesirable as it reduces the amount of
-information that is gathered from each plate and may not account for
-the systematic error any better that the more complicated approach,
-possibly allowing it to propagate further.
+proportionally more nutrients because there is a relatively large area
+beyond them which is unoccupied by cultures. In photographic images,
+these sites are also affected by reflections from plate walls which
+cause errors in integrated optical density (IOD) measurements, a proxy
+for cell density, which cannot be fully corrected for by Colonyzer
+\citep{Lawless2010}. In experiments, an identical culture is grown in
+edge locations and the results are discarded (see refs). We may choose
+to adjust for the increased nutrient access and include edge cultures
+in our model and analysis. This would introduce a systematic error for
+sites close to the plate edges and is an argument for the use of
+repeats and randomisation of location (see
+\ref{sec:comp-exper-designs}). A simpler modelling approach is to
+discard the first outer layer entirely from the model and the second
+outer layer from the final results. However, this is undesirable as it
+reduces the amount of information that is gathered from each plate and
+may not account for the systematic error any better than the more
+complicated approach, possibly allowing it to propagate further.
 
 \subsection{Analyse Experimental Data}
 \label{sec:analyse-data}
