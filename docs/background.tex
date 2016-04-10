@@ -10,7 +10,7 @@ which can be performed using a high-throughput protocol (sga ref) \cite{Banks201
 uses pinned cultures of higher initial cell density than the dilute liquid cultures used
 in QFA. Although SGA allows for more repeats per plate (1536 cultures vs 384 cultures in
 QFA), more of the growth curve can be captured with QFA so fits of growth models are more
-accurate (see Figure~\ref{fig:qfa_and_sga_growth_curves}).
+accurate (see Figure~\ref{fig:qfa_and_sga_growth_curves}) \citep{Lawless2010}.
 Comparison of QFA and SGA cultures in Figure~\ref{fig:qfa_and_sga_growth_curves}c shows
 how QFA cultures are composed of many individual colonies which increase in thickness,
 whereas SGA cultures are composed of a single uniform colony which grows outwards. The
@@ -27,18 +27,19 @@ measurements and provide a worse fit to the logistic model. To prevent bias in c
 of data from QFA and SGA we will use Colonyzer to take the more accurate IOD measurements
 for both data types.
 
+Fitness screening can also be performed using liquid cultures which are not susceptible to
+competition or signalling effects. However, this approach has lower throughput (ref).
+
 \end{multicols}
 \graphicspath{{images_low_res/}}
 \begin{Figure}
   \centering
   \includegraphics[width=\linewidth]{pin_v_spot_growth}
-  \captionof{figure}{Fits of the logistic growth model, to cell
-    density observations of yeast growing on solid agar, for spotted
-    cultures (circles) and pinned cultures (crosses). In A) culture
-    density is plotted on a linear scale. In B) culture density is
-    plotted on a logarithmic scale. C) shows images of the spotted and
-    pinned cultures corresponding to the data in A) \& B). Reproduced
-    ??with permission?? from \citet{Lawless2010}.}
+  \captionof{figure}{Fits of the logistic growth model, to cell density observations of
+    yeast growing on solid agar, for spotted cultures (circles) and pinned cultures
+    (crosses). In A) culture density is plotted on a linear scale. In B) culture density
+    is plotted on a logarithmic scale. C) shows images of the spotted and pinned cultures
+    corresponding to the data in A) \& B). Courtesy of \citet{Lawless2010}.}
   \label{fig:qfa_and_sga_growth_curves}
 \end{Figure}
 \begin{multicols}{2}
@@ -62,15 +63,13 @@ for both data types.
 ethanol poisoning
 quorum sensing
 
-Fitness screening can also be performed using liquid cultures which are not susceptible to
-competition or signalling effects. However, this approach has lower throughput (ref).
 
 \begin{Figure}
   \centering
   \includegraphics[width=\linewidth]{5658435523_c2e43729f1_b}
-  \captionof{figure}{An image of 15 cultures on a section of solid agar
-    from a QFA procedure. Image taken ??with permission?? from the Colonyzer GitHub repo
-    https://github.com/CnrLwlss/Colonyzer \citep{Lawless2010}}
+  \captionof{figure}{An image of 15 cultures on a section of solid agar from a QFA
+    procedure. Image taken with permission from the Colonyzer \citep{Lawless2010} GitHub
+    repo https://github.com/CnrLwlss/Colonyzer}
 \end{Figure}
 
 \subsection{Modelling Approaches}
@@ -78,12 +77,40 @@ competition or signalling effects. However, this approach has lower throughput (
 \subsubsection{Mass Action Kinetics}
 \subsubsection{The Logistic Growth Model}
 
-The logistic growth model \cite{Verhulst1845} describes
+The logistic growth model,
 \begin{equation}
   \label{eq:1}
-  \dot{x} = rx\left(1 - \frac{x}{Z}\right)
+  \dot{x} = rx\left(1 - \frac{x}{K}\right)
 \end{equation}
-\subsubsection{Fishers multiplicative model of genetic interactions}
+\citep{Verhulst1845}, for a population of density \(x\), with parameters \(r\) and \(K\),
+the growth rate and carrying capacity, describes self-limiting growth and is commonly used
+to fit QFA and SGA data with an assumption of independence between cultures. It has the
+following analytical solution:
+\begin{equation}
+  \label{eq:2}
+  x(t) = \frac{KPe^{rt}}{K + P(e^{rt}-1)},
+\end{equation}
+where P is the initial population density. Measures of fitness are commonly defined in
+terms of \(r\), \(K\), and \(P\). For instance, \cite{Addinall2011} define two univariate fitness
+measures: the maximum doubling rate (MDR) and maximum doubling potential (MDP) as,
+\begin{subequations}
+  \label{eq:3}
+    \begin{align}
+      MDR &= \frac{r}{log\left(\frac{2(K-P)}{K-2P}\right)},\\
+      MDP &= \frac{log\left(\frac{K}{P}\right)}{log(2)}.
+    \end{align}
+\end{subequations}
+Starting from the mass action kinetic model Lawless (``http://cnr.lwlss.net/DSLMassAction/'')
+derives an ODE of equivalent form to \ref{eq:1},
+\begin{equation}
+  \label{eq:8}
+  \frac{dN_{Cell}}{dt} = rN_{Cell}\left(1 - \frac{N_{Cell}}{K}\right),
+\end{equation}
+where...
+If we can extend this to include include competition and signalling effects then this will
+allow us to compare the affect on existing fitness measures.
+
+\subsubsection{Fishers multiplicative model of genetic interaction}
 \subsubsection{Hierarchical models and Bayesian inference}
 
 \subsection{Inference of Genetic Interactions / Telomere Cap Defects}
