@@ -68,8 +68,8 @@ neighbours, using more nutrients, we believe that diffusion of nutrients along g
 between cultures might cause a significant competition effect. Growth of yeast cultures
 may also be affected by signal molecules, produced by cultures, which diffuse through the
 agar or travel across its surface. Candidates are ethanol \citep{fujita2006}, a poison
-produced by fermentation, and chemicals involved in quorum sensing, a regulatory response
-to changes in cell density (see \citet{sprague2006,honigberg2011}).
+produced by fermentation, and chemicals involved in regulatory response
+to changes in cell density (quorum sensing) (see \citet{sprague2006,honigberg2011}).
 
 \begin{Figure}
   \centering
@@ -83,8 +83,24 @@ to changes in cell density (see \citet{sprague2006,honigberg2011}).
 \subsection{Modelling Approaches}
 
 \subsubsection{Mass Action Kinetics}
-
-
+Chemical reactions in well stirred mixtures are commonly modelled using mass action
+kinetics, where the rate of a reaction is proportional to the product of the
+concentrations of the reactants. This reflects the probabilistic nature of reactions,
+which are dependent on collisions. If species numbers are large enough, reactions can be
+modelled continuously and deterministicly using ordinary differential equations
+(ODEs). Microbial population growth, with cell division dependent on nutrient
+availability, can also be modelled using mass action kinetics. We can use the following
+reaction equation for a culture growing at location \(i\) on an agar,
+\begin{align}
+  \label{eq:9}
+  &C + N \xrightarrow[]{r_{i}} 2C,\\
+  &rate = r_{i}[C][N]
+\end{align}
+where, \(r_{i}\) is the growth constant, \(C\) is a cell, \(N\) is an amount of nutrients
+required for a cell to divide and [~] are concentrations. The assumption of a well stirred
+reaction mixture is perhaps not valid for a culture growing on agar. However, mass action
+kinetics been used with some success to model spatially compartmentalised reactions inside
+cells (ref) and animal populations (ref) where this assumption is also questionable.
 \subsubsection{The Logistic Growth Model}
 
 The logistic growth model,
@@ -125,7 +141,9 @@ measures.
 \subsubsection{Fishers multiplicative model of genetic interaction}
 \subsection{Inference of Genetic Interactions / Telomere Cap Defects}
 \label{sec:genetic-interaction}
-(Move to background section.
+Genetic screening using cultures grown on solid agar have important uses in functional
+genomics.
+
 Motivated by the link between telomere shortening, ageing, and cancer
 (refs?), \citet{Addinall2011} study the genetic interactions of
 \textit{cdc13} which functions in telomere capping in the model
