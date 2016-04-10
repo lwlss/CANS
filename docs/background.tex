@@ -83,24 +83,35 @@ to changes in cell density (quorum sensing) (see \citet{sprague2006,honigberg201
 \subsection{Modelling Approaches}
 
 \subsubsection{Mass Action Kinetics}
-Chemical reactions in well stirred mixtures are commonly modelled using mass action
-kinetics, where the rate of a reaction is proportional to the product of the
-concentrations of the reactants. This reflects the probabilistic nature of reactions,
-which are dependent on collisions. If species numbers are large enough, reactions can be
+Chemical reactions are commonly modelled using mass action kinetics, where the rate of a
+reaction in a well stirred mixture is proportional to the product of the concentrations of
+the reactants. This reflects the probabilistic nature of reactions, which are dependent on
+collisions between reactants. If species numbers are large enough, reactions can be
 modelled continuously and deterministicly using ordinary differential equations
 (ODEs). Microbial population growth, with cell division dependent on nutrient
 availability, can also be modelled using mass action kinetics. We can use the following
 reaction equation for a culture growing at location \(i\) on an agar,
-\begin{align}
+\begin{subequations}
   \label{eq:9}
-  &C + N \xrightarrow[]{r_{i}} 2C,\\
-  &rate = r_{i}[C][N]
-\end{align}
+  \begin{align}
+    &N + C \xrightarrow[]{r_{i}} 2C,\\
+    &rate = r_{i}[N][C]
+  \end{align}
+\end{subequations}
 where, \(r_{i}\) is the growth constant, \(C\) is a cell, \(N\) is an amount of nutrients
-required for a cell to divide and [~] are concentrations. The assumption of a well stirred
-reaction mixture is perhaps not valid for a culture growing on agar. However, mass action
-kinetics been used with some success to model spatially compartmentalised reactions inside
-cells (ref) and animal populations (ref) where this assumption is also questionable.
+required for a cell to divide, and [~] are concentrations. In ODE form,
+\begin{equation}
+  \label{eq:10}
+  \frac{dC_{i}}{dt} = r_{i}N_{i}C_{i}
+\end{equation}
+where \(C_{i}\) and \(N_{i}\) are the amount of cells and nutrients at location \(i\).
+The assumption of a well stirred reaction mixture is perhaps not valid for a culture
+growing on agar. However, a mass action approximation has been used with some success to
+model predator-prey dynamics of animal populations \citep{Berryman1992} and signalling and
+reactions in the spatially heterogeneous environment inside cells
+\citet{Aldridge2006,Chen2010} where this assumption is also questionable. If nutrient
+gradients within cultures are too large then a PDE model may be required. Reactions that
+occur at a surface are better modelled using fractal kinetics \citep{savageau1995}.
 \subsubsection{The Logistic Growth Model}
 
 The logistic growth model,
@@ -108,8 +119,8 @@ The logistic growth model,
   \label{eq:1}
   \dot{x} = rx\left(1 - \frac{x}{K}\right)
 \end{equation}
-\citep{Verhulst1845}, for a population of density \(x\), with parameters \(r\) and \(K\),
-the growth rate and carrying capacity, describes self-limiting growth and is commonly used
+\citep{Verhulst1845}, for a population of density \(x\), with parameters, \(r\), growth
+rate and \(K\), carrying capacity, describes self-limiting growth and is commonly used
 to fit QFA and SGA data with an assumption of independence between cultures. It has the
 following analytical solution:
 \begin{equation}
@@ -117,8 +128,8 @@ following analytical solution:
   x(t) = \frac{KPe^{rt}}{K + P(e^{rt}-1)},
 \end{equation}
 where P is the initial population density. Measures of fitness are commonly defined in
-terms of \(r\), \(K\), and \(P\). For instance, \cite{Addinall2011} define two univariate fitness
-measures: the maximum doubling rate (MDR) and maximum doubling potential (MDP) as,
+terms of the parameters \(r\), \(K\), and \(P\). For example, \cite{Addinall2011} define two univariate
+fitness measures: the maximum doubling rate (MDR) and maximum doubling potential (MDP) as,
 \begin{subequations}
   \label{eq:3}
     \begin{align}
@@ -132,8 +143,8 @@ derives an ODE of equivalent form to \ref{eq:1},
   \label{eq:8}
   \frac{dN_{Cell}}{dt} = rN_{Cell}\left(1 - \frac{N_{Cell}}{K}\right),
 \end{equation}
-where...  If we extend this approach to a mass action kinetics model with competition and
-signalling, this will allow us to compare the effect on existing fitness
+where...  If we do this for a mass action kinetic model with competition and signalling,
+this will allow us to compare the effect of competition and signalling on existing fitness
 measures.
 
 
@@ -141,18 +152,17 @@ measures.
 \subsubsection{Fishers multiplicative model of genetic interaction}
 \subsection{Inference of Genetic Interactions / Telomere Cap Defects}
 \label{sec:genetic-interaction}
-Genetic screening using cultures grown on solid agar have important uses in functional
-genomics.
+Fitness screening using cultures grown on solid agar has important uses in functional
+genomics for infering genetic interactions and drug response and can even be used for
+inferring pathways (ref).
 
-Motivated by the link between telomere shortening, ageing, and cancer
-(refs?), \citet{Addinall2011} study the genetic interactions of
-\textit{cdc13} which functions in telomere capping in the model
-organism \textit{Saccharomyces cerevisiae}. If the power to predict
-genetic interactions is improved in the reanalysis of data from
-\citet{Addinall2011}, this may highlight new genes involved in these
-processes and will also be relevant for investigations of other types
-of genetic interaction and investigations using other types of
-microbial organism.)
+In a QFA study investigating the link between telomere shortening, ageing, and cancer,
+\citet{Addinall2011} study the genetic interactions of \textit{cdc13} which functions in
+telomere capping in the model organism \textit{Saccharomyces cerevisiae}. If the power to
+predict genetic interactions is improved in the reanalysis of data from
+\citet{Addinall2011}, this may highlight new genes involved in these processes and will
+also be relevant for investigations of other types of genetic interaction and
+investigations using other types of microbial organism.)
 
 
 %%% Local Variables:
