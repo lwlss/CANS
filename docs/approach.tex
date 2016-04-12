@@ -6,10 +6,10 @@
 \label{sec:initial_model}
 
 Figure~\ref{fig:simple_model} shows a schematic of our initial
-approach to consttucting a competition for nutrients and signalling
+approach to constructing a competition for nutrients and signalling
 (CANS) model. Each culture at location, \(i\), is associated with
-three variables: one observed variable, \(C_{i}\), the amount of cells
-\(i\), and two hidden variables, \(N_{i}\) and \(S_{i}\), the amount
+three variables: one observed variable, \(C_{i}\), the amount of
+cells, and two hidden variables, \(N_{i}\) and \(S_{i}\), the amount
 of nutrients, and signal. Cultures in QFA and SGA agars are arranged
 in a square array, each culture having eight neighbours with which
 they could conceivably interact directly. Initially, we will model
@@ -17,11 +17,10 @@ diffusion between only the four closest neighbours, indicated by the
 darker blue circles in Figure~\ref{fig:simple_model}. Assuming a well
 stirred mixture, we will begin by describing nutrient dependent growth
 at each location using mass action kinetics and the reaction equation
-\ref{eq:9}a.
-As a first approach, assuming that the number of cells is continuous,
-we will incorporate the effect of signal molecules on growth and the
-diffusion of both signal molecules and nutrients using the following
-ODEs (CANS model):
+\ref{eq:9}a.  As a first approach, assuming that the number of cells
+is continuous, we will incorporate the effect of signal molecules on
+growth and the diffusion of both signal molecules and nutrients using
+the following ODEs (CANS model):
 \begin{subequations}
   \label{eq:5}
   \begin{align}
@@ -31,24 +30,20 @@ ODEs (CANS model):
   \end{align}
 \end{subequations}
 where, \(j\) indicates the closest neighbours, \(k_{n}\) and \(k_{s}\)
-are nutrient and signal diffusion constants, \(\alpha\) is the rate of
-secretion of signal, and \(\beta\) is a constant for the effect of
-signal on culture population. ?do we assume no cell death\ detect dead
-cells on the agar/ times are short? Alternative models of signalling
-effect could be used, depending on the mechanism of signalling under
-investigation (see background section); initially, we have chosen to
-use the simplest modelling approach. Setting diffusion constants to
-zero reduces \ref{eq:5} to the independence model. We may also study
-the effects of signalling and competition for nutrients separately by
-setting other parameters to zero. If necessary, diagonal neighbours
-could be incorporated by adding or scaling diffusion constants. In
-section~\ref{sec:dev-mod-further}, we discuss the possibility of using
-finer-grain spatially-discretised or continuous models of diffusion
-which would also achieve this.
-% \begin{equation}
-%   \label{eq:6}
-%   \frac{dC_{i}}{dt}& = r_{i}N_{i}C_{i}(1 - \frac{S_{i}}{S_{crit}})
-% \end{equation}
+are nutrient and signal diffusion constants, \(\alpha\) is a rate
+constant for signal secretion, and \(\beta\) is a constant for the
+effect of signal on culture population. ?do we assume no cell death\
+detect dead cells on the agar/ times are short? Alternative models of
+signalling effect could be used, depending on the mechanism of
+signalling under investigation (see background section); initially, we
+have chosen to use the simplest modelling approach. Setting diffusion
+constants to zero reduces \ref{eq:5} to the independence model. We may
+also study the effects of signalling and competition for nutrients
+separately by setting other parameters to zero. If necessary, diagonal
+neighbours could be incorporated by adding or scaling diffusion
+constants. In section~\ref{sec:dev-mod-further}, we discuss the
+possibility of using finer-grain spatially-discretised or continuous
+models of diffusion which would also achieve this.
 
 \begin{Figure}
   \centering
@@ -57,14 +52,15 @@ which would also achieve this.
   \label{fig:simple_model}
 \end{Figure}
 
-Models will be written in SBML (ref), using SBML shorthand (ref), so
-that they may eventually be published in the BioModels database (ref)
-and available publicly. This will require conformation to the minimum
-information standard MIRIAM (ref). (Simulation experiments should also
-conform to MIASE (ref).) We will write code for the rest of the
+Models will be written in SBML \citep{Hucka2003}, using SBML shorthand
+\citep{Wilkinson2011}, so that they may eventually be published in the
+BioModels database \citep{BioModels2015b} and available publicly. This
+will require conformation to the minimum information standard MIRIAM
+\citep{MIRIAM2005}. (Simulation experiments should also conform to
+MIASE \cite{MIASE2011}.) We will write code for the rest of the
 project in Python as this has several advantages: it is used widely by
 the scientific community, has libraries which will be of use to us,
-and related tools such as Colonyzer \citet{Lawless2010} are already
+and related tools such as Colonyzer \citep{Lawless2010} are already
 written in Python. To interface SBML models with Python we will use
 the libSBMLO library \citep{Bornstein2008}. ODEs will be solved using
 odeint from the SciPy library \citep{SciPy}. We will use git as
@@ -75,7 +71,7 @@ It is anticipated that solving sets of ODEs for typically 384 cultures
 in QFA and 1536 cultures in SGA will be take a long time. Therefore,
 in the testing stage, we will simulate smaller sets of artificial data
 from the ODE models and attempt to fit these. We will also incorporate
-unittesting into the development to try to ensure that code will
+unit-testing into the development to try to ensure that code will
 still work when scaled up to larger arrays used in experiments.
 
 When dealing with experimental data we must also consider how to treat
@@ -111,19 +107,20 @@ competition. ?presumable some with the same variants grown at every
 location?. We will analyse data from single plates to avoid having to
 deal with batch variance which can be a major source of error (see
 \citet{Baryshnikova2010}). At first, we will fit our model to data
-using least squares. The QFA R package (ref) contains functions for
-fitting the independent logistic growth model and there is development
-underway of a qfaBayes package (ref) which will carry out a Bayesian
-inference of parameters of the same model. We plan to develop a method
-for Bayesian inference using the CANS model which will account for our
-prior belief about parameters distributions (?and allow us to conduct
-model comparison?). For this, we will use either of the Python
-libraries pyMC (ref) or pySTAN (ref). For pySTAN we would have to
-rewrite the ODE model in Stan (ref) but it could be faster.
+using least squares. The QFA R package \citep{qfa2016} contains
+functions for fitting the independent logistic growth model and there
+is development underway of a qfaBayes package which will carry out a
+Bayesian inference of parameters of the same model. We plan to develop
+a method for Bayesian inference using the CANS model which will
+estimate distributions of parameter values accounting for our prior
+belief and allow us to conduct model comparison. For this, we will use
+either of the Python libraries pyMC \citep{PyMC2010} or pySTAN
+\citep{Stan}. For pySTAN we would have to rewrite/parse the ODE model
+in Stan but it could be faster.
 
 In an analysis of high-throughput QFA data from a genetic interaction
 study by \citet{Addinall2011}, \citet{Heydari2016} use a Bayesian
-hierarchical model which mirrors the exerimental structure (from the
+hierarchical model which mirrors the experimental structure (from the
 time-point to population level) and simultaneously estimates growth
 parameters and genetic interaction strength by sharing information
 between levels. This approach accounts for differences in replicate
@@ -197,7 +194,7 @@ two-dimensions, as nutrients are assumed to be distributed evenly
 throughout the agar at time zero, whereas signal molecules will be
 secreted by cultures growing at the agar surface. We could also
 consider using a continuous PDE model of diffusion, although this is
-?likely to take more computational time? and be more difficult to
+likely to take more computational time and be more difficult to
 implement. Because of the generality of the problem, it is possible
 that computational models of diffusion already exist publicly, and we
 would explore the possibility of using them.
@@ -240,8 +237,8 @@ We also intend to determine the effect of competition on the different
 measures of fitness discussed in section \ref{sec:logistic_model}. In
 previous studies, which use fits of the independent logistic growth
 model (e.g. \citet{Addinall2011}), fitness estimates based on carrying
-capacity \(Z\) might be more affected by competition and signalling
-than those based on rate constant \(r\), because gradients in nutrient
+capacity, \(Z\), might be more affected by competition and signalling
+than those based on rate constant, \(r\), because gradients in nutrient
 and signal density will likely be greater towards the end of growth
 curves, after the exponential growth phase, when cultures are larger
 (and have grown for longer). If it is possible to relate parameters in
@@ -256,9 +253,9 @@ will carry out this comparison.
 
 If competition is present, without randomisation of culture location,
 repeat observations may lead to overconfidence in fitness
-estimates. As discussed in section~\ref{sec:initial_model}),
-reflections from plate edges at agar boundaries introduces a further
-systematic error, which persists even when we are trying to correct
+estimates. As discussed in section~\ref{sec:initial_model},
+reflections from plate edges at agar boundaries introduce a further
+systematic error which persists even when we are trying to correct
 for competition. We will compare growth parameters and fitness
 measures estimated from fits of the CANS and independence models, for
 repeats with and without randomisation, and expect to find closer
@@ -289,8 +286,8 @@ priority to compare SGA and QFA as they are currently performed,
 because data and machinery already exists for these designs.
 
 (?Pesumably already done somewhere? It is cheaper to use YEPD agars
-than CSM agars, but these have a higher initial nutrient density
-\(n_{0}\) and this reduces the time available to observe culture
+than CSM agars, but these have a higher initial nutrient density,
+\(n_{0}\), and this reduces the time available to observe culture
 growth. We could also choose to study this trade-off and see if there
 is any reduction in CANS effects due to there being a shorter time for
 diffusion to occur. ?However (A guess), we expect that CANS effects
