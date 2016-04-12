@@ -1,4 +1,4 @@
-# Late
+# Latex
 *.aux
 *.glo
 *.idx
@@ -25,7 +25,7 @@
 auto/
 *~
 *#
-*.pdf
+# *.pdf
 /images/
 _region_.tex
 *.html
