@@ -59,6 +59,13 @@ if args.column:
     print("Column {}".format(colnum))
     raw=pd.read_csv(fname,sep="\t")
     raw=raw[raw.Column==colnum]
+    if 'ID' not in raw.columns:
+        def makeStr(num,string,nchar=2):
+            formspec=string+"{:0"+str(nchar)+"d}"
+            return(formspec.format(num))
+        raw["ID"]=raw["Barcode"]+"_"+[makeStr(x,string="R",nchar=2) for x in raw["Row"]]+[makeStr(x,string="C",nchar=2) for x in raw["Column"]]
+    if 'ExptTime' not in raw.columns:
+        raw["ExptTime"]=raw["Expt.Time"]
     make_sure_path_exists(root)
     dirname=os.path.join(root,"C{0:02d}".format(colnum))
     make_sure_path_exists(dirname)
