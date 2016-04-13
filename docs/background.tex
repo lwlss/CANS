@@ -5,27 +5,30 @@
 
 \subsection{A Comparison of Methods for Screening Strain Fitness }
 
-QFA and SGA are methods for fitness screening using cultures grown on solid agar, both of
-which can be performed using a high-throughput protocol \citet{Baryshnikova2010sga,Banks2012}. SGA
-uses pinned cultures of higher initial cell density than the dilute liquid cultures used
-in QFA. Although SGA allows for more repeats per plate (1536 cultures vs 384 cultures in
-QFA), more of the growth curve can be captured with QFA so fits of growth models are more
-accurate (see Figure~\ref{fig:qfa_and_sga_growth_curves}) \citep{Lawless2010}.
-Comparison of QFA and SGA cultures in Figure~\ref{fig:qfa_and_sga_growth_curves}c shows
-how QFA cultures are composed of many individual colonies which increase in thickness,
-whereas SGA cultures are composed of a single uniform colony which grows outwards. The
-number of individual colonies in a QFA culture is high enough that lag and other
-stochastic effects should average out.
+QFA and SGA are methods for high-throughput fitness screening using cultures grown on
+solid agar \citep{Baryshnikova2010sga,Banks2012}. SGA uses a single measurement of culture
+size, taken at some midpoint in the growth curve, as a surrogate for growth rate
+\citep{Baryshnikova2010sga}. QFA collects more information about growth by taking images
+of plates at points throughout the growth curve. QFA can be performed using either the
+pinned cultures used in SGA or dilute liquid cultures (``spots'') of lower initial cell
+density. Although pinned QFA allows for more cultures per plate (1536 vs 384 in spotted),
+spotted QFA allows for more accurate fitting of growth models as growth curves are more
+complete (see Figure~\ref{fig:qfa_and_sga_growth_curves}) \citep{Lawless2010}. Comparison
+of spotted and pinned QFA cultures in Figure~\ref{fig:qfa_and_sga_growth_curves}c shows
+how spotted cultures are composed of many individual colonies which increase in size and
+thickness, whereas pinned cultures are composed of a single uniform colony which grows
+radially. The number of individual colonies in a spotted culture is high enough that lag
+and other stochastic effects should average out.
 
-Colonyzer \citep{Lawless2010}, a tool for automatic capture of growth curves from images
-of both QFA and SGA plates, uses integrated optical density (IOD) as a proxy for cell
-density. Figure~\ref{fig:qfa_curves}, courtesy of \citet{Banks2012}, shows an example of
-308 growth curves captured by Colonyzer from a QFA plate. In many SGA studies, culture
-area, rather than IOD, is used as a proxy for culture density (example
+Colonyzer \citep{Lawless2010}, a QFA tool for automatic capture of growth curves from
+images of both spotted and pinned plates, uses integrated optical density (IOD) as a proxy
+for cell density. Figure~\ref{fig:qfa_curves}, courtesy of \citet{Banks2012}, shows an
+example of 308 growth curves captured by Colonyzer from a QFA plate. In many SGA studies,
+culture area, rather than IOD, is used as a proxy for culture density (example
 ref). \cite{Lawless2010} found that direct area measurements are more noisy than IOD
 measurements and provide a worse fit to the logistic model. To prevent bias in comparison
-of data from QFA and SGA we will use Colonyzer to take the more accurate IOD measurements
-for both data types.
+of data from spotted and pinned QFA we will use Colonyzer to take the more accurate IOD
+measurements for both.
 
 Fitness screening can also be performed using liquid cultures which are not susceptible to
 competition or signalling effects. However, this approach has lower throughput (ref).
@@ -60,7 +63,7 @@ competition or signalling effects. However, this approach has lower throughput (
 
 \subsection{Competition and Signalling}
 
-At the beginning of QFA and SGA, nutrients are distributed uniformly throughout the
+At the beginning of QFA, nutrients are distributed uniformly throughout the
 agar. During incubation, cultures grow, consuming nutrients and creating gradients in
 nutrient density. A QFA plate taken partway through incubation can be
 seen in Figure~\ref{fig:15_spots}. As some cultures grow much faster than their
@@ -68,8 +71,8 @@ neighbours, using more nutrients, we believe that diffusion of nutrients along g
 between cultures might cause a significant competition effect. Growth of yeast cultures
 may also be affected by signal molecules produced by cells, which diffuse through the
 agar or travel across its surface. Candidates are ethanol \citep{fujita2006}, a poison
-produced by fermentation, and chemicals involved in regulatory response
-to changes in cell density (quorum sensing) (see \citet{sprague2006,honigberg2011}).
+produced by fermentation, and ammonia which is involved in regulatory response
+to changes in cell density (quorum sensing) \citep{sprague2006,honigberg2011}.
 
 \begin{Figure}
   \centering
