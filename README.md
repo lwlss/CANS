@@ -70,4 +70,5 @@ Output_Images contains analysed previews demonstrating success of automatic colo
 * Compare inferred paramter values from competition model with values from regular QFA
 
 #### Links:
-* Universally Sloppy Parameter Sensitivities in Systems Biology Models  http://dx.doi.org/10.1371/journal.pcbi.0030189  
+* Universally Sloppy Parameter Sensitivities in Systems Biology Models  http://dx.doi.org/10.1371/journal.pcbi.0030189
+* Agar diffusion model http://web.mit.edu/rsi/2014/all/yjreo.pdf.gz
