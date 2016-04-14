@@ -20,19 +20,6 @@ thickness, whereas pinned cultures are composed of a single uniform colony which
 radially. The number of individual colonies in a spotted culture is high enough that lag
 and other stochastic effects should average out.
 
-Colonyzer \citep{Lawless2010}, a QFA tool for automatic capture of growth curves, from
-images of both spotted and pinned plates, uses integrated optical density (IOD) as a proxy
-for cell density. Figure~\ref{fig:qfa_curves} \citep{Banks2012}, shows an example of 308
-growth curves from a spotted QFA plate captured by Colonyzer and assembled by the QFA R
-package \citep{qfa2016}. In SGA, culture area, rather than IOD, is used as a proxy for
-culture density \citep{Baryshnikova2010sga}. \citet{Lawless2010} find that direct area
-measurements are noisier than IOD measurements and provide a worse fit to the logistic
-model. To prevent bias in comparison of experimental designs, we will use Colonyzer to
-generate more accurate IOD measurements from spotted and pinned QFA images.
-
-Fitness screening can also be performed using independent liquid cultures which are not
-susceptible to competition or signalling effects \citep{Jasnos2007}. However, this
-approach has lower throughput.
 
 \end{multicols}
 \graphicspath{{images_low_res/}}
@@ -48,6 +35,19 @@ approach has lower throughput.
 \end{Figure}
 \begin{multicols}{2}
 
+Colonyzer \citep{Lawless2010}, a QFA tool for automatic capture of growth curves, from
+images of both spotted and pinned plates, uses integrated optical density (IOD) as a proxy
+for cell density. Figure~\ref{fig:qfa_curves} \citep{Banks2012}, shows an example of 308
+growth curves from a spotted QFA plate captured by Colonyzer and assembled by the QFA R
+package \citep{qfa2016}. In SGA, culture area, rather than IOD, is used as a proxy for
+culture density \citep{Baryshnikova2010sga}. \citet{Lawless2010} find that direct area
+measurements are noisier than IOD measurements and provide a worse fit to the logistic
+model. To prevent bias in comparison of experimental designs, we will use Colonyzer to
+generate more accurate IOD measurements from spotted and pinned QFA images.
+
+Fitness screening can also be performed using independent liquid cultures which are not
+susceptible to competition or signalling effects \citep{Jasnos2007}. However, this
+approach has lower throughput.
 
 \end{multicols}
 \graphicspath{{images_low_res/}}
@@ -73,15 +73,6 @@ may also be affected by signal molecules produced by cells, which diffuse throug
 agar or travel across its surface. Candidates are ethanol \citep{fujita2006}, a poison
 produced by fermentation, and ammonia which is involved in regulatory response
 to changes in cell density (quorum sensing) \citep{sprague2006,honigberg2011}.
-
-\begin{Figure}
-  \centering
-  \includegraphics[width=\linewidth]{5658435523_c2e43729f1_b}
-  \captionof{figure}{An image of 15 cultures on a section of solid agar taken partway
-    through a spotted QFA procedure. \citep{Lawless2010}
-    https://github.com/CnrLwlss/Colonyzer}
-  \label{fig:15_spots}
-\end{Figure}
 
 \subsection{Modelling Approaches}
 
@@ -118,6 +109,15 @@ of animal populations \citep{Berryman1992} and signalling and reactions in the s
 heterogeneous environment inside cells \citep{Aldridge2006,Chen2010} where this assumption
 is also questionable.
 %stochastic
+
+\begin{Figure}
+  \centering
+  \includegraphics[width=\linewidth]{5658435523_c2e43729f1_b}
+  \captionof{figure}{An image of 15 cultures on a section of solid agar taken partway
+    through a spotted QFA procedure. \citep{Lawless2010}
+    https://github.com/CnrLwlss/Colonyzer}
+  \label{fig:15_spots}
+\end{Figure}
 
 A deterministic approximation of culture growth should be valid; spotted cultures are
 inoculated with \textasciitilde 100 starting cells \citep{Addinall2011}, a fairly large

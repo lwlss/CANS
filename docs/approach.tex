@@ -35,9 +35,8 @@ where, \(\delta_i\) indicates the set of closest neighbours, \(k_{n}\)
 and \(k_{s}\) are nutrient and signal diffusion constants, \(\alpha\)
 is a rate constant for signal secretion, and \(\beta\) is a constant
 for the effect of signal on culture population.
-
- ?do we assume no cell
-death\ detect dead cells on the agar/ times are short?
+%  ?do we assume no cell
+% death\ detect dead cells on the agar/ times are short?
 
 Alternative models of signalling effect could be used, depending on
 the mechanism of signalling under investigation (see section
@@ -108,9 +107,9 @@ possibly allowing it to propagate further.
 \subsection{Analyse Experimental Data}
 \label{sec:analyse-data}
 
-List of strains of known fitness??\\
-Specifically what machines do we use for computation?\\
-Can use yzer.ncl.ac.uk for computation: 56 cores, 256Gb RAM, massive GPU.\\
+% List of strains of known fitness??\\
+% Specifically what machines do we use for computation?\\
+% Can use yzer.ncl.ac.uk for computation: 56 cores, 256Gb RAM, massive GPU.\\
 
 We will investigate unpublished spotted and pinned QFA data for the
 model organism \textit{S. Cerevisiae}. Some data, with vacant gaps, is
@@ -123,6 +122,15 @@ allow us to conduct model comparison. For this, we will use either of
 the Python libraries pyMC \citep{PyMC2010} or pySTAN \citep{Stan}. For
 pySTAN we would have to rewrite the ODE model in Stan but it
 could be faster.
+
+\begin{Figure}
+  \centering
+  \includegraphics[width=\linewidth]{DLR00012647-2009-07-02_23-12-49}
+  \captionof{figure}{An agar with locations left empty (``gaps'')
+    designed to exhibit effects of competition and signalling.}
+  \label{fig:gaps}
+\end{Figure}
+
 
 In an analysis of QFA data from a genetic interaction study by
 \citet{Addinall2011}, \citet{Heydari2016} use a Bayesian hierarchical
@@ -153,13 +161,6 @@ model we will calibrate these parameters on one plate and validate the
 model on a second plate by assessing whether a good fit is still
 produced.
 
-\begin{Figure}
-  \centering
-  \includegraphics[width=\linewidth]{DLR00012647-2009-07-02_23-12-49}
-  \captionof{figure}{An agar with locations left empty (``gaps'')
-    designed to exhibit effects of competition and signalling.}
-  \label{fig:gaps}
-\end{Figure}
 
 If we fail to discover competition or signalling effects by fitting
 the CANS model, we may need to improve aspects of our modelling
