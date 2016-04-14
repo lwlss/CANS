@@ -6,11 +6,11 @@
 \subsection{A Comparison of Methods for Screening Strain Fitness }
 
 QFA and SGA are methods for high-throughput fitness screening using cultures grown on
-solid agar \citep{Baryshnikova2010sga,Banks2012}. SGA uses a single measurement of culture
-size, taken at some midpoint in the growth curve, as a surrogate for growth rate
+solid agar \citep{Baryshnikova2010sga,Banks2012}. As a surrogate for growth rate, SGA uses
+a single measurement of culture size taken at some midpoint in the growth curve
 \citep{Baryshnikova2010sga}. QFA collects more information about growth by taking images
 of plates at points throughout the growth curve. QFA can be performed using either the
-pinned cultures used in SGA or dilute liquid cultures (``spots'') of lower initial cell
+pinned cultures (used in SGA) or dilute liquid cultures (``spots'') of lower initial cell
 density. Although pinned QFA allows for more cultures per plate (1536 vs 384 in spotted),
 spotted QFA allows for more accurate fitting of growth models as growth curves are more
 complete (see Figure~\ref{fig:qfa_and_sga_growth_curves}) \citep{Lawless2010}. Comparison
@@ -26,12 +26,13 @@ for cell density. Figure~\ref{fig:qfa_curves} \citep{Banks2012}, shows an exampl
 growth curves from a spotted QFA plate captured by Colonyzer and assembled by the QFA R
 package \citep{qfa2016}. In SGA, culture area, rather than IOD, is used as a proxy for
 culture density \citep{Baryshnikova2010sga}. \citet{Lawless2010} find that direct area
-measurements are more noisy than IOD measurements and provide a worse fit to the logistic
+measurements are noisier than IOD measurements and provide a worse fit to the logistic
 model. To prevent bias in comparison of experimental designs, we will use Colonyzer to
 generate more accurate IOD measurements from spotted and pinned QFA images.
 
-Fitness screening can also be performed using independent liquid cultures which are not susceptible to
-competition or signalling effects \citep{Jasnos2007}. However, this approach has lower throughput.
+Fitness screening can also be performed using independent liquid cultures which are not
+susceptible to competition or signalling effects \citep{Jasnos2007}. However, this
+approach has lower throughput.
 
 \end{multicols}
 \graphicspath{{images_low_res/}}
@@ -76,8 +77,9 @@ to changes in cell density (quorum sensing) \citep{sprague2006,honigberg2011}.
 \begin{Figure}
   \centering
   \includegraphics[width=\linewidth]{5658435523_c2e43729f1_b}
-  \captionof{figure}{An image of 15 cultures on a section of solid agar from a QFA
-    procedure. \citep{Lawless2010} https://github.com/CnrLwlss/Colonyzer}
+  \captionof{figure}{An image of 15 cultures on a section of solid agar taken partway
+    through a spotted QFA procedure. \citep{Lawless2010}
+    https://github.com/CnrLwlss/Colonyzer}
   \label{fig:15_spots}
 \end{Figure}
 
@@ -92,7 +94,7 @@ directions. If species numbers are large enough, reactions can be modelled conti
 and deterministicly using ordinary differential equations (ODEs). Microbial population
 growth, with cell division dependent on nutrient availability, can also be modelled using
 mass action kinetics. We can use the following reaction equation for a culture \(i\)
-growing on the agar,
+growing on an agar plate,
 \begin{subequations}
   \label{eq:9}
   \begin{align}
@@ -124,15 +126,17 @@ The logistic growth model,
   \dot{x} = rx\left(1 - \frac{x}{K}\right)
 \end{equation}
 \citep{Verhulst1845}, for a population of density \(x\), with parameters, \(r\), growth
-rate and \(K\), carrying capacity, describes self-limiting growth and is commonly used
-to fit QFA data with an assumption of independence between cultures. It has the
-following analytical solution:
+rate and \(K\), carrying capacity, describes self-limiting growth and is currently used to
+fit QFA data with an assumption of independence between cultures
+\citep{Addinall2011,qfa2016}. It has the following analytical solution:
 \begin{equation}
   \label{eq:2}
   x(t) = \frac{KPe^{rt}}{K + P(e^{rt}-1)},
 \end{equation}
 where P is the initial population density. Measures of fitness are commonly defined in
-terms of the parameters \(r\), \(K\), and \(P\) \citep{Addinall2011}.
+terms of the parameters \(r\), \(K\), and \(P\) \citep{Addinall2011}. We hope to improve
+the reproducibility of fitness estimates using a model accounting for competition and
+signalling
 % For example, \cite{Addinall2011} define two univariate
 % fitness measures: the maximum doubling rate (MDR) and maximum doubling potential (MDP) as,
 % \begin{subequations}
@@ -153,16 +157,16 @@ terms of the parameters \(r\), \(K\), and \(P\) \citep{Addinall2011}.
 % signalling, this will allow us to compare the effect of competition and signalling on
 % existing fitness measures.
 
-\subsection{Fitness Screening in Functional Genomics}
-\label{sec:genetic-interaction}
-Fitness screening using cultures grown on solid agar has important uses in functional
-genomics for inferring genetic interactions, response to environmental conditions drug
-responses, and response to environmental conditions \citep{Addinall2011,Andrew2013} and
-can be carried out on a genome wide scale. For example, \citet{Costanzo2010} use SGA data
-to construct a genetic interaction map for \textasciitilde 75\% of the
-\textit{S. cerevisiae} genome.
-% There exist several methods for inferring genetic interaction strength from fitness
-% measures (see \citet{Mani2008}). Fishers multiplicative model of genetic independence
+%%%%% \subsection{Fitness Screening in Functional Genomics}
+%%%%% \label{sec:genetic-interaction}
+%%%%% Fitness screening using cultures grown on solid agar has important uses in functional
+%%%%% genomics for inferring genetic interactions, response to environmental conditions drug
+%%%%% responses, and response to environmental conditions \citep{Addinall2011,Andrew2013} and
+%%%%% can be carried out on a genome wide scale. For example, \citet{Costanzo2010} use SGA data
+%%%%% to construct a genetic interaction map for \textasciitilde 75\% of the
+%%%%% \textit{S. cerevisiae} genome.
+%%%%% % There exist several methods for inferring genetic interaction strength from fitness
+%%%%% % measures (see \citet{Mani2008}). Fishers multiplicative model of genetic independence
 % \citep{fisher1919}, used, among others, by \citet{Addinall2011}, states that if two genes,
 % \textit{a} and \textit{b}, are non-interacting, then the product of the double-mutant and
 % wild-type fitnesses is equal to the product of the single-mutant fitnesses.
@@ -184,10 +188,10 @@ to construct a genetic interaction map for \textasciitilde 75\% of the
 % \textit{cdc13}, which functions in telomere capping, in an attempt to discover genes
 % involved in telomere shortening, which is linked to cancer and ageing. Important
 % discoveries could be made, leading to health benefits for humans
-The statistacal power to predict genetic interactions may be improved by accounting for
-competition and signalling in reanalysis of data from such studies. If competition and
-signalling has an affect in yeast this is also likely to be relevant for fitness screening
-using other types of microbial organisms.
+% The statistacal power to predict genetic interactions may be improved by accounting for
+% competition and signalling in reanalysis of data from such studies. If competition and
+% signalling has an affect in yeast this is also likely to be relevant for fitness screening
+% using other types of microbial organisms.
 
 %%% Local Variables:
 %%% mode: latex
