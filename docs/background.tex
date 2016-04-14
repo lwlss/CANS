@@ -110,14 +110,23 @@ required for a cell to divide, and [~] are concentrations. In ODE form,
 \end{equation}
 where \(C_{i}\) and \(N_{i}\) are the amount of cells and nutrients for culture \(i\).
 The assumption of a well stirred reaction mixture is perhaps not valid for a culture
-growing on agar. However, a mass action approximation has been used with some success to
-model predator-prey dynamics of animal populations \citep{Berryman1992} and signalling and
-reactions in the spatially heterogeneous environment inside cells
-\citep{Aldridge2006,Chen2010} where this assumption is also questionable. If nutrient
-gradients within cultures are too large then a spatial PDE model may be required. If
-nutrients are in some way dimensionally confined inside the culture medium, perhaps within
-a channel or on a surface, then a fractal kinetics model may be more appropriate
-\citep{savageau1995}.
+growing on agar. We could explore alternatives such as PDE models, if gradients within
+cultures are large, or fractal kinetics if nutrient diffusion is limited inside cultures,
+due to gel-like properties of the medium \citep{savageau1995,Kopelman1988}. However, a
+mass action approximation has been used with some success to model predator-prey dynamics
+of animal populations \citep{Berryman1992} and signalling and reactions in the spatially
+heterogeneous environment inside cells \citep{Aldridge2006,Chen2010} where this assumption
+is also questionable.
+%stochastic
+
+A deterministic approximation of culture growth should be valid; spotted cultures are
+inoculated with \textasciitilde 100 starting cells \citep{Addinall2011}, a fairly large
+starting number, with each undergoing exponential growth and contain a large enough number
+of subcolonies (Figure~\ref{fig:15_spots}) so that stochastic effects should average out;
+pinned cultures have a much higher initial cell density. Furthermore, microbial growth
+curves for both have a smooth appearance uncharacteristic of stochasticity (see
+Figure~\ref{fig:qfa_and_sga_growth_curves}).
+
 \subsubsection{The Logistic Growth Model}
 \label{sec:logistic_model}
 The logistic growth model,
