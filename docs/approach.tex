@@ -7,21 +7,22 @@
 
 Figure~\ref{fig:simple_model} shows a schematic of our initial
 approach to constructing a competition for nutrients and signalling
-(CANS) model. Each culture at location, \(i\), is associated with
-three variables: one observed variable, \(C_{i}\), the amount of
-cells, and two hidden variables, \(N_{i}\) and \(S_{i}\), the amount
-of nutrients, and signal. Cultures in QFA and SGA agars are arranged
-in a rectangular array, each culture having eight neighbours with
-which they could conceivably interact directly (except at the
-boundaries). Initially, we will model diffusion between only the four
-closest neighbours, indicated by the darker blue circles in
-Figure~\ref{fig:simple_model}. Assuming a well stirred mixture, we
-will begin by describing nutrient dependent growth at each location
-using mass action kinetics and the reaction equation \ref{eq:9}a.  As
-a first approach, assuming that the number of cells is continuous, we
-will incorporate the effect of signal molecules on growth and the
-diffusion of both signal molecules and nutrients using the following
-ODEs (CANS model):
+(CANS) model. Each culture, \(i\), on a plate is associated with three
+variables: one observed variable, \(C_{i}\), the amount of cells, and
+two hidden variables, \(N_{i}\) and \(S_{i}\), the amount of nutrients
+and signal. Cultures in QFA and SGA agars are arranged in a
+rectangular array, each culture having eight neighbours with which
+they could conceivably interact directly (except at plate
+boundaries). Initially, we construct a network diffusion model for an
+entire plate with diffusion occurring directly between only the four
+closest neighbours of each culture, indicated by the darker blue
+circles in Figure~\ref{fig:simple_model}. Assuming a well stirred
+mixture, we begin by describing nutrient dependent growth of each
+culture using mass action kinetics and the reaction equation
+\ref{eq:9}a. As a first approach, assuming that the number of cells
+is continuous, we will incorporate the effect of signal molecules on
+growth and the diffusion of both signal molecules and nutrients using
+the following ODEs (CANS model):
 \begin{subequations}
   \label{eq:5}
   \begin{align}
@@ -33,23 +34,30 @@ ODEs (CANS model):
 where, \(\delta_i\) indicates the set of closest neighbours, \(k_{n}\)
 and \(k_{s}\) are nutrient and signal diffusion constants, \(\alpha\)
 is a rate constant for signal secretion, and \(\beta\) is a constant
-for the effect of signal on culture population. ?do we assume no cell
-death\ detect dead cells on the agar/ times are short? Alternative
-models of signalling effect could be used, depending on the mechanism
-of signalling under investigation (see background section); initially,
-we have chosen to use the simplest modelling approach. Setting
-diffusion constants to zero reduces \ref{eq:5} to the independence
-model. We may also study the effects of signalling and competition for
-nutrients separately by setting other parameters to zero. If
-necessary, diagonal neighbours could be incorporated by adding or
-scaling diffusion constants. In section~\ref{sec:dev-mod-further}, we
-discuss the possibility of using finer-grain spatially-discretised or
-continuous models of diffusion which would also achieve this.
+for the effect of signal on culture population.
+
+ ?do we assume no cell
+death\ detect dead cells on the agar/ times are short?
+
+Alternative models of signalling effect could be used, depending on
+the mechanism of signalling under investigation (see section
+\ref{sec:dev-mod-further}); initially, we have chosen to use the
+simplest modelling approach. Setting diffusion constants to zero
+reduces \ref{eq:5} to the independence model. We may also study the
+effects of signalling and competition for nutrients separately by
+setting other parameters to zero. If necessary, diagonal neighbours
+could be incorporated by adding or scaling diffusion constants. In
+section~\ref{sec:dev-mod-further}, we discuss the possibility of using
+finer-grain spatially-discretised or continuous models of diffusion
+which would also achieve this.
 
 \begin{Figure}
   \centering
   \includegraphics[width=\linewidth]{square_array}
-  \captionof{figure}{Schematic of simple modelling approach.}
+  \captionof{figure}{Schematic of a modelling approach where each
+    circle represents a culture, \(i\), on an agar plate and arrows
+    represent diffusion. \(C_{i}\) - amount of cells; \(N_{i}\) -
+    amount of nutrients; \(S_{i}\) - amount of signal.}
   \label{fig:simple_model}
 \end{Figure}
 
@@ -58,7 +66,7 @@ Models will be written in SBML \citep{Hucka2003}, using SBML shorthand
 BioModels database \citep{BioModels2015b} and available publicly. This
 will require conformation to the minimum information standard MIRIAM
 \citep{MIRIAM2005}. (Simulation experiments should also conform to
-MIASE \cite{MIASE2011}.) We will write code for the rest of the
+MIASE \citep{MIASE2011}.) We will write code for the rest of the
 project in Python as this has several advantages: it is used widely by
 the scientific community, has libraries which will be of use to us,
 and related tools such as Colonyzer \citep{Lawless2010} are already
@@ -69,31 +77,33 @@ version control and GitHub as a remote repository where packages will
 eventually be released publicly.
 
 It is anticipated that solving sets of ODEs for typically 384 cultures
-in QFA and 1536 cultures in SGA will be take a long time. Therefore,
-in the testing stage, we will simulate smaller sets of artificial data
-from the ODE models and attempt to fit these. We will also incorporate
-unit-testing into the development to try to ensure that code will
-still work when scaled up to larger arrays used in experiments.
+in spotted QFA and 1536 cultures in pinned QFA will be take a long
+time. Therefore, in the testing stage, we will simulate smaller sets
+of artificial data from the ODE models and attempt to fit these. We
+will also incorporate unit-testing into the development to try to
+ensure that code will still work when scaled up to larger arrays used
+in experiments.
 
 When dealing with experimental data we must also consider how to treat
 cultures around the edge of the agar. These have access to
 proportionally more nutrients because there is a relatively large area
-beyond them which is unoccupied by cultures. In photographic images,
-these sites are also affected by reflections from plate walls which
-cause errors in integrated optical density (IOD) measurements, a proxy
-for cell density, which cannot be fully corrected for by Colonyzer
+beyond them which is unoccupied. In photographic images, these sites
+are also affected by reflections from plate walls which cause errors
+in integrated optical density (IOD) measurements, a proxy for cell
+density, which cannot be fully corrected for by Colonyzer
 \citep{Lawless2010}. In experiments, an identical culture is grown in
-edge locations and the results are discarded (see refs). We may choose
-to adjust for the increased nutrient access and include edge cultures
-in our model and analysis. This would introduce a systematic error for
-sites close to the plate edges and is an argument for the use of
-repeats and randomisation of location (see
-\ref{sec:comp-exper-designs}). A simpler modelling approach is to
-discard the first outer layer entirely from the model and the second
-outer layer from the final results. However, this is undesirable as it
-reduces the amount of information that is gathered from each plate and
-may not account for the systematic error any better than the more
-complicated approach, possibly allowing it to propagate further.
+edge locations and the results are discarded
+\citep{Lawless2010,Addinall2011}. We may choose to adjust for the
+increased nutrient access and include edge cultures in our model and
+analysis. This would introduce a systematic error for sites close to
+the plate edges and is an argument for the use of repeats and
+randomisation of location (see \ref{sec:comp-exper-designs}). A
+simpler modelling approach is to discard the first outer layer
+entirely from the model and the second outer layer from the final
+results. However, this is undesirable as it reduces the amount of
+information that is gathered from each plate and may not account for
+the systematic error any better than the more complicated approach,
+possibly allowing it to propagate further.
 
 \subsection{Analyse Experimental Data}
 \label{sec:analyse-data}
@@ -102,39 +112,38 @@ List of strains of known fitness??\\
 Specifically what machines do we use for computation?\\
 Can use yzer.ncl.ac.uk for computation: 56 cores, 256Gb RAM, massive GPU.\\
 
-We will investigate unpublished QFA and SGA data for the model
-organism \textit{S. Cerevisiae}. Some data (Figure~\ref{fig:gaps}),
-with vacant gaps, is specifically designed for the study of
+We will investigate unpublished spotted and pinned QFA data for the
+model organism \textit{S. Cerevisiae}. Some data, with vacant gaps, is
+specifically designed for the study of
 competition. Figure~\ref{fig:gaps} shows such an agar where each
 culture is also an identical strain. We plan to develop a method for
 Bayesian inference using the CANS model which will estimate
 distributions of parameter values accounting for our prior belief and
 allow us to conduct model comparison. For this, we will use either of
 the Python libraries pyMC \citep{PyMC2010} or pySTAN \citep{Stan}. For
-pySTAN we would have to rewrite/parse the ODE model in Stan but it
+pySTAN we would have to rewrite the ODE model in Stan but it
 could be faster.
 
-In an analysis of high-throughput QFA data from a genetic interaction
-study by \citet{Addinall2011}, \citet{Heydari2016} use a Bayesian
-hierarchical model which mirrors the experimental structure (from the
-time-point to population level) and simultaneously estimates growth
-parameters and genetic interaction strength by sharing information
-between levels. This approach accounts for differences in replicate
-fitness variances between different mutant strains which cannot be
-efficiently factored into statistical analyses
-\citep{Heydari2016}. When looking at the most significant genetic
-interactions, for the increased computational time that it takes (4
-weeks vs 3 hours), this analysis does not offer a significant
-advantage over the original statistical analysis carried out by
-\citet{Addinall2011}. However, \citet{Heydari2016} do identify weakly
-interacting genes for which there is no previous evidence, and a
-hierarchical model which only modelled population dynamics took
-significantly less time (1 week). As we are only studying single
-plates, and not going on to infer genetic interaction strength, there
-will be fewer levels in our hierarchy allowing for a faster
-computational time, and this type of analysis may prove more effective in
-identifying competition and signalling effects than it is in identifying genetic
-interactions.
+In an analysis of QFA data from a genetic interaction study by
+\citet{Addinall2011}, \citet{Heydari2016} use a Bayesian hierarchical
+model which mirrors the experimental structure (from the time-point to
+population level) and simultaneously estimates growth parameters and
+genetic interaction strength by sharing information between
+levels. This approach accounts for differences in replicate fitness
+variances between different mutant strains which cannot be efficiently
+factored into statistical analyses \citep{Heydari2016}. When looking
+at the most significant genetic interactions, for the increased
+computational time that it takes (4 weeks vs 3 hours), this analysis
+does not offer a significant advantage over the original statistical
+analysis carried out by \citet{Addinall2011}. However,
+\citet{Heydari2016} do identify weakly interacting genes for which
+there is no previous evidence, and a hierarchical model which only
+modelled population dynamics took significantly less time (1 week). As
+we are only studying single plates, and not going on to infer genetic
+interaction strength, there will be fewer levels in our hierarchy
+allowing for a faster computational time, and this type of analysis
+may prove more effective in identifying competition and signalling
+effects than it is in identifying genetic interactions.
 
 \begin{Figure}
   \centering
@@ -167,24 +176,24 @@ culture growth rate as,
 where \(S_{crit}\) is some critical concentration of signal above
 which cultures do not grow. We must, however, be careful to avoid
 adding too much complexity to models when we are unsure of the
-underlying mechanism as this could result in over-fitting.
+underlying mechanism, as this could result in over-fitting.
 
 We may also model diffusion more realistically, and incorporate
 interactions between diagonal neighbours, using a
 spatially-discretised model of diffusion with a finer grid (see
 Figure~\ref{fig:grid}). We would begin using a two-dimensional model
-as this is simpler. Although variance between cultures on the same
-line will still be an issue, we may attempt to validate against data
-from miniQFA (Figure~\ref{fig:stripes}), and remain in two-dimensions,
-to investigate how diffusion varies across agar height (see
-Figure~\ref{fig:height_dependence} middle). We should do this for
+as this is simpler. We may attempt to validate against data from
+miniQFA (Figure~\ref{fig:stripes}), and remain in two-dimensions, to
+investigate how diffusion varies across agar height (see
+Figure~\ref{fig:height_dependence} middle). However, variance between
+cultures on the same line may still be an issue. We should do this for
 different agar geometries, varying \(d\) and \(w\) in
-Figure~\ref{fig:exp_vars}, to represent QFA and SGA experiments. If
-height dependence is found to be unimportant, we may apply a
-two-dimensional grid in the plane of the agar surface as in
-Figure~\ref{fig:grid}. Otherwise, we would have to use a three
-dimensional model of diffusion. It may suffice to model nutrient
-diffusion in three-dimensions and signal diffusion in only
+Figure~\ref{fig:exp_vars}, to represent spotted and pinned
+experiments. If diffusion across agar height is found to be
+unimportant, we may apply a two-dimensional grid in the plane of the
+agar surface as in Figure~\ref{fig:grid}. Otherwise, we would have to
+use a three dimensional model of diffusion. It may suffice to model
+nutrient diffusion in three-dimensions and signal diffusion in only
 two-dimensions, as nutrients are assumed to be distributed evenly
 throughout the agar at time zero, whereas signal molecules will be
 secreted by cultures growing at the agar surface. We could also
@@ -216,7 +225,9 @@ would explore the possibility of using them.
 \begin{Figure}
   \centering
   \includegraphics[width=\linewidth]{height_dep_miniqfa_delta_z}
-  \captionof{figure}{Schematics of diffusion across agar height.}
+  \captionof{figure}{Schematics of diffusion across agar height. Top -
+    no diffusion across height; Middle - spatially-discretised; Bottom
+    - continuous.}
   \label{fig:height_dependence}
 \end{Figure}
 % Top: Could model movement of vertical or movement across it.
@@ -229,18 +240,16 @@ growth is independent.
 
 We also intend to determine the effect of competition on different
 measures of fitness (see section \ref{sec:logistic_model}). In
-previous studies, which use fits of the independent logistic growth
-model (e.g. \citet{Addinall2011}), fitness estimates based on carrying
-capacity, \(Z\), might be more affected by competition and signalling
-than those based on rate constant, \(r\), because gradients in
-nutrient and signal density will likely be greater towards the end of
-growth curves, after the exponential growth phase, when cultures are
-larger. However, we also expect modelling competition to improve our
-confidence in estimates of \(r\) by using information the beginning
-and end of growth curve to inform our estimates. If it is possible to
-relate parameters in our model to those of the independent logistic
-model (\ref{eq:1}) we will make this comparison.
-
+previous studies, which assume independence and fit the logistic
+growth model (e.g. \citet{Addinall2011}), fitness estimates based on
+carrying capacity, \(Z\), might be more affected by competition and
+signalling than those based on rate constant, \(r\), because gradients
+in nutrient and signal density will likely be greater towards the end
+of growth curves, after the exponential growth phase, when cultures
+are larger. We expect modelling competition and signalling to improve
+our confidence in estimates of \(r\) and \(Z\) by using information from
+the beginning and the end of growth curves to inform our estimates. We
+will test this and also compare the two measures.
 
 \subsection{Compare Experimental Designs}
 \label{sec:comp-exper-designs}
@@ -267,33 +276,29 @@ randomisation when using the independence model.
 \end{Figure}
 
 If time allows, we wish to compare differences in CANS effects between
-spotted and pinned QFA designs. To do this we change the following
+spotted and pinned designs. To do this we change the following
 variables: \(\rho_{0}\), the initial concentration of cells, \(d\),
 the distance between cultures, and \(w\), the diameter of cultures
 (see Figure~\ref{fig:exp_vars}). For pinned cultures, we also have to
-consider that the diameter/area of cultures changes with time and
-account for this in our models. We should also account for the
-statistical advantage of SGA, in that roughly five times more cultures
-can be grown on SGA plates, allowing for more repeats. Simulations may
-be of use to study the effect of one variable at a time. However, it
-is of greater priority to compare SGA and QFA as they are currently
-performed, because data and machinery already exists for these
-designs.
+consider that the area of cultures changes with time and account for
+this in our models. We should also account for the statistical
+advantage of pinned QFA, in that roughly five times more cultures can
+be grown on plate, allowing for more repeats. Simulations may be of
+use to study the effect of one variable at a time. However, it is of
+greater priority to compare spotted and pinned experiments as they are
+currently performed, because data and machinery already exists for
+these designs.
 
 It is cheaper to use YEPD agar than CSM agar, but YEPD agars have a
 higher initial nutrient density, \(n_{0}\), and this reduces the time
-available to observe culture growth. We may study this trade-off and
-see if there is any reduction in CANS effects due to there being a
-shorter time for diffusion to occur. However, we expect that CANS
-effects would be small compared to the error from shorter observation
-time and that a better approach would be to correct for CANS in CSM
-data either directly or using randomisation.
+available to observe culture growth resulting in less accurate
+fits. We may investigate whether there is any reduction in CANS
+effects due to the shorter time for diffusion to occur which could
+justify the trade-off. However, we expect that CANS effects would be
+small compared to the error from shorter observation time and that a
+better approach would be to correct for CANS in CSM data either
+directly or by randomisation.
 
-
-\subsection{Package and Distribute}
-\label{sec:package-distribute}
-Already mentioned much of this in other parts of the
-approach. Anything missing?
 
 %%% Local Variables:
 %%% mode: latex
