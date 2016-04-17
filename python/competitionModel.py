@@ -1,6 +1,7 @@
 from CANS_functions import *
 import pandas as pd
 import scipy.optimize as opt
+from numpy import inf
 
 # Timepoints at which we would like to simulate cell densities (& remaining nutrients)
 t=np.linspace(0,4.5,100)
@@ -50,7 +51,7 @@ def ObjFun(x):
 
 print(ObjFun([C[0]]+[N[0]]+r+[k]))
 
-res=opt.minimize(ObjFun,[C[0]]+[N[0]]+r+[k])
+res=opt.minimize(ObjFun,x0=[C[0]]+[N[0]]+r+[k],args=(), method='BFGS', jac=None, tol=None, callback=None, options={'disp': False, 'gtol': 1e-03, 'eps': 1.4901161193847656e-08, 'return_all': False, 'maxiter': None, 'norm': inf})
 
 C=[res.x[0] for i in range(nrow*ncol)]
 N=[res.x[1] for i in range(nrow*ncol)]
