@@ -1,12 +1,11 @@
 from CANS_functions import *
 import pandas as pd
 import scipy.optimize as opt
-from numpy import inf
 
 # Timepoints at which we would like to simulate cell densities (& remaining nutrients)
 t=np.linspace(0,4.5,100)
 
-nrow,ncol=5,5
+nrow,ncol=16,24
 
 # Initial conditions
 C0=0.001
@@ -42,16 +41,39 @@ def calcErr(C,N,r,k,dmat):
     esoln=odeint(f,C+N,et)[:,0:(nrow*ncol)]
     return(np.sqrt(np.square(esoln-dmat).sum().sum()))
 
-def ObjFun(x):
-    Cvals=[x[0] for i in range(nrow*ncol)]
-    Nvals=[x[1] for i in range(nrow*ncol)]
-    rvals=x[2:(2+nrow*ncol)]
-    k=x[2+nrow*ncol]
-    return(calcErr(Cvals,Nvals,rvals,k,dmat))
+def makeLeastSquares(dmat):
+    '''Set up an objective function with a vector of arguments for least squares optimisation of CANS model, given data dmat'''
+    nrow=len(set([x[0:3] for x in dmat.columns]))
+    ncol=len(set([x[4:] for x in dmat.columns]))
+    def ObjFun(x):
+      Cvals=[x[0] for i in range(nrow*ncol)]
+      Nvals=[x[1] for i in range(nrow*ncol)]
+      rvals=x[2:(2+nrow*ncol)]
+      k=x[2+nrow*ncol]
+      return(calcErr(Cvals,Nvals,rvals,k,dmat))
+    return(ObjFun)
 
-print(ObjFun([C[0]]+[N[0]]+r+[k]))
+Obj=makeLeastSquares(dmat)
+print(Obj([C[0]]+[N[0]]+r+[k]))
 
-res=opt.minimize(ObjFun,x0=[C[0]]+[N[0]]+r+[k],args=(), method='BFGS', jac=None, tol=None, callback=None, options={'disp': False, 'gtol': 1e-03, 'eps': 1.4901161193847656e-08, 'return_all': False, 'maxiter': None, 'norm': inf})
+startTime = int(round(time.time()))
+
+res=opt.minimize(
+    Obj,
+    x0=[C[0]]+[N[0]]+r+[k],
+    args=(),
+    method='BFGS',
+    jac=None,
+    tol=None,
+    callback=None,
+    options={'disp': False, 'gtol': 1e-02, 'eps': 0.0001, 'return_all': False, 'maxiter': 1000, 'norm': np.inf}
+)
+
+endTime = int(round(time.time()))+" s"
+
+print(endTime-startTime)
+
+print(res.nit)
 
 C=[res.x[0] for i in range(nrow*ncol)]
 N=[res.x[1] for i in range(nrow*ncol)]
@@ -76,29 +98,4 @@ for row in range(nrow):
         ax[row,col].set_ylim([-0.02,0.3])
         ax[row,col].text(2.6, 0.275, 'R{r:02d}C{c:02d}'.format(r=row+1,c=col+1))
         ax[row,col].text(2.6, 0.255, 'SqErr: %.3f'%se)
-
-##with open(r"C:\Users\Vicky\Desktop\blanktextfile.txt", "w") as fp:
-##     soln=odeint(f,C+N,t)
-##     for row in range(nrow):
-##         for col in range(ncol):
-##             i=convertij((row,col),ncol)
-##             g = soln[:,i]
-##             print type(g)
-##        print t,soln[:,i+(nrow*ncol)]
-##             fp.write("%i\t%i\t%i") % (i, t, g) 
-##     fp.write("%s\n%s\n" % p)
-##fp.write(("%s\t%.15f\t%i\t%i\n") % (p[0], p[1][0], p[1][1], p[1][2]))
-
-### Plotting results
-##fig,ax=plt.subplots(nrow,ncol,figsize=(20,10)) #nrow, ncol
-##for row in range(nrow):
-##    for col in range(ncol):
-##        i=convertij((row+1,col+1),ncol)
-##        ax[row,col].plot(t,soln[:,i],c="black")
-##        ax[row,col].plot(t,soln[:,i+(nrow*ncol)],c="blue")
-##        ax[row,col].set_xlabel('Time since inoculation (d)')
-##        ax[row,col].set_ylabel('Population size (AU)')
-##plt.show()
-##
-##print(setot)
 

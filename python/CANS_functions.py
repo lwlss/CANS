@@ -2,12 +2,23 @@ from scipy.integrate import odeint
 import numpy as np
 import matplotlib.pyplot as plt
 import random
+import time                                                
 
+def timeme(method):
+    # http://stackoverflow.com/questions/889900/accurate-timing-of-functions-in-python
+    def wrapper(*args, **kw):
+        startTime = int(round(time.time() * 1000))
+        result = method(*args, **kw)
+        endTime = int(round(time.time() * 1000))
+
+        print(endTime - startTime,'ms')
+        return result
+
+    return wrapper
 
 def convertij(pos, NCol):
     '''Converts row i, col j into row-major vector index'''
-    i = pos[0]
-    j = pos[1]
+    i,j = pos
     return((i-1)*NCol+(j-1))
 
 
@@ -20,8 +31,7 @@ def convertind(ind, NCol):
 
 def neighbours(pos, NRow, NCol):
     '''Returns valid list of neighbours for cell at row i, col j'''
-    i = pos[0]
-    j = pos[1]
+    i,j = pos
     candidates = [(i+1, j), (i-1, j), (i, j+1), (i, j-1)]
     return([coords for coords in candidates if 1 <= coords[0] and
             1 <= coords[1] and coords[0] <= NRow and coords[1] <= NCol])
@@ -42,7 +52,7 @@ def makeModelCANS(nrow, ncol, rparams, rA, rC, rS, kN, kS):
     '''Set up variables and return a function suitable for simulating CANS dynamics with scipy.odeint'''
     # Convert between indices and coordinates generate neighbourhoods and calculate distances
     inds = [x for x in range(0, nrow * ncol)]
-    coords = [convertind(i, nrow) for i in inds]
+    coords = [convertind(i, ncol) for i in inds]
     neighbcoords = [neighbours(coord, nrow, ncol) for coord in coords]
     neighbinds = [[convertij(neighb, nrow) for neighb in neighblist] for neighblist in neighbcoords]
     dists = [[distance(coord, neighb) for neighb in neighbs] for coord, neighbs in zip(coords, neighbcoords)]
@@ -75,7 +85,7 @@ def makeModelComp(nrow, ncol, rparams, k):
     inds = range(0, nrow * ncol)
     coords = [convertind(i, ncol) for i in inds]
     neighbcoords = [neighbours(coord, nrow, ncol) for coord in coords] 
-    neighbinds = [[convertij(neighb, nrow) for neighb in neighblist] for neighblist in neighbcoords]
+    neighbinds = [[convertij(neighb, ncol) for neighb in neighblist] for neighblist in neighbcoords]
     # Indices to convert from long vector to species-specific vectors
     Cinds = inds
     Ninds = [ind + len(inds) for ind in inds]
