@@ -1,0 +1,16 @@
+# Compiled python modules
+*.pyc
+# Temp files
+*~
+*#*
+*cache*
+# Setuptools distribution folder.
+/dist/
+# Test cache
+tests/__pycache__/
+/.cache/
+# Python egg metadata, regenerated from source files by setuptools.
+/biotrack.egg-info
+# venv
+.python-version
+
