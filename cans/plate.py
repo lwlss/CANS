@@ -71,7 +71,7 @@ class Plate:
     #     return zip_longest(fillvalue=fillvalue, *args)
 
     def find_neighbourhood(self):
-        """Return a list of tuples of neighbour indices."""
+        """Return a list of tuples of neighbour indices for each culture."""
         rows = self.rows
         cols = self.cols
         no_cultures = rows*cols
@@ -94,40 +94,77 @@ class Plate:
         return neighbourhood
 
 
-#     def inde_growth(self, y, t, r, b, a):
-#         """Return independent odes for each culture."""
-#         # The zip reapeats the same interator thrice so as to group y by
-#         # threes. This is a Python idiom.
-
-#         # Cannot have negative cell numbers or concentrations
-#         y = np.maximum(0, y)
-#         #
-#         nutrients = y[1::3]
-#         signal = y[2::3]
-#         # need a list of tuples of neighbours for each culture. Sum
-#         # nutrients and signal for the neighbours of each culture to
-#         # find diffusion terms.
-
-#         inde_rates = [rate for C, N, S in zip(*[iter(y)]*3)
-#                 for rate in (r*N*C - b*S, -r*N*C, a*C)]
-#         diffusion = [diffusion for dC, dN, dS in zip(*[iter(diffusion_sums)]*3) for diffusion in (dC, dN + , dS + )]
-
-#         # dydt = [rate for C, N, S, difN, difS in zip(*[iter(y)]*3, *[iter(diffusion)]*2)
-#         #         for rate in (dC, dN + difN, dS + difS)]
-# #        dydt = map(add, inde_rates, diffusion)
-#         return dydt
+    def inde_growth(self, y, t, r, b, a):
+        """Return independent odes for each culture."""
+        # Cannot have negative cell numbers or concentrations
+        y = np.maximum(0, y)
+        # The zip reapeats the same interator thrice so as to group y by
+        # threes. This is a Python idiom.
+        inde_rates = [rate for C, N, S in zip(*[iter(y)]*3)
+                      for rate in (r*N*C - b*S, -r*N*C, a*C)]
+        return inde_rates
 
 
-    def collect_odes(self):
-        """Generate ODEs for the entire plate and a model."""
+    def cans_growth(self, y, t, params, neighbourhood):
+        """Return independent odes for each culture."""
+        # The zip reapeats the same interator thrice so as to group y by
+        # threes. This is a Python idiom.
+
+        # Cannot have negative cell numbers or concentrations
+        y = np.maximum(0, y)
+
+        nutrients = y[1::3]
+        signal = y[2::3]
+        # need a list of tuples of neighbours for each culture. Sum
+        # nutrients and signal for the neighbours of each culture to
+        # find diffusion terms.
+        N_diffusions = [sum([nutrient - nutrients[j] for j in neighbourhood[i]])
+                        for i, nutrient in enumerate(nutrients)]
+        S_diffusions = [sum([sig - signal[j] for j in neighbourhood[i]])
+                        for i, sig in enumerate(signal)]
+        vals = zip(*[iter(y)]*3, *[iter(params)]*3, N_diffusions, S_diffusions)
+        dydt = [rate for C, N, S, r, b, a, Ndiff, Sdiff in vals
+                for rate in (r*N*C - b*S, -r*N*C - self.kn*Ndiff, a*C - self.ks*Sdiff)]
+        return dydt
+
+
+    def sim_cans_growth(self, t):
+        """Simulate cans growth for whole plate."""
         init_vals = self.collect_init_vals()
-        for i, culture in enumerate(self.cultures):
-            if i < (self.rows - 1 )*self.cols:
-                # then not in last row
-                pass
-            if (i + 1) % self.cols:
-                # then not in last column
-                pass
+        # can I just define params and neighbourhood in this scope and
+        # not have to pass them to odeint? Conor acheives this by
+        # defining the ode function within another function which
+        # returns the inner function. Maybe odeint deals with args in
+        # a clever way though so that they are not passes every time.
+        params = self.collect_params()
+        neighbourhood = self.find_neighbourhood()
+        sol = odeint(self.cans_growth, init_vals, t, args=(params, neighbourhood))
+        return sol
+
+
+    def plot_cans_sims(self):
+        t = np.linspace(0, 10, 101)
+        sol = self.sim_cans_growth(t)
+        print(sol)
+        plt.plot(t, sol[:, 3], 'b', label='cells')
+        plt.plot(t, sol[:, 4], 'y', label='nutrients')
+        plt.plot(t, sol[:, 5], 'r', label='signal')
+        plt.legend(loc='best')
+        plt.xlabel('t')
+        plt.grid()
+        plt.show()
+
+
+    # def collect_odes(self):
+    #     """Generate ODEs for the entire plate and a model."""
+    #     init_vals = self.collect_init_vals()
+    #     for i, culture in enumerate(self.cultures):
+    #         if i < (self.rows - 1 )*self.cols:
+    #             # then not in last row
+    #             pass
+    #         if (i + 1) % self.cols:
+    #             # then not in last column
+    #             pass
 
     def sim_inde_growth(self, t):
         init_vals = self.collect_init_vals()
@@ -162,5 +199,6 @@ if __name__ == "__main__":
     print(len(plate1.collect_init_vals()))
     print(plate1.collect_params())
     print(len(plate1.collect_params()))
-#    plate1.plot_growth_sims()
+    plate1.plot_growth_sims()
     print(plate1.find_neighbourhood())
+    plate1.plot_cans_sims()
