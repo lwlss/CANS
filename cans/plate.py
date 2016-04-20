@@ -92,14 +92,14 @@ class Plate:
         return neighbourhood
 
 
-    def inde_growth(self, y, t, r, b, a):
+    def inde_growth(self, y, t, params):
         """Return independent odes for each culture."""
         # Cannot have negative cell numbers or concentrations
-        y = np.maximum(0, y)
+        # y = np.maximum(0, y)
         # The zip reapeats the same interator thrice so as to group y by
         # threes. This is a Python idiom.
-        inde_rates = [rate for C, N, S in zip(*[iter(y)]*3)
-                      for rate in (r*N*C - b*S, -r*N*C, a*C)]
+        inde_rates = [rate for C, N, S, r, b, a in zip(*[iter(y)]*3, *[iter(params)]*3)
+                      for rate in (r*N*C - b*S*C, -r*N*C, a*C)]
         return inde_rates
 
 
@@ -116,7 +116,8 @@ class Plate:
         #     assert(min(y) >= 0.0)
         # except AssertionError:
         #     print("have a valus of C less than 0.")
-#        y = [max(0.0, val) for val in y]    # This does not produce the required result.
+        # # This does not produce the required result.
+        # y = [max(0.0, val) for val in y]
         # assert(min(y) >= 0.0)
         nutrients = y[1::3]
         signal = y[2::3]
@@ -129,9 +130,9 @@ class Plate:
         # This will sometimes store a negative values of cells. This
         # can be corrected in the results and at the start of each
         # function call so that this as zero effect.
-        dydt = [rate for C, N, S, r, b, a, Ndiff, Sdiff in vals for rate in
-                (r*N*C - b*S, -r*N*C - self.kn*Ndiff, a*C - self.ks*Sdiff)]
-        return dydt
+        rates = [rate for C, N, S, r, b, a, Ndiff, Sdiff in vals for rate in
+                (r*N*C - b*S*C, -r*N*C - self.kn*Ndiff, a*C - self.ks*Sdiff)]
+        return rates
 
 
     def sim_cans_growth(self, t):
@@ -150,10 +151,9 @@ class Plate:
         return sol
 
 
-    def plot_cans_sims(self):
+    def plot_cans_sim(self):
         t = np.linspace(0, 15, 151)
         sol = self.sim_cans_growth(t)
-        print(sol)
         plt.plot(t, sol[:, 3], 'b', label='cells')
         plt.plot(t, sol[:, 4], 'y', label='nutrients')
         plt.plot(t, sol[:, 5], 'r', label='signal')
@@ -162,18 +162,66 @@ class Plate:
         plt.grid()
         plt.show()
 
+#     def plot_cans_sims(self):
+#         """Plot growth curves for each culture."""
+#         t = np.linspace(0, 15, 151)
+#         sol = self.sim_inde_growth(t)
+#         f, axes = plt.subplots(self.rows, self.cols)
+#         flattened_axes = [ax for axe in axes for ax in axe]
+#         for i, ax in enumerate(flattened_axes):
+#             ax.plot(t, sol[:, 3*i], 'b', label='cells')
+#             ax.plot(t, sol[:, 3*i+1], 'y', label='nutrients')
+#             ax.plot(t, sol[:, 3*i+2], 'r', label='signal')
+#             ax.legend(loc='best')
+# #            ax.xlabel('t')
+#             ax.grid()
+
+
+    def plot_cans_sims(self):
+        """Plot growth curves for each culture."""
+        t = np.linspace(0, 15, 151)
+        sol = self.sim_cans_growth(t)
+        fig = plt.figure()
+        for i in range(self.rows*self.cols):
+            fig.add_subplot(self.rows, self.cols, i+1)
+            plt.plot(t, sol[:, i*3], 'b', label='cells')
+            plt.plot(t, sol[:, i*3 + 1], 'y', label='nutrients')
+            plt.plot(t, sol[:, i*3 + 2], 'r', label='signal')
+            #plt.legend(loc='best')
+            plt.xlabel('t')
+            plt.grid()
+        # plt.legend(loc='best')
+        plt.savefig('cans.pdf')
+
+
+    def plot_inde_sims(self):
+        """Plot growth curves for each culture."""
+        t = np.linspace(0, 15, 151)
+        sol = self.sim_inde_growth(t)
+        fig = plt.figure()
+        for i in range(self.rows*self.cols):
+            fig.add_subplot(self.rows, self.cols, i+1)
+            plt.plot(t, sol[:, i*3], 'b', label='cells')
+            plt.plot(t, sol[:, i*3 + 1], 'y', label='nutrients')
+            plt.plot(t, sol[:, i*3 + 2], 'r', label='signal')
+            #plt.legend(loc='best')
+            plt.xlabel('t')
+            plt.grid()
+        # plt.legend(loc='best')
+        plt.savefig('inde.pdf')
+
+
 
     def sim_inde_growth(self, t):
         init_vals = self.collect_init_vals()
         params = self.collect_params()
-        sol = odeint(self.inde_growth, init_vals, t, args=tuple(params[0:3]))
+        sol = odeint(self.inde_growth, init_vals, t, args=(params,))
         return sol
 
 
     def plot_growth_sims(self):
         t = np.linspace(0, 10, 101)
         sol = self.sim_inde_growth(t)
-        print(sol)
         plt.plot(t, sol[:, 3], 'b', label='cells')
         plt.plot(t, sol[:, 4], 'y', label='nutrients')
         plt.plot(t, sol[:, 5], 'r', label='signal')
@@ -206,12 +254,7 @@ class RandomPlate(Plate):
         self.cols = cols
         self.kn = kn
         self.ks = ks
-        self.cultures = []
-        for culture in range(rows*cols):
-            self.cultures.append(RandomCulture())
-
-
-
+        self.cultures = [RandomCulture() for culture in range(cols*rows)]
 
 
 if __name__ == "__main__":
@@ -230,5 +273,6 @@ if __name__ == "__main__":
 #    plate1.plot_growth_sims()
     print(plate1.find_neighbourhood())
 #    plate1.plot_cans_sims()
-    rand_plate = RandomPlate()
+    rand_plate = RandomPlate(3, 3, kn=0.1, ks=0.1)
     rand_plate.plot_cans_sims()
+    rand_plate.plot_inde_sims()
