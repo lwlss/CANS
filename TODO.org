@@ -1,4 +1,4 @@
-* TODO [0/7]
+* TODO [1/7]
   - [ ] Fix negative cells problem
     - First fix with an equality caused odeint to crash
     - Could just fix this in the data after running and at the start
@@ -8,7 +8,7 @@
       another fn like Conor
   - [ ] Think about the location of functions
     - Would some of them be better in a module?
-  - [ ] Make an array of subplots
+  - [X] Make an array of subplots
   - [ ] Write unittests
   - [ ] Compare timings with Conors code
   - [ ] Consider Julia
