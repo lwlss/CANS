@@ -2,12 +2,13 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import math
 
 from operator import add
 from scipy.integrate import odeint
 
 
-from culture import Culture
+from culture import Culture, RandomCulture
 
 
 class Plate:
@@ -37,10 +38,6 @@ class Plate:
             self.cultures.append(Culture())
 
 
-    def sim_growth(self):
-        pass
-
-
     def collect_init_vals(self):
         """Collect a list of initial values for each culture.
 
@@ -49,7 +46,8 @@ class Plate:
 
         """
         init_vals = [val for culture in self.cultures
-                     for val in (culture.cells, culture.nutrients, culture.signal)]
+                     for val in (culture.cells, culture.nutrients,
+                                 culture.signal)]
         return init_vals
 
 
@@ -106,25 +104,33 @@ class Plate:
 
 
     def cans_growth(self, y, t, params, neighbourhood):
-        """Return independent odes for each culture."""
-        # The zip reapeats the same interator thrice so as to group y by
-        # threes. This is a Python idiom.
+        """Return independent odes for each culture.
 
+        y contains a list of cells, nutrients, and signal... repeated
+        for each culture.
+
+        """
         # Cannot have negative cell numbers or concentrations
-        y = np.maximum(0, y)
-
+        #  np.clip(y, a_min=0.0, a_max=math.inf, out=y)
+        # try:
+        #     assert(min(y) >= 0.0)
+        # except AssertionError:
+        #     print("have a valus of C less than 0.")
+#        y = [max(0.0, val) for val in y]    # This does not produce the required result.
+        # assert(min(y) >= 0.0)
         nutrients = y[1::3]
         signal = y[2::3]
-        # need a list of tuples of neighbours for each culture. Sum
-        # nutrients and signal for the neighbours of each culture to
-        # find diffusion terms.
         N_diffusions = [sum([nutrient - nutrients[j] for j in neighbourhood[i]])
                         for i, nutrient in enumerate(nutrients)]
         S_diffusions = [sum([sig - signal[j] for j in neighbourhood[i]])
                         for i, sig in enumerate(signal)]
+        # An iterator of values for variables/terms appearing in the model.
         vals = zip(*[iter(y)]*3, *[iter(params)]*3, N_diffusions, S_diffusions)
-        dydt = [rate for C, N, S, r, b, a, Ndiff, Sdiff in vals
-                for rate in (r*N*C - b*S, -r*N*C - self.kn*Ndiff, a*C - self.ks*Sdiff)]
+        # This will sometimes store a negative values of cells. This
+        # can be corrected in the results and at the start of each
+        # function call so that this as zero effect.
+        dydt = [rate for C, N, S, r, b, a, Ndiff, Sdiff in vals for rate in
+                (r*N*C - b*S, -r*N*C - self.kn*Ndiff, a*C - self.ks*Sdiff)]
         return dydt
 
 
@@ -136,14 +142,16 @@ class Plate:
         # defining the ode function within another function which
         # returns the inner function. Maybe odeint deals with args in
         # a clever way though so that they are not passes every time.
+        # Also consider moviing growth models to a different module.
         params = self.collect_params()
         neighbourhood = self.find_neighbourhood()
-        sol = odeint(self.cans_growth, init_vals, t, args=(params, neighbourhood))
+        sol = odeint(self.cans_growth, init_vals, t,
+                     args=(params, neighbourhood))
         return sol
 
 
     def plot_cans_sims(self):
-        t = np.linspace(0, 10, 101)
+        t = np.linspace(0, 15, 151)
         sol = self.sim_cans_growth(t)
         print(sol)
         plt.plot(t, sol[:, 3], 'b', label='cells')
@@ -155,22 +163,12 @@ class Plate:
         plt.show()
 
 
-    # def collect_odes(self):
-    #     """Generate ODEs for the entire plate and a model."""
-    #     init_vals = self.collect_init_vals()
-    #     for i, culture in enumerate(self.cultures):
-    #         if i < (self.rows - 1 )*self.cols:
-    #             # then not in last row
-    #             pass
-    #         if (i + 1) % self.cols:
-    #             # then not in last column
-    #             pass
-
     def sim_inde_growth(self, t):
         init_vals = self.collect_init_vals()
         params = self.collect_params()
         sol = odeint(self.inde_growth, init_vals, t, args=tuple(params[0:3]))
         return sol
+
 
     def plot_growth_sims(self):
         t = np.linspace(0, 10, 101)
@@ -183,6 +181,36 @@ class Plate:
         plt.xlabel('t')
         plt.grid()
         plt.show()
+
+
+class RandomPlate(Plate):
+    """A plate containing cultures with randomised parameters."""
+
+    def __init__(self, rows=3, cols=3, kn=1.0, ks=1.0):
+        """Initialise plate with an array of cultures.
+
+        Parameters
+        ----------
+        rows : Optional[int]
+            Number of rows (default 3)
+        cols : Optional[int]
+            Number of columns (default 3)
+        kn : Optional[float]
+            Nutrient diffusion constant (default 0.0)
+        ks : Optional[float]
+            Signal diffusion constant (default 0.0)
+        cultures : list[Culture]
+            A list of rows*cols Culture objects.
+        """
+        self.rows = rows
+        self.cols = cols
+        self.kn = kn
+        self.ks = ks
+        self.cultures = []
+        for culture in range(rows*cols):
+            self.cultures.append(RandomCulture())
+
+
 
 
 
@@ -199,6 +227,8 @@ if __name__ == "__main__":
     print(len(plate1.collect_init_vals()))
     print(plate1.collect_params())
     print(len(plate1.collect_params()))
-    plate1.plot_growth_sims()
+#    plate1.plot_growth_sims()
     print(plate1.find_neighbourhood())
-    plate1.plot_cans_sims()
+#    plate1.plot_cans_sims()
+    rand_plate = RandomPlate()
+    rand_plate.plot_cans_sims()
