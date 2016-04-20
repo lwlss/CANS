@@ -3,7 +3,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-
+from operator import add
 from scipy.integrate import odeint
 
 
@@ -70,13 +70,52 @@ class Plate:
     #     args = [iter(iterable)] * n
     #     return zip_longest(fillvalue=fillvalue, *args)
 
-    def inde_growth(self, y, t, r, b, a):
-        """Return independent odes for each culture."""
-        # The zip reapeats the same interator thrice so as to group y by
-        # threes. This is a Python idiom.
-        dydt = [rate for C, N, S in zip(*[iter(y)]*3)
-                for rate in (r*N*C - b*S, -r*N*C, a*C)]
-        return dydt
+    def find_neighbourhood(self):
+        """Return a list of tuples of neighbour indices."""
+        rows = self.rows
+        cols = self.cols
+        no_cultures = rows*cols
+        neighbourhood = []
+        for i in range(no_cultures):
+            neighbours = []
+            if i // cols:
+                # Then not in first row.
+                neighbours.append(i - cols)
+            if i % cols:
+                # Then not in first column.
+                neighbours.append(i - 1)
+            if (i + 1) % self.cols:
+                # Then not in last column.
+                neighbours.append(i + 1)
+            if i < (rows - 1 )*cols:
+                # Then not in last row.
+                neighbours.append(i + cols)
+            neighbourhood.append(tuple(neighbours))
+        return neighbourhood
+
+
+#     def inde_growth(self, y, t, r, b, a):
+#         """Return independent odes for each culture."""
+#         # The zip reapeats the same interator thrice so as to group y by
+#         # threes. This is a Python idiom.
+
+#         # Cannot have negative cell numbers or concentrations
+#         y = np.maximum(0, y)
+#         #
+#         nutrients = y[1::3]
+#         signal = y[2::3]
+#         # need a list of tuples of neighbours for each culture. Sum
+#         # nutrients and signal for the neighbours of each culture to
+#         # find diffusion terms.
+
+#         inde_rates = [rate for C, N, S in zip(*[iter(y)]*3)
+#                 for rate in (r*N*C - b*S, -r*N*C, a*C)]
+#         diffusion = [diffusion for dC, dN, dS in zip(*[iter(diffusion_sums)]*3) for diffusion in (dC, dN + , dS + )]
+
+#         # dydt = [rate for C, N, S, difN, difS in zip(*[iter(y)]*3, *[iter(diffusion)]*2)
+#         #         for rate in (dC, dN + difN, dS + difS)]
+# #        dydt = map(add, inde_rates, diffusion)
+#         return dydt
 
 
     def collect_odes(self):
@@ -123,4 +162,5 @@ if __name__ == "__main__":
     print(len(plate1.collect_init_vals()))
     print(plate1.collect_params())
     print(len(plate1.collect_params()))
-    plate1.plot_growth_sims()
+#    plate1.plot_growth_sims()
+    print(plate1.find_neighbourhood())
