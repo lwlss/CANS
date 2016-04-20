@@ -2,6 +2,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import random
 
 
 from scipy.integrate import odeint
@@ -35,6 +36,7 @@ class Culture:
         C, N, S = y
         dydt = [r*N*C - b*S, -r*N*C, a*C]
         return dydt
+
 
     def sim_inde_growth(self, t):
         y0 = [self.cells, self.nutrients, self.signal]
@@ -81,6 +83,29 @@ class Culture:
         plt.xlabel('t')
         plt.grid()
         plt.show()
+
+
+class RandomCulture(Culture):
+    """A culture with random parameter values r, b, and a."""
+    def __init__(self, cells=0.1, nutrients=1.0, signal=0.0):
+        """Initialise culture.
+
+        Parameters
+        ----------
+        cells : Optional[float]
+            Initial amount of cells (default 0.1)
+        nutrients : Optional[float]
+            Initial amount of cells (default 1.0)
+        signal : Optional[float]
+            Initial amount of signal (default 0.0)
+        """
+        self.cells = cells
+        self.nutrients = nutrients
+        self.signal = signal
+        self.r = max(0.0, random.gauss(1.0, 1.0))   # Growth rate constant
+        self.b = 0.1 #random.gauss(4.0,1.0)    # Signal on cells effect constant
+        self.a = 0.1 #random.gauss(4.0,1.0)    # Signal secretion constant
+
 
 
 if __name__ == '__main__':
