@@ -33,9 +33,7 @@ class Plate:
         self.cols = cols
         self.kn = kn
         self.ks = ks
-        self.cultures = []
-        for culture in range(rows*cols):
-            self.cultures.append(Culture())
+        self.cultures = [Culture() for culture in range(rows*cols)]
 
 
     def collect_init_vals(self):
@@ -43,7 +41,6 @@ class Plate:
 
         Return a flattened list of cell, nutirient, and signal amounts for
         each culture.
-
         """
         init_vals = [val for culture in self.cultures
                      for val in (culture.cells, culture.nutrients,
@@ -61,12 +58,6 @@ class Plate:
                   for param in (culture.r, culture.b, culture.a)]
         return params
 
-
-    # def grouper(self, iterable, n, fillvalue=None):
-    #     "Collect data into fixed-length chunks or blocks"
-    #     # grouper('ABCDEFG', 3, 'x') --> ABC DEF Gxx
-    #     args = [iter(iterable)] * n
-    #     return zip_longest(fillvalue=fillvalue, *args)
 
     def find_neighbourhood(self):
         """Return a list of tuples of neighbour indices for each culture."""
@@ -98,9 +89,33 @@ class Plate:
         # y = np.maximum(0, y)
         # The zip reapeats the same interator thrice so as to group y by
         # threes. This is a Python idiom.
-        inde_rates = [rate for C, N, S, r, b, a in zip(*[iter(y)]*3, *[iter(params)]*3)
-                      for rate in (r*N*C - b*S*C, -r*N*C, a*C)]
-        return inde_rates
+        rates = [rate for C, N, S, r, b, a in zip(*[iter(y)]*3, *[iter(params)]*3)
+                 for rate in (r*N*C - b*S*C, -r*N*C, a*C)]
+        return rates
+
+
+    def sim_inde_growth(self, t):
+        """Simulate independent growth for ."""
+        init_vals = self.collect_init_vals()
+        params = self.collect_params()
+        sol = odeint(self.inde_growth, init_vals, t, args=(params,))
+        return sol
+
+
+    def plot_inde_sims(self, filename='inde.pdf'):
+        """Plot growth curves for each culture."""
+        t = np.linspace(0, 15, 151)
+        sol = self.sim_inde_growth(t)
+        fig = plt.figure()
+        for i in range(self.rows*self.cols):
+            fig.add_subplot(self.rows, self.cols, i+1)
+            plt.plot(t, sol[:, i*3], 'b', label='cells')
+            plt.plot(t, sol[:, i*3 + 1], 'y', label='nutrients')
+            plt.plot(t, sol[:, i*3 + 2], 'r', label='signal')
+            plt.xlabel('t')
+            plt.grid()
+        # plt.legend(loc='best')
+        plt.savefig(filename)
 
 
     def cans_growth(self, y, t, params, neighbourhood):
@@ -151,33 +166,7 @@ class Plate:
         return sol
 
 
-    def plot_cans_sim(self):
-        t = np.linspace(0, 15, 151)
-        sol = self.sim_cans_growth(t)
-        plt.plot(t, sol[:, 3], 'b', label='cells')
-        plt.plot(t, sol[:, 4], 'y', label='nutrients')
-        plt.plot(t, sol[:, 5], 'r', label='signal')
-        plt.legend(loc='best')
-        plt.xlabel('t')
-        plt.grid()
-        plt.show()
-
-#     def plot_cans_sims(self):
-#         """Plot growth curves for each culture."""
-#         t = np.linspace(0, 15, 151)
-#         sol = self.sim_inde_growth(t)
-#         f, axes = plt.subplots(self.rows, self.cols)
-#         flattened_axes = [ax for axe in axes for ax in axe]
-#         for i, ax in enumerate(flattened_axes):
-#             ax.plot(t, sol[:, 3*i], 'b', label='cells')
-#             ax.plot(t, sol[:, 3*i+1], 'y', label='nutrients')
-#             ax.plot(t, sol[:, 3*i+2], 'r', label='signal')
-#             ax.legend(loc='best')
-# #            ax.xlabel('t')
-#             ax.grid()
-
-
-    def plot_cans_sims(self):
+    def plot_cans_sims(self, filename='cans.pdf'):
         """Plot growth curves for each culture."""
         t = np.linspace(0, 15, 151)
         sol = self.sim_cans_growth(t)
@@ -187,48 +176,10 @@ class Plate:
             plt.plot(t, sol[:, i*3], 'b', label='cells')
             plt.plot(t, sol[:, i*3 + 1], 'y', label='nutrients')
             plt.plot(t, sol[:, i*3 + 2], 'r', label='signal')
-            #plt.legend(loc='best')
             plt.xlabel('t')
             plt.grid()
         # plt.legend(loc='best')
-        plt.savefig('cans.pdf')
-
-
-    def plot_inde_sims(self):
-        """Plot growth curves for each culture."""
-        t = np.linspace(0, 15, 151)
-        sol = self.sim_inde_growth(t)
-        fig = plt.figure()
-        for i in range(self.rows*self.cols):
-            fig.add_subplot(self.rows, self.cols, i+1)
-            plt.plot(t, sol[:, i*3], 'b', label='cells')
-            plt.plot(t, sol[:, i*3 + 1], 'y', label='nutrients')
-            plt.plot(t, sol[:, i*3 + 2], 'r', label='signal')
-            #plt.legend(loc='best')
-            plt.xlabel('t')
-            plt.grid()
-        # plt.legend(loc='best')
-        plt.savefig('inde.pdf')
-
-
-
-    def sim_inde_growth(self, t):
-        init_vals = self.collect_init_vals()
-        params = self.collect_params()
-        sol = odeint(self.inde_growth, init_vals, t, args=(params,))
-        return sol
-
-
-    def plot_growth_sims(self):
-        t = np.linspace(0, 10, 101)
-        sol = self.sim_inde_growth(t)
-        plt.plot(t, sol[:, 3], 'b', label='cells')
-        plt.plot(t, sol[:, 4], 'y', label='nutrients')
-        plt.plot(t, sol[:, 5], 'r', label='signal')
-        plt.legend(loc='best')
-        plt.xlabel('t')
-        plt.grid()
-        plt.show()
+        plt.savefig(filename)
 
 
 class RandomPlate(Plate):
@@ -258,21 +209,26 @@ class RandomPlate(Plate):
 
 
 if __name__ == "__main__":
-    plate1 = Plate()
-    print(plate1.rows)
-    print(plate1.cols)
-    print(plate1.cultures)
-    print(plate1.cultures[0].cells)
-    print(plate1.cultures[0].nutrients)
-    print(plate1.cultures[0].signal)
-    print(len(plate1.cultures))
-    print(plate1.collect_init_vals())
-    print(len(plate1.collect_init_vals()))
-    print(plate1.collect_params())
-    print(len(plate1.collect_params()))
-#    plate1.plot_growth_sims()
-    print(plate1.find_neighbourhood())
+#     plate1 = Plate()
+#     print(plate1.rows)
+#     print(plate1.cols)
+#     print(plate1.cultures)
+#     print(plate1.cultures[0].cells)
+#     print(plate1.cultures[0].nutrients)
+#     print(plate1.cultures[0].signal)
+#     print(len(plate1.cultures))
+#     print(plate1.collect_init_vals())
+#     print(len(plate1.collect_init_vals()))
+#     print(plate1.collect_params())
+#     print(len(plate1.collect_params()))
+# #    plate1.plot_growth_sims()
+#     print(plate1.find_neighbourhood())
 #    plate1.plot_cans_sims()
-    rand_plate = RandomPlate(3, 3, kn=0.1, ks=0.1)
-    rand_plate.plot_cans_sims()
-    rand_plate.plot_inde_sims()
+    t = np.linspace(0, 15, 151)
+    rand_plate = RandomPlate(14, 22, kn=0.1, ks=0.1)
+    rand_plate.sim_cans_growth(t)
+    #rand_plate.plot_cans_sims(t)
+    # rand_plate.plot_cans_sims()
+    # rand_plate.kn = 0.0
+    # rand_plate.ks = 0.0
+    # rand_plate.plot_cans_sims('inde.pdf')
