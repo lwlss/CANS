@@ -13,4 +13,6 @@ tests/__pycache__/
 /biotrack.egg-info
 # venv
 .python-version
+# plots
+*.pdf
 
