@@ -45,7 +45,7 @@ class Plate:
         """Collect a list of initial values for each culture.
 
         Return a flattened list of cell, nutirient, and signal amounts for
-        each culture.
+        each culture. I.e. [C0, N0, S0, C1, N1, S1, ...].
         """
         init_vals = [val for culture in self.cultures
                      for val in (culture.cells, culture.nutrients,
@@ -91,7 +91,7 @@ class Plate:
     def inde_growth(self, y, t, params):
         """Return independent odes for each culture."""
         # Cannot have negative cell numbers or concentrations
-        # y = np.maximum(0, y)
+        np.maximum(0, y, out=y)
         # The zip reapeats the same interator thrice so as to group y by
         # threes. This is a Python idiom.
         rates = [rate for C, N, S, r, b, a in zip(*[iter(y)]*3, *[iter(params)]*3)
@@ -104,6 +104,8 @@ class Plate:
         init_vals = self.collect_init_vals()
         params = self.collect_params()
         sol = odeint(self.inde_growth, init_vals, t, args=(params,))
+        # Remove negative amounts.
+        np.maximum(0, sol, out=sol)
         return sol
 
 
@@ -119,8 +121,11 @@ class Plate:
             plt.plot(t, sol[:, i*3 + 2], 'r', label='signal')
             plt.xlabel('t')
             plt.grid()
-        # plt.legend(loc='best')
-        plt.savefig(filename)
+        if filename is None:
+            plt.show()
+        else:
+            # plt.legend(loc='best')
+            plt.savefig(filename)
 
 
     def cans_growth(self, y, t, params, neighbourhood):
@@ -173,6 +178,7 @@ class Plate:
                      args=(params, neighbourhood))
         # Remove negative amounts.
         np.maximum(0, sol, out=sol)
+        print("Solved")
         return sol
 
 
@@ -188,17 +194,19 @@ class Plate:
             plt.plot(t, sol[:, i*3 + 2], 'r', label='signal')
             plt.xlabel('t')
             plt.grid()
-        plt.show()
-        # plt.legend(loc='best')
-        # plt.display()
-        # plt.savefig(filename)
+        if filename is None:
+            plt.show()
+        else:
+            # plt.legend(loc='best')
+            plt.savefig(filename)
 
 
 class RandomPlate(Plate):
     """A plate containing cultures with randomised parameters."""
 
     def get_cultures(self):
-        """Return a list of Cultures with random parameters."""
+        """Return a list of cultures with random parameters."""
+        # This is called in __init__.
         return [RandomCulture() for culture in range(self.rows*self.cols)]
 
 
@@ -218,13 +226,12 @@ if __name__ == "__main__":
 # #    plate1.plot_growth_sims()
 #     print(plate1.find_neighbourhood())
 #    plate1.plot_cans_sims()
-    t = np.linspace(0, 15, 151)
-    rand_plate = RandomPlate(3, 3, kn=1.0, ks=1.0)
+    rand_plate = RandomPlate(3, 3, kn=0.1, ks=0.1)
+#    t = np.linspace(0, 15, 151)
 #    rand_plate.sim_cans_growth(t)
     rand_plate.plot_cans_sims()
-#    rand_plate.plot_inde_sims()
-    #rand_plate.plot_cans_sims(t)
-    # rand_plate.plot_cans_sims()
+    rand_plate.plot_inde_sims()
+    # rand_plate.plot_cans_sims(t)
     # rand_plate.kn = 0.0
     # rand_plate.ks = 0.0
     # rand_plate.plot_cans_sims('inde.pdf')
