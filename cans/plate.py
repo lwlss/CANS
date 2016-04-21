@@ -34,6 +34,7 @@ class Plate:
         self.kn = kn
         self.ks = ks
         self.cultures = self.get_cultures()
+        self.neighbourhood = self.find_neighbourhood()
 
 
     def get_cultures(self):
@@ -59,8 +60,9 @@ class Plate:
         Return a flattened list of r, b, and a constants for each culture.
 
         """
-        params = [param for culture in self.cultures
-                  for param in (culture.r, culture.b, culture.a)]
+        culture_params = [param for culture in self.cultures
+                          for param in (culture.r, culture.b, culture.a)]
+        params = [self.kn, self.ks] + culture_params
         return params
 
 
@@ -94,7 +96,7 @@ class Plate:
         np.maximum(0, y, out=y)
         # The zip reapeats the same interator thrice so as to group y by
         # threes. This is a Python idiom.
-        rates = [rate for C, N, S, r, b, a in zip(*[iter(y)]*3, *[iter(params)]*3)
+        rates = [rate for C, N, S, r, b, a in zip(*[iter(y)]*3, *[iter(params[2])]*3)
                  for rate in (r*N*C - b*S, -r*N*C, a*C)]    # *b*S*C?
         return rates
 
@@ -152,14 +154,16 @@ class Plate:
                         for i, nutrient in enumerate(nutrients)]
         S_diffusions = [sum([sig - signal[j] for j in neighbourhood[i]])
                         for i, sig in enumerate(signal)]
+        kn = params[0]
+        ks = params[1]
         # An iterator of values for variables/terms appearing in the model.
-        vals = zip(*[iter(y)]*3, *[iter(params)]*3, N_diffusions, S_diffusions)
+        vals = zip(*[iter(y)]*3, *[iter(params[2:])]*3, N_diffusions, S_diffusions)
         # This will sometimes store a negative amounts. This can be
         # corrected in the results returned by odeint if at the start
         # of each function call values are set to zero (see
         # np.maximum() above).
         rates = [rate for C, N, S, r, b, a, Ndiff, Sdiff in vals for rate in
-                (r*N*C - b*S, -r*N*C - self.kn*Ndiff, a*C - self.ks*Sdiff)]
+                (r*N*C - b*S, -r*N*C - kn*Ndiff, a*C - ks*Sdiff)]
         return rates
 
 
@@ -180,6 +184,16 @@ class Plate:
         np.maximum(0, sol[0], out=sol[0])
         print("Solved")
         return sol
+
+
+    def sim_cans_growth2(self, t, init_amounts, params):
+        sol = odeint(self.cans_growth, init_amounts, t,
+                     args=(params, self.neighbourhood))
+        # Remove negative amounts.
+        np.maximum(0, sol, out=sol)
+        print("Solved")
+        return sol
+
 
 
     def plot_cans_sims(self, filename='cans.pdf'):
@@ -207,12 +221,15 @@ class Plate:
         data, info = self.sim_cans_growth(t, full_output=True)
         obs_cells = [data[:, i*3] for i in range(self.rows*self.cols)]
         obs_times = [0.0] + list(info['tcur'])
+        obs = (obs_cells, obs_times)
         # List of initial variable and parameter guesses.
-        # Initial amounts are experimentally controlled fixed parameters.
+        # Initial amounts are experimentally controlled (known) parameters.
         C0 = 0.1
         N0 = 1.0
         S0 = 0.0
-        # Diffusion rates are the same for all but not fixed.
+        init_amounts = [init_val for i in range(self.rows*self.cols)
+                        for init_val in (C0, N0, S0)]
+        # Diffusion rates are the same for all but not certain.
         kn = 0.1
         ks = 0.1
         # These are initial guesses of parameters that are different
@@ -220,21 +237,60 @@ class Plate:
         r = 1.0
         b = 0.1
         a = 0.1
+        culture_params = [param for i in range(self.rows*self.cols)
+                          for param in (r, b, a)]
+        # List of initial estimates in form to allow fitting.
+        ests = [kn, ks] + culture_params
         # Options for minimization
-        options = {'disp': False, 'gtol': 1e-02, 'eps': 0.0001,
+        opts = {'disp': False, 'gtol': 1e-02, 'eps': 0.0001,
                    'return_all': False, 'maxiter': 1000, 'norm': np.inf}
-        opt.minimize(least_squares, x0, args=(), method='BSGS', jac=None,
-                     tol=None, options=options, callback=None}
+        # Minimisation
+        est_params = opt.minimize(self.least_squares, ests,
+                                  args=(init_amounts,) + obs,
+                                  method='BFGS', jac=None, tol=None,
+                                  callback=None, options=opts)
+        return est_params, init_amounts, obs_times
 
 
     def sum_squares(self, est_cells, obs_cells):
-        """RMS between observed and estimated cell amount."""
-        # Sum of element wise subtraction and square.
-        sum_of_squares = sum(np.square(np.subtract(cell_vals - obs_cells)))
+        """Sum of squares of estimated and observerd cell diffierences."""
+        # Sum of element-wise subtraction and square.
+        sum_of_squares = sum(np.square(np.subtract(est_cells,  obs_cells)))
+        print(type(sum_of_squares))
         return sum_of_squares
 
-    def least_squares(self):
-        pass
+
+    def least_squares(self, ests, init_amounts, obs_cells, obs_times):
+        # simulate growth from estimated parameters.
+        print(obs_times)
+        est_growth = odeint(self.cans_growth, init_amounts, obs_times,
+                            args=(ests, self.neighbourhood), full_output=False)
+        # Remove negative amounts.
+        np.maximum(0, est_growth[0], out=est_growth)
+        est_cells = [est_growth[:, i*3] for i in range(self.rows*self.cols)]
+        # calculate the sum of squares and return values.
+        sum_of_squares = self.sum_squares(est_cells, obs_cells)
+        return sum_of_squares
+
+
+    def plot_fit(self, filename='fit.pdf'):
+        # plot a fit using the estimated parameters.
+        params, init_amounts, t = self.fit_cans()
+        # If I reorder these I could just unpack with *args.
+        sol = self.sim_cans_growth2(t, init_amounts, params)
+        fig = plt.figure()
+        for i in range(self.rows*self.cols):
+            fig.add_subplot(self.rows, self.cols, i+1)
+            plt.plot(t, sol[:, i*3], 'b', label='cells')
+            plt.plot(t, sol[:, i*3 + 1], 'y', label='nutrients')
+            plt.plot(t, sol[:, i*3 + 2], 'r', label='signal')
+            plt.xlabel('t')
+            plt.grid()
+        if filename is None:
+            plt.show()
+        else:
+            # plt.legend(loc='best')
+            plt.savefig(filename)
 
 
 class RandomPlate(Plate):
@@ -271,4 +327,4 @@ if __name__ == "__main__":
     # rand_plate.kn = 0.0
     # rand_plate.ks = 0.0
     # rand_plate.plot_cans_sims('inde.pdf')
-    rand_plate.least_squares()
+    rand_plate.plot_fit()
