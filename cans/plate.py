@@ -33,7 +33,12 @@ class Plate:
         self.cols = cols
         self.kn = kn
         self.ks = ks
-        self.cultures = [Culture() for culture in range(rows*cols)]
+        self.cultures = self.get_cultures()
+
+
+    def get_cultures(self):
+        """Populate plate with cultures with the same parameters."""
+        return [Culture() for culture in range(self.rows*self.cols)]
 
 
     def collect_init_vals(self):
@@ -90,7 +95,7 @@ class Plate:
         # The zip reapeats the same interator thrice so as to group y by
         # threes. This is a Python idiom.
         rates = [rate for C, N, S, r, b, a in zip(*[iter(y)]*3, *[iter(params)]*3)
-                 for rate in (r*N*C - b*S*C, -r*N*C, a*C)]
+                 for rate in (r*N*C - b*S, -r*N*C, a*C)]    # *b*S*C?
         return rates
 
 
@@ -125,28 +130,31 @@ class Plate:
         for each culture.
 
         """
-        # Cannot have negative cell numbers or concentrations
-        #  np.clip(y, a_min=0.0, a_max=math.inf, out=y)
-        # try:
-        #     assert(min(y) >= 0.0)
-        # except AssertionError:
-        #     print("have a valus of C less than 0.")
-        # # This does not produce the required result.
-        # y = [max(0.0, val) for val in y]
-        # assert(min(y) >= 0.0)
+        # Cannot have negative cell numbers or concentrations. If we
+        # set this here then we may still get negative values for
+        # amounts in the solution but these can be replaced without
+        # having any side effects.
+        np.maximum(0, y, out=y)
+        try:
+            assert(min(y) >= 0)
+        except AssertionError:
+            print("y contains C, N, or S less than zero.")
+        # Amounts of nutrients and signal.
         nutrients = y[1::3]
         signal = y[2::3]
+        # Sums of nutrient and signal diffusion for each culture.
         N_diffusions = [sum([nutrient - nutrients[j] for j in neighbourhood[i]])
                         for i, nutrient in enumerate(nutrients)]
         S_diffusions = [sum([sig - signal[j] for j in neighbourhood[i]])
                         for i, sig in enumerate(signal)]
         # An iterator of values for variables/terms appearing in the model.
         vals = zip(*[iter(y)]*3, *[iter(params)]*3, N_diffusions, S_diffusions)
-        # This will sometimes store a negative values of cells. This
-        # can be corrected in the results and at the start of each
-        # function call so that this as zero effect.
+        # This will sometimes store a negative amounts. This can be
+        # corrected in the results returned by odeint if at the start
+        # of each function call values are set to zero (see
+        # np.maximum() above).
         rates = [rate for C, N, S, r, b, a, Ndiff, Sdiff in vals for rate in
-                (r*N*C - b*S*C, -r*N*C - self.kn*Ndiff, a*C - self.ks*Sdiff)]
+                (r*N*C - b*S, -r*N*C - self.kn*Ndiff, a*C - self.ks*Sdiff)]
         return rates
 
 
@@ -163,6 +171,8 @@ class Plate:
         neighbourhood = self.find_neighbourhood()
         sol = odeint(self.cans_growth, init_vals, t,
                      args=(params, neighbourhood))
+        # Remove negative amounts.
+        np.maximum(0, sol, out=sol)
         return sol
 
 
@@ -178,34 +188,18 @@ class Plate:
             plt.plot(t, sol[:, i*3 + 2], 'r', label='signal')
             plt.xlabel('t')
             plt.grid()
+        plt.show()
         # plt.legend(loc='best')
-        plt.savefig(filename)
+        # plt.display()
+        # plt.savefig(filename)
 
 
 class RandomPlate(Plate):
     """A plate containing cultures with randomised parameters."""
 
-    def __init__(self, rows=3, cols=3, kn=1.0, ks=1.0):
-        """Initialise plate with an array of cultures.
-
-        Parameters
-        ----------
-        rows : Optional[int]
-            Number of rows (default 3)
-        cols : Optional[int]
-            Number of columns (default 3)
-        kn : Optional[float]
-            Nutrient diffusion constant (default 0.0)
-        ks : Optional[float]
-            Signal diffusion constant (default 0.0)
-        cultures : list[Culture]
-            A list of rows*cols Culture objects.
-        """
-        self.rows = rows
-        self.cols = cols
-        self.kn = kn
-        self.ks = ks
-        self.cultures = [RandomCulture() for culture in range(cols*rows)]
+    def get_cultures(self):
+        """Return a list of Cultures with random parameters."""
+        return [RandomCulture() for culture in range(self.rows*self.cols)]
 
 
 if __name__ == "__main__":
@@ -225,8 +219,10 @@ if __name__ == "__main__":
 #     print(plate1.find_neighbourhood())
 #    plate1.plot_cans_sims()
     t = np.linspace(0, 15, 151)
-    rand_plate = RandomPlate(14, 22, kn=0.1, ks=0.1)
-    rand_plate.sim_cans_growth(t)
+    rand_plate = RandomPlate(3, 3, kn=1.0, ks=1.0)
+#    rand_plate.sim_cans_growth(t)
+    rand_plate.plot_cans_sims()
+#    rand_plate.plot_inde_sims()
     #rand_plate.plot_cans_sims(t)
     # rand_plate.plot_cans_sims()
     # rand_plate.kn = 0.0
