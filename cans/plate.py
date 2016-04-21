@@ -2,9 +2,9 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-import math
+import scipy.optimize as opt
 
-from operator import add
+
 from scipy.integrate import odeint
 
 
@@ -78,7 +78,7 @@ class Plate:
             if i % cols:
                 # Then not in first column.
                 neighbours.append(i - 1)
-            if (i + 1) % self.cols:
+            if (i + 1) % cols:
                 # Then not in last column.
                 neighbours.append(i + 1)
             if i < (rows - 1 )*cols:
@@ -163,7 +163,7 @@ class Plate:
         return rates
 
 
-    def sim_cans_growth(self, t):
+    def sim_cans_growth(self, t, full_output=False):
         """Simulate cans growth for whole plate."""
         init_vals = self.collect_init_vals()
         # can I just define params and neighbourhood in this scope and
@@ -175,9 +175,9 @@ class Plate:
         params = self.collect_params()
         neighbourhood = self.find_neighbourhood()
         sol = odeint(self.cans_growth, init_vals, t,
-                     args=(params, neighbourhood))
+                     args=(params, neighbourhood), full_output=full_output)
         # Remove negative amounts.
-        np.maximum(0, sol, out=sol)
+        np.maximum(0, sol[0], out=sol[0])
         print("Solved")
         return sol
 
@@ -199,6 +199,42 @@ class Plate:
         else:
             # plt.legend(loc='best')
             plt.savefig(filename)
+
+
+    def fit_cans(self):
+        # Use a simulated data set as observed values.
+        t = np.linspace(0, 15, 16)
+        data, info = self.sim_cans_growth(t, full_output=True)
+        obs_cells = [data[:, i*3] for i in range(self.rows*self.cols)]
+        obs_times = [0.0] + list(info['tcur'])
+        # List of initial variable and parameter guesses.
+        # Initial amounts are experimentally controlled fixed parameters.
+        C0 = 0.1
+        N0 = 1.0
+        S0 = 0.0
+        # Diffusion rates are the same for all but not fixed.
+        kn = 0.1
+        ks = 0.1
+        # These are initial guesses of parameters that are different
+        # for all cultures.
+        r = 1.0
+        b = 0.1
+        a = 0.1
+        # Options for minimization
+        options = {'disp': False, 'gtol': 1e-02, 'eps': 0.0001,
+                   'return_all': False, 'maxiter': 1000, 'norm': np.inf}
+        opt.minimize(least_squares, x0, args=(), method='BSGS', jac=None,
+                     tol=None, options=options, callback=None}
+
+
+    def sum_squares(self, est_cells, obs_cells):
+        """RMS between observed and estimated cell amount."""
+        # Sum of element wise subtraction and square.
+        sum_of_squares = sum(np.square(np.subtract(cell_vals - obs_cells)))
+        return sum_of_squares
+
+    def least_squares(self):
+        pass
 
 
 class RandomPlate(Plate):
@@ -229,9 +265,10 @@ if __name__ == "__main__":
     rand_plate = RandomPlate(3, 3, kn=0.1, ks=0.1)
 #    t = np.linspace(0, 15, 151)
 #    rand_plate.sim_cans_growth(t)
-    rand_plate.plot_cans_sims()
-    rand_plate.plot_inde_sims()
+#    rand_plate.plot_cans_sims()
+ #   rand_plate.plot_inde_sims()
     # rand_plate.plot_cans_sims(t)
     # rand_plate.kn = 0.0
     # rand_plate.ks = 0.0
     # rand_plate.plot_cans_sims('inde.pdf')
+    rand_plate.least_squares()
