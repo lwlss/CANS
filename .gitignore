@@ -59,3 +59,9 @@ target/
 # pymc
 python/pyMC/**/*.png
 python/pyMC/**/*.pdf
+
+# pyevn python version activator
+.python-version
+
+# temp files
+*~
