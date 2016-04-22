@@ -87,14 +87,28 @@ class Plate:
     def solve_model(self, init_amounts, times, params):
         growth_func = self.make_cans_model(params)
         sol = odeint(growth_func, init_amounts, times)
-        return sol
+        return np.maximum(0, sol)
 
 
     # Should work for simulations, fits, and experimental data.
     # Times used by odeint can be returned as 'tcur' in the info dict
     # if full_output is set to True.
-    def plot_growth(self, amounts, times):
-        pass
+    def plot_growth(self, amounts, times, filename=None):
+        fig = plt.figure()
+        for i in range(self.no_cultures):
+            fig.add_subplot(self.rows, self.cols, i+1)
+            plt.plot(times, amounts[:, i*3], 'b', label='cells')
+            plt.plot(times, amounts[:, i*3 + 1], 'y', label='nutrients')
+            plt.plot(times, amounts[:, i*3 + 2], 'r', label='signal')
+            plt.xlabel('t')
+            plt.grid()
+        if filename is None:
+            plt.show()
+        else:
+            # plt.legend(loc='best')
+            plt.savefig(filename)
+
+
 
 
 # Can do this with or without using culture classes. Going to stick
@@ -109,7 +123,6 @@ class SimPlate(Plate):
         super(SimPlate, self).__init__(rows, cols, kn, ks)
         # Then also fill the plate with RandomCultures.
         self.cultures = [RandomCulture() for i in range(self.no_cultures)]
-        self.true_params = [kn, ks] + self.collect_params()
 
 
     def collect_init_amounts(self):
@@ -118,10 +131,10 @@ class SimPlate(Plate):
         Return a flattened list of cell, nutirient, and signal amounts for
         each culture. I.e. [C0, N0, S0, C1, N1, S1, ...].
         """
-        init_vals = [val for culture in self.cultures
-                     for val in (culture.cells, culture.nutrients,
-                                 culture.signal)]
-        return init_vals
+        init_amounts = [amount for culture in self.cultures
+                        for amount in (culture.cells, culture.nutrients,
+                                       culture.signal)]
+        return init_amounts
 
 
     def collect_params(self):
@@ -135,13 +148,20 @@ class SimPlate(Plate):
         return params
 
 
-    # Now run and plot those simulations
-
-
 if __name__ == '__main__':
-    sim1 = SimPlate()
+    # Initialize a plate filled with random cultures.
+    sim1 = SimPlate(3, 3)
+    # Set/collect arguments for simulation.
     times = np.linspace(0, 15, 151)
     init_amounts = sim1.collect_init_amounts()
-    true_params = sim1.true_params
-    sol = sim1.solve_model(init_amounts, times, true_params)
-    #sim1.plot(sol, times)
+    cans_true_params = sim1.collect_params()
+    # Simulate and save plot of cans growth.
+    cans_sol = sim1.solve_model(init_amounts, times, cans_true_params)
+    sim1.plot_growth(cans_sol, times, filename='cans_growth.pdf')
+    # Now make independent by setting diffusion parameters to zero,
+    sim1.kn = 0.0
+    sim1.ks = 0.0
+    inde_true_params = sim1.collect_params()
+    # and simulate again
+    inde_sol = sim1.solve_model(init_amounts, times, inde_true_params)
+    sim1.plot_growth(inde_sol, times, filename='inde_growth.pdf')
