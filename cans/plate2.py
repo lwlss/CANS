@@ -15,7 +15,7 @@ class Plate:
         self.rows = rows
         self.cols = cols
         self.no_cultures = rows*cols
-        self.neighbourhood = self.fing_neighbourhood()
+        self.neighbourhood = self.find_neighbourhood()
         self.kn = kn
         self.ks = ks
 
@@ -72,7 +72,7 @@ class Plate:
             S_diffusions = [sum([sig - signal[j] for j in neighbourhood[i]])
                             for i, sig in enumerate(signal)]
             # An iterator of values for variables/terms appearing in the model.
-            vals = zip(*[iter(y)]*3, *[iter(culture_params)]*3,
+            vals = zip(*[iter(amounts)]*3, *[iter(culture_params)]*3,
                        N_diffusions, S_diffusions)
             # This will sometimes store a negative amounts. This can
             # be corrected in the results returned by odeint if call
@@ -142,6 +142,6 @@ if __name__ == '__main__':
     sim1 = SimPlate()
     times = np.linspace(0, 15, 151)
     init_amounts = sim1.collect_init_amounts()
-    ture_params = sim1.true_params
+    true_params = sim1.true_params
     sol = sim1.solve_model(init_amounts, times, true_params)
-    sim1.plot(sol, times)
+    #sim1.plot(sol, times)
