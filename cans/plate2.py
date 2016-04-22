@@ -5,7 +5,11 @@ import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 
 
+from culture import RandomCulture
+
+
 class Plate:
+
 
     def __init__(self, rows=3, cols=3, kn=None, ks=None):
         self.rows = rows
@@ -80,3 +84,12 @@ class Plate:
     # Should work for simulations, fits, and experimental data.
     def plot_growth(self):
         pass
+
+
+class SimPlate(Plate):
+
+    def __init__(self, rows=3, cols=3, kn=None, ks=None):
+        # Call Plate __init__
+        super(SimPlate, self).__init__(rows=3, cols=3, kn=None, ks=None)
+        # Then also fill the plate with RandomCultures.
+        self.cultures = [RandomCulture() for i in range(self.no_cultures)]
