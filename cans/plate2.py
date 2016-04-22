@@ -72,7 +72,8 @@ class Plate:
             S_diffusions = [sum([sig - signal[j] for j in neighbourhood[i]])
                             for i, sig in enumerate(signal)]
             # An iterator of values for variables/terms appearing in the model.
-            vals = zip(*[iter(y)]*3, *[iter(culture_params)]*3, N_diffusions, S_diffusions)
+            vals = zip(*[iter(y)]*3, *[iter(culture_params)]*3,
+                       N_diffusions, S_diffusions)
             # This will sometimes store a negative amounts. This can
             # be corrected in the results returned by odeint if call
             # values are ALSO set to zero at the start of each
@@ -83,8 +84,16 @@ class Plate:
         return cans_growth
 
 
+    def solve_model(self, init_amounts, times, params):
+        growth_func = self.make_cans_model(params)
+        sol = odeint(growth_func, init_amounts, times)
+        return sol
+
+
     # Should work for simulations, fits, and experimental data.
-    def plot_growth(self):
+    # Times used by odeint can be returned as 'tcur' in the info dict
+    # if full_output is set to True.
+    def plot_growth(self, amounts, times):
         pass
 
 
@@ -103,7 +112,7 @@ class SimPlate(Plate):
         self.true_params = [kn, ks] + self.collect_params()
 
 
-    def collect_init_vals(self):
+    def collect_init_amounts(self):
         """Collect a list of initial values for each culture.
 
         Return a flattened list of cell, nutirient, and signal amounts for
@@ -127,3 +136,12 @@ class SimPlate(Plate):
 
 
     # Now run and plot those simulations
+
+
+if __name__ == '__main__':
+    sim1 = SimPlate()
+    times = np.linspace(0, 15, 151)
+    init_amounts = sim1.collect_init_amounts()
+    ture_params = sim1.true_params
+    sol = sim1.solve_model(init_amounts, times, true_params)
+    sim1.plot(sol, times)
