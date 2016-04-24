@@ -31,58 +31,31 @@ class Culture:
         self.a = a    # Signal secretion constant
 
 
-    def growth(self, y, t, r, b, a):
-        """A growth model without diffusion."""
-        C, N, S = y
-        dydt = [r*N*C - b*S, -r*N*C, a*C]
-        return dydt
+    # def growth(self, y, t, r, b, a):
+    #     """A growth model without diffusion."""
+    #     C, N, S = y
+    #     dydt = [r*N*C - b*S, -r*N*C, a*C]
+    #     return dydt
 
 
-    def sim_inde_growth(self, t):
-        y0 = [self.cells, self.nutrients, self.signal]
-        r = 1
-        b = 0.01
-        a = 0.01
-        sol = odeint(self.growth, y0, t, args=(r, b, a))
-        return sol
+    # def sim_inde_growth(self, t):
+    #     y0 = [self.cells, self.nutrients, self.signal]
+    #     r = 1
+    #     b = 0.01
+    #     a = 0.01
+    #     sol = odeint(self.growth, y0, t, args=(r, b, a))
+    #     return sol
 
-    def plot_growth_sim(self):
-        t = np.linspace(0, 10, 101)
-        sol = self.sim_inde_growth(t)
-        plt.plot(t, sol[:, 0], 'b', label='cells')
-        plt.plot(t, sol[:, 1], 'y', label='nutrients')
-        plt.plot(t, sol[:, 2], 'r', label='signal')
-        plt.legend(loc='best')
-        plt.xlabel('t')
-        plt.grid()
-        plt.show()
-
-
-    def decomposed_growth(self, y, t, r, b, a):
-        """A decomposed growth model."""
-        c1, c2, s1 = y
-        dydt = [-r*c1*(c1+c2), -b*s1, a*(c1+c2)]
-        return dydt
-
-    def sim_decomp_inde_growth(self, t):
-        y0 = [-self.nutrients, self.cells + self.nutrients, self.signal]
-        r = 1
-        b = 0.01
-        a = 0.01
-        sol = odeint(self.decomposed_growth, y0, t, args=(r, b, a))
-        return sol
-
-
-    def plot_decomp_growth_sim(self):
-        t = np.linspace(0, 10, 101)
-        sol = self.sim_decomp_inde_growth(t)
-        plt.plot(t, [a+b for a, b in zip(sol[:, 0], sol[:, 1])], 'b', label='cells')
-        plt.plot(t, [-val for val in sol[:, 0]], 'y', label='nutrients')
-        plt.plot(t, sol[:, 2], 'r', label='signal')
-        plt.legend(loc='best')
-        plt.xlabel('t')
-        plt.grid()
-        plt.show()
+    # def plot_growth_sim(self):
+    #     t = np.linspace(0, 10, 101)
+    #     sol = self.sim_inde_growth(t)
+    #     plt.plot(t, sol[:, 0], 'b', label='cells')
+    #     plt.plot(t, sol[:, 1], 'y', label='nutrients')
+    #     plt.plot(t, sol[:, 2], 'r', label='signal')
+    #     plt.legend(loc='best')
+    #     plt.xlabel('t')
+    #     plt.grid()
+    #     plt.show()
 
 
 class RandomCulture(Culture):
@@ -109,6 +82,4 @@ class RandomCulture(Culture):
 
 if __name__ == '__main__':
     culture1 = Culture()
-    culture1.plot_growth_sim()
-    print("next")
-    culture1.plot_decomp_growth_sim()
+    rand_culture = RandomCulture()
