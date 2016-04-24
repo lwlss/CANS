@@ -79,12 +79,13 @@ class Plate:
             # values are ALSO set to zero at the start of each
             # function call (see np.maximum() above).
             rates = [rate for C, N, S, r, b, a, Ndiff, Sdiff in vals for rate in
-                     (r*N*C - b*S, -r*N*C - kn*Ndiff, a*C - ks*Sdiff)]
+                     (r*N*C - b*S*C, -r*N*C - kn*Ndiff, a*C - ks*Sdiff)]
             return rates
         return cans_growth
 
 
     def solve_model(self, init_amounts, times, params):
+        # init_amounts should be an array of length 3*no_cultures.
         growth_func = self.make_cans_model(params)
         sol = odeint(growth_func, init_amounts, times)
         return np.maximum(0, sol)
@@ -99,7 +100,7 @@ class Plate:
             fig.add_subplot(self.rows, self.cols, i+1)
             plt.plot(times, amounts[:, i*3], 'b', label='cells')
             plt.plot(times, amounts[:, i*3 + 1], 'y', label='nutrients')
-            plt.plot(times, amounts[:, i*3 + 2], 'r', label='signal')
+        #    plt.plot(times, amounts[:, i*3 + 2], 'r', label='signal')
             plt.xlabel('t')
             plt.grid()
         if filename is None:
