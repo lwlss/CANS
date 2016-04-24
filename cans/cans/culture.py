@@ -76,8 +76,8 @@ class RandomCulture(Culture):
         self.nutrients = nutrients
         self.signal = signal
         self.r = max(0.0, random.gauss(1.0, 1.0))   # Growth rate constant
-        self.b = 0.01    # Signal on cells effect constant
-        self.a = 0.1    # Signal secretion constant
+        self.b = 0.05   # Signal on cells effect constant
+        self.a = 0.05    # Signal secretion constant
 
 
 if __name__ == '__main__':
