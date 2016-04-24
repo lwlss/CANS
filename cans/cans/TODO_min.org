@@ -1,4 +1,4 @@
-* TODO [0/1]
+* TODO [0/5]
   - At the moment b and a do not fit very well. The fit appears to
     improve if observation time is longer.
   - As expected kn and ks do not change from initial values in a
@@ -9,5 +9,13 @@
     discovered by looking at an exponential fit on a logarithmic
     scale.
   - It is important that we are able to recover diffusion constants
-    well.
+    well as we are modelling competition. However might be a many
+    possible solutions with different alpha beta and initail amounts.
   - [ ] Compare true plots to estimated plots.
+  - Times solved by odeint are slightly different to the observed
+    times.
+  - Should perhaps fix beta - the effect of signal on cells.
+  - Could also fix or at least constrain alpha - the rate of
+    secretion of signal.
+  - Might be better to compare signal only diffusion and nutrient
+    diffusion only models.
