@@ -1,4 +1,4 @@
-* TODO [0/2]
+* TODO [4/7]
   - At the moment b and a do not fit very well. The fit appears to
     improve if observation time is longer.
   - As expected kn and ks do not change from initial values in a
@@ -11,7 +11,7 @@
   - It is important that we are able to recover diffusion constants
     well as we are modelling competition. However might be a many
     possible solutions with different alpha beta and initail amounts.
-  - [ ] Compare true plots to estimated plots.
+  - [X] Compare true plots to estimated plots.
   - Times solved by odeint are slightly different to the observed
     times.
   - Should perhaps fix beta - the effect of signal on cells.
@@ -19,4 +19,13 @@
     secretion of signal.
   - Might be better to compare signal only diffusion and nutrient
     diffusion only models.
-  - [ ] Try model C + N -> 2C + S
+  - [X] Try model C + N -> 2C + S
+  - [X] Find way to store model tuple as an attribute/string so that
+    it can easily be changed. THIS WAS SLOW.
+  - [X] Make fitting general to n x m plate.
+  - [ ] Look at code design
+    - Either make fitting methods or go functional.
+  - [ ] Plot cans_true, cans_fit_of_cans, and inde_fit_of_cans on same
+    axes.
+  - [ ] Also plot inde_true, cans_fit_of_inde, inde_fit_of_inde on
+    same axes.
