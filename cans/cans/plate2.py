@@ -16,15 +16,19 @@ class Plate:
         self.neighbourhood = self.find_neighbourhood()
         self.kn = kn
         self.ks = ks
+        # self.init_params
+        # self.init_amounts
+        # self.init_guess
+        # self.times
+
 
 
     def find_neighbourhood(self):
         """Return a list of tuples of neighbour indices for each culture."""
         rows = self.rows
         cols = self.cols
-        no_cultures = rows*cols
         neighbourhood = []
-        for i in range(no_cultures):
+        for i in range(self.no_cultures):
             neighbours = []
             if i // cols:
                 # Then not in first row.
@@ -108,6 +112,33 @@ class Plate:
             plt.savefig(filename)
 
 
+    def obj_func(self, params):
+        # Could do tiling later in solve_model if faster.
+        init_amounts = np.tile(params[: 3], self.no_cultures)
+        params = params[3:]
+        # Now find the amounts from simulations using the parameters.
+        amounts_est = self.solve_model(init_amounts, times, params)
+        c_est = np.array([amounts[:, i*3] for i in range(self.no_cultures)]).flatten()
+        err = np.sqrt(sum((c_meas - c_est)**2))
+        return err
+
+
+    def init_guess(self):
+        """Return an initial parameter guess."""
+        # C(t=0), N(t=0), S(t=0)
+        amounts_guess = [0.2, 0.2, 0.0]
+        # kn, ks
+        kn_ks_guess = [0.05, 0.15]
+        # r, b, a
+        rates_guess = [1.0, 0.05, 0.05]
+        # Initial guess: C(t=0), N(t=0), S(t=0), kn, ks, r0, b0, a0, r1, b1, a1, ...
+        init_guess = np.array(amounts_guess + kn_ks_guess
+                              + rates_guess*self.no_cultures)
+        return init_guess
+
+
+    def fit_data(self, init):
+        true_amounts = None
 
 
 # Can do this with or without using culture classes. Going to stick
@@ -130,9 +161,8 @@ class SimPlate(Plate):
         Return a flattened list of cell, nutirient, and signal amounts for
         each culture. I.e. [C0, N0, S0, C1, N1, S1, ...].
         """
-        init_amounts = [amount for culture in self.cultures
-                        for amount in (culture.cells, culture.nutrients,
-                                       culture.signal)]
+        init_amounts = [amount for culture in self.cultures for amount in
+                        (culture.cells, culture.nutrients, culture.signal)]
         return init_amounts
 
 
