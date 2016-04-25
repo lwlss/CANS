@@ -135,7 +135,6 @@ def gen_params(no_cultures):
     return params
 
 
-
 def obj_func(no_cultures, c_meas, neighbourhood, params):
     """Objective function for fitting model."""
     # Could do tiling later in solve_model if faster.
@@ -162,23 +161,19 @@ def guess_params(no_cultures):
 
 
 if __name__ == '__main__':
-    rows = 1
-    cols = 1
+    rows = 2
+    cols = 2
     no_cultures = rows*cols
     neighbourhood = find_neighbourhood(rows, cols)
     params = gen_params(no_cultures)
     init_amounts = gen_amounts(no_cultures)
     times = np.linspace(0, 20, 201)
     true_amounts = solve_model(init_amounts, times, params, neighbourhood)
-    plot_growth(rows, cols, true_amounts, times)
-
 
     # Fitting
-    # Mock data
     c_meas = [true_amounts[:, i*3] for i in range(no_cultures)]
     c_meas = np.array(c_meas).flatten()
     obj_f = partial(obj_func, no_cultures, c_meas, neighbourhood)
-
     # Initial parameter guess
     init_guess = guess_params(no_cultures)
     # All values non-negative.
@@ -189,7 +184,5 @@ if __name__ == '__main__':
                           bounds=bounds, options={'disp': True})
     est_amounts = solve_model(np.tile(est_params.x[: 3], no_cultures),
                               times, est_params.x[3 :], neighbourhood)
-
     plot_growth(rows, cols, true_amounts, times, filename='true.pdf')
     plot_growth(rows, cols, est_amounts, times, filename='est.pdf')
-    print('here')
