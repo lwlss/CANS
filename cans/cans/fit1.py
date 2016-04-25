@@ -4,7 +4,7 @@ from scipy.optimize import minimize
 
 from plate2 import Plate, SimPlate
 
-plate1 = SimPlate(1, 2)
+plate1 = SimPlate(2, 2)
 times = np.linspace(0, 20, 21)
 true_init_amounts = np.array(plate1.collect_init_amounts())
 true_params = np.array(plate1.collect_params())
@@ -46,9 +46,6 @@ bounds[2] = (0.0, 0.0)
 res = minimize(obj_func, init_guess, method='L-BFGS-B', bounds=bounds,
                options={'disp': True})
 
-print(init_guess)
-print(np.append(true_init_amounts[:3], true_params))
-print(res.x)
 
 # plot the true amounts and the estimated amounts.
 est_amounts = plate1.solve_model(np.tile(res.x[: 3], plate1.no_cultures),
