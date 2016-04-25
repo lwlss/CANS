@@ -8,16 +8,19 @@ from scipy.integrate import odeint
 from culture import RandomCulture
 
 
+# Default model
+DEF_MOD = ("r*N*C - b*S*C", "-r*N*C - kn*Ndiff", "r*N*C - ks*Sdiff")
+
+
 class Plate:
-
-
-    def __init__(self, rows=3, cols=3, kn=None, ks=None):
+    def __init__(self, rows=3, cols=3, kn=None, ks=None, model=DEF_MOD):
         self.rows = rows
         self.cols = cols
         self.no_cultures = rows*cols
         self.neighbourhood = self.find_neighbourhood()
         self.kn = kn
         self.ks = ks
+        self.model = model
 
 
     def find_neighbourhood(self):
@@ -54,8 +57,8 @@ class Plate:
         """
         neighbourhood = self.neighbourhood
         # Separate out plate and culture level parameters.
-        kn = params[0]
-        ks = params[1]
+        # kn and ks need to be a dictionary in order to pass to eval.
+        k_dict = {'kn': params[0], 'ks': params[1]}
         culture_params = params[2:]    # Could also do the iter here.
         # Must have times as argument in cans_growth function as this
         # is a requirement of odeint?
@@ -74,12 +77,16 @@ class Plate:
             # An iterator of values for variables/terms appearing in the model.
             vals = zip(*[iter(amounts)]*3, *[iter(culture_params)]*3,
                        N_diffusions, S_diffusions)
-            # This will sometimes store a negative amounts. This can
+            # This will sometimes store negative amounts. This can
             # be corrected in the results returned by odeint if call
             # values are ALSO set to zero at the start of each
-            # function call (see np.maximum() above).
-            rates = [rate for C, N, S, r, b, a, Ndiff, Sdiff in vals for rate in
-                     (r*N*C - b*S*C, -r*N*C - kn*Ndiff, a*C - ks*Sdiff)]
+            # function call (see np.maximum() above).  Passing k_dict
+            # as the 'global' argument here. Currying causes an issue
+            # with scope when using eval as k_dict is not found in
+            # locals() or globals().
+            rates = [eval(rate, k_dict, locals())
+                     for C, N, S, r, b, a, Ndiff, Sdiff in vals
+                     for rate in self.model]
             return rates
         return cans_growth
 
@@ -100,7 +107,7 @@ class Plate:
             fig.add_subplot(self.rows, self.cols, i+1)
             plt.plot(times, amounts[:, i*3], 'b', label='cells')
             plt.plot(times, amounts[:, i*3 + 1], 'y', label='nutrients')
-        #    plt.plot(times, amounts[:, i*3 + 2], 'r', label='signal')
+            plt.plot(times, amounts[:, i*3 + 2], 'r', label='signal')
             plt.xlabel('t')
             plt.grid()
         if filename is None:
@@ -119,9 +126,9 @@ class Plate:
 # fixing certain parameters on some plates.
 class SimPlate(Plate):
 
-    def __init__(self, rows=3, cols=3, kn=0.1, ks=0.1):
+    def __init__(self, rows=3, cols=3, kn=0.1, ks=0.1, model=DEF_MOD):
         # Call Plate __init__
-        super(SimPlate, self).__init__(rows, cols, kn, ks)
+        super(SimPlate, self).__init__(rows, cols, kn, ks, model)
         # Then also fill the plate with RandomCultures.
         self.cultures = [RandomCulture() for i in range(self.no_cultures)]
 
@@ -151,7 +158,7 @@ class SimPlate(Plate):
 
 if __name__ == '__main__':
     # Initialize a plate filled with random cultures.
-    sim1 = SimPlate(3, 3)
+    sim1 = SimPlate(1, 1)
     # Set/collect arguments for simulation.
     times = np.linspace(0, 15, 151)
     init_amounts = sim1.collect_init_amounts()
