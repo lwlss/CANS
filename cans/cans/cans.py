@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 from random import gauss
 from scipy.integrate import odeint
 from scipy.optimize import minimize
