@@ -85,24 +85,6 @@ def solve_model(init_amounts, times, params, neighbourhood):
     return np.maximum(0, sol)
 
 
-def plot_growth(rows, cols, amounts, times, filename=None):
-    """Plot a grid of timecourses of C, N, and S for each culture."""
-    ymax = np.amax(true_amounts)
-    fig = plt.figure()
-    for i in range(rows*cols):
-        fig.add_subplot(rows, cols, i+1, ylim=(0.0, ymax))
-        plt.plot(times, amounts[:, i*3], 'b', label='cells')
-        plt.plot(times, amounts[:, i*3 + 1], 'y', label='nutrients')
-        plt.plot(times, amounts[:, i*3 + 2], 'r', label='signal')
-        plt.xlabel('t')
-        plt.grid()
-    if filename is None:
-        plt.show()
-    else:
-        # plt.legend(loc='best')
-        plt.savefig(filename)
-
-
 # May choose just to have gen_params
 def gen_amounts(no_cultures):
     """Return a list of initial amounts for a plate of cultures.
@@ -163,8 +145,9 @@ def guess_params(no_cultures):
 
 
 if __name__ == '__main__':
-    rows = 9
-    cols = 9
+    from cans_plot import plot_growth
+    rows = 3
+    cols = 3
     no_cultures = rows*cols
     neighbourhood = find_neighbourhood(rows, cols)
     params = gen_params(no_cultures)
