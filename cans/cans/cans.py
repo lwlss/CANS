@@ -161,8 +161,8 @@ def guess_params(no_cultures):
 
 
 if __name__ == '__main__':
-    rows = 2
-    cols = 2
+    rows = 3
+    cols = 3
     no_cultures = rows*cols
     neighbourhood = find_neighbourhood(rows, cols)
     params = gen_params(no_cultures)
@@ -184,5 +184,5 @@ if __name__ == '__main__':
                           bounds=bounds, options={'disp': True})
     est_amounts = solve_model(np.tile(est_params.x[: 3], no_cultures),
                               times, est_params.x[3 :], neighbourhood)
-    plot_growth(rows, cols, true_amounts, times, filename='true.pdf')
-    plot_growth(rows, cols, est_amounts, times, filename='est.pdf')
+    plot_growth(rows, cols, true_amounts, times, filename='true_func.pdf')
+    plot_growth(rows, cols, est_amounts, times, filename='est_func.pdf')
