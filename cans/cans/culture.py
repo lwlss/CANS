@@ -1,11 +1,5 @@
 """Clases for the representation of microbial cultures."""
-
-import numpy as np
-import matplotlib.pyplot as plt
 import random
-
-
-from scipy.integrate import odeint
 
 
 class Culture:
@@ -29,33 +23,6 @@ class Culture:
         self.r = r    # Growth rate constant
         self.b = b    # Signal on cells effect constant
         self.a = a    # Signal secretion constant
-
-
-    # def growth(self, y, t, r, b, a):
-    #     """A growth model without diffusion."""
-    #     C, N, S = y
-    #     dydt = [r*N*C - b*S, -r*N*C, a*C]
-    #     return dydt
-
-
-    # def sim_inde_growth(self, t):
-    #     y0 = [self.cells, self.nutrients, self.signal]
-    #     r = 1
-    #     b = 0.01
-    #     a = 0.01
-    #     sol = odeint(self.growth, y0, t, args=(r, b, a))
-    #     return sol
-
-    # def plot_growth_sim(self):
-    #     t = np.linspace(0, 10, 101)
-    #     sol = self.sim_inde_growth(t)
-    #     plt.plot(t, sol[:, 0], 'b', label='cells')
-    #     plt.plot(t, sol[:, 1], 'y', label='nutrients')
-    #     plt.plot(t, sol[:, 2], 'r', label='signal')
-    #     plt.legend(loc='best')
-    #     plt.xlabel('t')
-    #     plt.grid()
-    #     plt.show()
 
 
 class RandomCulture(Culture):
