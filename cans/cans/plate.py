@@ -17,11 +17,6 @@ class Plate:
         self.neighbourhood = self.find_neighbourhood()
         self.kn = kn
         self.ks = ks
-        # self.init_params
-        # self.init_amounts = None
-        # self.init_guess
-        # self.times = times
-
 
 
     def find_neighbourhood(self):
@@ -136,8 +131,6 @@ class Plate:
         init_guess = np.array(amounts_guess + kn_ks_guess
                               + rates_guess*self.no_cultures)
         return init_guess
-
-
 
 
 # Can do this with or without using culture classes. Going to stick
