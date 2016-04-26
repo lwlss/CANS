@@ -86,9 +86,10 @@ def solve_model(init_amounts, times, params, neighbourhood):
 
 def plot_growth(rows, cols, amounts, times, filename=None):
     """Plot a grid of timecourses of C, N, and S for each culture."""
+    ymax = np.amax(true_amounts)
     fig = plt.figure()
     for i in range(rows*cols):
-        fig.add_subplot(rows, cols, i+1)
+        fig.add_subplot(rows, cols, i+1, ylim=(0.0, ymax))
         plt.plot(times, amounts[:, i*3], 'b', label='cells')
         plt.plot(times, amounts[:, i*3 + 1], 'y', label='nutrients')
         plt.plot(times, amounts[:, i*3 + 2], 'r', label='signal')
@@ -161,28 +162,28 @@ def guess_params(no_cultures):
 
 
 if __name__ == '__main__':
-    rows = 3
-    cols = 3
+    rows = 9
+    cols = 9
     no_cultures = rows*cols
     neighbourhood = find_neighbourhood(rows, cols)
     params = gen_params(no_cultures)
     init_amounts = gen_amounts(no_cultures)
     times = np.linspace(0, 20, 201)
     true_amounts = solve_model(init_amounts, times, params, neighbourhood)
-
-    # Fitting
-    c_meas = [true_amounts[:, i*3] for i in range(no_cultures)]
-    c_meas = np.array(c_meas).flatten()
-    obj_f = partial(obj_func, no_cultures, c_meas, neighbourhood)
-    # Initial parameter guess
-    init_guess = guess_params(no_cultures)
-    # All values non-negative.
-    bounds = [(0.0, None) for i in range(len(init_guess))]
-    # S(t=0) = 0.
-    bounds[2] = (0.0, 0.0)
-    est_params = minimize(obj_f, init_guess, method='L-BFGS-B',
-                          bounds=bounds, options={'disp': True})
-    est_amounts = solve_model(np.tile(est_params.x[: 3], no_cultures),
-                              times, est_params.x[3 :], neighbourhood)
-    plot_growth(rows, cols, true_amounts, times, filename='true_func.pdf')
-    plot_growth(rows, cols, est_amounts, times, filename='est_func.pdf')
+    plot_growth(rows, cols, true_amounts, times)
+    # # Fitting
+    # c_meas = [true_amounts[:, i*3] for i in range(no_cultures)]
+    # c_meas = np.array(c_meas).flatten()
+    # obj_f = partial(obj_func, no_cultures, c_meas, neighbourhood)
+    # # Initial parameter guess
+    # init_guess = guess_params(no_cultures)
+    # # All values non-negative.
+    # bounds = [(0.0, None) for i in range(len(init_guess))]
+    # # S(t=0) = 0.
+    # bounds[2] = (0.0, 0.0)
+    # est_params = minimize(obj_f, init_guess, method='L-BFGS-B',
+    #                       bounds=bounds, options={'disp': True})
+    # est_amounts = solve_model(np.tile(est_params.x[: 3], no_cultures),
+    #                           times, est_params.x[3 :], neighbourhood)
+    # plot_growth(rows, cols, true_amounts, times, filename='true_func.pdf')
+    # plot_growth(rows, cols, est_amounts, times, filename='est_func.pdf')
