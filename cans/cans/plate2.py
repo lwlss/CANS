@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 
 
 from scipy.integrate import odeint
+from scipy.optimize import minimize
 
 
 from culture import RandomCulture
@@ -17,9 +18,9 @@ class Plate:
         self.kn = kn
         self.ks = ks
         # self.init_params
-        # self.init_amounts
+        # self.init_amounts = None
         # self.init_guess
-        # self.times
+        # self.times = times
 
 
 
@@ -86,23 +87,23 @@ class Plate:
         return cans_growth
 
 
-    def solve_model(self, init_amounts, times, params):
+    def solve_model(self, init_amounts, params):
         # init_amounts should be an array of length 3*no_cultures.
         growth_func = self.make_cans_model(params)
-        sol = odeint(growth_func, init_amounts, times)
+        sol = odeint(growth_func, init_amounts, self.times)
         return np.maximum(0, sol)
 
 
     # Should work for simulations, fits, and experimental data.
     # Times used by odeint can be returned as 'tcur' in the info dict
     # if full_output is set to True.
-    def plot_growth(self, amounts, times, filename=None):
+    def plot_growth(self, amounts, filename=None):
         fig = plt.figure()
         for i in range(self.no_cultures):
             fig.add_subplot(self.rows, self.cols, i+1)
-            plt.plot(times, amounts[:, i*3], 'b', label='cells')
-            plt.plot(times, amounts[:, i*3 + 1], 'y', label='nutrients')
-            plt.plot(times, amounts[:, i*3 + 2], 'r', label='signal')
+            plt.plot(self.times, amounts[:, i*3], 'b', label='cells')
+            plt.plot(self.times, amounts[:, i*3 + 1], 'y', label='nutrients')
+            plt.plot(self.times, amounts[:, i*3 + 2], 'r', label='signal')
             plt.xlabel('t')
             plt.grid()
         if filename is None:
@@ -117,9 +118,9 @@ class Plate:
         init_amounts = np.tile(params[: 3], self.no_cultures)
         params = params[3:]
         # Now find the amounts from simulations using the parameters.
-        amounts_est = self.solve_model(init_amounts, times, params)
-        c_est = np.array([amounts[:, i*3] for i in range(self.no_cultures)]).flatten()
-        err = np.sqrt(sum((c_meas - c_est)**2))
+        amounts_est = self.solve_model(init_amounts, params)
+        c_est = np.array([amounts_est[:, i*3] for i in range(self.no_cultures)]).flatten()
+        err = np.sqrt(sum((self.c_meas - c_est)**2))
         return err
 
 
@@ -137,8 +138,6 @@ class Plate:
         return init_guess
 
 
-    def fit_data(self, init):
-        true_amounts = None
 
 
 # Can do this with or without using culture classes. Going to stick
@@ -148,11 +147,20 @@ class Plate:
 # fixing certain parameters on some plates.
 class SimPlate(Plate):
 
-    def __init__(self, rows=3, cols=3, kn=0.1, ks=0.1):
+    def __init__(self, rows=3, cols=3, kn=0.1, ks=0.1, times=None):
         # Call Plate __init__
         super(SimPlate, self).__init__(rows, cols, kn, ks)
         # Then also fill the plate with RandomCultures.
         self.cultures = [RandomCulture() for i in range(self.no_cultures)]
+        self.true_init_amounts = self.collect_init_amounts()
+        self.true_params = self.collect_params()
+        self.times = times    # Can be taken from the data for a plate.
+        # Artificial data including hidden varibles.
+        self.true_amounts = self.solve_model(self.true_init_amounts,
+                                             self.true_params)
+        # Cells times-course. The data from a real plate.
+        self.c_meas = np.array([self.true_amounts[:, i*3] for i in
+                                range(self.no_cultures)]).flatten()
 
 
     def collect_init_amounts(self):
@@ -177,20 +185,36 @@ class SimPlate(Plate):
         return params
 
 
+    def fit_data(self, plot=True):
+        init_guess = self.init_guess()
+        bounds = [(0.0, None) for i in range(len(init_guess))]
+        bounds[2] = (0.0, 0.0)    # S(t=0), remove from params and
+                                  # instead set const.
+        res = minimize(self.obj_func, init_guess, method='L-BFGS-B',
+                       bounds=bounds, options={'disp': True})
+        est_amounts = self.solve_model(np.tile(res.x[: 3], self.no_cultures),
+                                       res.x[3 :])
+        if plot:
+            self.plot_growth(self.true_amounts, filename='true.pdf')
+            self.plot_growth(est_amounts, filename='est.pdf')
+        return est_amounts
+
+
 if __name__ == '__main__':
     # Initialize a plate filled with random cultures.
-    sim1 = SimPlate(1, 1)
+    times = np.linspace(0, 20, 201)
+    sim1 = SimPlate(3, 3, times=times)
     # Set/collect arguments for simulation.
-    times = np.linspace(0, 15, 151)
-    init_amounts = sim1.collect_init_amounts()
     cans_true_params = sim1.collect_params()
     # Simulate and save plot of cans growth.
-    cans_sol = sim1.solve_model(init_amounts, times, cans_true_params)
-    sim1.plot_growth(cans_sol, times, filename='cans_growth.pdf')
+    cans_sol = sim1.true_amounts
+    sim1.plot_growth(cans_sol, filename='cans_growth.pdf')
     # Now make independent by setting diffusion parameters to zero,
     sim1.kn = 0.0
     sim1.ks = 0.0
+    init_amounts = sim1.collect_init_amounts()
+    # Careful not to use self.true_params which contains old kn, ks.
     inde_true_params = sim1.collect_params()
     # and simulate again
-    inde_sol = sim1.solve_model(init_amounts, times, inde_true_params)
-    sim1.plot_growth(inde_sol, times, filename='inde_growth.pdf')
+    inde_sol = sim1.solve_model(init_amounts, inde_true_params)
+    sim1.plot_growth(inde_sol, filename='inde_growth.pdf')
