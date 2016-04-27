@@ -40,7 +40,7 @@
     plots.
 
 
-* TODO Blog [0/4]
+* TODO Blog [0/5]
   - [ ] Plots of independent and cans simulations for
     - [ ] 1 (same)
     - [ ] 2x2,
@@ -50,13 +50,13 @@
   - [ ] Need a MAD/summary of ri's and also of other paramters. This
     will show how well parameters are being recovered. Do this for all
     of the below models.
-  - [ ] Plots comparing simulated data and fits of data. Ideally this
-    should be with the same set of random (ri) parameters which I
-    should save to file or pickle. Or two sets of random paramters -
-    one with a zero growth cultures. Want to show plots of 3x3. Should
-    also compare how the models perform at different grid sizes 1,
-    2x2, 3x3, 5x5. Having a larger grid may effect parameter estimates
-    in either direction.
+  - [ ] Plots comparing simulated data and fits of data
+    (competition). Ideally this should be with the same set of random
+    (ri) parameters which I should save to file or pickle. Or two sets
+    of random paramters - one with a zero growth cultures. Want to
+    show plots of 3x3. Should also compare how the models perform at
+    different grid sizes 1, 2x2, 3x3, 5x5. Having a larger grid may
+    effect parameter estimates in either direction.
     - [ ] For independent model.
     - [ ] For model with many loose params i.e. b and a.
     - [ ] For model without a i.e. N + C -> 2C + S
@@ -70,8 +70,14 @@
       - [ ] Or allow S_crit to vary
   - [ ] For at least one of the models (the apparent best?) we should
     compare recovery of parameters at different grid sizes.
+  - [ ] Should also see how well the cans model performs on a set of
+    data that is independent.
 
 
+* TODO Speed up code [0/3]
+  - [ ] See how long it takes to fit a realistic sized plate.
+  - [ ] Profile the function to see which bits need to be sped up.
+  - [ ]
 
 * TODO Fitting Data [0/2]
   - [ ] Write functions to read in amounts and times.
