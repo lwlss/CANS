@@ -41,7 +41,7 @@ def plot_growth(rows, cols, amounts, times, filename=None):
         plt.savefig(filename)
 
 
-def plot_growth_grid(rows, cols, amounts, times, filename=None):
+def plot_growth_grid(rows, cols, amounts, times, title='CANS Growth', filename=None):
     """Plot a grid of timecourses of C, N, and S for each culture.
 
     Uses AxesGrid from mpl_loolkits.axes_grid1.
@@ -49,7 +49,7 @@ def plot_growth_grid(rows, cols, amounts, times, filename=None):
     ymax = np.amax(amounts)
     ymax = np.ceil(ymax*10)/10
     fig = plt.figure()
-    fig.suptitle('CANS growth', fontsize=20)
+    fig.suptitle(title, fontsize=20)
     # http://stackoverflow.com/a/36542971
     # Add big axes and hide frame.
     fig.add_subplot(111, frameon=False)
@@ -76,7 +76,7 @@ def plot_growth_grid(rows, cols, amounts, times, filename=None):
             plt.setp(ax.get_yticklabels()[-1], visible=False)
             # pass
 
-    grid[-1].legend(loc='best')
+    # grid[-1].legend(loc='best')
     if filename is None:
         plt.show()
     else:
