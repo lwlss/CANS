@@ -1,0 +1,79 @@
+* TODO Fitting Simulations [5/7]
+  - At the moment b and a do not fit very well. The fit appears to
+    improve if observation time is longer.
+  - As expected kn and ks do not change from initial values in a
+    single culture simulation.
+  - I anticipate that we may need to remove early values from the data
+    if actual values fall below the resolution to detect cells. This
+    would mean taking of any values below a certain IOD which can be
+    discovered (once) by looking at an exponential fit on a
+    logarithmic scale.
+  - It is important that we are able to recover diffusion constants
+    well as we are modelling competition. However, there might be a
+    many possible solutions with different params. We should consider
+    how to bound/constrain parameters and which can be assumed to be
+    the same for all cultures.
+  - [X] Compare true plots to estimated plots.
+  - Times solved by odeint are slightly different to the observed
+    times.
+  - Should perhaps fix beta - the effect of signal on cells.
+  - Could also fix or at least constrain alpha - the rate of
+    secretion of signal.
+  - Might be better to compare signal only diffusion and nutrient
+    diffusion only models.
+  - [X] Try model C + N -> 2C + S
+  - [X] Find way to store model tuple as an attribute/string so that
+    it can easily be changed. THIS WAS SLOW.
+  - [X] Make fitting general to n x m plate.
+  - [X] Look at code design. Have both of the below.
+    - Either make fitting methods or go functional.
+  - [ ] Plot cans_true, cans_fit_of_cans, and inde_fit_of_cans on same
+    axes.
+  - [ ] Also plot inde_true, cans_fit_of_inde, inde_fit_of_inde on
+    same axes.
+
+
+* TODO Plot layout [3/3]
+  - [X] make all y axes the same
+  - [X] Only have values on the outer axes
+  - [X] Exclude last value on axis so that they do not overlap in grid
+    plots.
+
+
+* TODO Blog [0/4]
+  - [ ] Plots of independent and cans simulations for
+    - [ ] 1 (same)
+    - [ ] 2x2,
+    - [ ] 3x3,
+    - [ ] and 16x24.
+    - [ ] Also look at 1x10 out of interest.
+  - [ ] Need a MAD/summary of ri's and also of other paramters. This
+    will show how well parameters are being recovered. Do this for all
+    of the below models.
+  - [ ] Plots comparing simulated data and fits of data. Ideally this
+    should be with the same set of random (ri) parameters which I
+    should save to file or pickle. Or two sets of random paramters -
+    one with a zero growth cultures. Want to show plots of 3x3. Should
+    also compare how the models perform at different grid sizes 1,
+    2x2, 3x3, 5x5. Having a larger grid may effect parameter estimates
+    in either direction.
+    - [ ] For independent model.
+    - [ ] For model with many loose params i.e. b and a.
+    - [ ] For model without a i.e. N + C -> 2C + S
+      - [ ] How does this change when there is a culture which does
+        not grow.
+    - [ ] First model with common a (signal secretion)
+    - [ ] Both with common b (effect of signal on cells)
+    - [ ] Then with a and b fixed for first model
+    - [ ] Try alternative model of signal effect maxof(0, (1 - Si/Scrit))
+      - [ ] Can have common S_crit
+      - [ ] Or allow S_crit to vary
+  - [ ] For at least one of the models (the apparent best?) we should
+    compare recovery of parameters at different grid sizes.
+
+
+
+* TODO Fitting Data [0/2]
+  - [ ] Write functions to read in amounts and times.
+  - [ ] Need to keep track of which file/experiment the data belongs
+    to.
