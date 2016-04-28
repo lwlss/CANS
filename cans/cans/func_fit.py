@@ -1,20 +1,26 @@
 import numpy as np
 import pickle
+import csv
+
 from tabulate import tabulate
 
 from cans import *
 from cans_plot import plot_growth_grid as plot_growth
 
+
 def mad(a, b):
+    """Return mean absolute deviation."""
     return np.mean(np.abs(a - b))
 
+
+model = 'compare_fit_results/mod1'
 rows = 3
 cols = 3
 no_cultures = rows*cols
 neighbourhood = find_neighbourhood(rows, cols)
 # params = gen_params(no_cultures)
 # Using the same random r values for fits of different models.
-with open('params3x3.pickle', 'rb') as f:
+with open('compare_fit_results/params3x3.pickle', 'rb') as f:
     params = pickle.load(f)
 init_amounts = gen_amounts(no_cultures)
 times = np.linspace(0, 20, 21)
@@ -39,8 +45,8 @@ est_params = minimize(obj_f, init_guess, method='L-BFGS-B',
                       bounds=bounds, options={'disp': True})
 est_amounts = solve_model(np.tile(est_params.x[: 3], no_cultures),
                           times, neighbourhood, est_params.x[3 :])
-plot_growth(rows, cols, true_amounts, times, filename='true_mod1.pdf')
-plot_growth(rows, cols, est_amounts, times, filename='est_mod1.pdf')
+plot_growth(rows, cols, true_amounts, times, filename=model+'_true.pdf')
+plot_growth(rows, cols, est_amounts, times, filename=model+'_est.pdf')
 
 
 # Find error between true and estimated parameters.
@@ -73,3 +79,6 @@ table = [
 ]
 
 print(tabulate(table, headers=["Parameter", "Deviation"]))
+with open(model+'_devs.csv', 'w', newline='') as f:
+    writer = csv.writer(f)
+    writer.writerows(table)
