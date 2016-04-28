@@ -3,8 +3,8 @@
     - Individual a's and b's
     - No bounds
   - [ ] Model 2
-    - Individual a's and b's
-    - Bound S(t=0)
-  - [ ] Model 3
     - Plate level a and b
     - No bounds
+  - [ ] Model 3 (maybe not this one)
+    - Individual a's and b's
+    - Bound S(t=0)
