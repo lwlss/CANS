@@ -65,12 +65,12 @@ def make_cans_model(params, neighbourhood):
         # values are ALSO set to zero at the start of each
         # function call (see np.maximum() above).
         rates = [rate for C, N, S, r, b, a, Ndiff, Sdiff in vals for rate
-                 in (r*N*C - b*S*C, -r*N*C - kn*Ndiff, r*N*C - ks*Sdiff)]
+                 in (r*N*C - b*S*C, -r*N*C - kn*Ndiff, a*C - ks*Sdiff)]
         return rates
     return cans_growth
 
 
-def solve_model(init_amounts, times, params, neighbourhood):
+def solve_model(init_amounts, times, neighbourhood, params):
     """Solve ODEs return amounts of C, N, and S.
 
     Args
@@ -119,13 +119,13 @@ def gen_params(no_cultures):
     return params
 
 
-def obj_func(no_cultures, c_meas, neighbourhood, params):
+def obj_func(no_cultures, times, c_meas, neighbourhood, params):
     """Objective function for fitting model."""
     # Could do tiling later in solve_model if faster.
     init_amounts = np.tile(params[: 3], no_cultures)
     params = params[3:]
     # Now find the amounts from simulations using the parameters.
-    amounts_est = solve_model(init_amounts, times, params, neighbourhood)
+    amounts_est = solve_model(init_amounts, times, neighbourhood, params)
     c_est = np.array([amounts_est[:, i*3] for i in range(no_cultures)]).flatten()
     err = np.sqrt(sum((c_meas - c_est)**2))
     return err
@@ -153,12 +153,12 @@ if __name__ == '__main__':
     params = gen_params(no_cultures)
     init_amounts = gen_amounts(no_cultures)
     times = np.linspace(0, 20, 201)
-    true_amounts = solve_model(init_amounts, times, params, neighbourhood)
+    true_amounts = solve_model(init_amounts, times, neighbourhood, params)
     plot_growth(rows, cols, true_amounts, times)
     # # Fitting
     # c_meas = [true_amounts[:, i*3] for i in range(no_cultures)]
     # c_meas = np.array(c_meas).flatten()
-    # obj_f = partial(obj_func, no_cultures, c_meas, neighbourhood)
+    # obj_f = partial(obj_func, no_cultures, times, c_meas, neighbourhood)
     # # Initial parameter guess
     # init_guess = guess_params(no_cultures)
     # # All values non-negative.
