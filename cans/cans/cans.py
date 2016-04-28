@@ -43,7 +43,9 @@ def make_cans_model(params, neighbourhood):
     # Separate out plate and culture level parameters.
     kn = params[0]
     ks = params[1]
-    culture_params = params[2:]
+    b = params[2]
+    a = params[3]
+    r_params = params[4:]
     # odeint requires times argument in cans_growth function.
     def cans_growth(amounts, times):
         """Return cans rates given current amounts and times."""
@@ -58,13 +60,13 @@ def make_cans_model(params, neighbourhood):
         S_diffusions = [sum([sig - signal[j] for j in neighbourhood[i]])
                         for i, sig in enumerate(signal)]
         # An iterator of values for variables/terms appearing in the model.
-        vals = zip(*[iter(amounts)]*3, *[iter(culture_params)]*3,
-                   N_diffusions, S_diffusions)
+        vals = zip(*[iter(amounts)]*3, r_params, N_diffusions,
+                   S_diffusions)
         # This will sometimes store negative amounts. This can
         # be corrected in the results returned by odeint if call
         # values are ALSO set to zero at the start of each
         # function call (see np.maximum() above).
-        rates = [rate for C, N, S, r, b, a, Ndiff, Sdiff in vals for rate
+        rates = [rate for C, N, S, r, Ndiff, Sdiff in vals for rate
                  in (r*N*C - b*S*C, -r*N*C - kn*Ndiff, a*C - ks*Sdiff)]
         return rates
     return cans_growth
@@ -107,15 +109,14 @@ def gen_params(no_cultures):
     # Plate level
     kn = 0.1    # Nutrient diffusion
     ks = 0.1    # Signal diffusion
+    b = 0.05    # Signal on cells effect constant
+    a = 0.05    # Signal secretion constant
     # Culture level
     # Growth rate constant
     r_mean = 1.0
     r_var = 1.0
-    b = 0.05    # Signal on cells effect constant
-    a = 0.05    # Signal secretion constant
-    rba = [val for i in range(no_cultures) for val in
-           (max(0.0, gauss(r_mean, r_var)), b, a)]
-    params = np.array([kn, ks] + rba)
+    r_params = [max(0.0, gauss(r_mean, r_var)) for i in range(no_cultures)]
+    params = np.array([kn, ks, b, a] + r_params)
     return params
 
 
@@ -137,10 +138,13 @@ def guess_params(no_cultures):
     amounts_guess = [0.2, 0.2, 0.0]
     # kn, ks
     kn_ks_guess = [0.05, 0.15]
-    # r, b, a
-    rates_guess = [1.0, 0.05, 0.05]
+    # b, a
+    ba_guess = [0.05, 0.05]
+    # r
+    r_guess = [1.0]
     # Initial guess: C(t=0), N(t=0), S(t=0), kn, ks, r0, b0, a0, r1, b1, a1, ...
-    init_guess = np.array(amounts_guess + kn_ks_guess + rates_guess*no_cultures)
+    init_guess = np.array(amounts_guess + kn_ks_guess +
+                          ba_guess + r_guess*no_cultures)
     return init_guess
 
 
