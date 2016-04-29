@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.integrate import odeint
 
+
 def make_inde_model(params):
     """Return a function for running the inde model.
 
@@ -32,7 +33,7 @@ def make_inde_model(params):
     return inde_growth
 
 
-def solve_inde_model(init_amounts, times, neighbourhood, params):
+def solve_inde_model(init_amounts, times, params):
     """Solve ODEs return amounts of C, N, and S.
 
     Args
@@ -42,6 +43,6 @@ def solve_inde_model(init_amounts, times, neighbourhood, params):
         b, a, r0, r1, r2 ...
     """
     # init_amounts should be an array of length 3*no_cultures.
-    growth_func = make_inde_model(params, neighbourhood)
+    growth_func = make_inde_model(params)
     sol = odeint(growth_func, init_amounts, times)
     return np.maximum(0, sol)
