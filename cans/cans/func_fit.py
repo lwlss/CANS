@@ -13,15 +13,15 @@ def mad(a, b):
     return np.mean(np.abs(a - b))
 
 
-# model = 'compare_fit_results/mod2_data2'   # careful don't overwrite if uncomment
-rows = 3
-cols = 3
+model = 'simulation_fits/plate_9x9_1'
+rows = 9
+cols = 9
 no_cultures = rows*cols
 neighbourhood = find_neighbourhood(rows, cols)
-# params = gen_params(no_cultures)
+params = gen_params(no_cultures)
 # Using the same random r values for fits of different models.
-with open('compare_fit_results/params3x3_data2.pickle', 'rb') as f:        # Make sure to change pickle file with data
-    params = pickle.load(f)
+# with open('compare_fit_results/params3x3_data2.pickle', 'rb') as f:        # Make sure to change pickle file with data
+#     params = pickle.load(f)
 
 # We have to splice the pickled params to take into acount that b and
 # a are now plate level rather than culture level.
@@ -54,9 +54,9 @@ est_params = minimize(obj_f, init_guess, method='L-BFGS-B',
 est_amounts = solve_model(np.tile(est_params.x[: 3], no_cultures),
                           times, neighbourhood, est_params.x[3 :])
 plot_growth(rows, cols, true_amounts, times,
-            filename=model+'_true.pdf', title='True (model 2)')
+            filename=model+'_true.pdf', title='Truth')
 plot_growth(rows, cols, est_amounts, times,
-            filename=model+'_est.pdf', title='Estimate (model 2)')
+            filename=model+'_est.pdf', title='Estimation')
 
 
 # Find error between true and estimated parameters.
@@ -78,7 +78,7 @@ print(est_rs)
 table = [
     ["C(t=0)", plate_lvl[0]], ["N(t=0)", plate_lvl[1]],
     ["S(t=0)", plate_lvl[2]], ["kn", plate_lvl[3]], ["ks", plate_lvl[4]],
-    ["r (MAD)", r_mad], ["b (MAD)", plate_lvl[5]], ["a (MAD)", plate_lvl[6]]
+    ["r (MAD)", r_mad], ["b", plate_lvl[5]], ["a", plate_lvl[6]]
 ]
 
 print(tabulate(table, headers=["Parameter", "Deviation"]))
