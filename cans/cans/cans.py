@@ -79,7 +79,7 @@ def solve_model(init_amounts, times, neighbourhood, params):
     ----
     params : list
         Model parameters.
-        kn, ks, r0, b0, a0, r1, b1, a1, ...
+        kn, ks, b, a, r0, r1,...
     """
     # init_amounts should be an array of length 3*no_cultures.
     growth_func = make_cans_model(params, neighbourhood)
@@ -104,7 +104,7 @@ def gen_amounts(no_cultures):
 def gen_params(no_cultures):
     """Return a list of parameters for a plate of cultures.
 
-    kn, ks, r0, b0, a0, r1, b1, a1,...
+    kn, ks, b, a, r0, r1,...
     """
     # Plate level
     kn = 0.1    # Nutrient diffusion
