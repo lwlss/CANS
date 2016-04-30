@@ -8,6 +8,11 @@ from scipy.optimize import minimize
 from functools import partial
 
 
+def mad(a, b):
+    """Return mean absolute deviation."""
+    return np.mean(np.abs(a - b))
+
+
 def find_neighbourhood(rows, cols):
     """Return a list of tuples of neighbour indices for each culture."""
     no_cultures = rows*cols
