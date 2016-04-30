@@ -5,7 +5,9 @@ import matplotlib.pyplot as plt
 
 from random import gauss
 from scipy.integrate import odeint
+from scipy.optimize import minimize
 from mpl_toolkits.axes_grid1 import AxesGrid
+from functools import partial
 
 
 from cans import find_neighbourhood
@@ -55,6 +57,7 @@ def solve_model(init_amounts, times, neighbourhood, params):
 
 
 
+# Identical to competition.py except for title.
 def plot_growth(rows, cols, amounts, times,
                 title='Idependent Growth', filename=None):
     """Plot a grid of timecourses of C and N for each culture.
@@ -149,7 +152,6 @@ def gen_amounts(no_cultures):
     return init_amounts
 
 
-# This could go in cans with neighbourhood as it is general.
 def simulate_amounts(rows, cols, times):
     """Return simulated amounts for competition model."""
     no_cultures = rows*cols
@@ -178,8 +180,6 @@ def fit_model(rows, cols, times, true_amounts):
 
 if __name__ == '__main__':
     from cans import find_neighbourhood
-    from scipy.optimize import minimize
-    from functools import partial
 
     rows = 3
     cols = 3
