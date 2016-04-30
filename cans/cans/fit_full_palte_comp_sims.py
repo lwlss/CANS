@@ -7,20 +7,20 @@ import competition as comp
 import inde
 
 
-rows = 1
-cols = 1
+rows = 16
+cols = 24
 no_cultures = rows*cols
 neighbourhood = find_neighbourhood(rows, cols)
 times = np.linspace(0, 15, 21)
 dir_name = "results/comp_sim_fits_vary_kn_16x24/"
 
 # Vary kn for each plate simulation
-kn_params = np.linspace(0, 0.2, 6)
+kn_params = np.linspace(0, 0.1, 6)
 init_amounts = comp.gen_amounts(no_cultures)
 # Have random rs but the same for each kn
 r_params = inde.gen_params(no_cultures)
 
-for sim in range(no_cultures):
+for sim in range(len(kn_params)):
     params = np.append(kn_params[sim], r_params)
     true_params = np.append(init_amounts[:2], params)
     assert(len(true_params) == 3 + no_cultures)
