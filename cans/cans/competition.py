@@ -5,7 +5,9 @@ import matplotlib.pyplot as plt
 
 from random import gauss
 from scipy.integrate import odeint
+from scipy.optimize import minimize
 from mpl_toolkits.axes_grid1 import AxesGrid
+from functools import partial
 
 
 from cans import find_neighbourhood
@@ -171,7 +173,6 @@ def gen_amounts(no_cultures):
     return init_amounts
 
 
-# This could go in cans with neighbourhood as it is general.
 def simulate_amounts(rows, cols, times):
     """Return simulated amounts for competition model."""
     no_cultures = rows*cols
@@ -200,8 +201,6 @@ def fit_model(rows, cols, times, true_amounts):
 
 if __name__ == '__main__':
     from cans import find_neighbourhood
-    from scipy.optimize import minimize
-    from functools import partial
 
     rows = 1
     cols = 1
