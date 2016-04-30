@@ -1,4 +1,4 @@
-"""Functions to make and solve the competition model."""
+"""Functions to make and solve the competition (CN) model."""
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -11,7 +11,7 @@ from mpl_toolkits.axes_grid1 import AxesGrid
 from cans import find_neighbourhood
 
 
-def make_cans_model(params, neighbourhood):
+def make_comp_model(params, neighbourhood):
     """Return a function for running the competition model.
 
     Args
@@ -25,7 +25,7 @@ def make_cans_model(params, neighbourhood):
     kn = params[0]
     r_params = params[1:]
     # odeint requires times argument in cans_growth function.
-    def cans_growth(amounts, times):
+    def comp_growth(amounts, times):
         """Return model rates given current amounts and times."""
         # Cannot have negative amounts.
         np.maximum(0, amounts, out=amounts)
@@ -43,7 +43,7 @@ def make_cans_model(params, neighbourhood):
         rates = [rate for C, N, r, Ndiff in vals for rate
                  in (r*N*C, -r*N*C - kn*Ndiff)]
         return rates
-    return cans_growth
+    return comp_growth
 
 
 def solve_model(init_amounts, times, neighbourhood, params):
@@ -67,7 +67,7 @@ def solve_model(init_amounts, times, neighbourhood, params):
 
     """
     # init_amounts should be an array of length 2*no_cultures.
-    growth_func = make_cans_model(params, neighbourhood)
+    growth_func = make_comp_model(params, neighbourhood)
     sol = odeint(growth_func, init_amounts, times)
     return np.maximum(0, sol)
 
@@ -182,21 +182,8 @@ def simulate_amounts(rows, cols, times):
     return true_amounts
 
 
-if __name__ == '__main__':
-    from cans import find_neighbourhood
-    from scipy.optimize import minimize
-    from functools import partial
-
-    rows = 3
-    cols = 3
+def fit_model(rows, cols, times, true_amounts):
     no_cultures = rows*cols
-    times = np.linspace(0, 20, 21)
-
-    # sim
-    true_amounts = simulate_amounts(rows, cols, times)
-    plot_growth(rows, cols, true_amounts, times)
-
-    # fit
     neighbourhood = find_neighbourhood(rows, cols)
     c_meas = [true_amounts[:, i*2] for i in range(no_cultures)]
     c_meas = np.array(c_meas).flatten()
@@ -208,8 +195,33 @@ if __name__ == '__main__':
     # bounds[2] = (0.0, 0.0)
     est_params = minimize(obj_f, init_guess, method='L-BFGS-B',
                           bounds=bounds, options={'disp': True})
+    return est_params
 
-    est_amounts = solve_model(np.tile(est_params.x[: 3], no_cultures),
-                              times, est_params.x[3 :], neighbourhood)
-    plot_growth(rows, cols, true_amounts, times, filename='true_func.pdf')
-    plot_growth(rows, cols, est_amounts, times, filename='est_func.pdf')
+
+if __name__ == '__main__':
+    from cans import find_neighbourhood
+    from scipy.optimize import minimize
+    from functools import partial
+
+    rows = 1
+    cols = 1
+    no_cultures = rows*cols
+    times = np.linspace(0, 20, 21)
+
+    # eventually put it a for loop and save the outputs or many simulations.
+    sim = 0
+    dir_name = "competition_fits/"
+
+    # sim
+    true_amounts = simulate_amounts(rows, cols, times)
+
+    # fit
+    neighbourhood = find_neighbourhood(rows, cols)
+    est_params = fit_model(rows, cols, times, true_amounts)
+    est_init_amounts = np.tile(est_params.x[:2], no_cultures)
+    est_amounts = solve_model(np.tile(est_params.x[:2], no_cultures),
+                              times, neighbourhood, est_params.x[2:])
+    plot_growth(rows, cols, true_amounts, times, title="Truth",
+                filename='{0}truth_{1}.pdf'.format(dir_name, sim))
+    plot_growth(rows, cols, est_amounts, times, title="Estimation",
+                filename='{0}est_{1}.pdf'.format(dir_name, sim))
