@@ -7,48 +7,79 @@ import competition as comp
 import inde
 
 
-rows = 16
-cols = 24
+# rows = 16
+# cols = 24
 
-rows = 1
-cols = 1
+rows = 2
+cols = 2
 no_cultures = rows*cols
 neighbourhood = find_neighbourhood(rows, cols)
 times = np.linspace(0, 15, 21)
-dir_name = "results/comp_sim_fits_16x24/"
+dir_name = "results/comp_sim_fits_vary_kn_16x24/"
 
 # Vary kn for each plate simulation
-kn_params = np.linspace(0, 0.1, 11)
-print(kn)
-init_amounts = comp.gen_amouts(no_cultures)
+kn_params = np.linspace(0, 0.2, 6)
+init_amounts = comp.gen_amounts(no_cultures)
+# Have random rs but the same for each kn
+r_params = inde.gen_params(no_cultures)
 
-for sim in range(11):
-    r_params = inde.gen_params(no_cultures)
+for sim in range(6):
     params = np.append(kn_params[sim], r_params)
-
-    true_amounts = solve_model(init_amounts, times, neighbourhood, params)
+    true_amounts = comp.solve_model(init_amounts, times, neighbourhood, params)
 
     # Fit comp and inde models to estimate parameters
     comp_param_est = comp.fit_model(rows, cols, times, true_amounts)
+    comp_param_est = comp_param_est.x
     inde_param_est = inde.fit_model(rows, cols, times, true_amounts)
+    inde_param_est = np.insert(inde_param_est.x, 2, np.nan)
+    true_params = np.append(init_amounts[:2], params)
+    assert(len(true_params) == 3 + no_cultures)
+
+    # Plate level devs
+    true_plate_lvl = true_params[:3]
+    comp_devs = np.abs(true_plate_lvl - comp_param_est[:3])
+    inde_devs = np.abs(true_plate_lvl[:3] - inde_param_est[:3])
+
+    # r MADs
+    print(true_params)
+    print(comp_param_est)
+    print(inde_param_est)
+    comp_r_mad = mad(true_params[3:], comp_param_est[3:])
+    inde_r_mad = mad(true_params[3:], inde_param_est[3:])
 
 
-    table = [
-        ["C(t=0)", plate_lvl[0]], ["N(t=0)", plate_lvl[1]],
-        ["S(t=0)", plate_lvl[2]], ["kn", plate_lvl[3]], ["ks", plate_lvl[4]],
-        ["r (MAD)", r_mad], ["b", plate_lvl[5]], ["a", plate_lvl[6]]
+    kn_table = [
+        ["kn"],
+        [kn_params[sim]]
     ]
+
+    dev_table = [
+        ["deviations"],
+        ["param", "comp dev", "inde dev"],
+        ["C(t=0)", comp_devs[0], inde_devs[0]],
+        ["N(t=0)", comp_devs[1], inde_devs[1]],
+        ["kn", comp_devs[2], inde_devs[2]],
+        ["r (MAD)", comp_r_mad, inde_r_mad]
+    ]
+
+    param_names = ["C(t=0)", "N(t=0)", "kn"]
+    param_names += ["r{}".format(i) for i in range(no_cultures)]
+    param_vals = [list(tup) for tup in
+                  zip(param_names, true_params, comp_param_est, inde_param_est)]
+
+    param_table = [
+        ["params"],
+        ["param", "true", "comp est", "inde est"]
+    ]
+    param_table += param_vals
 
     # Save parameters and deviations
     outfile = dir_name + 'param_devs_{}.csv'.format(sim)
     with open(outfile, 'w', newline='') as f:
         writer = csv.writer(f)
-        writer.writerows([["kn", kn_params[sim]],])
-        writer.writerows(table)
-        writer.writerows([["True_params"],])
-        writer.writerows([[val] for val in true_params])
-        writer.writerows([["Est_params"],])
-        writer.writerows([[val] for val in est_params.x])
+        writer.writerows(kn_table)
+        writer.writerows(dev_table)
+        writer.writerows(param_table)
 
 
 
