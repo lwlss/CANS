@@ -40,17 +40,17 @@
     plots.
 
 
-* TODO Blog [0/5]
-  - [ ] Plots of independent and cans simulations for
+* TODO Blog [1/6]
+  - [-] Plots of independent and cans simulations for
     - [ ] 1 (same)
     - [ ] 2x2,
-    - [ ] 3x3,
+    - [X] 3x3,
     - [ ] and 16x24.
     - [ ] Also look at 1x10 out of interest.
-  - [ ] Need a MAD/summary of ri's and also of other paramters. This
+  - [X] Need a MAD/summary of ri's and also of other paramters. This
     will show how well parameters are being recovered. Do this for all
     of the below models.
-  - [ ] Plots comparing simulated data and fits of data
+  - [-] Plots comparing simulated data and fits of data
     (competition). Ideally this should be with the same set of random
     (ri) parameters which I should save to file or pickle. Or two sets
     of random paramters - one with a zero growth cultures. Want to
@@ -58,13 +58,13 @@
     different grid sizes 1, 2x2, 3x3, 5x5. Having a larger grid may
     effect parameter estimates in either direction.
     - [ ] For independent model.
-    - [ ] For model with many loose params i.e. b and a.
+    - [X] For model with many loose params i.e. b and a.
     - [ ] For model without a i.e. N + C -> 2C + S
       - [ ] How does this change when there is a culture which does
         not grow.
     - [ ] First model with common a (signal secretion)
     - [ ] Both with common b (effect of signal on cells)
-    - [ ] Then with a and b fixed for first model
+    - [X] Then with a and b fixed for first model
     - [ ] Try alternative model of signal effect maxof(0, (1 - Si/Scrit))
       - [ ] Can have common S_crit
       - [ ] Or allow S_crit to vary
@@ -72,6 +72,31 @@
     compare recovery of parameters at different grid sizes.
   - [ ] Should also see how well the cans model performs on a set of
     data that is independent.
+
+
+
+* TODO Fitting simulations [0/2]
+  - [ ] Full plate
+    - [ ] Competition only
+    - [ ] Independent
+    - [ ] Cans arrest (rather than declining cells)
+    - [ ] Check performance with zero growth constant.
+      - [ ] If does not work we can randomise start position and take
+        the value where the objective function is minimum.
+    - [ ] Also spit out
+      - [ ] True params
+      - [ ] Est params
+      - [ ] Deviations
+      - [ ] Starting point
+      - [ ] Stopping
+	- [ ] How many iterations?
+	- [ ] How many function calls?
+	- [ ] How long?
+  - [ ] MiniQFA
+    - [ ] Simulate a plate with all the same cultures but with empty
+      rows. Fit with independent and competition.
+    - [ ] Simulate plate with same cultures but fill in the rows and
+      see how pramameters in independent and competition fits differ.
 
 
 * TODO Speed up code [0/3]
