@@ -105,7 +105,7 @@ def plot_growth(rows, cols, amounts, times,
 def guess_params(no_cultures):
     """Return an initial parameter guess."""
     # C(t=0), N(t=0)
-    amounts_guess = [0.2, 0.2]
+    amounts_guess = [0.005, 0.8]
     # r
     r_guess = [1.0]
     # Initial guess: C(t=0), N(t=0), r0, r1,...
@@ -146,7 +146,7 @@ def gen_amounts(no_cultures):
     C0(t=0), N0(t=0), C1(t=0), N1(t=0), ...
     """
     # Init amounts
-    C = 0.1
+    C = 0.01
     N = 1.0
     init_amounts = np.array([C, N]*no_cultures)
     return init_amounts
