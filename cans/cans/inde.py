@@ -181,8 +181,8 @@ def fit_model(rows, cols, times, true_amounts):
 if __name__ == '__main__':
     from cans import find_neighbourhood
 
-    rows = 3
-    cols = 3
+    rows = 2
+    cols = 2
     no_cultures = rows*cols
     times = np.linspace(0, 20, 21)
 
@@ -194,8 +194,16 @@ if __name__ == '__main__':
     # Should actually use competition and not independent model for truth.
     true_amounts = simulate_amounts(rows, cols, times)
 
-    # fit
+    init_amounts = gen_amounts(no_cultures)
+    print(init_amounts)
     neighbourhood = find_neighbourhood(rows, cols)
+    params = gen_params(no_cultures)
+    print(params)
+    params[1:4] = [0, 0, 0]
+    print(params)
+    true_amounts = solve_model(init_amounts, times, neighbourhood, params)
+
+    # fit
     est_params = fit_model(rows, cols, times, true_amounts)
     est_init_amounts = np.tile(est_params.x[:2], no_cultures)
     est_amounts = solve_model(np.tile(est_params.x[:2], no_cultures),
