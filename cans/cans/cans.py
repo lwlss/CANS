@@ -172,6 +172,6 @@ if __name__ == '__main__':
     # est_params = minimize(obj_f, init_guess, method='L-BFGS-B',
     #                       bounds=bounds, options={'disp': True})
     # est_amounts = solve_model(np.tile(est_params.x[: 3], no_cultures),
-    #                           times, est_params.x[3 :], neighbourhood)
+    #                           times, neighbourhood, est_params.x[3 :])
     # plot_growth(rows, cols, true_amounts, times, filename='true_func.pdf')
     # plot_growth(rows, cols, est_amounts, times, filename='est_func.pdf')
