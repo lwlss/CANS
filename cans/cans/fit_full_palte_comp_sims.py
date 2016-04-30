@@ -7,11 +7,8 @@ import competition as comp
 import inde
 
 
-# rows = 16
-# cols = 24
-
-rows = 2
-cols = 2
+rows = 1
+cols = 1
 no_cultures = rows*cols
 neighbourhood = find_neighbourhood(rows, cols)
 times = np.linspace(0, 15, 21)
@@ -23,17 +20,18 @@ init_amounts = comp.gen_amounts(no_cultures)
 # Have random rs but the same for each kn
 r_params = inde.gen_params(no_cultures)
 
-for sim in range(6):
+for sim in range(no_cultures):
     params = np.append(kn_params[sim], r_params)
+    true_params = np.append(init_amounts[:2], params)
+    assert(len(true_params) == 3 + no_cultures)
     true_amounts = comp.solve_model(init_amounts, times, neighbourhood, params)
+
 
     # Fit comp and inde models to estimate parameters
     comp_param_est = comp.fit_model(rows, cols, times, true_amounts)
     comp_param_est = comp_param_est.x
     inde_param_est = inde.fit_model(rows, cols, times, true_amounts)
     inde_param_est = np.insert(inde_param_est.x, 2, np.nan)
-    true_params = np.append(init_amounts[:2], params)
-    assert(len(true_params) == 3 + no_cultures)
 
     # Plate level devs
     true_plate_lvl = true_params[:3]
@@ -41,9 +39,6 @@ for sim in range(6):
     inde_devs = np.abs(true_plate_lvl[:3] - inde_param_est[:3])
 
     # r MADs
-    print(true_params)
-    print(comp_param_est)
-    print(inde_param_est)
     comp_r_mad = mad(true_params[3:], comp_param_est[3:])
     inde_r_mad = mad(true_params[3:], inde_param_est[3:])
 
