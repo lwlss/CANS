@@ -18,3 +18,5 @@ tests/__pycache__/
 *.png
 # Practice scripts
 /cans/practice/
+# iPython notebook
+*.ipynb_checkpoints
