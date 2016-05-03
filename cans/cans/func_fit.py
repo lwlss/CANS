@@ -4,8 +4,7 @@ import csv
 
 from tabulate import tabulate
 
-from cans import *
-from cans_plot import plot_growth_grid as plot_growth
+from cns import *
 
 
 def mad(a, b):
