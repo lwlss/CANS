@@ -7,12 +7,12 @@ import competition as comp
 import inde
 
 
-rows = 16
-cols = 24
+rows = 3
+cols = 3
 no_cultures = rows*cols
 neighbourhood = find_neighbourhood(rows, cols)
 times = np.linspace(0, 15, 21)
-dir_name = "results/comp_sim_fits_vary_kn_16x24/"
+dir_name = "results/"
 
 # Vary kn for each plate simulation
 kn_params = np.linspace(0, 0.1, 6)
