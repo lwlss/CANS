@@ -1,5 +1,5 @@
 import numpy as np
-import csv
+import csv, json
 
 from cans import find_neighbourhood, mad
 
@@ -49,7 +49,7 @@ kn_params = [0.1]
 init_amounts = comp.gen_amounts(no_cultures)
 # Have random rs but the same for each kn
 r_params = inde.gen_params(no_cultures)
-
+all_data = []
 for sim in range(len(kn_params)):
     params = np.append(kn_params[sim], r_params)
     true_params = np.append(init_amounts[:2], params)
@@ -61,6 +61,29 @@ for sim in range(len(kn_params)):
 
     inde_devs, comp_devs = calc_devs(true_params, r_index,
                                      inde_param_est, comp_param_est)
+
+    # Do a json dump as easier to work with.
+    # must convert numpy arrays to lists using np.array.tolist()
+
+    data = {}
+    data['kn'] = true_params[2]
+    data['true_params'] = true_params
+    data['inde_est'] = inde_param_est
+    data['comp_est'] = comp_param_est
+    data['inde_devs'] = inde_devs
+    data['comp_devs'] = comp_devs
+    data['description'] = ("Parameters and estimates are lists of
+                           C(t=0), N(t=0), kn, r0, r1, ...
+                           Mean absolute deviations are take for
+                           growth rates, r, are ")
+    all_data.append(data)
+
+    with open('sim_{}_data.json'.format(sim), 'w') as f:
+        json.dump(data, f, sort_keys=True, indent=4)
+
+
+
+
 
     kn_table = [
         ["kn"],
