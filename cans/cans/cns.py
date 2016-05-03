@@ -8,33 +8,6 @@ from scipy.optimize import minimize
 from functools import partial
 
 
-def mad(a, b):
-    """Return mean absolute deviation."""
-    return np.mean(np.abs(a - b))
-
-
-def find_neighbourhood(rows, cols):
-    """Return a list of tuples of neighbour indices for each culture."""
-    no_cultures = rows*cols
-    neighbourhood = []
-    for i in range(no_cultures):
-        neighbours = []
-        if i // cols:
-            # Then not in first row.
-            neighbours.append(i - cols)
-        if i % cols:
-            # Then not in first column.
-            neighbours.append(i - 1)
-        if (i + 1) % cols:
-            # Then not in last column.
-            neighbours.append(i + 1)
-        if i < (rows - 1 )*cols:
-            # Then not in last row.
-            neighbours.append(i + cols)
-        neighbourhood.append(tuple(neighbours))
-    return neighbourhood
-
-
 def make_cns_model(params, neighbourhood):
     """Return a function for running the cns model.
 
@@ -196,6 +169,7 @@ def plot_growth(rows, cols, amounts, times, title='CNS Growth', filename=None):
 
 
 if __name__ == '__main__':
+    from cans import find_neighbourhood, mad
     rows = 3
     cols = 3
     no_cultures = rows*cols
