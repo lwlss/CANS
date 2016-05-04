@@ -175,9 +175,10 @@ def fit_model(rows, cols, times, true_amounts, maxiter=None):
     # bounds[2] = (0.0, 0.0)
     if maxiter is None:
         est_params = minimize(obj_f, init_guess, method='L-BFGS-B',
-                              bounds=bounds, options={'disp': True})
+                              bounds=bounds,
+                              options={'disp': True, 'maxfun': np.inf})
     else:
-        options = {'disp': True, 'maxiter': maxiter}
+        options = {'disp': True, 'maxfun' : np.inf, 'maxiter': maxiter}
         est_params = minimize(obj_f, init_guess, method='L-BFGS-B',
                               bounds=bounds, options=options)
                           # options={'disp': False, 'gtol': 1e-02,
