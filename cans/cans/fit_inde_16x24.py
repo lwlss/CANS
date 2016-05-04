@@ -24,6 +24,9 @@ with open(param_file, 'r') as f:
     param_reader = csv.reader(f)
     true_params = np.array([float(row[0]) for row in param_reader])
 
+# Test params
+# true_params = [0.01, 1.0, 0.0] + inde.gen_params(no_cultures)
+
 init_amounts = np.tile(true_params[:2], no_cultures)
 true_amounts = comp.solve_model(init_amounts, times,
                                 neighbourhood, true_params[2:])
@@ -32,6 +35,7 @@ true_amounts = comp.solve_model(init_amounts, times,
 for maxiter in (1000, None):
     inde_param_est = inde.fit_model(rows, cols, times, true_amounts)
     no_iters = inde_param_est.nit
+    reason_for_stop = str(inde_param_est.message)
     inde_param_est = np.insert(inde_param_est.x, 2, np.nan)
 
     inde_devs = calc_devs(true_params, 3, inde_param_est)[0]
@@ -40,7 +44,8 @@ for maxiter in (1000, None):
         'true_params' : true_params,
         'inde_est' : inde_param_est,
         'inde_devs' : inde_devs,
-        'no_iters' : no_iters
+        'no_iters' : no_iters,
+        'reason_for_stop' : reason_for_stop
     }
 
     # Json requires np.ndarray to be dumped as a list.
