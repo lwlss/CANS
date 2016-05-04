@@ -1,6 +1,7 @@
 import numpy as np
 import json
 import csv
+import copy
 
 
 import competition as comp
@@ -10,14 +11,21 @@ import inde
 from cans import find_neighbourhood, mad
 
 
-def fit_inde_and_comp(rows, cols, times, true_amounts):
+def fit_inde_and_comp(rows, cols, times, true_amounts, use_inde=True):
     """Fit inde and comp models and return param estimates.
 
     Also add nan for the inde estimate of kn in the correct position.
     """
     inde_param_est = inde.fit_model(rows, cols, times, true_amounts)
+    # Insert nan for kn value in independent params.
     inde_param_est = np.insert(inde_param_est.x, 2, np.nan)
-    comp_param_est = comp.fit_model(rows, cols, times, true_amounts)
+    if use_inde:
+        # Use inde_param_est as initial guess for comp fitting.
+        init_guess = copy.deepcopy(inde_param_est)
+        # Set init guess of kn to zero.
+        init_guess[2] = 0
+    comp_param_est = comp.fit_model(rows, cols, times, true_amounts,
+                                    init_guess)
     comp_param_est = comp_param_est.x
     return inde_param_est, comp_param_est
 
@@ -134,7 +142,7 @@ if __name__ == '__main__':
     no_cultures = rows*cols
     neighbourhood = find_neighbourhood(rows, cols)
     times = np.linspace(0, 15, 151)
-    dir_name = "results/comp_sim_fits_vary_kn_3x3/"
+    dir_name = "results/comp_sim_fits_vary_kn_3x3_use_inde/"
     plot_dir = dir_name + "plots/"
     # Vary kn for each plate simulation
     # kn_params = [0.0, 0.1, 0.2]
@@ -151,7 +159,8 @@ if __name__ == '__main__':
 
         # Fit comp and inde models to estimate parameters
         inde_param_est, comp_param_est = fit_inde_and_comp(rows, cols,
-                                                           times, true_amounts)
+                                                           times, true_amounts,
+                                                           use_inde=True)
 
         inde_devs, comp_devs = calc_devs(true_params, r_index,
                                          inde_param_est, comp_param_est)
