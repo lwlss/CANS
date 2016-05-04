@@ -1,4 +1,5 @@
 import numpy as np
+import json
 
 import competition as comp
 import inde
@@ -14,14 +15,20 @@ no_cultures = rows*cols
 neighbourhood = find_neighbourhood(rows, cols)
 times = np.linspace(0, 20, 201)    # Use plenty of points to make sure
                                    # that this is not the issue.
-dir_name = "results/fix_comp_kn_zero_fits2/"
+dir_name = "results/fix_comp_kn_zero_fits2/improvements/"
 plot_dir = dir_name + "plots/"
 # Vary kn for each plate simulation
 kn_params = [0.0]
 # kn_params = np.linspace(0, 0.1, 6)
-init_amounts = comp.gen_amounts(no_cultures)
+# init_amounts = comp.gen_amounts(no_cultures)
 # Have random rs but the same for each kn
-r_params = inde.gen_params(no_cultures)
+# r_params = inde.gen_params(no_cultures)
+
+# Read in ill fitted data from file then try different ways of improve fit.
+with open('results/fix_comp_kn_zero_fits2/sim_0_data.json', 'r') as f:
+    data = json.load(f)
+init_amoutns =
+
 all_data = []
 for sim in range(len(kn_params)):
     params = np.append(kn_params[sim], r_params)
