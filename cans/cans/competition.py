@@ -121,14 +121,30 @@ def plot_growth(rows, cols, amounts, times,
 def guess_params(no_cultures):
     """Return an initial parameter guess."""
     # C(t=0), N(t=0)
-    amounts_guess = [0.005, 0.8]
+    amounts_guess = [0.005, 1.5]
     # kn
-    kn_guess = [0.05]
+    kn_guess = [0.00000001]
     # r
     r_guess = [1.0]
     # Initial guess: C(t=0), N(t=0), kn, r0, r1,...
     init_guess = np.array(amounts_guess + kn_guess + r_guess*no_cultures)
     return init_guess
+
+def guess_params2(no_cultures):
+    """Return an initial parameter guess."""
+    # C(t=0), N(t=0)
+    amounts_guess = [0.005, 1.5]
+    # kn
+    kn_guess = [0.00000001]
+    # r
+    # r_guess = [1.0]
+    r_mean = 1.0
+    r_var = 1.0
+    r_guess = [max(0.0, gauss(r_mean, r_var)) for i in range(no_cultures)]
+    # Initial guess: C(t=0), N(t=0), kn, r0, r1,...
+    init_guess = np.array(amounts_guess + kn_guess + r_guess)
+    return init_guess
+
 
 
 def obj_func(no_cultures, times, c_meas, neighbourhood, params):
@@ -183,13 +199,15 @@ def simulate_amounts(rows, cols, times):
     return true_amounts
 
 
-def fit_model(rows, cols, times, true_amounts):
+def fit_model(rows, cols, times, true_amounts, init_guess=None):
     no_cultures = rows*cols
     neighbourhood = find_neighbourhood(rows, cols)
     c_meas = [true_amounts[:, i*2] for i in range(no_cultures)]
     c_meas = np.array(c_meas).flatten()
     obj_f = partial(obj_func, no_cultures, times, c_meas, neighbourhood)
-    init_guess = guess_params(no_cultures)
+    if init_guess is None:
+        init_guess = guess_params2(no_cultures)
+    print(init_guess)
     # All values non-negative.
     bounds = [(0.0, None) for i in range(len(init_guess))]
     # S(t=0) = 0.
