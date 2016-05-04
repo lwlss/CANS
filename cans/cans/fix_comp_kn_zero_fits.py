@@ -14,7 +14,7 @@ no_cultures = rows*cols
 neighbourhood = find_neighbourhood(rows, cols)
 times = np.linspace(0, 20, 201)    # Use plenty of points to make sure
                                    # that this is not the issue.
-dir_name = "results/fix_comp_kn_zero_fits/"
+dir_name = "results/fix_comp_kn_zero_fits2/"
 plot_dir = dir_name + "plots/"
 # Vary kn for each plate simulation
 kn_params = [0.0]
@@ -27,6 +27,9 @@ for sim in range(len(kn_params)):
     params = np.append(kn_params[sim], r_params)
     true_params = np.append(init_amounts[:2], params)
     true_amounts = comp.solve_model(init_amounts, times, neighbourhood, params)
+
+    # Check plot visually.
+    comp.plot_growth(rows, cols, true_amounts, times, title="Truth")
 
     # Fit comp and inde models to estimate parameters
     inde_param_est, comp_param_est = fit_inde_and_comp(rows, cols,
@@ -41,12 +44,12 @@ for sim in range(len(kn_params)):
                      inde_devs, comp_devs, dir_name, sim)
     all_data.append(data)
     save_csv(true_params, inde_param_est, comp_param_est,
-             inde_devs, comp_devs, dir_name, sim, no_cultures)
+             inde_devs, comp_devs, no_cultures, dir_name, sim)
 
     # Not much point in saving plots for 16x24 because they will look
     # really ugly.
-    plot_fits(true_params, inde_param_est, comp_param_est,
-              times, neighbourhood, plot_dir)
+    plot_fits(true_amounts, true_params[2], inde_param_est, comp_param_est,
+              times, rows, cols, plot_dir, sim)
 
 # Finally save all json in one file.
 save_all_json(all_data, kn_params, dir_name)
