@@ -73,7 +73,7 @@ def save_all_json(all_data, kn_params, dir_name):
 
 
 def save_csv(true_params, inde_est, comp_est, inde_devs, comp_devs,
-             dir_name, sim):
+             dir_name, sim, no_cultures):
     """Save true parameters and comp and inde estimates as csv."""
     kn_table = [
         ["kn"],
@@ -88,6 +88,7 @@ def save_csv(true_params, inde_est, comp_est, inde_devs, comp_devs,
         ["r (MAD)", inde_devs[3], comp_devs[3]]
     ]
     param_names = ["C(t=0)", "N(t=0)", "kn"]
+    # Could use len(params[:3]) rather than no_cultures.
     param_names += ["r{}".format(i) for i in range(no_cultures)]
     param_vals = [list(tup) for tup in
                   zip(param_names, true_params, inde_est, comp_est)]
@@ -125,48 +126,47 @@ def plot_fits(true_params, inde_est, comp_est, times, neighbourhood,
                      filename='{0}comp_est_{1}.pdf'.format(plot_dir, sim))
 
 
-rows = 2
-cols = 2
-r_index = 3    # Position of first r in parameter lists.
-no_cultures = rows*cols
-neighbourhood = find_neighbourhood(rows, cols)
-times = np.linspace(0, 15, 21)
-dir_name = "results/comp_sim_fits_vary_kn_3x3/"
-plot_dir = dir_name + "plots/"
-# Vary kn for each plate simulation
-kn_params = [0.1, 0.2]
-#kn_params = np.linspace(0, 0.1, 6)
-init_amounts = comp.gen_amounts(no_cultures)
-# Have random rs but the same for each kn
-r_params = inde.gen_params(no_cultures)
-all_data = []
-for sim in range(len(kn_params)):
-    params = np.append(kn_params[sim], r_params)
-    true_params = np.append(init_amounts[:2], params)
-    true_amounts = comp.solve_model(init_amounts, times, neighbourhood, params)
+if __name__ == '__main__':
+    rows = 3
+    cols = 3
+    r_index = 3    # Position of first r in parameter lists.
+    no_cultures = rows*cols
+    neighbourhood = find_neighbourhood(rows, cols)
+    times = np.linspace(0, 15, 151)
+    dir_name = "results/comp_sim_fits_vary_kn_3x3/"
+    plot_dir = dir_name + "plots/"
+    # Vary kn for each plate simulation
+    # kn_params = [0.0, 0.1, 0.2]
+    kn_params = np.linspace(0, 0.2, 11)
+    init_amounts = comp.gen_amounts(no_cultures)
+    # Have random rs but the same for each kn
+    r_params = inde.gen_params(no_cultures)
+    all_data = []
+    for sim in range(len(kn_params)):
+        params = np.append(kn_params[sim], r_params)
+        true_params = np.append(init_amounts[:2], params)
+        true_amounts = comp.solve_model(init_amounts, times,
+                                        neighbourhood, params)
 
-    # Fit comp and inde models to estimate parameters
-    inde_param_est, comp_param_est = fit_inde_and_comp(rows, cols,
-                                                       times, true_amounts)
+        # Fit comp and inde models to estimate parameters
+        inde_param_est, comp_param_est = fit_inde_and_comp(rows, cols,
+                                                           times, true_amounts)
 
-    inde_devs, comp_devs = calc_devs(true_params, r_index,
-                                     inde_param_est, comp_param_est)
+        inde_devs, comp_devs = calc_devs(true_params, r_index,
+                                         inde_param_est, comp_param_est)
 
-    # Save as single json file and append to all_data so that all data
-    # may eventually be stored in a single file.
-    data = save_json(true_params, inde_param_est, comp_param_est,
-                     inde_devs, comp_devs, dir_name, sim)
-    all_data.append(data)
-    save_csv(true_params, inde_param_est, comp_param_est,
-             inde_devs, comp_devs, dir_name, sim)
+        # Save as single json file and append to all_data so that all data
+        # may eventually be stored in a single file.
+        data = save_json(true_params, inde_param_est, comp_param_est,
+                         inde_devs, comp_devs, dir_name, sim)
+        all_data.append(data)
+        save_csv(true_params, inde_param_est, comp_param_est,
+                 inde_devs, comp_devs, dir_name, sim, no_cultures)
 
-    # Not much point in saving plots for 16x24 because they will look
-    # really ugly.
-    plot_fits(true_params, inde_param_est, comp_param_est,
-              times, neighbourhood, plot_dir)
+        # Not much point in saving plots for 16x24 because they will look
+        # really ugly.
+        plot_fits(true_params, inde_param_est, comp_param_est,
+                  times, neighbourhood, plot_dir)
 
-# Finally save all json in one file.
-save_all_json(all_data, kn_params, dir_name)
-
-
-
+    # Finally save all json in one file.
+    save_all_json(all_data, kn_params, dir_name)
