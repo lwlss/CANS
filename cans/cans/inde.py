@@ -162,7 +162,7 @@ def simulate_amounts(rows, cols, times):
     return true_amounts
 
 
-def fit_model(rows, cols, times, true_amounts):
+def fit_model(rows, cols, times, true_amounts, maxiter=None):
     no_cultures = rows*cols
     neighbourhood = find_neighbourhood(rows, cols)
     c_meas = [true_amounts[:, i*2] for i in range(no_cultures)]
@@ -173,8 +173,13 @@ def fit_model(rows, cols, times, true_amounts):
     bounds = [(0.0, None) for i in range(len(init_guess))]
     # S(t=0) = 0.
     # bounds[2] = (0.0, 0.0)
-    est_params = minimize(obj_f, init_guess, method='L-BFGS-B',
-                          bounds=bounds, options={'disp': True})
+    if maxiter is None:
+        est_params = minimize(obj_f, init_guess, method='L-BFGS-B',
+                              bounds=bounds, options={'disp': True})
+    else:
+        options = {'disp': True, 'maxiter': maxiter}
+        est_params = minimize(obj_f, init_guess, method='L-BFGS-B',
+                              bounds=bounds, options=options)
                           # options={'disp': False, 'gtol': 1e-02,
                           #          'eps': 0.0001, 'maxiter': 1000})
     return est_params
