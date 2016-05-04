@@ -27,6 +27,7 @@ with open(param_file, 'r') as f:
 init_amounts = np.tile(true_params[:2], no_cultures)
 true_amounts = comp.solve_model(init_amounts, times,
                                 neighbourhood, true_params[2:])
+# comp.plot_growth(rows, cols, true_amounts, times)
 
 for maxiter in (1000, None):
     inde_param_est = inde.fit_model(rows, cols, times, true_amounts)
