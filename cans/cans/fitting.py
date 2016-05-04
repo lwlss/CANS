@@ -73,7 +73,7 @@ def save_all_json(all_data, kn_params, dir_name):
 
 
 def save_csv(true_params, inde_est, comp_est, inde_devs, comp_devs,
-             dir_name, sim, no_cultures):
+             no_cultures, dir_name, sim):
     """Save true parameters and comp and inde estimates as csv."""
     kn_table = [
         ["kn"],
@@ -105,9 +105,10 @@ def save_csv(true_params, inde_est, comp_est, inde_devs, comp_devs,
         writer.writerows(param_table)
 
 
-def plot_fits(true_params, inde_est, comp_est, times, neighbourhood,
-              plot_dir):
-    kn_true = true_params[2]
+def plot_fits(true_amounts, true_kn, inde_est, comp_est, times,
+              rows, cols, plot_dir, sim):
+    no_cultures = rows*cols
+    neighbourhood = find_neighbourhood(rows, cols)
     # Now solve using estimated parameters. Do not pass kn for inde est.
     inde_amount_est = inde.solve_model(np.tile(inde_est[:2], no_cultures),
                                        times, neighbourhood, inde_est[3:])
@@ -116,13 +117,13 @@ def plot_fits(true_params, inde_est, comp_est, times, neighbourhood,
 
     # Plot truth, inde fit, and comp fit.
     comp.plot_growth(rows, cols, true_amounts, times,
-                     title="Truth (kn={0})".format(kn_true),
+                     title="Truth (kn={0})".format(true_kn),
                      filename='{0}truth_{1}.pdf'.format(plot_dir, sim))
     comp.plot_growth(rows, cols, inde_amount_est, times,
-                     title="Inde Estimation (true kn={0})".format(kn_true),
+                     title="Inde Estimation (true kn={0})".format(true_kn),
                      filename='{0}inde_est_{1}.pdf'.format(plot_dir, sim))
     comp.plot_growth(rows, cols, comp_amount_est, times,
-                     title="Comp Estimation (true kn={0})".format(kn_true),
+                     title="Comp Estimation (true kn={0})".format(true_kn),
                      filename='{0}comp_est_{1}.pdf'.format(plot_dir, sim))
 
 
@@ -161,12 +162,12 @@ if __name__ == '__main__':
                          inde_devs, comp_devs, dir_name, sim)
         all_data.append(data)
         save_csv(true_params, inde_param_est, comp_param_est,
-                 inde_devs, comp_devs, dir_name, sim, no_cultures)
+                 inde_devs, comp_devs, no_cultures, dir_name, sim)
 
         # Not much point in saving plots for 16x24 because they will look
         # really ugly.
-        plot_fits(true_params, inde_param_est, comp_param_est,
-                  times, neighbourhood, plot_dir)
+        plot_fits(true_amounts, true_params[2], inde_param_est, comp_param_est,
+                  times, rows, cols, plot_dir, sim)
 
     # Finally save all json in one file.
     save_all_json(all_data, kn_params, dir_name)
