@@ -174,9 +174,9 @@ def fit_model(rows, cols, times, true_amounts):
     # S(t=0) = 0.
     # bounds[2] = (0.0, 0.0)
     est_params = minimize(obj_f, init_guess, method='L-BFGS-B',
-                          bounds=bounds,
-                          options={'disp': False, 'gtol': 1e-02,
-                                   'eps': 0.0001, 'maxiter': 1000})
+                          bounds=bounds, options={'disp': True})
+                          # options={'disp': False, 'gtol': 1e-02,
+                          #          'eps': 0.0001, 'maxiter': 1000})
     return est_params
 
 
