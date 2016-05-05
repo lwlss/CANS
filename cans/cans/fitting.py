@@ -16,21 +16,33 @@ def fit_inde_and_comp(rows, cols, times, true_amounts, start='inde'):
 
     Also add nan for the inde estimate of kn in the correct position.
     """
-    inde_param_est = inde.fit_model(rows, cols, times, true_amounts)
+    if isinstance(start, np.ndarray):
+        # Use random r values as a guess.
+        comp_guess = start
+        inde_guess = copy.deepcopy(start)
+        inde_guess = np.delete(inde_guess, 2)
+    else:
+        inde_guess = None
+        comp_guess = None
+        assert False, "Should always provide a rand guess 05/05/2016."
+
+    print(inde_guess)
+    print(comp_guess)
+
+    inde_param_est = inde.fit_model(rows, cols, times, true_amounts,
+                                    init_guess=inde_guess)
     # Insert nan for kn value in independent params.
     inde_param_est = np.insert(inde_param_est.x, 2, np.nan)
+
     if start == 'inde':
         # Use inde_param_est as initial guess for comp fitting.
-        init_guess = copy.deepcopy(inde_param_est)
+        comp_guess = copy.deepcopy(inde_param_est)
         # Set init guess of kn to zero.
-        init_guess[2] = 0
-    elif start == 'rand_r':
-        # Use random r values as a guess.
-        init_guess = 'rand_r'
-    else:
-        init_guess = None
+        comp_guess[2] = 0
+        assert False, "Should always provide a rand guess 05/05/2016."
+
     comp_param_est = comp.fit_model(rows, cols, times, true_amounts,
-                                    init_guess=init_guess)
+                                    init_guess=comp_guess)
     comp_param_est = comp_param_est.x
     return inde_param_est, comp_param_est
 
@@ -52,6 +64,17 @@ def calc_devs(true_params, r_index, *ests):
     return devs
 
 
+def to_json(dct):
+    """Convert np.ndarrays in a dict to lists.
+
+    Json requires np.ndarray to be dumped as a list.
+    """
+    for k, v in dct.items():
+        if isinstance(v, np.ndarray):
+            dct[k] = v.tolist()
+    return dct
+
+
 def save_json(true_params, inde_est, comp_est, inde_devs, comp_devs,
               dir_name, sim):
     """Save true parameters and comp and inde estimates as json."""
@@ -67,9 +90,7 @@ def save_json(true_params, inde_est, comp_est, inde_devs, comp_devs,
                            "Mean absolute deviations are take for "
                            "growth rates r_i.")
     # Json requires np.ndarray to be dumped as a list.
-    for k, v in data.items():
-        if isinstance(v, np.ndarray):
-            data[k] = v.tolist()
+    data = to_json(data)
     with open(dir_name + 'sim_{}_data.json'.format(sim), 'w') as f:
         json.dump(data, f, sort_keys=True, indent=4)
     return data
