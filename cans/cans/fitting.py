@@ -16,18 +16,17 @@ def fit_inde_and_comp(rows, cols, times, true_amounts, start='inde'):
 
     Also add nan for the inde estimate of kn in the correct position.
     """
-    if isinstance(start, np.ndarray):
+    if isinstance(start, np.ndarray) or isinstance(start, list):
         # Use random r values as a guess.
         comp_guess = start
         inde_guess = copy.deepcopy(start)
         inde_guess = np.delete(inde_guess, 2)
+        print("Using custom parameter guess")
+        print(comp_guess)
     else:
         inde_guess = None
         comp_guess = None
-        assert False, "Should always provide a rand guess 05/05/2016."
-
-    print(inde_guess)
-    print(comp_guess)
+        print("Using uniform parameter guess")
 
     inde_param_est = inde.fit_model(rows, cols, times, true_amounts,
                                     init_guess=inde_guess)
@@ -39,7 +38,7 @@ def fit_inde_and_comp(rows, cols, times, true_amounts, start='inde'):
         comp_guess = copy.deepcopy(inde_param_est)
         # Set init guess of kn to zero.
         comp_guess[2] = 0
-        assert False, "Should always provide a rand guess 05/05/2016."
+        print("Using inde params for comp fit.")
 
     comp_param_est = comp.fit_model(rows, cols, times, true_amounts,
                                     init_guess=comp_guess)
