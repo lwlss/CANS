@@ -69,7 +69,7 @@ res=opt.minimize(
     options={'disp': False, 'gtol': 1e-02, 'eps': 0.0001, 'return_all': False, 'maxiter': 1000, 'norm': np.inf}
 )
 
-endTime = int(round(time.time()))+" s"
+endTime = int(round(time.time()))
 
 print(endTime-startTime)
 
