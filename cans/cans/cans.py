@@ -8,9 +8,24 @@ from scipy.optimize import minimize
 from functools import partial
 
 
+
+# Going to place general functions in here for now but should probably
+# move and rename module sooner rather than later.
 def mad(a, b):
     """Return mean absolute deviation."""
     return np.mean(np.abs(a - b))
+
+
+def gauss_list(n, mean=1.0, var=1.0, negs=False):
+    """Return a list of n random gaussian numbers.
+
+    If negs is False (default), negative values are round to zero.
+    """
+    vals = [random.gauss(mean, var) for i in range(n)]
+    if negs:
+        return vals
+    else:
+        return [max(0, v) for v in vals]
 
 
 def find_neighbourhood(rows, cols):
@@ -35,6 +50,7 @@ def find_neighbourhood(rows, cols):
     return neighbourhood
 
 
+# Specific cans
 def make_cans_model(params, neighbourhood):
     """Return a function for running the cans model.
 
