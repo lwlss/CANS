@@ -14,7 +14,7 @@ solution is a local minimum.
 
 Next I will try several random sets of starting rs.
 
-times = np.linspace(0, 15, 151)
+times = np.linspace(0, 20, 201)
 kns = np.linspace(0, 0.2, 11)
 
 Initial guesses:
