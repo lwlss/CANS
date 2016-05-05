@@ -98,6 +98,7 @@ def plot_growth(rows, cols, amounts, times,
         plt.show()
     else:
         plt.savefig(filename)
+    plt.close()
 
 
 # Functions for fitting
@@ -162,13 +163,17 @@ def simulate_amounts(rows, cols, times):
     return true_amounts
 
 
-def fit_model(rows, cols, times, true_amounts, maxiter=None):
+def fit_model(rows, cols, times, true_amounts, init_guess=None, maxiter=None):
     no_cultures = rows*cols
     neighbourhood = find_neighbourhood(rows, cols)
     c_meas = [true_amounts[:, i*2] for i in range(no_cultures)]
     c_meas = np.array(c_meas).flatten()
     obj_f = partial(obj_func, no_cultures, times, c_meas, neighbourhood)
-    init_guess = guess_params(no_cultures)
+    if init_guess is None:
+        init_guess = guess_params(no_cultures)
+
+    print(init_guess)
+
     # All values non-negative.
     bounds = [(0.0, None) for i in range(len(init_guess))]
     # S(t=0) = 0.
