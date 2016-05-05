@@ -93,7 +93,7 @@
 	- [ ] How many iterations?
 	- [ ] How many function calls?
 	- [ ] How long?
-  - [ ] MiniQFA
+  - [ ] MiniQFAx
     - [ ] Simulate a plate with all the same cultures but with empty
       rows. Fit with independent and competition.
     - [ ] Simulate plate with same cultures but fill in the rows and
@@ -102,12 +102,15 @@
 
 
 
-* TODO Thurday 05/05/2016 [0/3]
+* TODO Thurday 05/05/2016 [0/4]
   - [ ] Simulate 3 random start points and take minimum at various kn
     for a 3x3 plate.
   - [ ] Make sure that the independent full plate works.
   - [ ] Try constraining zeros to zero
     - This will be useful for empty spots in miniQFA
+  - [ ] Segment fitting into 100 iterations using the output for one
+    as the input for the next. Save all of these to see how many
+    iterations you will need for convergence.
 
 * TODO Speed up code [0/3]
   - [ ] See how long it takes to fit a realistic sized plate.
