@@ -18,7 +18,9 @@ dir_name = "results/"
 kn_params = np.linspace(0, 0.1, 6)
 init_amounts = comp.gen_amounts(no_cultures)
 # Have random rs but the same for each kn
-r_params = inde.gen_params(no_cultures)
+# r_params = inde.gen_params(no_cultures)
+
+
 
 for sim in range(len(kn_params)):
     params = np.append(kn_params[sim], r_params)
