@@ -114,6 +114,7 @@ def plot_growth(rows, cols, amounts, times,
         plt.show()
     else:
         plt.savefig(filename)
+    plt.close()
 
 
 # Functions for fitting
@@ -123,7 +124,7 @@ def guess_params(no_cultures, rand_r=False):
     # C(t=0), N(t=0)
     amounts_guess = [0.005, 1.5]
     # kn
-    kn_guess = [0.00000001]
+    kn_guess = [0]
     # r
     if rand_r:
         r_guess = gauss_list(no_cultures)
@@ -198,6 +199,7 @@ def fit_model(rows, cols, times, true_amounts, init_guess=None):
         init_guess = guess_params(no_cultures, rand_r=True)
     else:
         assert(len(init_guess) == 3 + rows*cols)
+    print('comp', init_guess)
     # All values non-negative.
     bounds = [(0.0, None) for i in range(len(init_guess))]
     # S(t=0) = 0.
