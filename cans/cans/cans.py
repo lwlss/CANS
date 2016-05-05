@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import random
 
 
-from random import gauss
 from scipy.integrate import odeint
 from scipy.optimize import minimize
 from functools import partial
@@ -136,7 +136,7 @@ def gen_params(no_cultures):
     # Growth rate constant
     r_mean = 1.0
     r_var = 1.0
-    r_params = [max(0.0, gauss(r_mean, r_var)) for i in range(no_cultures)]
+    r_params = [max(0.0, random.gauss(r_mean, r_var)) for i in range(no_cultures)]
     params = np.array([kn, ks, b, a] + r_params)
     return params
 
