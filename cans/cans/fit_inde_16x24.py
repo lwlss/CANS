@@ -33,7 +33,8 @@ true_amounts = comp.solve_model(init_amounts, times,
 # comp.plot_growth(rows, cols, true_amounts, times)
 
 for maxiter in (1000, None):
-    inde_param_est = inde.fit_model(rows, cols, times, true_amounts)
+    inde_param_est = inde.fit_model(rows, cols, times, true_amounts,
+                                    maxiter=maxiter)
     no_iters = inde_param_est.nit
     reason_for_stop = str(inde_param_est.message)
     inde_param_est = np.insert(inde_param_est.x, 2, np.nan)
