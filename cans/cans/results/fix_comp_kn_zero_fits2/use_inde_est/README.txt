@@ -9,7 +9,7 @@ point for competition fits.
 I made competition simulations varying kn from 0-0.2 by increments of
 0.02 and keeping other parameters the same.
 
-This suceeds at kn up to 1.2. Above this value the independent
+This suceeds at kn up to 0.12. Above this value the independent
 solution is a local minimum.
 
 Next I will try several random sets of starting rs.
