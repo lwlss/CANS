@@ -18,7 +18,7 @@ neighbourhood = find_neighbourhood(rows, cols)
 times = np.linspace(0, 20, 201)    # Use plenty of points to make sure
                                    # that this is not the issue.
 
-dir_name = "results/fix_comp_kn_zero_fits2/use_random_est/"
+dir_name = "results/fix_comp_kn_zero_fits2/use_uniform_est/"
 plot_dir = dir_name + "plots/"
 
 
@@ -31,29 +31,27 @@ with open('results/fix_comp_kn_zero_fits2/sim_0_data.json', 'r') as f:
 kn_params = np.linspace(0, 0.2, 11)
 no_kns = len(kn_params)
 
-# Use three sets of random r parameters.
-repeats = 3    # Number of random parameter guesses.
-rand_guesses = [comp.guess_params(no_cultures, rand_r=True).tolist()
-                for i in range(repeats)]
+
+init_guess = comp.guess_params(no_cultures, rand_r=False).tolist()
+
 # Save metadata as json.
 meta = {
-    'rand_guesses' : rand_guesses,
+    'init_guess' : init_guess,
     'times' : times,
     'kn_params' : kn_params,
     'dims' : [rows, cols],
-    'rand_repeats' : repeats
 }
 meta = to_json(meta)
 with open(dir_name + 'meta.json', 'w') as f:
     json.dump(meta, f, sort_keys=True, indent=4)
 
-rand_guesses = np.repeat(rand_guesses, no_kns, axis=0)
+
 all_data = []
 count = 0
 # Replace each kn in the sets of parameters with the approprate value
-for kn, init_guess in zip(np.tile(kn_params, repeats), rand_guesses):
+for kn in kn_params:
     # Label for saved files
-    sim = 'rand_{0}_kn_{1}'.format(int(count//no_kns), count%no_kns)
+    sim = 'uniform_kn_{0}'.format(count)
     true_params[2] = kn
     init_amounts = np.tile(true_params[:2], no_cultures)
     true_amounts = comp.solve_model(init_amounts, times,
