@@ -11,7 +11,7 @@ import inde
 from cans import find_neighbourhood, mad
 
 
-def fit_inde_and_comp(rows, cols, times, true_amounts, use_inde=True):
+def fit_inde_and_comp(rows, cols, times, true_amounts, start='inde'):
     """Fit inde and comp models and return param estimates.
 
     Also add nan for the inde estimate of kn in the correct position.
@@ -19,13 +19,18 @@ def fit_inde_and_comp(rows, cols, times, true_amounts, use_inde=True):
     inde_param_est = inde.fit_model(rows, cols, times, true_amounts)
     # Insert nan for kn value in independent params.
     inde_param_est = np.insert(inde_param_est.x, 2, np.nan)
-    if use_inde:
+    if start == 'inde':
         # Use inde_param_est as initial guess for comp fitting.
         init_guess = copy.deepcopy(inde_param_est)
         # Set init guess of kn to zero.
         init_guess[2] = 0
+    elif start == 'rand_r':
+        # Use random r values as a guess.
+        init_guess = 'rand_r'
+    else:
+        init_guess = None
     comp_param_est = comp.fit_model(rows, cols, times, true_amounts,
-                                    init_guess)
+                                    init_guess=init_guess)
     comp_param_est = comp_param_est.x
     return inde_param_est, comp_param_est
 
