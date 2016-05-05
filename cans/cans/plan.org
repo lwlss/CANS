@@ -76,17 +76,18 @@
 
 
 * TODO Fitting simulations [0/2]
-  - [ ] Full plate
-    - [ ] Competition only
-    - [ ] Independent
+  - [-] Full plate
+    - [X] Competition only
+    - [X] Independent
     - [ ] Cans arrest (rather than declining cells)
     - [ ] Check performance with zero growth constant.
       - [ ] If does not work we can randomise start position and take
         the value where the objective function is minimum.
-    - [ ] Also spit out
-      - [ ] True params
-      - [ ] Est params
-      - [ ] Deviations
+    - [-] Also spit out
+      - [X] True params
+      - [X] Est params
+      - [X] Deviations
+      - [ ] Times
       - [ ] Starting point
       - [ ] Stopping
 	- [ ] How many iterations?
@@ -99,10 +100,18 @@
       see how pramameters in independent and competition fits differ.
 
 
+
+
+* TODO Thurday 05/05/2016 [0/3]
+  - [ ] Simulate 3 random start points and take minimum at various kn
+    for a 3x3 plate.
+  - [ ] Make sure that the independent full plate works.
+  - [ ] Try constraining zeros to zero
+    - This will be useful for empty spots in miniQFA
+
 * TODO Speed up code [0/3]
   - [ ] See how long it takes to fit a realistic sized plate.
   - [ ] Profile the function to see which bits need to be sped up.
-  - [ ]
 
 * TODO Fitting Data [0/2]
   - [ ] Write functions to read in amounts and times.
