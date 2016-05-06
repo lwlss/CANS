@@ -10,7 +10,7 @@ from mpl_toolkits.axes_grid1 import AxesGrid
 from functools import partial
 
 
-from cans import find_neighbourhood
+from cans.cans import find_neighbourhood
 
 
 def make_inde_model(params):
