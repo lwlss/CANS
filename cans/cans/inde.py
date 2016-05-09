@@ -10,7 +10,7 @@ from mpl_toolkits.axes_grid1 import AxesGrid
 from functools import partial
 
 
-from cans.cans import find_neighbourhood
+from cans import find_neighbourhood, gauss_list
 
 
 def make_inde_model(params):
@@ -41,7 +41,7 @@ def make_inde_model(params):
     return inde_growth
 
 
-def solve_model(init_amounts, times, neighbourhood, params):
+def solve_model(no_cultures, times, neighbourhood, params):
     """Solve ODEs return amounts of C and N.
 
     Args
@@ -51,7 +51,8 @@ def solve_model(init_amounts, times, neighbourhood, params):
         r0, r1, r2 ...
     """
     # init_amounts should be an array of length 3*no_cultures.
-    growth_func = make_inde_model(params)
+    init_amounts = np.tile(params[:2], no_cultures)
+    growth_func = make_inde_model(params[2:])
     sol = odeint(growth_func, init_amounts, times)
     return np.maximum(0, sol)
 
@@ -59,7 +60,7 @@ def solve_model(init_amounts, times, neighbourhood, params):
 
 # Identical to competition.py except for title.
 def plot_growth(rows, cols, amounts, times,
-                title='Idependent Growth', filename=None):
+                title='Idependent Growth', filename=None, data=None):
     """Plot a grid of timecourses of C and N for each culture.
 
     Uses AxesGrid from mpl_loolkits.axes_grid1.
@@ -83,6 +84,9 @@ def plot_growth(rows, cols, amounts, times,
         ax.set_ylim(0.0, ymax)
         ax.plot(times, amounts[:, i*2], 'b', label='Cells')
         ax.plot(times, amounts[:, i*2 + 1], 'y', label='Nutrients')
+        if data is not None:
+            ax.plot(times, data[:, i*2], 'x', label='Cells Data')
+      #     ax.plot(times, data[:, i*2 + 1], 'x', label='Nutrients Data')
         ax.grid()
         if i + 1 > (rows - 1)*cols:
             # Then in last row.
@@ -103,24 +107,12 @@ def plot_growth(rows, cols, amounts, times,
 
 # Functions for fitting
 
-def guess_params(no_cultures):
-    """Return an initial parameter guess."""
-    # C(t=0), N(t=0)
-    amounts_guess = [0.005, 0.8]
-    # r
-    r_guess = [1.0]
-    # Initial guess: C(t=0), N(t=0), r0, r1,...
-    init_guess = np.array(amounts_guess + r_guess*no_cultures)
-    return init_guess
 
 
 def obj_func(no_cultures, times, c_meas, neighbourhood, params):
     """Objective function for fitting model."""
-    # Could do tiling later in solve_model if faster.
-    init_amounts = np.tile(params[: 2], no_cultures)
-    r_params = params[2:]
     # Now find the amounts from simulations using the parameters.
-    amounts_est = solve_model(init_amounts, times, neighbourhood, r_params)
+    amounts_est = solve_model(no_cultures, times, neighbourhood, params)
     c_est = np.array([amounts_est[:, i*2] for i in range(no_cultures)]).flatten()
     err = np.sqrt(sum((c_meas - c_est)**2))
     return err
@@ -128,38 +120,27 @@ def obj_func(no_cultures, times, c_meas, neighbourhood, params):
 
 # Functions required for simulations.
 
-def gen_params(no_cultures):
-    """Return a list of parameters for a plate of cultures.
+def gen_params(no_cultures, mean=1.0, var=0.0):
+    """Return a np.array of parameter values."""
+    # C(t=0), N(t=0)
+    amounts = [0.005, 1.5]
+    # r
+    if var:
+        r = gauss_list(no_cultures, mean, var, negs=False)
+    else:
+        r = [mean]*no_cultures
+    # Initial guess: C(t=0), N(t=0), r0, r1,...
+    params = np.array(amounts + r)
+    return params
 
-    r0, r1,...
-    """
-    # Culture level
-    # Growth rate constant
-    r_mean = 1.0
-    r_var = 1.0
-    r_params = [max(0.0, gauss(r_mean, r_var)) for i in range(no_cultures)]
-    return r_params
-
-
-def gen_amounts(no_cultures):
-    """Return a list of initial amounts for a plate of cultures.
-
-    C0(t=0), N0(t=0), C1(t=0), N1(t=0), ...
-    """
-    # Init amounts
-    C = 0.01
-    N = 1.0
-    init_amounts = np.array([C, N]*no_cultures)
-    return init_amounts
 
 
 def simulate_amounts(rows, cols, times):
-    """Return simulated amounts for competition model."""
-    no_cultures = rows*cols
-    init_amounts = gen_amounts(no_cultures)
+    """Return simulated amounts."""
     neighbourhood = find_neighbourhood(rows, cols)
-    params = gen_params(no_cultures)
-    true_amounts = solve_model(init_amounts, times, neighbourhood, params)
+    no_cultures = rows*cols
+    params = gen_params(no_cultures, mean=1.0, var=1.0)
+    true_amounts = solve_model(no_cultures, times, neighbourhood, params)
     return true_amounts
 
 
@@ -171,9 +152,6 @@ def fit_model(rows, cols, times, true_amounts, init_guess=None, maxiter=None):
     obj_f = partial(obj_func, no_cultures, times, c_meas, neighbourhood)
     if init_guess is None:
         init_guess = guess_params(no_cultures)
-
-    print(init_guess)
-
     # All values non-negative.
     bounds = [(0.0, None) for i in range(len(init_guess))]
     # S(t=0) = 0.
