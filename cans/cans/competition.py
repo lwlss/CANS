@@ -48,7 +48,7 @@ def make_comp_model(params, neighbourhood):
     return comp_growth
 
 
-def solve_model(init_amounts, times, neighbourhood, params):
+def solve_model(no_cultures, times, neighbourhood, params):
     """Solve ODEs return amounts of C and N.
 
     Args
@@ -69,7 +69,8 @@ def solve_model(init_amounts, times, neighbourhood, params):
 
     """
     # init_amounts should be an array of length 2*no_cultures.
-    growth_func = make_comp_model(params, neighbourhood)
+    init_amounts = np.tile(params[:2], no_cultures)
+    growth_func = make_comp_model(params[2:], neighbourhood)
     sol = odeint(growth_func, init_amounts, times)
     return np.maximum(0, sol)
 
@@ -122,29 +123,26 @@ def plot_growth(rows, cols, amounts, times, title='Competition Growth',
 
 # Functions for fitting
 
-def guess_params(no_cultures, rand_r=False):
-    """Return an initial parameter guess."""
+def gen_params(no_cultures, mean=1.0, var=0.0):
+    """Return a np.array of parameter values."""
     # C(t=0), N(t=0)
-    amounts_guess = [0.005, 1.5]
+    amounts = [0.005, 1.5]
     # kn
-    kn_guess = [0]
+    kn = [0.0]
     # r
-    if rand_r:
-        r_guess = gauss_list(no_cultures)
+    if var:
+        r = gauss_list(no_cultures, mean, var, negs=False)
     else:
-        r_guess = [1.0]*no_cultures
+        r = [mean]*no_cultures
     # Initial guess: C(t=0), N(t=0), kn, r0, r1,...
-    init_guess = np.array(amounts_guess + kn_guess + r_guess)
-    return init_guess
+    params = np.array(amounts + kn + r)
+    return params
 
 
 def obj_func(no_cultures, times, c_meas, neighbourhood, params):
     """Objective function for fitting model."""
-    # Could do tiling later in solve_model if faster.
-    init_amounts = np.tile(params[: 2], no_cultures)
-    params = params[2:]
     # Now find the amounts from simulations using the parameters.
-    amounts_est = solve_model(init_amounts, times, neighbourhood, params)
+    amounts_est = solve_model(no_cultures, times, neighbourhood, params)
     c_est = np.array([amounts_est[:, i*2] for i in range(no_cultures)]).flatten()
     err = np.sqrt(sum((c_meas - c_est)**2))
     return err
@@ -152,41 +150,12 @@ def obj_func(no_cultures, times, c_meas, neighbourhood, params):
 
 # Functions required for simulations.
 
-def gen_params(no_cultures):
-    """Return a list of parameters for a plate of cultures.
-
-    kn, r0, r1,...
-    """
-    # Plate level
-    kn = 0.1    # Nutrient diffusion
-    # Culture level
-    # Growth rate constant
-    r_mean = 1.0
-    r_var = 1.0
-    r_params = [max(0.0, gauss(r_mean, r_var)) for i in range(no_cultures)]
-    params = np.array([kn] + r_params)
-    return params
-
-
-def gen_amounts(no_cultures):
-    """Return a list of initial amounts for a plate of cultures.
-
-    C0(t=0), N0(t=0), C1(t=0), N1(t=0), ...
-    """
-    # Init amounts
-    C = 0.01
-    N = 1.0
-    init_amounts = np.array([C, N]*no_cultures)
-    return init_amounts
-
-
 def simulate_amounts(rows, cols, times):
     """Return simulated amounts for competition model."""
-    no_cultures = rows*cols
-    init_amounts = gen_amounts(no_cultures)
     neighbourhood = find_neighbourhood(rows, cols)
-    params = gen_params(no_cultures)
-    true_amounts = solve_model(init_amounts, times, neighbourhood, params)
+    no_cultures = rows*cols
+    params = gen_params(no_cultures, mean=1.0, var=1.0)
+    true_amounts = solve_model(no_cultures, times, neighbourhood, params)
     return true_amounts
 
 
@@ -197,9 +166,9 @@ def fit_model(rows, cols, times, true_amounts, init_guess=None):
     c_meas = np.array(c_meas).flatten()
     obj_f = partial(obj_func, no_cultures, times, c_meas, neighbourhood)
     if init_guess is None:
-        init_guess = guess_params(no_cultures, rand_r=False)
+        init_guess = gen_params(no_cultures)
     elif init_guess == 'rand_r':
-        init_guess = guess_params(no_cultures, rand_r=True)
+        init_guess = gen_params(no_cultures, mean=1.0, var=1.0)
     else:
         assert(len(init_guess) == 3 + rows*cols)
     print('comp', init_guess)
@@ -233,8 +202,7 @@ if __name__ == '__main__':
     neighbourhood = find_neighbourhood(rows, cols)
     est_params = fit_model(rows, cols, times, true_amounts)
     est_init_amounts = np.tile(est_params.x[:2], no_cultures)
-    est_amounts = solve_model(np.tile(est_params.x[:2], no_cultures),
-                              times, neighbourhood, est_params.x[2:])
+    est_amounts = solve_model(no_cultures, times, neighbourhood, est_params.x)
     plot_growth(rows, cols, true_amounts, times, title="Truth",
                 filename='{0}truth_{1}.pdf'.format(dir_name, sim))
     plot_growth(rows, cols, est_amounts, times, title="Estimation",
