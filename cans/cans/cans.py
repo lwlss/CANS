@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import random
+import copy
 
 
 from scipy.integrate import odeint
@@ -8,11 +9,16 @@ from scipy.optimize import minimize
 from functools import partial
 
 
-
-def add_noise(data, sigma=0.01):
-    """Return data with added noise."""
-    data = [val + random.gauss(0, sigma) for val in data]
-    return data
+def add_noise(data, sigma=0.02):
+    """Return data with added random noise as np.ndarray."""
+    if not isinstance(data, np.ndarray):
+        noisey = np.asarray(copy.deepcopy(data), dtype=np.float64)
+    else:
+        noisey = copy.deepcopy(data)
+    for x in np.nditer(noisey, op_flags=['readwrite']):
+        x[...] = x + random.gauss(0, sigma)
+    np.maximum(0, noisey, out=noisey)
+    return noisey
 
 
 # Going to place general functions in here for now but should probably
