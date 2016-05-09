@@ -10,7 +10,7 @@ from mpl_toolkits.axes_grid1 import AxesGrid
 from functools import partial
 
 
-from cans.cans import find_neighbourhood, gauss_list
+from cans import find_neighbourhood, gauss_list
 
 
 def make_comp_model(params, neighbourhood):
@@ -74,8 +74,8 @@ def solve_model(init_amounts, times, neighbourhood, params):
     return np.maximum(0, sol)
 
 
-def plot_growth(rows, cols, amounts, times,
-                title='Competition Growth', filename=None):
+def plot_growth(rows, cols, amounts, times, title='Competition Growth',
+                filename=None, data=None):
     """Plot a grid of timecourses of C and N for each culture.
 
     Uses AxesGrid from mpl_loolkits.axes_grid1.
@@ -99,6 +99,9 @@ def plot_growth(rows, cols, amounts, times,
         ax.set_ylim(0.0, ymax)
         ax.plot(times, amounts[:, i*2], 'b', label='Cells')
         ax.plot(times, amounts[:, i*2 + 1], 'y', label='Nutrients')
+        if data is not None:
+            ax.plot(times, data[:, i*2], 'x', label='Cells Data')
+            ax.plot(times, data[:, i*2 + 1], 'x', label='Nutrients Data')
         ax.grid()
         if i + 1 > (rows - 1)*cols:
             # Then in last row.
