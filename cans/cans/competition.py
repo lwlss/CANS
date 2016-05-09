@@ -126,12 +126,12 @@ def plot_growth(rows, cols, amounts, times, title='Competition Growth',
 def gen_params(no_cultures, mean=1.0, var=0.0):
     """Return a np.array of parameter values."""
     # C(t=0), N(t=0)
-    amounts = [0.005, 1.5]
+    amounts = [0.005, 1.0]
     # kn
     kn = [0.0]
     # r
     if var:
-        r = gauss_list(no_cultures, mean, var, negs=False)
+        r = gauss_list(no_cultures, mean=mean, var=var, negs=False)
     else:
         r = [mean]*no_cultures
     # Initial guess: C(t=0), N(t=0), kn, r0, r1,...
