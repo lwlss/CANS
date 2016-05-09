@@ -85,8 +85,10 @@ def plot_growth(rows, cols, amounts, times,
         ax.plot(times, amounts[:, i*2], 'b', label='Cells')
         ax.plot(times, amounts[:, i*2 + 1], 'y', label='Nutrients')
         if data is not None:
-            ax.plot(times, data[:, i*2], 'x', label='Cells Data')
-      #     ax.plot(times, data[:, i*2 + 1], 'x', label='Nutrients Data')
+            ax.plot(data['times'], data['amounts'][:, i*2], 'x',
+                    label='Cells Data')
+      #     ax.plot(data['times'], data['amounts'][:, i*2 + 1], 'x',
+      #     label='Nutrients Data')
         ax.grid()
         if i + 1 > (rows - 1)*cols:
             # Then in last row.
@@ -123,7 +125,7 @@ def obj_func(no_cultures, times, c_meas, neighbourhood, params):
 def gen_params(no_cultures, mean=1.0, var=0.0):
     """Return a np.array of parameter values."""
     # C(t=0), N(t=0)
-    amounts = [0.005, 1.5]
+    amounts = [0.005, 1.0]
     # r
     if var:
         r = gauss_list(no_cultures, mean, var, negs=False)
@@ -161,7 +163,7 @@ def fit_model(rows, cols, times, true_amounts, init_guess=None, maxiter=None):
                               bounds=bounds,
                               options={'disp': True, 'maxfun': np.inf})
     else:
-        options = {'disp': True, 'maxfun' : np.inf, 'maxiter': maxiter}
+        options = {'disp': True, 'maxfun': np.inf, 'maxiter': maxiter}
         est_params = minimize(obj_f, init_guess, method='L-BFGS-B',
                               bounds=bounds, options=options)
                           # options={'disp': False, 'gtol': 1e-02,
