@@ -9,6 +9,12 @@ from functools import partial
 
 
 
+def add_noise(data, sigma=0.01):
+    """Return data with added noise."""
+    data = [val + random.gauss(0, sigma) for val in data]
+    return data
+
+
 # Going to place general functions in here for now but should probably
 # move and rename module sooner rather than later.
 def mad(a, b):
