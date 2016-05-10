@@ -21,11 +21,9 @@ class Fitter:
 
 
     def fit_model(plate, param_guess=None, maxiter=None):
-        no_cultures = plate.no_cultures
-        neighbourhood = plate.neighbourhood
-        c_meas = plate.c_meas    # Flattened np.array
         obj_f = partial(obj_func, plate)
         if param_guess is None:
+            # Fit using uniform parameters
             param_guess = self.model.gen_params(plate)
         # All values non-negative.
         bounds = [(0.0, None) for param in param_guess]
