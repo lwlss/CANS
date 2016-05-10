@@ -13,7 +13,7 @@ class BasePlate:
         else:
             self.c_meas = None    # Should flatten as np.array
             self.times = None
-        # Specicial attributes for simulated data.
+        # Attributes for simulated data.
         self.sim_amounts = None
         self.sim_params = None
 
@@ -42,13 +42,28 @@ class BasePlate:
 class Plate(BasePlate):
     def __init__(self, rows, cols, data=None):
         super(Plate, self).__init__(rows, cols, data)
-        # A plate has Cultures. Only make these if we have data? Need
-        # to figure out what data looks like.
         if self.data is not None:
-            self.cultures = [Culture(self.data[i:i+len(self.times)]) for i in
-                             range(self.no_culture)]    # Fix this
+            # Feed data to Cultures. Depends on form of data but would
+            # like a dictionary with times and c_meas.
+            pass
         else:
             self.cultures = [Culture() for i in range(self.no_cultures)]
+
+
+    def add_cultures_sim_data(self):
+        for i, culture in enumerate(self.cultures):
+            # May need to pass the model used in order to
+            # generalize. Then we can replace 2 with the number of
+            # species and also provide parameters used for the
+            # simulations and other amounts (e.g. N). This is not
+            # possible with real data and not really necessary
+            # simulated data.
+            no_species = int(len(self.sim_amounts[0])/self.no_cultures)
+            # culture.sim_amounts = self.sim_amounts[:, i*2:(i+1)*2]
+            culture.c_meas = self.sim_amounts[:, i*no_species].flatten()
+            culture.times = self.times
+            # culture.sim_params = self.sim_params[0:]
+
 
 class Culture(BasePlate):
     def __init__(self, data=None):
