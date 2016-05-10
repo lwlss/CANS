@@ -1,4 +1,4 @@
-class Plate:
+class BasePlate:
     def __init__(self, rows, cols, data=None):
         self.rows = rows
         self.cols = cols
@@ -16,7 +16,6 @@ class Plate:
         # Specicial attributes for simulated data.
         self.sim_amounts = None
         self.sim_params = None
-        # A plate has Cultures
 
 
     def find_neighbourhood(self):
@@ -40,7 +39,18 @@ class Plate:
         return neighbourhood
 
 
-class Culture(Plate):
+class Plate(BasePlate):
+    def __init__(self, rows, cols, data=None):
+        super(Plate, self).__init__(rows, cols, data)
+        # A plate has Cultures. Only make these if we have data? Need
+        # to figure out what data looks like.
+        if self.data is not None:
+            self.cultures = [Culture(self.data[i:i+len(self.times)]) for i in
+                             range(self.no_culture)]    # Fix this
+        else:
+            self.cultures = [Culture() for i in range(self.no_cultures)]
+
+class Culture(BasePlate):
     def __init__(self, data=None):
         super(Culture, self).__init__(1, 1, data)
 
