@@ -1,3 +1,10 @@
+import numpy as np
+
+
+from functools import partial
+from scipy.optimize import minimize
+
+
 class Fitter:
     # Can either fit different Models to data on a given Plate or fit
     # the same Model to data on different Plates. It is more natural
@@ -20,8 +27,8 @@ class Fitter:
         return err
 
 
-    def fit_model(plate, param_guess=None, maxiter=None):
-        obj_f = partial(obj_func, plate)
+    def fit_model(self, plate, param_guess=None, maxiter=None):
+        obj_f = partial(self._obj_func, plate)
         if param_guess is None:
             # Fit using uniform parameters
             param_guess = self.model.gen_params(plate)
