@@ -75,6 +75,8 @@ class Model:
         self.params = params    # A list of parameter names
 
 
+    # Require the neighbourhood and no_cultures from the plate but not
+    # any other data.
     def solve(self, plate, params):
         init_amounts = np.tile(params[:r_index], plate.no_cultures)
         # Might be cheaper to pass neighbourhood for the independent
@@ -89,7 +91,11 @@ class Model:
 
 
     def gen_params(self, plate, mean=1.0, var=0.0):
-        """Return a np.array of parameter values."""
+        """Generate and return a np.array of parameter values.
+
+        Useful for simulations and initial guesses in fitting.
+
+        """
         # C(t=0), N(t=0)
         params = [0.005, 1.0]
         if 'kn' in self.params:
