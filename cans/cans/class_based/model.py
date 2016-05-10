@@ -78,14 +78,15 @@ class Model:
     # Require the neighbourhood and no_cultures from the plate but not
     # any other data.
     def solve(self, plate, params):
-        init_amounts = np.tile(params[:r_index], plate.no_cultures)
+        no_species = len(self.species)
+        init_amounts = np.tile(params[:no_species], plate.no_cultures)
         # Might be cheaper to pass neighbourhood for the independent
         # model but do nothing with it. However, the comparison below
         # is more explicit.
         if 'kn' in self.params:
-            growth_func = self.model(params[r_index:], plate.neighbourhood)
+            growth_func = self.model(params[no_species:], plate.neighbourhood)
         else:
-            growth_func = self.model(params[r_index:])
+            growth_func = self.model(params[no_species:])
         sol = odeint(growth_func, init_amounts, plate.times)
         return np.maximum(0, sol)
 
