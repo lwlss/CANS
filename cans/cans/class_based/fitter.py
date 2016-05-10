@@ -1,44 +1,40 @@
 class Fitter:
-
-    # Can either fit different Models to data on a given Plate
-    # or fit the same Model to data on different Plates
-    def __init__(self, model=None, plate=None):
+    # Can either fit different Models to data on a given Plate or fit
+    # the same Model to data on different Plates. It is more natural
+    # that we will want to fit different Models to the same data. I
+    # choose to give the Model to the fitter in init to set up inde
+    # and comp fitter instances which can be used with various Plates.
+    def __init__(self, model=None):
         self.model = model    # A Model object
-        self.plate = plate    # A plate object
 
 
     # params must be correct for the Model.
-
-
     def _obj_func(self, plate, params):
         """Objective function for fitting model."""
-        # Now find the amounts from simulations using the parameters.
+        # Find amounts by solving the model using the estimated parameters.
         amounts_est = self.model.solve(plate, params)
-        c_est = np.array([amounts_est[:, i*2] for i
+        # Generalized using Model.species attribute
+        c_est = np.array([amounts_est[:, i*len(self.model.species)] for i
                           in range(plate.no_cultures)]).flatten()
         err = np.sqrt(sum((plate.c_meas - c_est)**2))
         return err
 
 
-    def fit_model_to_data(param_guess):
-        pass
-
-
-    def fit_model(plate, init_guess=None, maxiter=None):
+    def fit_model(plate, param_guess=None, maxiter=None):
         no_cultures = plate.no_cultures
         neighbourhood = plate.neighbourhood
         c_meas = plate.c_meas    # Flattened np.array
         obj_f = partial(obj_func, plate)
-        if init_guess is None:
-            init_guess = self.model.gen_params(plate)
+        if param_guess is None:
+            param_guess = self.model.gen_params(plate)
         # All values non-negative.
-        bounds = [(0.0, None) for i in range(len(init_guess))]
+        bounds = [(0.0, None) for param in param_guess]
         if maxiter is None:
-            est_params = minimize(obj_f, init_guess, method='L-BFGS-B',
+            est_params = minimize(obj_f, param_guess, method='L-BFGS-B',
                                   bounds=bounds,
                                   options={'disp': True, 'maxfun': np.inf})
         else:
             options = {'disp': True, 'maxfun': np.inf, 'maxiter': maxiter}
-            est_params = minimize(obj_f, init_guess, method='L-BFGS-B',
+            est_params = minimize(obj_f, param_guess, method='L-BFGS-B',
                                   bounds=bounds, options=options)
     return est_params
