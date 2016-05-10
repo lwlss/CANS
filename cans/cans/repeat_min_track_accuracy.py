@@ -12,8 +12,8 @@ from cans import add_noise, find_neighbourhood
 
 dir_name = 'results/calibrate_tolerance/'
 
-rows = 1
-cols = 2
+rows = 16
+cols = 24
 no_cultures = rows*cols
 neighbourhood = find_neighbourhood(rows, cols)
 times = np.linspace(0, 15, 21)
@@ -26,7 +26,7 @@ true_params[2] = 0.0
 true_amounts = comp.solve_model(no_cultures, times, neighbourhood, true_params)
 
 
-for sigma_noise in [0.0, 0.02, 0.04, 0.1]:
+for sigma_noise in [0.02, 0.04, 0.1]:
     dir_name = 'results/calibrate_tolerance/var_0_0{}_16x24/'.format(int(sigma_noise*100))
     noisey_amounts = add_noise(true_amounts, sigma=sigma_noise)
     data = {
@@ -38,7 +38,7 @@ for sigma_noise in [0.0, 0.02, 0.04, 0.1]:
     init_guess = inde.gen_params(no_cultures)
     init_guess[0] = 0.001
     init_guess[1] = 1.2
-    comp.plot_growth(rows, cols, noisey_amounts, times)
+#    comp.plot_growth(rows, cols, noisey_amounts, times)
 
     meta = {
         'times': times,
@@ -55,7 +55,7 @@ for sigma_noise in [0.0, 0.02, 0.04, 0.1]:
 
     no_iters = 0
     success = False
-    while no_iters < 100:
+    while no_iters < 200 and not success:
         inde_param_est = inde.fit_model(rows, cols, times, noisey_amounts,
                                         init_guess=init_guess, maxiter=9)
         # Only need if plotting
