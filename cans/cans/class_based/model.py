@@ -69,11 +69,11 @@ def comp_model(params, neighbourhood):
 
 
 class Model:
-    def __init__(self, model, r_index, params):
+    def __init__(self, model, r_index, params, species):
         self.model = model
         self.r_index = r_index
         self.params = params    # A list of parameter names
-
+        self.species = species
 
     # Require the neighbourhood and no_cultures from the plate but not
     # any other data.
@@ -115,6 +115,7 @@ class CompModel(Model):
         self.model = comp_model
         self.r_index = 3
         self.params = ['C(t=0)', 'N(t=0)', 'kn', 'rs']
+        self.species = ['C', 'N']
 
 
 class IndeModel(Model):
@@ -122,6 +123,7 @@ class IndeModel(Model):
         self.model = inde_model
         self.r_index = 2
         self.params = ['C(t=0)', 'N(t=0)', 'rs']
+        self.species = ['C', 'N']
 
 
 if __name__ == '__main__':
