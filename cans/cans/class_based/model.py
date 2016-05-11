@@ -74,19 +74,21 @@ class Model:
         self.r_index = r_index
         self.params = params    # A list of parameter names
         self.species = species
+        self.no_species = len(self.species)
+
 
     # Require the neighbourhood and no_cultures from the plate but not
     # any other data.
     def solve(self, plate, params):
-        no_species = len(self.species)
-        init_amounts = np.tile(params[:no_species], plate.no_cultures)
+        init_amounts = np.tile(params[:self.no_species], plate.no_cultures)
         # Might be cheaper to pass neighbourhood for the independent
         # model but do nothing with it. However, the comparison below
         # is more explicit.
         if 'kn' in self.params:
-            growth_func = self.model(params[no_species:], plate.neighbourhood)
+            growth_func = self.model(params[self.no_species:],
+                                     plate.neighbourhood)
         else:
-            growth_func = self.model(params[no_species:])
+            growth_func = self.model(params[self.no_species:])
         sol = odeint(growth_func, init_amounts, plate.times)
         return np.maximum(0, sol)
 
@@ -117,6 +119,8 @@ class CompModel(Model):
         self.r_index = 3
         self.params = ['C(t=0)', 'N(t=0)', 'kn', 'rs']
         self.species = ['C', 'N']
+        self.no_species = len(self.species)
+        self.name = 'Competition Model'
 
 
 class IndeModel(Model):
@@ -125,6 +129,8 @@ class IndeModel(Model):
         self.r_index = 2
         self.params = ['C(t=0)', 'N(t=0)', 'rs']
         self.species = ['C', 'N']
+        self.no_species = len(self.species)
+        self.name = 'Independent Model'
 
 
 if __name__ == '__main__':
