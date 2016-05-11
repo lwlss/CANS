@@ -41,12 +41,12 @@ success = False
 # documentation) ftol = factr*epsmch. eps.mch can be found using
 # eps = np.finfo(float).eps.
 # very accurate minimum would be ftol = 10.0*eps.
-while fun > 0.001 and not success:
+while fun > -np.inf and not success:
     plate1.comp_est = plate1.fit_model(comp_model, init_guess, maxiter=50)
     init_guess = plate1.comp_est.x
     fun = plate1.comp_est.fun
     success = plate1.comp_est.success
-
+    # Save the data every 50 iters
 
 print("sim_params/true")
 print(plate1.sim_params)
