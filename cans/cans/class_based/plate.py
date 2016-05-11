@@ -64,8 +64,8 @@ class Plate(BasePlate):
             self.cultures = [Culture() for i in range(self.no_cultures)]
 
 
-    def set_cultures(self):
-        """Add Culture data from sims."""
+    def _set_cultures(self):
+        """Add plate level simulation data to Cultures."""
         for i, culture in enumerate(self.cultures):
             # May need to pass the model used in order to
             # generalize. Then we can also provide parameters used for
@@ -77,8 +77,9 @@ class Plate(BasePlate):
             culture.times = self.times
 
 
-    def set_sim_data(self, model, r_mean=1.0, r_var=1.0, custom_params=None):
-        self.sim_params = model.gen_params(self, mean=r_mean, var=r_var)    # Decide whether want this here
+    def _gen_sim_params(self, model, r_mean=1.0, r_var=1.0, custom_params=None):
+        """Generate a set of simulation parameters for a model."""
+        self.sim_params = model.gen_params(self, mean=r_mean, var=r_var)
         if custom_params is not None:
             for k, v in custom_params.items():
                 try:
@@ -87,16 +88,31 @@ class Plate(BasePlate):
                 except ValueError:
                     print("No plate level {0} in {1}.".format(k, model.name))
                     raise
+
+
+    def set_sim_data(self, model, r_mean=1.0, r_var=1.0, custom_params=None):
+        """Set simulation data.
+
+        If sim_params attribute does not exist one will be
+        generated. This option is to allow the use of simulation
+        parameters loaded from file.
+
+        """
+        if self.sim_params is None:
+            self.sim_params = self._gen_sim_params(model, r_mean=r_mean,
+                                                   r_var=r_var,
+                                                   custom_params=custom_params)
         self.sim_amounts = model.solve(self, self.sim_params)
         self.c_meas = self.sim_amounts.flatten()[::model.no_species]
-        self.set_cultures()    # Set culture.c_meas and times
+        self._set_cultures()    # Set culture c_meas and times.
 
 
     def est_from_cultures(self):
         """Estimate parameters from inde fits of individual Cultures.
 
         Set idependent estimates (with scipy.integrate.odeint data) as
-        culture attribute inde_est and return estimate values.
+        culture attribute inde_est and return averaged values. Also
+        set the average as the plate attribute avg_culture_ests.
 
         """
         # Could be generalized by supplying Model as argument. For
@@ -111,14 +127,15 @@ class Plate(BasePlate):
         # Averages only for plate level params.
         avg_params = np.append(avgs[:inde_model.r_index],
                                params[:, inde_model.r_index])
+        self.avg_culture_ests = avg_params
         return avg_params
-
 
 
 
 class Culture(BasePlate):
     def __init__(self, data=None):
         super(Culture, self).__init__(1, 1, data)
+
 
 if __name__ == '__main__':
     plate1 = Plate(3, 3)
