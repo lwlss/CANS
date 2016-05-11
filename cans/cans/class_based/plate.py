@@ -77,7 +77,7 @@ class Plate(BasePlate):
             culture.times = self.times
 
 
-    def _gen_sim_params(self, model, r_mean=1.0, r_var=1.0, custom_params=None):
+    def _gen_sim_params(self, model, r_mean, r_var, custom_params):
         """Generate a set of simulation parameters for a model."""
         self.sim_params = model.gen_params(self, mean=r_mean, var=r_var)
         if custom_params is not None:
@@ -90,7 +90,8 @@ class Plate(BasePlate):
                     raise
 
 
-    def set_sim_data(self, model, r_mean=1.0, r_var=1.0, custom_params=None):
+
+    def set_sim_data(self, model, r_mean=2.0, r_var=2.0, custom_params=None):
         """Set simulation data.
 
         If sim_params attribute does not exist one will be
@@ -99,9 +100,7 @@ class Plate(BasePlate):
 
         """
         if self.sim_params is None:
-            self.sim_params = self._gen_sim_params(model, r_mean=r_mean,
-                                                   r_var=r_var,
-                                                   custom_params=custom_params)
+            self._gen_sim_params(model, r_mean, r_var, custom_params)
         self.sim_amounts = model.solve(self, self.sim_params)
         self.c_meas = self.sim_amounts.flatten()[::model.no_species]
         self._set_cultures()    # Set culture c_meas and times.
