@@ -1,3 +1,10 @@
+import numpy as np
+
+
+from model import IndeModel
+from fitter import Fitter
+
+
 class BasePlate:
     def __init__(self, rows, cols, data=None):
         self.rows = rows
@@ -39,6 +46,13 @@ class BasePlate:
         return neighbourhood
 
 
+    def fit_model(self, model, param_guess=None, maxiter=None):
+        """Return estimates from fitting model to plate."""
+        fitter = Fitter(model)
+        est = fitter.fit_model(self, param_guess, maxiter)
+        return est
+
+
 class Plate(BasePlate):
     def __init__(self, rows, cols, data=None):
         super(Plate, self).__init__(rows, cols, data)
@@ -50,19 +64,41 @@ class Plate(BasePlate):
             self.cultures = [Culture() for i in range(self.no_cultures)]
 
 
-    def add_cultures_sim_data(self):
+    def set_cultures(self):
+        """Add Culture data from sims."""
         for i, culture in enumerate(self.cultures):
             # May need to pass the model used in order to
-            # generalize. Then we can replace 2 with the number of
-            # species and also provide parameters used for the
-            # simulations and other amounts (e.g. N). This is not
-            # possible with real data and not really necessary
-            # simulated data.
+            # generalize. Then we can also provide parameters used for
+            # the simulations and other amounts (e.g. N). We can also
+            # use model.no_species. This is not possible with real
+            # data and not really necessary with simulated data.
             no_species = int(len(self.sim_amounts[0])/self.no_cultures)
-            # culture.sim_amounts = self.sim_amounts[:, i*2:(i+1)*2]
             culture.c_meas = self.sim_amounts[:, i*no_species].flatten()
             culture.times = self.times
-            # culture.sim_params = self.sim_params[0:]
+
+
+    def est_from_cultures(self):
+        """Estimate parameters from inde fits of individual Cultures.
+
+        Set idependent estimates (with scipy.integrate.odeint data) as
+        culture attribute inde_est and return estimate values.
+
+        """
+        # Could be generalized by supplying Model as argument. For
+        # instance if we have different independent models.
+        inde_model = IndeModel()
+        # Make inde fits for individual Cultures.
+        for culture in self.cultures:
+            culture.inde_est = culture.fit_model(inde_model)
+        params = np.array([c.inde_est.x for c in self.cultures])
+        # Only take averages if r>0 otherwise amount estimates are arbitrary.
+        avgs = np.average([p for p in params if p[-1]], axis=0)
+        # Averages only for plate level params.
+        avg_params = np.append(avgs[:inde_model.r_index],
+                               params[:, inde_model.r_index])
+        return avg_params
+
+
 
 
 class Culture(BasePlate):
