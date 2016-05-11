@@ -78,8 +78,10 @@ class Model:
 
 
     # Require the neighbourhood and no_cultures from the plate but not
-    # any other data.
-    def solve(self, plate, params):
+    # any other data. Optional times is for simulations. If worried
+    # about speed can create different solve methods with and
+    # without the extra argument.
+    def solve(self, plate, params, times=None):
         init_amounts = np.tile(params[:self.no_species], plate.no_cultures)
         # Might be cheaper to pass neighbourhood for the independent
         # model but do nothing with it. However, the comparison below
@@ -89,7 +91,10 @@ class Model:
                                      plate.neighbourhood)
         else:
             growth_func = self.model(params[self.no_species:])
-        sol = odeint(growth_func, init_amounts, plate.times)
+        if times is None:
+            sol = odeint(growth_func, init_amounts, plate.times)
+        else:
+            sol = odeint(growth_func, init_amounts, times)
         return np.maximum(0, sol)
 
 
