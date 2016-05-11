@@ -38,7 +38,10 @@ class Fitter:
                                   bounds=bounds,
                                   options={'disp': True, 'maxfun': np.inf})
         else:
-            options = {'disp': True, 'maxfun': np.inf, 'maxiter': maxiter}
+            options = {
+                'disp': True, 'maxfun': np.inf,
+                'maxiter': maxiter, 'ftol': 10.0*np.finfo(float).eps
+            }
             est_params = minimize(obj_f, param_guess, method='L-BFGS-B',
                                   bounds=bounds, options=options)
         return est_params
