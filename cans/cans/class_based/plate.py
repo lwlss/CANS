@@ -77,6 +77,21 @@ class Plate(BasePlate):
             culture.times = self.times
 
 
+    def set_sim_data(self, model, r_mean=1.0, r_var=1.0, custom_params=None):
+        self.sim_params = model.gen_params(self, mean=r_mean, var=r_var)    # Decide whether want this here
+        if custom_params is not None:
+            for k, v in custom_params.items():
+                try:
+                    index = model.params.index(k)
+                    self.sim_params[index] = v
+                except ValueError:
+                    print("No plate level {0} in {1}.".format(k, model.name))
+                    raise
+        self.sim_amounts = model.solve(self, self.sim_params)
+        self.c_meas = self.sim_amounts.flatten()[::model.no_species]
+        self.set_cultures()    # Set culture.c_meas and times
+
+
     def est_from_cultures(self):
         """Estimate parameters from inde fits of individual Cultures.
 
