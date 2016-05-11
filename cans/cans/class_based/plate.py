@@ -90,8 +90,7 @@ class Plate(BasePlate):
                     raise
 
 
-
-    def set_sim_data(self, model, r_mean=2.0, r_var=2.0, custom_params=None):
+    def set_sim_data(self, model, r_mean=1.0, r_var=1.0, custom_params=None):
         """Set simulation data.
 
         If sim_params attribute does not exist one will be
