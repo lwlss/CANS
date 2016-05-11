@@ -20,14 +20,13 @@ class Fitter:
         """Objective function for fitting model."""
         # Find amounts by solving the model using the estimated parameters.
         amounts_est = self.model.solve(plate, params)
-        # Generalized using Model.species attribute
-        c_est = np.array([amounts_est[:, i*len(self.model.species)] for i
-                          in range(plate.no_cultures)]).flatten()
+        c_est = amounts_est.flatten()[::self.model.no_species]
         err = np.sqrt(sum((plate.c_meas - c_est)**2))
         return err
 
 
     def fit_model(self, plate, param_guess=None, maxiter=None):
+        assert(plate.c_meas is not None)
         obj_f = partial(self._obj_func, plate)
         if param_guess is None:
             # Fit using uniform parameters
