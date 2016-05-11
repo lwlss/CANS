@@ -40,7 +40,8 @@ class Plotter:
 
     # Plate may have plate.inde_est and plate.comp_est so need to pass
     # one of these.
-    def plot_estimate(self, plate, est_params, title='Est', sim=False):
+    def plot_estimate(self, plate, est_params, title='Estimated Growth',
+                      sim=False):
         amounts = self.model.solve(plate, est_params)    # times?
         if sim:
             ymax = self._find_ymax(np.append(amounts, plate.sim_amounts))
@@ -51,7 +52,7 @@ class Plotter:
 
         for i, ax in enumerate(grid):
             ax.set_ylim(0.0, ymax)
-
+            ax.grid()
             for j, species in enumerate(self.model.species):
                 ax.plot(plate.times, amounts[:, i * self.model.no_species + j],
                         self.colours[j], label=species)
@@ -63,7 +64,7 @@ class Plotter:
             else:
                 # just plot c_meas
                 # may need to reshape c_meas
-                ax.plot(plate.times, plate.c_meas[::i+plate.no_cultures],
+                ax.plot(plate.times, plate.c_meas[i::plate.no_cultures],
                         'x', label='Observed Cells')
             if i + 1 > (plate.rows - 1)*plate.cols:
                 # Then in last row.
