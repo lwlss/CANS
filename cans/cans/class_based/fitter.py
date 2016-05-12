@@ -36,7 +36,7 @@ class Fitter:
         # Add r (0, 0) bounds for empty sites according to plate.empties.
         if plate.empties is not None:
             for index in plate.empties:
-                bounds[model.r_index + index] = (0.0, 0.0)
+                bounds[self.model.r_index + index] = (0.0, 0.0)
         if maxiter is None:
             est_params = minimize(obj_f, param_guess, method='L-BFGS-B',
                                   bounds=bounds,
