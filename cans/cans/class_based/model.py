@@ -83,6 +83,17 @@ class Model:
     # without the extra argument.
     def solve(self, plate, params, times=None):
         init_amounts = np.tile(params[:self.no_species], plate.no_cultures)
+        # Set C(t=0) to zero for empty locations.
+        if plate.mask is not None:
+            for index in plate.mask:
+                init_amounts[self.no_species*index] = 0.0
+        # For alternative approach without using (0,0) bounds can
+        # insert r=0 values according to indices in mask. In this
+        # approach the r values would be absent from the params so
+        # would have to be inserted rather than replaced. These would
+        # then have to be reentered in the final result from the
+        # minimizer as nan in order for placings to correspond.
+
         # Might be cheaper to pass neighbourhood for the independent
         # model but do nothing with it. However, the comparison below
         # is more explicit.
@@ -109,12 +120,12 @@ class Model:
         if 'kn' in self.params:
             params.append(0.0)
         if var:
-            # Need to import function from some module
+            # Need to import function from cans functional modules.
             r = gauss_list(plate.no_cultures, mean=mean, var=var, negs=False)
         else:
             r = [mean]*plate.no_cultures
         # C(t=0), N(t=0), kn (if present), r0, r1,...
-        params = np.array(params + r)
+        params = np.array(params + r)    # Can remove r params according to the mask.
         return params
 
         
