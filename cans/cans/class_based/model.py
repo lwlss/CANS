@@ -84,9 +84,8 @@ class Model:
     def solve(self, plate, params, times=None):
         init_amounts = np.tile(params[:self.no_species], plate.no_cultures)
         # Set C(t=0) to zero for empty locations.
-        if plate.empties is not None:
-            for index in plate.empties:
-                init_amounts[self.no_species*index] = 0.0
+        for index in plate.empties:
+            init_amounts[self.no_species*index] = 0.0
         # For alternative approach without using (0,0) bounds can
         # insert r=0 values according to indices in empties. In this
         # approach the r values would be absent from the params so

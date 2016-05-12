@@ -65,7 +65,9 @@ class Plotter:
             for j, species in enumerate(self.model.species):
                 ax.plot(sim_times, amounts[:, i * self.model.no_species + j],
                         self.colours[j], label=species)
-                if sim:
+                if j == 0 and i in plate.empties:
+                    continue
+                elif sim:
                     # Plot all true.
                     ax.plot(plate.times,
                             plate.sim_amounts[:, i*self.model.no_species + j],

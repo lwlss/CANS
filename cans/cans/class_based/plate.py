@@ -15,13 +15,15 @@ class BasePlate:
         # Is data going to be a dictionary of observation times and
         # cell measurements? Let's assume so.
         if data is not None:
-            self.c_meas = data['c_meas']    # Should be a flat np.array
+            # c_measn should be a flat np.array with zero observation
+            # values added for empty spots
+            self.c_meas = data['c_meas']
             self.times = data['times']
             self.empties = data['empties']    # List of indices of empty sites
         else:
             self.c_meas = None
             self.times = None
-            self.empties = None
+            self.empties = []
         # Attributes for simulated data.
         self.sim_amounts = None
         self.sim_params = None
@@ -77,9 +79,8 @@ class Plate(BasePlate):
             no_species = int(len(self.sim_amounts[0])/self.no_cultures)
             culture.c_meas = self.sim_amounts[:, i*no_species].flatten()
             culture.times = self.times
-            if self.empties is not None:
-                if i in self.empties:
-                    culture.empties = [0]
+            if i in self.empties:
+                culture.empties = [0]
 
 
     def _gen_sim_params(self, model, r_mean, r_var, custom_params):
@@ -94,9 +95,8 @@ class Plate(BasePlate):
                     print("No plate level {0} in {1}.".format(k, model.name))
                     raise
         # Set r params for zero for empty plates. Could also go with nan.
-        if self.empties is not None:
-            for index in self.empties:
-                self.sim_params[model.r_index+index] = 0.0
+        for index in self.empties:
+            self.sim_params[model.r_index+index] = 0.0
 
 
     def set_sim_data(self, model, r_mean=1.0, r_var=1.0, custom_params=None):

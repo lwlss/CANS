@@ -21,6 +21,8 @@ class Fitter:
         # Find amounts by solving the model using the estimated parameters.
         amounts_est = self.model.solve(plate, params)
         c_est = amounts_est.flatten()[::self.model.no_species]
+        # Zeros appear in here for empty plates but this shouldn't
+        # have any effect.
         err = np.sqrt(sum((plate.c_meas - c_est)**2))
         return err
 
@@ -31,12 +33,13 @@ class Fitter:
         if param_guess is None:
             # Fit using uniform parameters
             param_guess = self.model.gen_params(plate)
+        else:
+            assert(len(param_guess) == self.model.r_index + plate.no_cultures)
         # All values non-negative.
         bounds = [(0.0, None) for param in param_guess]
         # Add r (0, 0) bounds for empty sites according to plate.empties.
-        if plate.empties is not None:
-            for index in plate.empties:
-                bounds[self.model.r_index + index] = (0.0, 0.0)
+        for index in plate.empties:
+            bounds[self.model.r_index + index] = (0.0, 0.0)
         if maxiter is None:
             est_params = minimize(obj_f, param_guess, method='L-BFGS-B',
                                   bounds=bounds,

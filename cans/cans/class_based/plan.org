@@ -1,9 +1,13 @@
-* TODO [0/3]
-  - [ ] Code should be able to handle empty spots
+* TODO [1/3]
+  - [X] Code should be able to handle empty spots
     - e.g. in miniQFA
-    - [ ] Is it better to bound rs to be zero or remove them as parameters?
+    - [X] Is it better to bound rs to be zero (0, 0) or remove them as
+      parameters?
       - First approach is easier to implement but I am slighly uneasy
         with passing fixed parameters to the optimizer.
+	- I went with bounds. This approach requires you to set c_meas
+          as zeros for empty spots.
+    - [X] Do no plot C for empty plates.
   - [ ] Determine stopping criteria for fits
     - [ ] Time fitting
     - [ ] What value of ftol to use? Or use fun? What value?
