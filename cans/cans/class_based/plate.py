@@ -24,7 +24,7 @@ class BasePlate:
         self.sim_amounts = None
         self.sim_params = None
         # Attribute for unoccupied cultures. List of r indices of unpopulated cultures.
-        self.mask = None
+        self.empties = None
 
 
     def find_neighbourhood(self):

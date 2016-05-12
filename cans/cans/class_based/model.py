@@ -84,11 +84,11 @@ class Model:
     def solve(self, plate, params, times=None):
         init_amounts = np.tile(params[:self.no_species], plate.no_cultures)
         # Set C(t=0) to zero for empty locations.
-        if plate.mask is not None:
-            for index in plate.mask:
+        if plate.empties is not None:
+            for index in plate.empties:
                 init_amounts[self.no_species*index] = 0.0
         # For alternative approach without using (0,0) bounds can
-        # insert r=0 values according to indices in mask. In this
+        # insert r=0 values according to indices in empties. In this
         # approach the r values would be absent from the params so
         # would have to be inserted rather than replaced. These would
         # then have to be reentered in the final result from the
@@ -125,7 +125,7 @@ class Model:
         else:
             r = [mean]*plate.no_cultures
         # C(t=0), N(t=0), kn (if present), r0, r1,...
-        params = np.array(params + r)    # Can remove r params according to the mask.
+        params = np.array(params + r)    # Can remove r params according to the empties.
         return params
 
         
