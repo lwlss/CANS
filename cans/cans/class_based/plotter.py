@@ -62,6 +62,10 @@ class Plotter:
         fig, grid = self._make_grid(plate, amounts, sim, title)
 
         for i, ax in enumerate(grid):
+            if not sim and i not in plate.empties:
+                # Plot c_meas.
+                ax.plot(plate.times, plate.c_meas[i::plate.no_cultures],
+                        'x', label='Observed Cells')
             for j, species in enumerate(self.model.species):
                 ax.plot(sim_times, amounts[:, i * self.model.no_species + j],
                         self.colours[j], label=species)
@@ -73,9 +77,7 @@ class Plotter:
                             plate.sim_amounts[:, i*self.model.no_species + j],
                             'x' + self.colours[j], label=species)
                 else:
-                    # just plot c_meas.
-                    ax.plot(plate.times, plate.c_meas[i::plate.no_cultures],
-                            'x', label='Observed Cells')
+                    continue
         # grid[-1].legend(loc='best')
         if filename is None:
             plt.show()
