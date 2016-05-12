@@ -23,6 +23,8 @@ class BasePlate:
         # Attributes for simulated data.
         self.sim_amounts = None
         self.sim_params = None
+        # Attribute for unoccupied cultures. List of r indices of unpopulated cultures.
+        self.mask = None
 
 
     def find_neighbourhood(self):
@@ -122,6 +124,9 @@ class Plate(BasePlate):
         params = np.array([c.inde_est.x for c in self.cultures])
         # Only take averages if r>0 otherwise amount estimates are arbitrary.
         avgs = np.average([p for p in params if p[-1]], axis=0)
+        if np.all(np.isnan(avgs)):
+            print("Warning: All rs were zero so estimates may not be reliable.")
+            avgs = np.average(params, axis=0)
         # Averages only for plate level params.
         avg_params = np.append(avgs[:inde_model.r_index],
                                params[:, inde_model.r_index])
