@@ -12,8 +12,6 @@ def inde_model(params):
     ----
     params : list
         Model parameters
-    neighbourhood : list
-        A list of tuples of neighbour indices for each culture.
     """
     # Separate out plate and culture level parameters.
     r_params = params
@@ -94,13 +92,14 @@ class Model:
         # minimizer as nan in order for placings to correspond.
 
         # Might be cheaper to pass neighbourhood for the independent
-        # model but do nothing with it. However, the comparison below
-        # is more explicit.
+        # model but do nothing with it. However, the comparison with
+        # 'kn' below is more explicit.
         if 'kn' in self.params:
             growth_func = self.model(params[self.no_species:],
                                      plate.neighbourhood)
         else:
             growth_func = self.model(params[self.no_species:])
+        # Optional smooth times for simulations/fits.
         if times is None:
             sol = odeint(growth_func, init_amounts, plate.times)
         else:
