@@ -2,7 +2,6 @@ import numpy as np
 
 
 from plate import Plate
-from fitter import Fitter
 from model import CompModel, IndeModel
 
 
