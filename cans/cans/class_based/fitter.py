@@ -1,4 +1,5 @@
 import numpy as np
+import time
 
 
 from functools import partial
@@ -27,7 +28,15 @@ class Fitter:
         return err
 
 
-    def fit_model(self, plate, param_guess=None, maxiter=None):
+    def fit_model(self, plate, param_guess=None, custom_options=None):
+        """Fit the model to data on the plate (and return a Fit object?)
+
+        If passed use param guess as the initial guess for
+        minimization, else generate a uniform guess. custom_options
+        should be a dictionary. Commmon options to set are ftol and
+        maxiter.
+
+        """
         assert(plate.c_meas is not None)
         obj_f = partial(self._obj_func, plate)
         if param_guess is None:
@@ -40,15 +49,18 @@ class Fitter:
         # Add r (0, 0) bounds for empty sites according to plate.empties.
         for index in plate.empties:
             bounds[self.model.r_index + index] = (0.0, 0.0)
-        if maxiter is None:
-            est_params = minimize(obj_f, param_guess, method='L-BFGS-B',
-                                  bounds=bounds,
-                                  options={'disp': True, 'maxfun': np.inf})
-        else:
-            options = {
-                'disp': True, 'maxfun': np.inf,
-                'maxiter': maxiter, 'ftol': 10.0*np.finfo(float).eps
-            }
-            est_params = minimize(obj_f, param_guess, method='L-BFGS-B',
-                                  bounds=bounds, options=options)
+
+        options = {
+            'disp': True,
+            'maxfun': np.inf,
+            'ftol': 10.0*np.finfo(float).eps
+        }
+        if custom_options is not None:
+            options.update(custom_options)
+
+        t0 = time.time()
+        est_params = minimize(obj_f, param_guess, method='L-BFGS-B',
+                              bounds=bounds, options=options)
+        t1 = time.time()
+        fitting_time = t1 - t0
         return est_params
