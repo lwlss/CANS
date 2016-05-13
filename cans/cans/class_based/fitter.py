@@ -62,5 +62,11 @@ class Fitter:
         est_params = minimize(obj_f, param_guess, method='L-BFGS-B',
                               bounds=bounds, options=options)
         t1 = time.time()
-        fitting_time = t1 - t0
+        # Add extra attributes to scipy.optimize.OptimizeResult
+        # object. Can access with keys() as this is just a subclass of
+        # dict.
+        est_params.fit_time = t1 - t0
+        est_params.init_guess = param_guess
+        est_params.bounds = bounds
+        est_params.fit_options = options
         return est_params
