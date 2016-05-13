@@ -53,7 +53,7 @@ class Fitter:
         options = {
             'disp': True,
             'maxfun': np.inf,
-            'ftol': 10.0*np.finfo(float).eps
+            #'ftol': 10.0*np.finfo(float).eps
         }
         if custom_options is not None:
             options.update(custom_options)
