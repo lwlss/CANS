@@ -26,4 +26,4 @@ plate1.inde_est = plate1.fit_model(inde_model, culture_ests)
 
 # Test plotting
 inde_plotter = Plotter(inde_model)
-inde_plotter.plot_estimates(plate1, plate1.inde_est.x, sim=True)
+inde_plotter.plot_estimates(plate1, plate1.inde_est.x, sim=False)
