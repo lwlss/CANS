@@ -67,6 +67,8 @@ class Fitter:
         # dict.
         est_params.fit_time = t1 - t0
         est_params.init_guess = param_guess
-        est_params.bounds = bounds
-        est_params.fit_options = options
+        est_params.fit_options = options    # including ftol
+        # est_params.model = self.model.name
+        # est_params.bounds = bounds
+        # est_params.method = 'L-BFGS-B'
         return est_params
