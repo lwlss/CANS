@@ -1,8 +1,10 @@
 import numpy as np
 
+
 from scipy.integrate import odeint
 
-from cans.cans import gauss_list
+
+from cans_funcs import gauss_list
 
 
 def inde_model(params):
@@ -114,7 +116,8 @@ class Model:
 
         """
         # C(t=0), N(t=0)
-        params = [0.005, 1.0]
+        params = [0.005, 1.0]    # Might be better to set defaults in
+                                 # model __init__.
         if 'kn' in self.params:
             params.append(0.0)
         if var:
@@ -131,7 +134,7 @@ class CompModel(Model):
     def __init__(self):
         self.model = comp_model
         self.r_index = 3
-        self.params = ['C(t=0)', 'N(t=0)', 'kn', 'rs']
+        self.params = ['C_0', 'N_0', 'kn', 'rs']
         self.species = ['C', 'N']
         self.no_species = len(self.species)
         self.name = 'Competition Model'
@@ -141,7 +144,7 @@ class IndeModel(Model):
     def __init__(self):
         self.model = inde_model
         self.r_index = 2
-        self.params = ['C(t=0)', 'N(t=0)', 'rs']
+        self.params = ['C_0', 'N_0', 'rs']
         self.species = ['C', 'N']
         self.no_species = len(self.species)
         self.name = 'Independent Model'
