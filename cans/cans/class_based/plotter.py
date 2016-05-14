@@ -53,8 +53,8 @@ class Plotter:
 
     # Plate may have plate.inde_est and plate.comp_est so need to pass
     # one of these.
-    def plot_estimates(self, plate, est_params, title='Estimated Growth',
-                       sim=False, filename=None):
+    def plot_est(self, plate, est_params, title='Estimated Growth',
+                 sim=False, filename=None):
         # Smooth times for sims.
         sim_times = np.linspace(plate.times[0], plate.times[-1], 100)
         amounts = self.model.solve(plate, est_params, sim_times)
