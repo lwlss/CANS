@@ -9,6 +9,7 @@
           as zeros for empty spots.
     - [X] Do no plot C for empty plates.
   - [ ] Determine stopping criteria for fits
+    - Can do this in a loop.
     - [ ] Time fitting
     - [ ] What value of ftol to use?
   - [ ] Run full plate fits in parallel using different initial
