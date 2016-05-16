@@ -15,7 +15,7 @@ with open(true_file, 'r') as f:
     true_data = json.load(f)
 
 
-# Make guess. Just use a slice of 16x24 random rs for smaller
+# MAKE GUESS. Just use a slice of 16x24 random rs for smaller
 # arrays. Could also have done for sim params but not if we have also
 # simed amounts.
 guess_file = "init_guess/16x24_rs_mean_5_var_3/16x24_rs_{}.json"
@@ -30,5 +30,3 @@ r_guess = guess_data['rand_rs'][:rows*cols]
 assert len(r_guess) == rows*cols
 init_guess = plate_lvl_guess + r_guess
 assert len(init_guess) == len(true_data['sim_params'])
-print(init_guess)
-print(true_data['sim_params'])
