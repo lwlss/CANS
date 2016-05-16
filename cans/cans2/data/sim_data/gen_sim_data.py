@@ -7,13 +7,13 @@ from cans2.model import CompModel
 from cans2.cans_funcs import dict_to_json
 
 
-file_name = '16x24_comp_model/name.json'
-
 mean = 5
 var = 3
 
-rows = 16
-cols = 24
+rows = 5
+cols = 5
+
+file_name = '{0}x{1}_comp_model/mean_5_var_3.json'.format(rows, cols)
 
 custom_params = {
     'C_0': 0.0001,
