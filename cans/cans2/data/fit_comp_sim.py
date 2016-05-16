@@ -39,7 +39,7 @@ assert len(init_guess) == len(true_data['sim_params'])
 init_guess = copy.deepcopy(init_guess_0)
 timings = []
 
-factrs = reversed([10**i for i in range(15)])
+factrs = reversed([10**i for i in range(20)])    # could make 15
 
 
 for factr in factrs:
