@@ -4,7 +4,7 @@ import numpy as np
 from scipy.integrate import odeint
 
 
-from cans_funcs import gauss_list
+from cans2.cans_funcs import gauss_list
 
 
 def inde_model(params):

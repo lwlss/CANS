@@ -1,8 +1,8 @@
 import numpy as np
 
 
-from model import IndeModel
-from fitter import Fitter
+from cans2.model import IndeModel
+from cans2.fitter import Fitter
 
 
 class BasePlate:
