@@ -1,3 +1,4 @@
+"""Simulate plate amounts and save data as json."""
 import numpy as np
 import json
 
@@ -25,7 +26,7 @@ custom_params['kn'] = 0.2
 model = CompModel()
 times = np.linspace(0, 5, 21)
 
-# Generate sets or simulated amounts
+# Generate sets of simulated amounts
 for i in range(1):
     plate1 = Plate(rows, cols)
     plate1.times = times
