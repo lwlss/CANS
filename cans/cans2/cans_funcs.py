@@ -32,6 +32,12 @@ def dict_to_json(dct):
     return dct
 
 
+def get_zone(array, coords, rows, cols):
+    """Return a zone of an array."""
+    zone = array[coords[0]:coords[0]+rows, coords[1]:coords[1]+cols]
+    return zone
+
+
 def add_noise(data, sigma=0.02):
     """Return data with added random noise as np.ndarray."""
     if not isinstance(data, np.ndarray):
