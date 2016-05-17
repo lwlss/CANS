@@ -155,7 +155,7 @@ this_plate.set_sim_data(model)
 
 
 for factr in factrs:
-    power = str(int(np.log(factr)/np.log(10)))
+    power = str(int(round(np.log(factr)/np.log(10))))
     out_file = out_dir + "stop_factr_10e{}.json".format(power)
 
     fit_options = {
