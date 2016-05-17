@@ -531,7 +531,7 @@
         6,
         11
     ],
-    "description": "Coords start (0, 0) and refer to a parent plate from which data is collected. If resim is True then amounts are resimulated from zone parameters. If resim is False then amounts are those of the parent plate.",
+    "description": "A zone of a larger plate. Coords start (0, 0) and refer to a parent plate from which data is collected. If resim is True then amounts are resimulated from zone parameters. If resim is False then amounts are those of the parent plate.",
     "model": "Competition Model",
     "model_params": [
         "C_0",
