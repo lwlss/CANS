@@ -6,6 +6,9 @@ from functools import partial
 from scipy.optimize import minimize
 
 
+from cans2.cans_funcs import dict_to_json
+
+
 class Fitter:
     # Can either fit different Models to data on a given Plate or fit
     # the same Model to data on different Plates. It is more natural
@@ -67,8 +70,8 @@ class Fitter:
         # dict.
         est_params.fit_time = t1 - t0
         est_params.init_guess = param_guess
-        est_params.fit_options = options    # including ftol
-        # est_params.model = self.model.name
-        # est_params.bounds = bounds
-        # est_params.method = 'L-BFGS-B'
+        est_params.fit_options = dict_to_json(options)    # including ftol
+        est_params.model = model
+        est_params.bounds = bounds
+        est_params.method = 'L-BFGS-B'
         return est_params
