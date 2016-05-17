@@ -23,6 +23,16 @@ def plate_zone(resim=True):
     pass
 
 
+def get_zone_r_guess(r_guess, coords, rows, cols):
+    """Return initial r guesses or a zone"""
+    r_zone = np.array(r_guess, copy=True)
+    r_zone.shape = (rows, cols)
+    r_zone = _get_zone(r_zone, coords, rows, cols)
+    r_zone = r_zone.flatten()
+    return r_zone
+
+
+
 def get_zone_params(plate_file, coords, rows, cols):
     """Return params for a zone of a plate saved as json.
 
