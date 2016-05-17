@@ -140,7 +140,7 @@ assert len(init_guess) == len(true_data['sim_params'])
 
 
 # Fit varying factr and save everytime.
-factrs = reversed([10**i for i in range(20)])    # could make 15
+factrs = reversed([10**i for i in range(15)])
 
 tot_fit_time = 0
 tot_nfev = 0
