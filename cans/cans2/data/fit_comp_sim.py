@@ -60,13 +60,13 @@ def save_as_json(true_plate, est_plate, est, factr, init_guess, model,
         'fit_success': est.success,
         'reason_for_stop': est.message,
 
-        # These should be tallied for the loop instead/as well.
-        'fit_time': est.fit_time,
-        'fit_time_accumulated':,
+        # For the ftol iter and cumulative.
+        'tot_fit_time': est.fit_time,
+        'fit_time_tot': est.tot_fit_time,
         'nfev': est.nfev,
-        'nfev_accumulated':,
+        'tot_nfev': est.tot_nfev,
         'nit': est.nit,
-        'nit_accumulated':,
+        'tot_nit': est.tot_init,
 
         'date': datetime.date.today(),
         'description': '',
@@ -143,8 +143,11 @@ for factr in factrs:
     tot_fit_time += this_plate.comp_est.fit_time
     tot_nfev += this_plate.comp_est.nfev
     tot_nit += this_plate.comp_est.nit
+    this_plate.comp_est.tot_fit_time = tot_fit_time
+    this_plate.comp_est.tot_nfev = tot_nfev
+    this_plate.comp_est.tot_nit = tot_nit
 
-
+    # Create estimated plate and use as next this_plate.
     est_plate = Plate(true_plate.rows, true_plate.cols)
     est_plate.times = true_plate.times
     est_plate.sim_params = this_plate.comp_est.x
