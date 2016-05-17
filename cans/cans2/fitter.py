@@ -71,7 +71,7 @@ class Fitter:
         est_params.fit_time = t1 - t0
         est_params.init_guess = param_guess
         est_params.fit_options = dict_to_json(options)    # including ftol
-        est_params.model = model
+        est_params.model = self.model
         est_params.bounds = bounds
         est_params.method = 'L-BFGS-B'
         return est_params
