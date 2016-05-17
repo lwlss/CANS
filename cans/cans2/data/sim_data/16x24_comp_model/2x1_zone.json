@@ -56,6 +56,10 @@
         "kn",
         "rs"
     ],
+    "model_species": [
+        "C",
+        "N"
+    ],
     "parent_plate": "16x24_comp_model/full_plate.json",
     "r_mean": 5,
     "r_var": 3,

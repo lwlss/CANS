@@ -8073,6 +8073,10 @@
         "kn",
         "rs"
     ],
+    "model_species": [
+        "C",
+        "N"
+    ],
     "r_mean": 5,
     "r_var": 3,
     "rows": 16,
