@@ -6,12 +6,12 @@ import datetime
 from cans2.zoning import get_zone_r_guess
 from cans2.plate import Plate
 from cans2.model import CompModel
-#from cans2.plotter import Plotter
-from cans2.funcs import calc_devs, dict_to_json
+from cans2.plotter import Plotter
+from cans2.cans_funcs import calc_devs, dict_to_json
 
 
 def save_as_json(true_plate, est_plate, est, factr, init_guess,
-                 plate_file, guess_file, out_file):
+                 coords, plate_file, guess_file, out_file):
 
     assert np.array_equal(est_plate.sim_params, est.x)
 
@@ -20,7 +20,7 @@ def save_as_json(true_plate, est_plate, est, factr, init_guess,
         true_data = json.load(f)
 
     # Calculate parameter deviations
-    assert np.array_equal(true_data['params'], est.model.params)
+    assert np.array_equal(true_data['model_params'], est.model.params)
     param_devs = calc_devs(true_plate.sim_params, est.model.r_index,
                            est_plate.sim_params)[0]
 
@@ -59,7 +59,7 @@ def save_as_json(true_plate, est_plate, est, factr, init_guess,
 
         'obj_fun_val': est.fun,
         'fit_success': est.success,
-        'reason_for_stop': est.message,
+        'reason_for_stop': str(est.message),
 
         # For the ftol iter and cumulative.
         'tot_fit_time': est.fit_time,
@@ -69,15 +69,21 @@ def save_as_json(true_plate, est_plate, est, factr, init_guess,
         'nit': est.nit,
         'tot_nit': est.tot_nit,
 
-        'date': datetime.date.today(),
-        'description': ('If smaller than a 16x24 plate init_guesses are'
-                        'the first no_cultures r values in the file.'),
+        'date': str(datetime.date.today()),
+        'coords': coords,
+        'description': (
+            'If smaller than a 16x24 plate, init_guesses are either',
+            'the first no_cultures r values in the file, or, if',
+            'coordinates are given, r values for the corresponding zone.'
+        ),
     }
     data = dict_to_json(data)
 
+    # Check not overwritting data_files.
+    assert out_file.split("/")[0] == 'sim_fits'
+
     with open(out_file, 'w') as f:
         json.dump(data, f, sort_keys=True, indent=4)
-
 
 
 # Parse in a number for an initial guess.
@@ -85,14 +91,15 @@ guess_no = 0
 rows = 2
 cols = 1
 model = CompModel()
-out_dir = "{0}x{1}_comp_model/init_guess_{2}/".format(rows, cols, guess_no)
-true_file = "sim_data/16x24_comp_model/2x1_zone.json".format(rows, cols)
+true_file = "sim_data/16x24_comp_model/{0}x{1}.json".format(rows, cols)
+out_dir = "sim_fits/{0}x{1}_comp_model/init_guess_{2}/".format(rows, cols,
+                                                               guess_no)
 
 # Read in true data
 with open(true_file, 'r') as f:
     true_data = json.load(f)
 
-# Find coords on full plate if exist
+# Find coords on full plate if exist in data.
 if 'coords_on_parent' in true_data.keys():
     coords = true_data['coords_on_parent']
 else:
@@ -102,27 +109,30 @@ true_plate = Plate(rows, cols)
 true_plate.times = true_data['times']
 true_plate.sim_params = true_data['sim_params']
 true_plate.set_sim_data(model)
-assert np.equal(true_plate.c_meas, true_data['c_meas'])
+assert np.array_equal(true_plate.c_meas, true_data['c_meas'])
 
 
-# MAKE GUESS
-guess_file = "init_guess/16x24_rs_mean_5_var_3/16x24_rs_{}.json"   # zones
+# MAKE GUESS. Also deal with zones.
+guess_file = "init_guess/16x24_rs_mean_5_var_3/16x24_rs_{}.json"
 guess_file = guess_file.format(guess_no)
 # C_0, N_0, kn
-plate_lvl_guess = [0.00001, 1.2, 0.0]
+plate_lvl_guess = [0.0001, 1.2, 0.1]
+
 # Read in an initial guess for rs
 with open(guess_file, 'r') as f:
     guess_data = json.load(f)
 r_guess = guess_data['rand_rs']
+
 # If coords are given for a zone of a larger plate take the initial
 # guess from that zone. This may not make much of a difference but is
 # more consistant.
-if len(r_guess) < rows*cols and coords:
-    r_guess =  get_zone_r_guess(r_guess, coords, rows, cols)
-elif len(r_guess) < rows*cols and not coords:
+if rows*cols < len(r_guess) and coords:
+    r_guess =  get_zone_r_guess(r_guess, 16, 24, coords, rows, cols)
+elif rows*cols < len(r_guess) and not coords:
     r_guess = r_guess[:rows*cols]
+
 assert len(r_guess) == rows*cols
-init_guess = plate_lvl_guess + r_guess
+init_guess = np.append(plate_lvl_guess,  r_guess)
 assert len(init_guess) == len(true_data['sim_params'])
 
 
@@ -141,8 +151,10 @@ this_plate.sim_params = init_guess
 this_plate.set_sim_data(model)
 
 
-
 for factr in factrs:
+    power = str(int(np.log(factr)/np.log(10)))
+    out_file = out_dir + "stop_factr_10e{}.json".format(power)
+
     fit_options = {
         'ftol': factr*np.finfo(float).eps
     }
@@ -166,14 +178,17 @@ for factr in factrs:
     est_plate.set_sim_data(model)
 
     save_as_json(true_plate, est_plate, this_plate.comp_est, factr,
-                 init_guess, true_file, guess_file, out_file)
-
-    save_fit(est_plate, this_plate.comp_est, factr, out_file)
+                 init_guess, coords, true_file, guess_file, out_file)
 
     this_plate = est_plate
 
 
     # Could plot if no_cultures <= 25
-    # comp_plotter = Plotter(model)
-    # comp_plotter.plot_estimates(emp_plate, emp_plate.comp_est.x,
-    #                             title="factr = 10e"+str(np.log(factr)/np.log(10)), sim=True)
+    if rows*cols <=25:
+        comp_plotter = Plotter(model)
+        title = "factr = 10e" + power
+        plot_file = out_dir + "plots/stop_factr_10e{}.pdf".format(power)
+
+        comp_plotter.plot_est(true_plate, est_plate.sim_params,
+                              title=title, sim=True,
+                              filename=plot_file)
