@@ -23,10 +23,10 @@ def plate_zone(resim=True):
     pass
 
 
-def get_zone_r_guess(r_guess, coords, rows, cols):
+def get_zone_r_guess(r_guess, big_rows, big_cols, coords, rows, cols):
     """Return initial r guesses or a zone"""
     r_zone = np.array(r_guess, copy=True)
-    r_zone.shape = (rows, cols)
+    r_zone.shape = (big_rows, big_cols)
     r_zone = _get_zone(r_zone, coords, rows, cols)
     r_zone = r_zone.flatten()
     return r_zone
