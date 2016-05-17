@@ -1,6 +1,8 @@
 import numpy as np
 import json
 import datetime
+#import argparse
+from sys import argv
 
 
 from cans2.zoning import get_zone_r_guess
@@ -86,10 +88,11 @@ def save_as_json(true_plate, est_plate, est, factr, init_guess,
         json.dump(data, f, sort_keys=True, indent=4)
 
 
-# Parse in a number for an initial guess.
-guess_no = 0
-rows = 2
-cols = 1
+script, rows, cols, guess_no = argv
+
+rows = int(rows)
+cols = int(cols)
+guess_no = int(guess_no)
 model = CompModel()
 true_file = "sim_data/16x24_comp_model/{0}x{1}.json".format(rows, cols)
 out_dir = "sim_fits/{0}x{1}_comp_model/init_guess_{2}/".format(rows, cols,
@@ -156,7 +159,8 @@ for factr in factrs:
     out_file = out_dir + "stop_factr_10e{}.json".format(power)
 
     fit_options = {
-        'ftol': factr*np.finfo(float).eps
+        'ftol': factr*np.finfo(float).eps,
+        'disp': False,
     }
 
     this_plate.comp_est = true_plate.fit_model(model,
