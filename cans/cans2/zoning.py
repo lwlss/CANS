@@ -106,11 +106,14 @@ def save_zone_as_json(zone, model, coords, plate_file, outfile):
         'parent_plate': plate_file,
         'coords_on_parent': coords,
         'resim': True,
-        'description': ('Coords start (0, 0) and refer to a parent plate '
-                        'from which data is collected. If resim is True '
-                        'then amounts are resimulated from zone parameters. '
-                        'If resim is False then amounts are those of the '
-                        'parent plate.')
+        'description': (
+            'A zone of a larger plate.'
+            'Coords start (0, 0) and refer to a parent plate '
+            'from which data is collected. If resim is True '
+            'then amounts are resimulated from zone parameters. '
+            'If resim is False then amounts are those of the '
+            'parent plate.'
+        )
     }
     zone_data = dict_to_json(zone_data)
 
