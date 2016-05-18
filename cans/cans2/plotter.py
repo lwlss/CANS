@@ -68,14 +68,14 @@ class Plotter:
                         'x', label='Observed Cells')
             for j, species in enumerate(self.model.species):
                 ax.plot(sim_times, amounts[:, i * self.model.no_species + j],
-                        self.colours[j], label=species)
+                        self.colours[j], label="Est "+species)
                 if j == 0 and i in plate.empties:
                     continue
                 elif sim:
                     # Plot all true.
                     ax.plot(plate.times,
                             plate.sim_amounts[:, i*self.model.no_species + j],
-                            'x' + self.colours[j], label=species)
+                            'x' + self.colours[j], label="True "+species)
                 else:
                     continue
         if legend:
