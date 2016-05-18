@@ -1,3 +1,4 @@
+"""Script to replot fits in matplotlib window to save manually."""
 import numpy as np
 import json
 
@@ -7,6 +8,10 @@ from cans2.model import CompModel
 from cans2.plate import Plate
 
 
+# Chage the four values below to plot different fits. You can change
+# plot options/appearance in the plotter.plot_est function in last
+# line. If sim=True, true nutrient amounts are also plotted (these are
+# not used in fitting).
 rows = 5
 cols = 5
 guess_no = 5
@@ -27,9 +32,9 @@ with open(data_file, 'r') as f:
 # Add necessary data attributes to produce plots
 
 plate.times = fit_data['times']
-plate.c_meas = fit_data['c_meas']    # Needed if plot_est option sim=False
+plate.c_meas = fit_data['c_meas']    # Used if sim=False in Plotter.plot_est
 plate.sim_amounts = np.array(fit_data['true_amounts'])
 plate.comp_est = fit_data['est_params']
 
 plotter.plot_est(plate, plate.comp_est, title='Estimatied Growth',
-                 sim=False, legend=True)
+                 sim=True, legend=True)
