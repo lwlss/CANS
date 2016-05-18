@@ -54,7 +54,7 @@ class Plotter:
     # Plate may have plate.inde_est and plate.comp_est so need to pass
     # one of these.
     def plot_est(self, plate, est_params, title='Estimated Growth',
-                 sim=False, filename=None):
+                 sim=False, filename=None, legend=False):
         # Smooth times for sims.
         sim_times = np.linspace(plate.times[0], plate.times[-1], 100)
         amounts = self.model.solve(plate, est_params, sim_times)
@@ -78,7 +78,8 @@ class Plotter:
                             'x' + self.colours[j], label=species)
                 else:
                     continue
-        # grid[-1].legend(loc='best')
+        if legend:
+            grid[-1].legend(loc='best')
         if filename is None:
             plt.show()
         else:
