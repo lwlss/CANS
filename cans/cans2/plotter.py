@@ -54,7 +54,8 @@ class Plotter:
     # Plate may have plate.inde_est and plate.comp_est so need to pass
     # one of these.
     def plot_est(self, plate, est_params, title='Estimated Growth',
-                 sim=False, filename=None, legend=False):
+                 sim=False, filename=None, legend=False, ms=6.0,
+                 lw=1.0, mew=0.5):
         # Smooth times for sims.
         sim_times = np.linspace(plate.times[0], plate.times[-1], 100)
         amounts = self.model.solve(plate, est_params, sim_times)
@@ -65,17 +66,18 @@ class Plotter:
             if not sim and i not in plate.empties:
                 # Plot c_meas.
                 ax.plot(plate.times, plate.c_meas[i::plate.no_cultures],
-                        'x', label='Observed Cells')
+                        'x', label='Observed Cells', ms=ms, mew=mew)
             for j, species in enumerate(self.model.species):
                 ax.plot(sim_times, amounts[:, i * self.model.no_species + j],
-                        self.colours[j], label="Est "+species)
+                        self.colours[j], label="Est "+species, lw=lw)
                 if j == 0 and i in plate.empties:
                     continue
                 elif sim:
                     # Plot all true.
                     ax.plot(plate.times,
                             plate.sim_amounts[:, i*self.model.no_species + j],
-                            'x' + self.colours[j], label="True "+species)
+                            'x' + self.colours[j], label="True "+species,
+                            ms=ms, mew=mew)
                 else:
                     continue
         if legend:
