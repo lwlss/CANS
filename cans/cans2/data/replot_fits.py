@@ -30,11 +30,12 @@ with open(data_file, 'r') as f:
     fit_data = json.load(f)
 
 # Add necessary data attributes to produce plots
-
 plate.times = fit_data['times']
 plate.c_meas = fit_data['c_meas']    # Used if sim=False in Plotter.plot_est
 plate.sim_amounts = np.array(fit_data['true_amounts'])
 plate.comp_est = fit_data['est_params']
 
-plotter.plot_est(plate, plate.comp_est, title='Estimatied Growth',
+# markersize, markeredgewidth, linewidth
+plotter.plot_est(plate, plate.comp_est,
+                 title='Fit of Competition Model Simulation',
                  sim=True, legend=True)
