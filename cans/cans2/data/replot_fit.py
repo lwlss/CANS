@@ -12,11 +12,11 @@ from cans2.plate import Plate
 # plot options/appearance in the plotter.plot_est function in last
 # line. If sim=True, true nutrient amounts are also plotted (these are
 # not used in fitting).
-rows = 5
-cols = 5
-guess_no = 5
+rows = 16
+cols = 24
+guess_no = 8
 # Stopping criteria: factr = 10**factr_pow
-factr_pow = 0
+factr_pow = 10
 
 data_file = "sim_fits/{0}x{1}_comp_model/init_guess_{2}/stop_factr_10e{3}.json"
 data_file = data_file.format(rows, cols, guess_no, factr_pow)
@@ -38,4 +38,4 @@ plate.comp_est = fit_data['est_params']
 # markersize, markeredgewidth, linewidth
 plotter.plot_est(plate, plate.comp_est,
                  title='Fit of Competition Model Simulation',
-                 sim=True, legend=True)
+                 sim=True, legend=False)
