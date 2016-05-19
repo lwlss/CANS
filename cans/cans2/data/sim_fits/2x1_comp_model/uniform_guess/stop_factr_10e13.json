@@ -274,7 +274,7 @@
         "maxfun": Infinity
     },
     "fit_success": true,
-    "fit_time_tot": 0.9645359516143799,
+    "fit_time_tot": 0.8078436851501465,
     "ftol": 0.002220446049250313,
     "init_guess": [
         0.0001,
@@ -332,7 +332,7 @@
         4.75,
         5.0
     ],
-    "tot_fit_time": 0.8878941535949707,
+    "tot_fit_time": 0.7332181930541992,
     "tot_nfev": 186,
     "tot_nit": 12,
     "true_amounts": [
