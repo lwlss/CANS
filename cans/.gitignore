@@ -20,3 +20,5 @@ tests/__pycache__/
 /cans/practice/
 # iPython notebook
 *.ipynb_checkpoints
+# nohup output
+*nohup.out
