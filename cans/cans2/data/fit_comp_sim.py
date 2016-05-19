@@ -88,25 +88,36 @@ def save_as_json(true_plate, est_plate, est, factr, init_guess,
         json.dump(data, f, sort_keys=True, indent=4)
 
 
+# Main
 script, rows, cols, guess_no = argv
 
 rows = int(rows)
 cols = int(cols)
 guess_no = int(guess_no)
 model = CompModel()
-true_file = "sim_data/16x24_comp_model/{0}x{1}.json".format(rows, cols)
-out_dir = "sim_fits/{0}x{1}_comp_model/init_guess_{2}/".format(rows, cols,
-                                                               guess_no)
+true_file = "sim_data/16x24_comp_model/{0}x{1}.json".format(rows, cols)#
+
+
+# Define initial guess
+# C_0, N_0, kn
+plate_lvl_guess = [0.0001, 1.2, 0.1]
+
+if guess_no >= 0:
+    out_dir = "sim_fits/{0}x{1}_comp_model/init_guess_{2}/".format(rows, cols,
+                                                                   guess_no)
+    guess_file = "init_guess/16x24_rs_mean_5_var_3/16x24_rs_{}.json"
+    guess_file = guess_file.format(guess_no)
+
+elif guess_no == -1:
+    out_dir = "sim_fits/{0}x{1}_comp_model/uniform_guess/".format(rows, cols)
+    guess_file = 'No file: uniform guess using r_mean'
+else:
+    raise ValueError("Guess for guess_no {} does not exist.".format(guess_no))
+
 
 # Read in true data
 with open(true_file, 'r') as f:
     true_data = json.load(f)
-
-# Find coords on full plate if exist in data.
-if 'coords_on_parent' in true_data.keys():
-    coords = true_data['coords_on_parent']
-else:
-    coords = []
 
 true_plate = Plate(rows, cols)
 true_plate.times = true_data['times']
@@ -115,29 +126,32 @@ true_plate.set_sim_data(model)
 assert np.array_equal(true_plate.c_meas, true_data['c_meas'])
 
 
-# MAKE GUESS. Also deal with zones.
-guess_file = "init_guess/16x24_rs_mean_5_var_3/16x24_rs_{}.json"
-guess_file = guess_file.format(guess_no)
-# C_0, N_0, kn
-plate_lvl_guess = [0.0001, 1.2, 0.1]
+# Find coords on full plate if exist in data.
+if 'coords_on_parent' in true_data.keys():
+    coords = true_data['coords_on_parent']
+else:
+    coords = []
 
-# Read in an initial guess for rs
-with open(guess_file, 'r') as f:
-    guess_data = json.load(f)
-r_guess = guess_data['rand_rs']
-
-# If coords are given for a zone of a larger plate take the initial
-# guess from that zone. This may not make much of a difference but is
-# more consistant.
-if rows*cols < len(r_guess) and coords:
-    r_guess =  get_zone_r_guess(r_guess, 16, 24, coords, rows, cols)
-elif rows*cols < len(r_guess) and not coords:
-    r_guess = r_guess[:rows*cols]
+if guess_no >= 0:
+    # Read in an initial guess for rs
+    with open(guess_file, 'r') as f:
+        guess_data = json.load(f)
+        r_guess = guess_data['rand_rs']
+    # If coords are given for a zone of a larger plate take the
+    # initial guess from that zone. This may not make much of a
+    # difference but is more consistant.
+    if rows*cols < len(r_guess) and coords:
+        r_guess =  get_zone_r_guess(r_guess, 16, 24, coords, rows, cols)
+    elif rows*cols < len(r_guess) and not coords:
+        r_guess = r_guess[:rows*cols]
+elif guess_no == -1:
+    r_guess = [true_data['r_mean']]*(rows*cols)
+else:
+    raise ValueError("Guess for guess_no {} does not exist.".format(guess_no))
 
 assert len(r_guess) == rows*cols
 init_guess = np.append(plate_lvl_guess,  r_guess)
 assert len(init_guess) == len(true_data['sim_params'])
-
 
 # Fit varying factr and save everytime.
 factrs = reversed([10**i for i in range(15)])
@@ -160,7 +174,7 @@ for factr in factrs:
 
     fit_options = {
         'ftol': factr*np.finfo(float).eps,
-        'disp': False,
+        # 'disp': False,
     }
 
     this_plate.comp_est = true_plate.fit_model(model,
@@ -188,7 +202,7 @@ for factr in factrs:
 
 
     # Could plot if no_cultures <= 25
-    if rows*cols <=25:
+    if rows*cols <= 25:
         comp_plotter = Plotter(model)
         title = "factr = 10e" + power
         plot_file = out_dir + "plots/stop_factr_10e{}.pdf".format(power)
