@@ -97,14 +97,17 @@ guess_no = int(guess_no)
 model = CompModel()
 true_file = "sim_data/16x24_comp_model/{0}x{1}.json".format(rows, cols)#
 
-
 # Define initial guess
 # C_0, N_0, kn
-plate_lvl_guess = [0.0001, 1.2, 0.1]
+plate_lvl_guess = [0.0001, 1.2, 0.0]
 
 if guess_no >= 0:
-    out_dir = "sim_fits/{0}x{1}_comp_model/init_guess_{2}/".format(rows, cols,
-                                                                   guess_no)
+    if plate_lvl_guess[-1] == 0.0:
+        out_dir = "sim_fits/{0}x{1}_comp_model_kn_guess_0/init_guess_{2}/"
+        out_dir = out_dir.format(rows, cols, guess_no)
+    else:
+        out_dir = "sim_fits/{0}x{1}_comp_model/init_guess_{2}/"
+        out_dir = out_dir.format(rows, cols, guess_no)
     guess_file = "init_guess/16x24_rs_mean_5_var_3/16x24_rs_{}.json"
     guess_file = guess_file.format(guess_no)
 
@@ -174,7 +177,7 @@ for factr in factrs:
 
     fit_options = {
         'ftol': factr*np.finfo(float).eps,
-        # 'disp': False,
+        'disp': False,
     }
 
     this_plate.comp_est = true_plate.fit_model(model,
