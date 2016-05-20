@@ -4,7 +4,7 @@ import numpy as np
 from scipy.integrate import odeint
 
 
-from cans2.cans_funcs import gauss_list
+from cans2.cans_funcs import gauss_list, stdout_redirected
 
 
 def inde_model(params):
@@ -103,9 +103,11 @@ class Model:
             growth_func = self.model(params[self.no_species:])
         # Optional smooth times for simulations/fits.
         if times is None:
-            sol = odeint(growth_func, init_amounts, plate.times)
+            with stdout_redirected():    # Redirect lsoda warnings
+                sol = odeint(growth_func, init_amounts, plate.times)
         else:
-            sol = odeint(growth_func, init_amounts, times)
+            with stdout_redirected():    # Redirect lsoda warnings
+                sol = odeint(growth_func, init_amounts, times)
         return np.maximum(0, sol)
 
 
