@@ -10,8 +10,8 @@ inde_model = IndeModel()
 comp_model = CompModel()
 
 # Define plate
-plate1 = Plate(3, 3)
-plate1.times = np.linspace(0, 5, 21)    # Set obs times
+plate1 = Plate(2, 2)
+plate1.times = np.linspace(0, 5, 15)    # Set obs times
 
 # Give the plate some data
 kns = [{'kn': 0.00}]    # Could use a list of dicts to store several kns
@@ -23,7 +23,6 @@ print(plate1.sim_params)
 culture_ests = plate1.est_from_cultures()
 plate1.inde_est = plate1.fit_model(inde_model, culture_ests)
 
-
 # Test plotting
 inde_plotter = Plotter(inde_model)
-inde_plotter.plot_estimates(plate1, plate1.inde_est.x, sim=False)
+inde_plotter.plot_est(plate1, plate1.inde_est.x, sim=False)
