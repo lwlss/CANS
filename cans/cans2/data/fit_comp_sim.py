@@ -97,13 +97,12 @@ guess_no = int(guess_no)
 model = CompModel()
 true_file = "sim_data/16x24_comp_model/{0}x{1}.json".format(rows, cols)
 
-# Define initial guess
-# C_0, N_0, kn
-plate_lvl_guess = [0.0001, 1.2, 0.0]
+# Define initial guess: C_0, N_0, kn
+plate_lvl_guess = [0.0001, 1.2, 0.1]
 
-
+# Set output dirs and files
 if guess_no >= 0:
-    # Messy code to sort out kn = 0.0 guess
+    # Messy non-general code to sort out kn = 0.0 guess
     if plate_lvl_guess[-1] == 0.0:
         out_dir = "sim_fits/{0}x{1}_comp_model_kn_guess_0/init_guess_{2}/"
         out_dir = out_dir.format(rows, cols, guess_no)
@@ -114,7 +113,7 @@ if guess_no >= 0:
     guess_file = "init_guess/16x24_rs_mean_5_var_3/16x24_rs_{}.json"
     guess_file = guess_file.format(guess_no)
 elif guess_no == -1:
-    # Messy code to sort out kn = 0.0 guess
+    # Messy non-general code to sort out kn = 0.0 guess
     if plate_lvl_guess[-1] == 0.0:
         out_dir = "sim_fits/{0}x{1}_comp_model_kn_guess_0/uniform_guess/"
         out_dir = out_dir.format(rows, cols)
