@@ -55,7 +55,7 @@ class Plotter:
     # one of these.
     def plot_est(self, plate, est_params, title='Estimated Growth',
                  sim=False, filename=None, legend=False, ms=6.0,
-                 lw=1.0, mew=0.5):
+                 mew=0.5, lw =1.0):
         # Smooth times for sims.
         sim_times = np.linspace(plate.times[0], plate.times[-1], 100)
         amounts = self.model.solve(plate, est_params, sim_times)
