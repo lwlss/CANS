@@ -23,12 +23,12 @@ def inde_model(params):
         # Cannot have negative amounts.
         np.maximum(0, amounts, out=amounts)
         # An iterator of values for variables/terms appearing in the model.
-        vals = zip(*[iter(amounts)]*2, r_params)
+        vals = zip(r_params, *[iter(amounts)]*2)
         # This will sometimes store negative amounts. This can
         # be corrected in the results returned by odeint if call
         # values are ALSO set to zero at the start of each
         # function call (see np.maximum() above).
-        rates = [rate for C, N, r in vals for rate in (r*N*C, -r*N*C)]
+        rates = [rate for r, C, N in vals for rate in (r*N*C, -r*N*C)]
         return rates
     return inde_growth
 
@@ -57,12 +57,12 @@ def comp_model(params, neighbourhood):
         N_diffusions = [sum([nutrient - nutrients[j] for j in neighbourhood[i]])
                         for i, nutrient in enumerate(nutrients)]
         # An iterator of values for variables/terms appearing in the model.
-        vals = zip(*[iter(amounts)]*2, r_params, N_diffusions)
+        vals = zip(r_params, N_diffusions, *[iter(amounts)]*2)
         # This will sometimes store negative amounts. This can
         # be corrected in the results returned by odeint if call
         # values are ALSO set to zero at the start of each
         # function call (see np.maximum() above).
-        rates = [rate for C, N, r, Ndiff in vals for rate
+        rates = [rate for r, Ndiff, C, N, in vals for rate
                  in (r*N*C, -r*N*C - kn*Ndiff)]
         return rates
     return comp_growth
