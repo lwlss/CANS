@@ -7,7 +7,7 @@ from scipy.integrate import odeint
 
 def logistic(x0,r,K,t):
     '''Vectorised logistic model'''
-    return(K*x0*np.exp(np.multiply(r,t))/(K+x0*(np.multiply(r,t)-1)))
+    return(K*x0*np.exp(np.multiply(r,t))/(K+x0*(np.exp(np.multiply(r,t))-1)))
 
 # To convert from N-C competition model to logistic model, think about matching rates at t=0
 # Competition:
