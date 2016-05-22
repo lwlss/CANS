@@ -82,9 +82,13 @@ if __name__ == '__main__':
         # Fit a line by least squares.
         A = np.vstack([kns, np.ones(len(kns))]).T
         m, c = np.linalg.lstsq(A, C_f_vars)[0]
-        return m, c
+        return m, c, C_f_vars
 
 
+    # For fixed r_mean and r_var, the variance in final cell
+    # measurement follows a linear relationship with kn. If we can
+    # make good (enough) guesses for r then we can guess kn (and
+    # possibly constrain it).
     rows = 16
     cols = 24
     times = np.linspace(0, 5, 11)
@@ -92,7 +96,29 @@ if __name__ == '__main__':
     comp_guesser = Guesser(comp_model)
     comp_plotter = Plotter(comp_model)
 
+
     kns = [x/100 for x in range(31)]
+
+    # plot cf vs kn for two different r dists and linear fit and eqn.
+    m1, c1, cf_vars1 = fit_C_f_var_vs_kn(kns, times, comp_model,
+                                         comp_guesser, rows=rows,
+                                         cols=cols, r_mean=50.0,
+                                         r_var=25.0)
+
+    m2, c2, cf_vars2 = fit_C_f_var_vs_kn(kns, times, comp_model,
+                                         comp_guesser, rows=rows,
+                                         cols=cols, r_mean=100.0,
+                                         r_var=50.0)
+    plt.plot(kns, cf_vars1,
+             title="Variation in final cell amount for different distributions of r",
+             label="r ~ N(100.0, 50.0)")
+    plt.plot(kns, cf_vars2, label="r ~ N(100.0, 50.0)")
+    plt.plot(kns, kns*m1 + c1, label="y = {0}x + {1}".format(m1, c1))
+    plt.plot(kns, kns*m2 + c2, label="y = {0}x + {1}".format(m2, c2))
+    plt.legend()
+    plt.show()
+    plt.close()
+
 
     # Study r_mean and r_var effect on gradient
     r_means = [20.0, 40.0, 60.0, 80.0, 100.0]
@@ -105,13 +131,6 @@ if __name__ == '__main__':
                                           comp_guesser, rows=rows,
                                           cols=cols, r_mean=r_mean)))
     r_mean_m_c = np.array(r_mean_m_c)
-
-
-
-    # For fixed r_mean and r_var, the variance in final cell
-    # measurement follows a linear relationship. If we can find good
-    # guesses for r then we can guess kn (and possibly constrain it).
-
 
     # vary r_var and plot against gradient in C_f_var vs kn.
     r_var_m_c = []
@@ -134,10 +153,6 @@ if __name__ == '__main__':
 
 
 
-    # plt.plot(kns, C_f_vars, label="Final Cells var", marker="x", linestyle="None")
-    # plt.legend(loc='best')
-    # plt.show()
-    # plt.close()
 
     # var_res = np.vstack([res[:, 0], np.ones(len(res[:, 0]))]).T
     # print(var_res)
