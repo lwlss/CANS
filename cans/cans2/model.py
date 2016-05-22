@@ -7,6 +7,21 @@ from scipy.integrate import odeint
 from cans2.cans_funcs import gauss_list, stdout_redirected
 
 
+def guess_model(params):
+    """Simplified model for (hopefully) guessing r params.
+
+    Constains a constant k as an approximation for diffusion.
+
+    """
+    k = params[0]
+    r = params[1]
+    def guess_growth(amounts, times):
+        np.maximum(0, amounts, out=amounts)
+        rate = [rate for N, C in amounts for rate in (r*N*C, -r*N*C + k)]
+        return rates
+    return growth_func
+
+
 def inde_model(params):
     """Return a function for running the inde model.
 
@@ -150,6 +165,18 @@ class IndeModel(Model):
         self.species = ['C', 'N']
         self.no_species = len(self.species)
         self.name = 'Independent Model'
+
+
+class GuessModel(Model):
+    def __init__(self):
+        """Only suitable for single cultures."""
+        self.model = guess_model
+        self.r_index = 3
+        # Could actually fix C_0 and N_0 with init guess.
+        self.params = ['C_0', 'N_0', 'k', 'r']
+        self.species = ['C', 'N']
+        self.no_species = len(self.species)
+        self.name = 'Guess Model'
 
 
 if __name__ == '__main__':
