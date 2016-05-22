@@ -2,7 +2,7 @@ import numpy as np
 from cans2.model import CompModel, GuessModel
 from cans2.guesser import Guesser
 from cans2.plate import Plate
-
+from cans2.plotter import Plotter
 
 comp_model = CompModel()
 guess_model = GuessModel()
@@ -18,17 +18,19 @@ plate.set_sim_data(comp_model, r_mean=50.0, r_var=25.0, custom_params=true_param
 
 guess = comp_guesser.make_guess(plate)
 
-param_guess = [guess['C_0'], guess['N_0'], 0.0, 2.0]
+param_guess = [guess['C_0'], guess['N_0'], 0.0, 5.0]
 print(param_guess)
 
 for culture in plate.cultures:
     print(culture.no_cultures)
     culture.guess_est = culture.fit_model(guess_model, param_guess=param_guess,
-                                          custom_options={'disp': True})
+                                          custom_options={'disp': False})
 
 
 print(plate.sim_params[3:])
 for culture in plate.cultures:
-    print(culture.guess_est.x)
+    print(culture.guess_est.x[-1])
 
 # So try fixing N_0 and C_0
+guess_plotter = Plotter(guess_model)
+guess_plotter.plot_est(plate.cultures[0], plate.cultures[0].guess_est.x)
