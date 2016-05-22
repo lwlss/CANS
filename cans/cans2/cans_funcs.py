@@ -7,6 +7,14 @@ import sys
 import contextlib
 
 
+from math import log10, floor
+
+
+def round_sig(x, sig=2):
+    """http://stackoverflow.com/a/3413529"""
+    return round(x, sig-int(floor(log10(x)))-1)
+
+
 def mad(a, b):
     """Return mean absolute deviation."""
     return np.mean(np.abs(a - b))
