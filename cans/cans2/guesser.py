@@ -59,6 +59,7 @@ if __name__ == '__main__':
     from cans2.plate import Plate
     from cans2.model import CompModel
     from cans2.plotter import Plotter
+    from cans2.cans_funcs import round_sig
 
 
     def fit_C_f_var_vs_kn(kns, times, model, guesser, rows=16,
@@ -97,28 +98,38 @@ if __name__ == '__main__':
     comp_plotter = Plotter(comp_model)
 
 
-    kns = [x/100 for x in range(31)]
+    # kns = np.array([x/100 for x in range(31)])
+    kns = np.array([0.5, 0.1])
+
 
     # plot cf vs kn for two different r dists and linear fit and eqn.
-    m1, c1, cf_vars1 = fit_C_f_var_vs_kn(kns, times, comp_model,
-                                         comp_guesser, rows=rows,
-                                         cols=cols, r_mean=50.0,
-                                         r_var=25.0)
+    def plot_fits(kns, times, model, guesser, rows, cols, r_dists):
+        fits = []
+        for r_mean, r_var in r_dists:
+            fit = fit_C_f_var_vs_kn(kns, times, comp_model,
+                                    comp_guesser, rows=rows,
+                                    cols=cols, r_mean=r_mean,
+                                    r_var=r_var)
+            fits.append(fit)
 
-    m2, c2, cf_vars2 = fit_C_f_var_vs_kn(kns, times, comp_model,
-                                         comp_guesser, rows=rows,
-                                         cols=cols, r_mean=100.0,
-                                         r_var=50.0)
-    plt.plot(kns, cf_vars1,
-             title="Variation in final cell amount for different distributions of r",
-             label="r ~ N(100.0, 50.0)")
-    plt.plot(kns, cf_vars2, label="r ~ N(100.0, 50.0)")
-    plt.plot(kns, kns*m1 + c1, label="y = {0}x + {1}".format(m1, c1))
-    plt.plot(kns, kns*m2 + c2, label="y = {0}x + {1}".format(m2, c2))
-    plt.legend()
-    plt.show()
-    plt.close()
+        col = 1
+        colors = ['k', 'r', 'b', 'g', 'y']
+        for r_dist, fit in zip(r_dists, fits):
+            plt.plot(kns, fit[2], label="r ~ N({0}, {1})".format(*r_dist),
+                     marker='x', linestyle='None', color=colors[col])
+            plt.plot(kns, kns*fit[0] + fit[1], color=colors[col],
+                     label="y = {0}x + {1}".format(round_sig(fit[0]),
+                                                   round_sig(fit[1])))
+            col += 1
+        plt.title("Fits of Variance in final cell amount vs kn for different r distributions")
+        plt.xlabel("kn")
+        plt.ylabel("Variance in final cell amount")
+        plt.legend(loc='best')
+        plt.show()
+        plt.close()
 
+    r_dists = [(50.0, 25.0), (100.0, 50.0)]
+    plot_fits(kns, times, comp_model, comp_guesser, rows, cols, r_dists)
 
     # Study r_mean and r_var effect on gradient
     r_means = [20.0, 40.0, 60.0, 80.0, 100.0]
@@ -128,8 +139,9 @@ if __name__ == '__main__':
     r_mean_m_c = []
     for r_mean in r_means:
         r_mean_m_c.append(list(fit_C_f_var_vs_kn(kns, times, comp_model,
-                                          comp_guesser, rows=rows,
-                                          cols=cols, r_mean=r_mean)))
+                                                 comp_guesser, rows=rows,
+                                                 cols=cols, r_mean=r_mean)))
+    print(r_mean_m_c)
     r_mean_m_c = np.array(r_mean_m_c)
 
     # vary r_var and plot against gradient in C_f_var vs kn.
@@ -142,12 +154,18 @@ if __name__ == '__main__':
     print(r_mean_m_c)
     print(r_var_m_c)
     # plot m against r_mean
-    plt.plot(r_means, r_mean_m_c[:, 0])
+    plt.plot(r_means, r_mean_m_c[:, 0], linestyle='None', marker='x')
+    plt.title("Gradient in finial cell variance with kn vs r mean")
+    plt.xlabel("m")
+    plt.ylabel("r mean")
     plt.show()
     plt.close()
 
     # plot m against r_var
-    plt.plot(r_vars, r_var_m_c[:, 0])
+    plt.plot(r_vars, r_var_m_c[:, 0], linestyle='None', marker='x')
+    plt.title("Gradient in finial cell variance with kn vs r var")
+    plt.xlabel("m")
+    plt.ylabel("r var")
     plt.show()
     plt.close()
 
