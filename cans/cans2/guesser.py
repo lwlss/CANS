@@ -1,3 +1,6 @@
+import numpy as np
+
+
 class Guesser:
     def __init__(self, model):
         self.model = model
