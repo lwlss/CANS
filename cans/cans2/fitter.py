@@ -49,12 +49,17 @@ class Fitter:
             assert(len(param_guess) == self.model.r_index + plate.no_cultures)
         # All values non-negative.
         bounds = [(0.0, None) for param in param_guess]
+        # Remove bounds for k in guess model
+        if 'k' in self.model.params:
+            bounds[0] = (param_guess[0], param_guess[0])
+            bounds[1] = (param_guess[1], param_guess[1])
+            bounds[2] = (-0.01, 0.01)
         # Add r (0, 0) bounds for empty sites according to plate.empties.
         for index in plate.empties:
             bounds[self.model.r_index + index] = (0.0, 0.0)
 
         options = {
-            'disp': True,
+            # 'disp': True,
             'maxfun': np.inf,
             #'ftol': 10.0*np.finfo(float).eps
         }
