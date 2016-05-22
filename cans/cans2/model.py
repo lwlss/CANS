@@ -17,9 +17,9 @@ def guess_model(params):
     r = params[1]
     def guess_growth(amounts, times):
         np.maximum(0, amounts, out=amounts)
-        rate = [rate for N, C in amounts for rate in (r*N*C, -r*N*C + k)]
+        rates = [r*amounts[0]*amounts[1], -r*amounts[0]*amounts[1] + k]
         return rates
-    return growth_func
+    return guess_growth
 
 
 def inde_model(params):
