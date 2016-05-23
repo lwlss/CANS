@@ -12,15 +12,32 @@ def _get_zone(array, coords, rows, cols):
     return zone
 
 
-def plate_zone(resim=True):
+def get_plate_zone(plate, coords, resim=False):
     """Return a plate from a zone of a larger plate.
 
     If resim == True, resimulate from the underlying
     parameters. Otherwise, return the c_measures from the larger
     plate.
 
+    Coords are a list of coordinate tuples for the top left and bottom
+    right cultures of a rectangular zone.
+
     """
-    pass
+    no_cultures = plate.no_cultures
+    c_collected = [plate.c_meas[i::no_cultures] for i in range(no_cultures)]
+    c_collected = np.array(c_collected)
+    c_collected.shape = (plate.rows, plate.cols, len(plate.times))
+    zone_rows, zone_cols = np.subtract(coords[1], coords[0]) + 1
+    zone = _get_zone(c_collected, coords[0], zone_rows, zone_cols)
+    c_meas = zone.flatten()
+    assert len(c_meas) == zone_rows*zone_cols*len(plate.times)
+    zone_data = {
+        "c_meas": c_meas,
+        "times": plate.times,
+        "empties": plate.empties
+        }
+    zone_plate = Plate(zone_rows, zone_cols, data=zone_data)
+    return zone_plate
 
 
 def get_zone_r_guess(r_guess, big_rows, big_cols, coords, rows, cols):
