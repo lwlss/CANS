@@ -16,7 +16,7 @@ import numpy as np
 def datetime_to_days(datetimes):
     """Return time as days starting from zero."""
     t0 = datetimes[0]
-    days = [(dt - t0).days for dt in datetimes]
+    days = [(dt - t0).total_seconds()/(60*60*24) for dt in datetimes]
     return(days)
 
 
@@ -84,6 +84,8 @@ if __name__ == "__main__":
     from cans2.plotter import Plotter
     from cans2.model import CompModel
     from cans2.zoning import get_plate_zone
+    from cans2.guesser import Guesser
+
 
     path = "/home/dan/projects/CANS/data/p15/Output_Data/"
 
@@ -91,17 +93,38 @@ if __name__ == "__main__":
     real_plate = Plate(plate_data["rows"], plate_data["cols"],
                        data=plate_data)
 
-    comp_model = CompModel
+    comp_model = CompModel()
     plotter = Plotter(comp_model)
 
-
-    # plotter.plot_c_meas(real_plate)
+    #plotter.plot_c_meas(real_plate)
 
     # This would have 5 rows and 5 cols
-    zone = get_plate_zone(real_plate, coords=[(0, 0), (4, 4)])
-    plotter.plot_c_meas(zone)
+    zone = get_plate_zone(real_plate, coords=[(4, 15), (8, 19)])
+    # plotter.plot_c_meas(zone)
 
-    plate1 = Plate(2, 2)
-    plate1.times = zone.times
-    plate1.set_sim_data(CompModel(), r_mean=50.0, r_var=25.0)
-    plotter.plot_c_meas(plate1)
+    comp_guesser = Guesser(CompModel())
+    guess = comp_guesser.make_guess(real_plate)
+
+    param_guess = [guess["C_0"], guess["N_0"], 1.0]
+    r_guess = [5.0 for i in range(zone.no_cultures)]
+    param_guess = param_guess + r_guess
+    print(param_guess)
+
+    zone.comp_est = zone.fit_model(CompModel(), param_guess=param_guess,
+                                   custom_options={'disp': True})
+
+    plotter.plot_est(zone, zone.comp_est.x, title="Fit of a real zone")
+    print(zone.comp_est.x)
+
+
+
+
+
+    # plate1 = Plate(5, 5)
+    # plate1.times = real_plate.times
+    # plate1.set_sim_data(CompModel(), r_mean=10.0, r_var=5.0)
+    # plotter.plot_c_meas(plate1)
+
+
+    # sim_zone = get_plate_zone(plate1, coords=[(1,0), (4,2)])
+    # plotter.plot_c_meas(sim_zone)
