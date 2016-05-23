@@ -87,3 +87,14 @@ class Plotter:
         else:
             plt.savefig(filename)
         plt.close()
+
+
+    def plot_c_meas(self, plate, title="Measured cell intensity",
+                    ms=6.0, mew=0.5, lw =1.0):
+        fig, grid = self._make_grid(plate, plate.c_meas, False, title)
+
+        for i, ax in enumerate(grid):
+                ax.plot(plate.times, plate.c_meas[i::plate.no_cultures],
+                        'x', label='Observed Cells', ms=ms, mew=mew)
+        plt.show()
+        plt.close()
