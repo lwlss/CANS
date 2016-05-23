@@ -9,15 +9,15 @@ import numpy as np
 # for that grid. Can just read in whole plate and do this with
 # zoning.py.
 
-
-# read in as a np.array()
-# Easily converts to a c_meas flat list.
-
-# Need to open all files in the directory and take the time and
-# intensity measurement.
-
 # Consider package_resources and how data will actually be read
 # in. Will we be invoking a packaged script instead?
+
+# Convert datatimes to times
+def datetime_to_days(datetimes):
+    """Return time as days starting from zero."""
+    t0 = datetimes[0]
+    days = [(dt - t0).days for dt in datetimes]
+    return(days)
 
 
 def get_data_files(path, ext="*.out"):
@@ -73,7 +73,7 @@ def get_plate_data(path):
     plate_data = {
         "rows": rows,
         "cols": cols,
-        "times": times,
+        "times": datetime_to_days(times),
         "c_meas": c_meas,
         "empties": []
     }
@@ -83,7 +83,7 @@ if __name__ == "__main__":
     from cans2.plate import Plate
     from cans2.plotter import Plotter
     from cans2.model import CompModel
-
+    from cans2.zoning import get_plate_zone
 
     path = "/home/dan/projects/CANS/data/p15/Output_Data/"
 
@@ -93,4 +93,15 @@ if __name__ == "__main__":
 
     comp_model = CompModel
     plotter = Plotter(comp_model)
-    plotter.plot_c_meas(real_plate)
+
+
+    # plotter.plot_c_meas(real_plate)
+
+    # This would have 5 rows and 5 cols
+    zone = get_plate_zone(real_plate, coords=[(0, 0), (4, 4)])
+    plotter.plot_c_meas(zone)
+
+    plate1 = Plate(2, 2)
+    plate1.times = zone.times
+    plate1.set_sim_data(CompModel(), r_mean=50.0, r_var=25.0)
+    plotter.plot_c_meas(plate1)
