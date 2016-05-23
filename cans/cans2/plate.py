@@ -85,6 +85,8 @@ class Plate(BasePlate):
 
     def _gen_sim_params(self, model, r_mean, r_var, custom_params):
         """Generate a set of simulation parameters for a model."""
+        # There is a bug here if model instance is being used
+        # somewhere else then plate fails to be passed.
         self.sim_params = model.gen_params(self, mean=r_mean, var=r_var)
         if custom_params is not None:
             for k, v in custom_params.items():
