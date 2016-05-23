@@ -32,7 +32,7 @@ class Fitter:
 
 
     def fit_model(self, plate, param_guess=None, custom_options=None):
-        """Fit the model to data on the plate (and return a Fit object?)
+        """Fit the model to data on the plate.
 
         If passed use param guess as the initial guess for
         minimization, else generate a uniform guess. custom_options
@@ -53,7 +53,7 @@ class Fitter:
         if 'k' in self.model.params:
             bounds[0] = (param_guess[0], param_guess[0])
             bounds[1] = (param_guess[1], param_guess[1])
-            bounds[2] = (-0.01, 0.01)
+            bounds[2] = (-0.03, 0.03)
         # Add r (0, 0) bounds for empty sites according to plate.empties.
         for index in plate.empties:
             bounds[self.model.r_index + index] = (0.0, 0.0)
