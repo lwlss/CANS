@@ -29,7 +29,8 @@ def get_plate_zone(plate, coords, resim=False):
     c_collected.shape = (plate.rows, plate.cols, len(plate.times))
     zone_rows, zone_cols = np.subtract(coords[1], coords[0]) + 1
     zone = _get_zone(c_collected, coords[0], zone_rows, zone_cols)
-    c_meas = zone.flatten()
+    c_meas = [zone[:, :, i] for i in range(len(plate.times))]
+    c_meas = np.array(c_meas).flatten()
     assert len(c_meas) == zone_rows*zone_cols*len(plate.times)
     zone_data = {
         "c_meas": c_meas,
@@ -47,7 +48,6 @@ def get_zone_r_guess(r_guess, big_rows, big_cols, coords, rows, cols):
     r_zone = _get_zone(r_zone, coords, rows, cols)
     r_zone = r_zone.flatten()
     return r_zone
-
 
 
 def get_zone_params(plate_file, coords, rows, cols):
