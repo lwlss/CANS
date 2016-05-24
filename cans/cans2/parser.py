@@ -99,7 +99,7 @@ if __name__ == "__main__":
     #plotter.plot_c_meas(real_plate)
 
     # This would have 5 rows and 5 cols
-    zone = get_plate_zone(real_plate, coords=[(4, 15), (7, 18)])
+    zone = get_plate_zone(real_plate, coords=(4, 16), rows=7, cols=7)
     # plotter.plot_c_meas(zone)
 
     comp_guesser = Guesser(CompModel())
@@ -111,7 +111,7 @@ if __name__ == "__main__":
     bounds = comp_guesser.set_bounds(zone, guess, factor=1.0)
     bounds[0] = (guess["C_0"]/1000, guess["C_0"]/5)
     bounds[1] = (guess["N_0"]*1.0, guess["N_0"]*1.15)
-    bounds[2] = (0.1, None)
+    bounds[2] = (0.8, 1.0)
     print(bounds)
 
     zone.comp_est = zone.fit_model(CompModel(),
