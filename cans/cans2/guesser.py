@@ -53,6 +53,23 @@ class Guesser:
         return guess
 
 
+    def set_bounds(self, plate, guess, factor=0.5):
+        """A list of tuples for each parameter in the model.
+
+        Must be suitable for scipy.optimize.minimize.
+
+        """
+        # Guess is a dictonary.
+        no_params = self.model.r_index + plate.no_cultures
+        bounds = [(0.0, None) for param in range(no_params)]
+        for k, v in guess.items():
+            assert k in self.model.params
+            index = self.model.params.index(k)
+            bounds[index] = (v - factor*v, v + factor*v)
+        return bounds
+
+
+
 if __name__ == '__main__':
     import numpy as np
     import matplotlib.pyplot as plt
