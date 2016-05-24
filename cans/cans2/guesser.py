@@ -50,22 +50,44 @@ class Guesser:
         # get C_f_var for growers
         #C_f_var = self._get_growers_C_f_var(plate, guess['C_0'])
         # guess r
+        # arrange guess according to index in model.
         return guess
 
 
-    def set_bounds(self, plate, guess, factor=0.5):
+    def list_guess(self, plate, guess):
+        guess_list = np.empty([1, self.model.r_index + plate.no_cultures])
+        for k, v in guess.items():
+            index = self.model.params.index(k)
+            guess_list[index] = v
+        # Need to make guesses or kn and rs (maybe as a list with a
+        # guess for each r).
+
+
+    def get_bounds(self, plate, guess, factor=0.5):
         """A list of tuples for each parameter in the model.
 
         Must be suitable for scipy.optimize.minimize.
 
         """
-        # Guess is a dictonary.
         no_params = self.model.r_index + plate.no_cultures
+        # First set all bounds greater than zero
         bounds = [(0.0, None) for param in range(no_params)]
+        # Then change the bounds for parameters for which there is a
+        # guess.
         for k, v in guess.items():
             assert k in self.model.params
-            index = self.model.params.index(k)
-            bounds[index] = (v - factor*v, v + factor*v)
+            if k == "C_0":
+                # Bounds on C_0 need to be looser as we don't really
+                # know.
+                index = self.model.params.index(k)
+                bounds[index] = (v/10 , v*10)
+            elif k == "N_0":
+                # N_0 is always underestimated unless all reactions
+                # are finished.
+                index = self.model.params.index(k)
+                bounds[index] = (v, 2*v)
+            elif k == "kn":
+                pass
         return bounds
 
 
