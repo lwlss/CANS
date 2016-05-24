@@ -7,14 +7,14 @@ import numpy as np
 
 # Ideally want to specify two coordinates on plate and find the data
 # for that grid. Can just read in whole plate and do this with
-# zoning.py.
+# zoning.py. Actually I prefer top left coordinate and then rows and
+# columns.
 
 # Consider package_resources and how data will actually be read
 # in. Will we be invoking a packaged script instead?
 
-# Convert datatimes to times
 def datetime_to_days(datetimes):
-    """Return time as days starting from zero."""
+    """Return time in days starting from zero."""
     t0 = datetimes[0]
     days = [(dt - t0).total_seconds()/(60*60*24) for dt in datetimes]
     return(days)
@@ -99,22 +99,28 @@ if __name__ == "__main__":
     #plotter.plot_c_meas(real_plate)
 
     # This would have 5 rows and 5 cols
-    zone = get_plate_zone(real_plate, coords=[(4, 15), (8, 19)])
+    zone = get_plate_zone(real_plate, coords=[(4, 15), (7, 18)])
     # plotter.plot_c_meas(zone)
 
     comp_guesser = Guesser(CompModel())
-    guess = comp_guesser.make_guess(real_plate)
-
-    param_guess = [guess["C_0"], guess["N_0"], 1.0]
-    r_guess = [5.0 for i in range(zone.no_cultures)]
+    guess = comp_guesser.make_guess(zone)
+    param_guess = [guess["C_0"], guess["N_0"], 0.1]
+    r_guess = [50.0 for i in range(zone.no_cultures)]
     param_guess = param_guess + r_guess
-    print(param_guess)
 
-    zone.comp_est = zone.fit_model(CompModel(), param_guess=param_guess,
-                                   custom_options={'disp': True})
+    bounds = comp_guesser.set_bounds(zone, guess, factor=1.0)
+    bounds[0] = (guess["C_0"]/1000, guess["C_0"]/5)
+    bounds[1] = (guess["N_0"]*1.0, guess["N_0"]*1.15)
+    bounds[2] = (0.1, None)
+    print(bounds)
 
-    plotter.plot_est(zone, zone.comp_est.x, title="Fit of a real zone")
+    zone.comp_est = zone.fit_model(CompModel(),
+                                   param_guess=param_guess,
+                                   minimizer_opts={'disp': True},
+                                   bounds=bounds)
     print(zone.comp_est.x)
+    plotter.plot_est(zone, zone.comp_est.x, title="Fit of a real zone")
+
 
 
 
