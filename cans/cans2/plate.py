@@ -1,4 +1,6 @@
 import numpy as np
+import copy
+import random
 
 
 from cans2.model import IndeModel
@@ -102,7 +104,8 @@ class Plate(BasePlate):
             self.sim_params[model.r_index+index] = 0.0
 
 
-    def set_sim_data(self, model, r_mean=1.0, r_var=1.0, custom_params=None):
+    def set_sim_data(self, model, r_mean=1.0, r_var=1.0,
+                     custom_params=None, noise=True):
         """Set simulation data.
 
         If sim_params attribute does not exist one will be
@@ -114,7 +117,26 @@ class Plate(BasePlate):
             self._gen_sim_params(model, r_mean, r_var, custom_params)
         self.sim_amounts = model.solve(self, self.sim_params)
         self.c_meas = self.sim_amounts.flatten()[::model.no_species]
+        if noise:
+            self.add_noise()
         self._set_cultures()    # Set culture c_meas and times.
+
+
+
+    def add_noise(self, sigma=None):
+        """Add random noise to c_meas."""
+        # Find a scale
+        if sigma is None:
+            max_c = max(self.c_meas)
+            sigma = max_c*0.025
+        if not isinstance(self.c_meas, np.ndarray):
+            noisey = np.asarray(copy.deepcopy(self.c_meas), dtype=np.float64)
+        else:
+            noisey = copy.deepcopy(self.c_meas)
+        for x in np.nditer(noisey, op_flags=['readwrite']):
+            x[...] = x + random.gauss(0, sigma)
+        np.maximum(0, noisey, out=noisey)
+        self.c_meas = noisey
 
 
     def est_from_cultures(self):
