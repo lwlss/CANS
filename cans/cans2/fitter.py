@@ -31,13 +31,19 @@ class Fitter:
         return err
 
 
-    def fit_model(self, plate, param_guess=None, custom_options=None):
+    def fit_model(self, plate, param_guess=None, custom_options=None,
+                  bounds=None):
         """Fit the model to data on the plate.
 
         If passed use param guess as the initial guess for
         minimization, else generate a uniform guess. custom_options
         should be a dictionary. Commmon options to set are ftol and
         maxiter.
+
+        Bounds should be passed in as a full list of tuples with
+        correct position for the model according to
+        model.params. Individual bounds must be included at the end
+        for each r parameter.
 
         """
         assert(plate.c_meas is not None)
@@ -47,8 +53,10 @@ class Fitter:
             param_guess = self.model.gen_params(plate)
         else:
             assert(len(param_guess) == self.model.r_index + plate.no_cultures)
-        # All values non-negative.
-        bounds = [(0.0, None) for param in param_guess]
+
+        if bounds is None:
+            # All values non-negative.
+            bounds = [(0.0, None) for param in param_guess]
         # Remove bounds for k in guess model
         if 'k' in self.model.params:
             bounds[0] = (param_guess[0], param_guess[0])
