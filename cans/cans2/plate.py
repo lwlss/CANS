@@ -50,10 +50,11 @@ class BasePlate:
         return neighbourhood
 
 
-    def fit_model(self, model, param_guess=None, custom_options=None):
+    def fit_model(self, model, param_guess=None, minimizer_opts=None,
+                  bounds=None):
         """Return estimates from fitting model to plate."""
         fitter = Fitter(model)
-        est = fitter.fit_model(self, param_guess, custom_options)
+        est = fitter.fit_model(self, param_guess, minimizer_opts, bounds)
         return est
 
 
