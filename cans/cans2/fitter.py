@@ -27,7 +27,7 @@ class Fitter:
         c_est = amounts_est.flatten()[::self.model.no_species]
         # Zeros appear in here for empty plates but this shouldn't
         # have any effect.
-        err = np.sqrt(sum((plate.c_meas - c_est)**2))
+        err = np.sqrt(np.sum((plate.c_meas - c_est)**2))
         return err
 
 
