@@ -73,7 +73,7 @@ class Plotter:
                 if j == 0 and i in plate.empties:
                     continue
                 elif sim:
-                    # Plot all true.
+                    # Plot all true. These do not have noise added.
                     ax.plot(plate.times,
                             plate.sim_amounts[:, i*self.model.no_species + j],
                             'x' + self.colours[j], label="True "+species,
@@ -94,7 +94,48 @@ class Plotter:
         fig, grid = self._make_grid(plate, plate.c_meas, False, title)
 
         for i, ax in enumerate(grid):
-                ax.plot(plate.times, plate.c_meas[i::plate.no_cultures],
-                        'x', label='Observed Cells', ms=ms, mew=mew)
+            ax.plot(plate.times, plate.c_meas[i::plate.no_cultures],
+                    'x', label='Observed Cells', ms=ms, mew=mew)
         plt.show()
+        plt.close()
+
+
+    # Need to plot simulations when the independent (or another model)
+    # is fit to individual cultures
+    def plot_culture_fits(self, zone, model, title="Individual fits of cultures",
+                          sim=False, ms=6.0, mew=0.5, lw =1.0, legend=False,
+                          filename=None):
+        fig, grid = self._make_grid(zone, zone.c_meas, sim, title)
+
+        sim_times = np.linspace(zone.times[0], zone.times[-1], 100)
+
+        for i, ax in enumerate(grid):
+            culture = zone.cultures[i]
+            # Simulate culture amounts from the estimates.
+            culture_amounts = model.solve(culture, culture.est.x, sim_times)
+            # Plot c_meas
+            ax.plot(zone.times, zone.c_meas[i::zone.no_cultures], 'x',
+                    label='Observed Cells', ms=ms, mew=mew)
+
+            for j, species in enumerate(model.species):
+                # Plot estimated amounts
+                ax.plot(sim_times, culture_amounts[:, j],
+                        self.colours[j], label="Est "+species, lw=lw)
+                if j == 0 and i in zone.empties:
+                    continue
+                elif sim and j != 0:
+                    # Plot all true for zone. These do not have noise added.
+                    ax.plot(zone.times,
+                            zone.sim_amounts[:, i*self.model.no_species + j],
+                            'x' + self.colours[j], label="True "+species,
+                            ms=ms, mew=mew)
+                else:
+                    continue
+
+        if legend:
+            grid[-1].legend(loc='best')
+        if filename is None:
+            plt.show()
+        else:
+            plt.savefig(filename)
         plt.close()
