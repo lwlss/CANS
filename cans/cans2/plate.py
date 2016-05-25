@@ -79,8 +79,7 @@ class Plate(BasePlate):
             # the simulations and other amounts (e.g. N). We can also
             # use model.no_species. This is not possible with real
             # data and not really necessary with simulated data.
-            no_species = int(len(self.sim_amounts[0])/self.no_cultures)
-            culture.c_meas = self.sim_amounts[:, i*no_species].flatten()
+            culture.c_meas = self.c_meas[i::self.no_cultures]
             culture.times = self.times
             if i in self.empties:
                 culture.empties = [0]
