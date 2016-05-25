@@ -22,6 +22,65 @@ def guess_model(params):
     return guess_growth
 
 
+def power_model2(params):
+    """Simplified model for (hopefully) guessing r params.
+
+    Constains a constant k as an approximation for diffusion.
+
+    """
+    k1 = params[0]
+    k2 = params[1]
+    r = params[2]
+    def guess_growth(amounts, times):
+        print(times)
+        np.maximum(0, amounts, out=amounts)
+        rates = [r*amounts[0]*amounts[1],
+                -r*amounts[0]*amounts[1] + k1 + k2*times]
+        return rates
+    return guess_growth
+
+
+def power_model3(params):
+    """Simplified model for (hopefully) guessing r params.
+
+    Constains a constant k as an approximation for diffusion.
+
+    """
+    k1 = params[0]
+    k2 = params[1]
+    k3 = params[2]
+    r = params[3]
+    def guess_growth(amounts, times):
+        print(times)
+        np.maximum(0, amounts, out=amounts)
+        rates = [r*amounts[0]*amounts[1],
+                 -r*amounts[0]*amounts[1] + k1 + k2*times + k3*times*times]
+        return rates
+    return guess_growth
+
+
+def power_model5(params):
+    """Simplified model for (hopefully) guessing r params.
+
+    Constains a constant k as an approximation for diffusion.
+
+    """
+    k1 = params[0]
+    k2 = params[1]
+    k3 = params[2]
+    k4 = params[3]
+    k5 = params[4]
+    r = params[5]
+    def guess_growth(amounts, times):
+        print(times)
+        np.maximum(0, amounts, out=amounts)
+        rates = [r*amounts[0]*amounts[1],
+                 -r*amounts[0]*amounts[1] + k1 + k2*times + k3*times*times
+                 + k3*times**4 + k4*times**5]
+        return rates
+    return guess_growth
+
+
 def inde_model(params):
     """Return a function for running the inde model.
 
@@ -177,6 +236,42 @@ class GuessModel(Model):
         self.species = ['C', 'N']
         self.no_species = len(self.species)
         self.name = 'Guess Model'
+
+
+class PowerModel2(Model):
+    def __init__(self):
+        """Only suitable for single cultures."""
+        self.model = power_model2
+        self.r_index = 4
+        # Could actually fix C_0 and N_0 with init guess.
+        self.params = ['C_0', 'N_0', 'k1', 'k2', 'r']
+        self.species = ['C', 'N']
+        self.no_species = len(self.species)
+        self.name = 'Power Model 2'
+
+
+class PowerModel3(Model):
+    def __init__(self):
+        """Only suitable for single cultures."""
+        self.model = power_model3
+        self.r_index = 5
+        # Could actually fix C_0 and N_0 with init guess.
+        self.params = ['C_0', 'N_0', 'k1', 'k2', 'k3', 'r']
+        self.species = ['C', 'N']
+        self.no_species = len(self.species)
+        self.name = 'Power Model 3'
+
+
+class PowerModel5(Model):
+    def __init__(self):
+        """Only suitable for single cultures."""
+        self.model = power_model5
+        self.r_index = 7
+        # Could actually fix C_0 and N_0 with init guess.
+        self.params = ['C_0', 'N_0', 'k1', 'k2', 'k3', 'k4', 'k5', 'r']
+        self.species = ['C', 'N']
+        self.no_species = len(self.species)
+        self.name = 'Power Model 5'
 
 
 if __name__ == '__main__':
