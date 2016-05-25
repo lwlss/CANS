@@ -1,6 +1,6 @@
 import numpy as np
 import time
-# import copy
+import copy
 
 
 from functools import partial
@@ -54,6 +54,11 @@ class Fitter:
         for each r parameter.
 
         """
+        # Make deep_copies of param_guesses and bounds because of
+        # rescaling for the minimizer and mutability.
+        param_guess = copy.deepcopy(param_guess)
+        bounds = copy.deepcopy(bounds)
+
         assert(plate.c_meas is not None)
         obj_f = partial(self._obj_func, plate)
         if param_guess is None:
