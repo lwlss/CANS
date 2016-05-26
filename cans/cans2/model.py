@@ -96,10 +96,10 @@ def neighbour_model(params):
         N = amounts[1::2]
         rates = [r[0]*N[0]*C[0],
                  -r[0]*N[0]*C[0] - kn[0]*(N[0] - N[1]),
-                 r[1]*N[1]*C[1],
-                 -r[1]*N[1]*C[1] - kn[0]*(N[1] - N[0]) - kn[1]*(N[1] - N[2]),
-                 r[2]*N[2]*C[2],
-                 -r[2]*N[2]*C[2] - kn[1]*(N[2] - N[1])]
+                 r[2]*N[1]*C[1],
+                 -r[2]*N[1]*C[1] - kn[0]*(N[1] - N[0]) - kn[1]*(N[1] - N[2]),
+                 r[1]*N[2]*C[2],
+                 -r[1]*N[2]*C[2] - kn[1]*(N[2] - N[1])]
         return rates
     return growth
 
@@ -301,13 +301,24 @@ class NeighModel(Model):
     def __init__(self):
         """Only suitable for single cultures."""
         self.model = neighbour_model
-        self.r_index = 4
+        self.r_index = 6
         # Could actually fix C_0 and N_0 with init guess.
-        self.params = ['C_0', 'N_0', 'kn1', 'kn2', 'rs'] #0', 'r1', 'r2']
+        self.params = ['C_0', 'N_0', 'kn1', 'kn2', 'r-', 'r+', 'r']
         self.species = ['C', 'N']
         self.no_species = len(self.species)
-        self.name = 'Arbitrary nieghbour model'
+        self.name = 'Neighbour model'
 
+
+    def solve(self, plate, params, times=None):
+        init_amounts = np.tile(params[:self.no_species], 3)
+        growth_func = self.model(params[self.no_species:])
+        if times is None:
+            with stdout_redirected():    # Redirect lsoda warnings
+                sol = odeint(growth_func, init_amounts, plate.times)
+        else:
+            with stdout_redirected():    # Redirect lsoda warnings
+                sol = odeint(growth_func, init_amounts, times)
+        return np.maximum(0, sol)
 
 
 if __name__ == '__main__':
