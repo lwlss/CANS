@@ -3,6 +3,7 @@ constants for inidividual cultures.
 
 """
 import numpy as np
+import copy
 
 
 from cans2.model import CompModel, NeighModel
@@ -10,10 +11,11 @@ from cans2.guesser import Guesser
 from cans2.plate import Plate
 from cans2.plotter import Plotter
 from cans2.zoning import resim_zone
+from cans2.cans_funcs import round_sig
 
 
+neigh_model = NeighModel(1)
 comp_model = CompModel()
-neigh_model = NeighModel()
 comp_guesser = Guesser(comp_model)
 comp_plotter = Plotter(CompModel())
 
@@ -44,25 +46,34 @@ neigh_bounds[1] = (resim_amount_guess["N_0"], resim_amount_guess["N_0"])
 neigh_bounds[4] = (0.0, 0.0)    # r-
 neigh_bounds[5] = (40.0, 40.0)    # r+
 
-# Guess using the neigh model
-neigh_r_ests = []
-neigh_kn_ests = []
-neigh_ests = []
-for culture in resim_zone.cultures:
-    # Fit the independent model allowing N_0 to vary and compare to
-    # true rs
-    culture.est = culture.fit_model(neigh_model, param_guess=neigh_param_guess,
-                                    bounds=neigh_bounds,
-                                    minimizer_opts={'disp': False})
-    neigh_r_ests.append(culture.est.x[-1])
-    neigh_kn_ests.append(culture.est.x[2:4])
-    neigh_ests.append(culture.est.x)
+true_rs = copy.deepcopy(resim_zone.sim_params[3:])
+print(true_rs)
+true_rs = [round_sig(float(x), 3) for x in true_rs]
+
+neigh_models = [NeighModel(i+1) for i in range(4)]
+for neigh_model in neigh_models:
+    # Guess using the neigh model
+    neigh_r_ests = []
+    neigh_kn_ests = []
+    neigh_ests = []
+    for culture in resim_zone.cultures:
+        # Fit the independent model allowing N_0 to vary and compare to
+        # true rs
+        culture.est = culture.fit_model(neigh_model, param_guess=neigh_param_guess,
+                                        bounds=neigh_bounds,
+                                        minimizer_opts={'disp': False})
+        neigh_r_ests.append(culture.est.x[-1])
+        neigh_kn_ests.append(culture.est.x[2:4])
+        neigh_ests.append(culture.est.x)
 
 
-print(resim_zone.sim_params[3:])
-print(neigh_r_ests)
-print(neigh_kn_ests)
-# comp_plotter.plot_est(resim_zone, resim_zone.sim_params)
 
-comp_plotter.plot_culture_fits(resim_zone, neigh_model, sim=True,
-                               title="Neighbour model fits of individual cultures")
+    neigh_r_ests = [round_sig(float(x), 3) for x in neigh_r_ests]
+
+    print(true_rs)
+    print(neigh_r_ests)
+    #print(neigh_kn_ests)
+    # comp_plotter.plot_est(resim_zone, resim_zone.sim_params)
+    title="Neighbour model fits of individual cultures ({0} neighbours)"
+    comp_plotter.plot_culture_fits(resim_zone, neigh_model, sim=True,
+                                   title=title.format(2*neigh_model.no_neighs))
