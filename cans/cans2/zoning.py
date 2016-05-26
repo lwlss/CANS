@@ -7,7 +7,7 @@ from cans2.cans_funcs import dict_to_json
 
 
 def _get_zone(array, coords, rows, cols):
-    """Return a zone of an array."""
+    """Return a zone of a 2d array."""
     zone = array[coords[0]:coords[0]+rows, coords[1]:coords[1]+cols]
     return zone
 
