@@ -81,7 +81,7 @@ def power_model5(params):
     return guess_growth
 
 
-def neighbour_model(params):
+def neighbour_model(params, no_neighs=2):
     """Model for guessing r for single cultures.
 
     Fast and slow growing neighbours (intended to have r bounded) with
@@ -97,7 +97,11 @@ def neighbour_model(params):
         rates = [r[0]*N[0]*C[0],
                  -r[0]*N[0]*C[0] - kn[0]*(N[0] - N[1]),
                  r[2]*N[1]*C[1],
-                 -r[2]*N[1]*C[1] - kn[0]*(N[1] - N[0]) - kn[1]*(N[1] - N[2]),
+                 # Factor of 2 in diffusion terms for 2 pairs of
+                 # identical neighbours. (3 if three etc.) No need to
+                 # alter the neighbour rates as they correspond to 2
+                 # identical cultures.
+                 -r[2]*N[1]*C[1] - no_neighs*kn[0]*(N[1] - N[0]) - no_neighs*kn[1]*(N[1] - N[2]),
                  r[1]*N[2]*C[2],
                  -r[1]*N[2]*C[2] - kn[1]*(N[2] - N[1])]
         return rates
@@ -298,7 +302,7 @@ class PowerModel5(Model):
 
 
 class NeighModel(Model):
-    def __init__(self):
+    def __init__(self, no_neighs):
         """Only suitable for single cultures."""
         self.model = neighbour_model
         self.r_index = 6
@@ -307,11 +311,11 @@ class NeighModel(Model):
         self.species = ['C', 'N']
         self.no_species = len(self.species)
         self.name = 'Neighbour model'
-
+        self.no_neighs = no_neighs
 
     def solve(self, plate, params, times=None):
         init_amounts = np.tile(params[:self.no_species], 3)
-        growth_func = self.model(params[self.no_species:])
+        growth_func = self.model(params[self.no_species:], self.no_neighs)
         if times is None:
             with stdout_redirected():    # Redirect lsoda warnings
                 sol = odeint(growth_func, init_amounts, plate.times)
