@@ -113,6 +113,9 @@ class Plotter:
             culture = zone.cultures[i]
             # Simulate culture amounts from the estimates.
             culture_amounts = model.solve(culture, culture.est.x, sim_times)
+            if model.name == "Neighbour model":
+                # Do not want neighbouring - and + cultures
+                culture_amounts = culture_amounts[:, [2, 3]]
             # Plot c_meas
             ax.plot(zone.times, zone.c_meas[i::zone.no_cultures], 'x',
                     label='Observed Cells', ms=ms, mew=mew)
