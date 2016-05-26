@@ -1,3 +1,7 @@
+"""Model diffusion using a power series to guess growth constants for
+individual cultures.
+
+"""
 import numpy as np
 #import matplotlib.pyplot as plt
 
