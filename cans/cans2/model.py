@@ -81,6 +81,29 @@ def power_model5(params):
     return guess_growth
 
 
+def neighbour_model(params):
+    """Model for guessing r for single cultures.
+
+    Fast and slow growing neighbours (intended to have r bounded) with
+    different diffusion constants.
+
+    """
+    kn = params[:2]
+    r = params[2:]
+    def growth(amounts, times):
+        np.maximum(0, amounts, out=amounts)
+        C = amounts[::2]
+        N = amounts[1::2]
+        rates = [r[0]*N[0]*C[0],
+                 -r[0]*N[0]*C[0] - kn[0]*(N[0] - N[1]),
+                 r[1]*N[1]*C[1],
+                 -r[1]*N[1]*C[1] - kn[0]*(N[1] - N[0]) - kn[1]*(N[1] - N[2]),
+                 r[2]*N[2]*C[2],
+                 -r[2]*N[2]*C[2] - kn[1]*(N[2] - N[1])]
+        return rates
+    return growth
+
+
 def inde_model(params):
     """Return a function for running the inde model.
 
@@ -272,6 +295,19 @@ class PowerModel5(Model):
         self.species = ['C', 'N']
         self.no_species = len(self.species)
         self.name = 'Power Model 5'
+
+
+class NeighModel(Model):
+    def __init__(self):
+        """Only suitable for single cultures."""
+        self.model = neighbour_model
+        self.r_index = 4
+        # Could actually fix C_0 and N_0 with init guess.
+        self.params = ['C_0', 'N_0', 'kn1', 'kn2', 'rs'] #0', 'r1', 'r2']
+        self.species = ['C', 'N']
+        self.no_species = len(self.species)
+        self.name = 'Arbitrary nieghbour model'
+
 
 
 if __name__ == '__main__':
