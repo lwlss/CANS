@@ -38,6 +38,23 @@ class Fitter:
         err = np.sqrt(np.sum((plate.c_meas - c_est)**2))
         return err
 
+    def _neigh_obj_func(self, plate, params):
+        """Obj fun for arbitrary neighbour model.
+
+        Must be treated differently because not all growing cultures
+        have cell observations.
+
+        """
+        params[0] = params[0]/10000
+        # Find amounts by solving the model using the estimated parameters.
+        amounts_est = self.model.solve(plate, params)
+        # Mutable so must scale C_0 back
+        params[0] = params[0]*10000
+        c_est = amounts_est.flatten()[::self.model.no_species]
+        c_est = c_est[1::3]    # Only the middle culture
+        err = np.sqrt(np.sum((plate.c_meas - c_est)**2))
+        return err
+
 
     def fit_model(self, plate, param_guess=None, custom_options=None,
                   bounds=None):
@@ -60,7 +77,10 @@ class Fitter:
         bounds = copy.deepcopy(bounds)
 
         assert(plate.c_meas is not None)
-        obj_f = partial(self._obj_func, plate)
+        if self.model.name == "Neighbour model":
+            obj_f = partial(self._neigh_obj_func, plate)
+        else:
+            obj_f = partial(self._obj_func, plate)
         if param_guess is None:
             # Fit using uniform parameters
             param_guess = self.model.gen_params(plate)
@@ -71,10 +91,10 @@ class Fitter:
             # All values non-negative.
             bounds = [(0.0, None) for param in param_guess]
         # Remove bounds for k in guess model
-        if 'k' in self.model.params:
-            bounds[0] = (param_guess[0], param_guess[0])
-            bounds[1] = (param_guess[1], param_guess[1])
-            bounds[2] = (-0.03, 0.03)
+        # if 'k' in self.model.params:
+        #     bounds[0] = (param_guess[0], param_guess[0])
+        #     bounds[1] = (param_guess[1], param_guess[1])
+        #     bounds[2] = (-0.03, 0.03)
         # Add r (0, 0) bounds for empty sites according to plate.empties.
         for index in plate.empties:
             bounds[self.model.r_index + index] = (0.0, 0.0)
