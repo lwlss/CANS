@@ -51,7 +51,7 @@ def get_plate_zone(plate, coords, rows, cols):
 
 
 def get_zone_rs(plate_rs, big_rows, big_cols, coords, rows, cols):
-    """Return initial r guesses or a zone"""
+    """Return rate constants r for a zone"""
     r_zone = np.array(plate_rs, copy=True)
     r_zone.shape = (big_rows, big_cols)
     r_zone = _get_zone(r_zone, coords, rows, cols)
@@ -62,7 +62,7 @@ def get_zone_rs(plate_rs, big_rows, big_cols, coords, rows, cols):
 def get_zone_params(plate_file, coords, rows, cols):
     """Return params for a zone of a plate saved as json.
 
-    Returns plate level parameters and in a flattened list.
+    Returns plate level parameters and r values in a flattened list.
 
     """
     # Read in the full plate.
@@ -112,7 +112,7 @@ def sim_zone(plate_file, model, coords, rows, cols):
 
 
 def save_zone_as_json(zone, model, coords, plate_file, outfile):
-    # Plate data
+    """Save data for a zone of a simulated plate read from file."""
     with open(plate_file, 'r') as f:
         plate_data = json.load(f)
 
