@@ -97,10 +97,9 @@ def neighbour_model(params, no_neighs=2):
         rates = [r[0]*N[0]*C[0],
                  -r[0]*N[0]*C[0] - kn[0]*(N[0] - N[1]),
                  r[2]*N[1]*C[1],
-                 # Factor of 2 in diffusion terms for 2 pairs of
-                 # identical neighbours. (3 if three etc.) No need to
-                 # alter the neighbour rates as they correspond to 2
-                 # identical cultures.
+                 # Factor of no_neighs in diffusion terms is for the
+                 # number of each pair of identical neighbours (zero
+                 # and fast growers).
                  -r[2]*N[1]*C[1] - no_neighs*kn[0]*(N[1] - N[0]) - no_neighs*kn[1]*(N[1] - N[2]),
                  r[1]*N[2]*C[2],
                  -r[1]*N[2]*C[2] - kn[1]*(N[2] - N[1])]
