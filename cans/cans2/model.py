@@ -313,6 +313,9 @@ class NeighModel(Model):
         self.no_neighs = no_neighs
 
     def solve(self, plate, params, times=None):
+        # Can't inherit becuase tiling of intitial amounts needs to be
+        # different (3 for only one culture) and need to pass the
+        # number of each type of neighbour to the growth fuction.
         init_amounts = np.tile(params[:self.no_species], 3)
         growth_func = self.model(params[self.no_species:], self.no_neighs)
         if times is None:
