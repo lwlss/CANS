@@ -94,6 +94,7 @@ def get_zone_params(plate_file, coords, rows, cols):
 
 
 def sim_zone(plate_file, model, coords, rows, cols):
+    """Resimulate and return a zone of a saved plate."""
     params = get_zone_params(plate_file, coords, rows, cols)
     with open(plate_file, 'r') as f:
         plate_data = json.load(f)
