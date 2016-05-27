@@ -102,15 +102,15 @@ if __name__ == "__main__":
 
     #plotter.plot_c_meas(real_plate)
 
-    coords = (7, 13)
+    coords = (3, 17)
     rows = 5
     cols = 5
 
 
     outdir =  "results/p15_fits/first_attempt/"
-    datafile = outdir + "coords_{0}_{1}_rows_{2}_cols_{3}_3.json"
+    datafile = outdir + "coords_{0}_{1}_rows_{2}_cols_{3}_1.json"
     datafile = datafile.format(coords[0], coords[1], rows, cols)
-    plotfile = outdir + "coords_{0}_{1}_rows_{2}_cols_{3}_3.pdf"
+    plotfile = outdir + "coords_{0}_{1}_rows_{2}_cols_{3}_1.pdf"
     plotfile = plotfile.format(coords[0], coords[1], rows, cols)
 
     # This would have 5 rows and 5 cols
@@ -119,14 +119,15 @@ if __name__ == "__main__":
 
     comp_guesser = Guesser(CompModel())
     guess = comp_guesser.make_guess(zone)
-    param_guess = [guess["C_0"], guess["N_0"], 1.2]
+    param_guess = [guess["C_0"], guess["N_0"], 1.0]
     r_guess = [50.0 for i in range(zone.no_cultures)]
     param_guess = param_guess + r_guess
 
-    bounds = comp_guesser.get_bounds(zone, guess, factor=1.0)
-    #bounds[0] = (guess["C_0"]/1000, guess["C_0"]/5)
-    #bounds[1] = (guess["N_0"]*0.8, guess["N_0"]*1.15)
-    bounds[2] = (1.2, 2.0)
+    bounds = comp_guesser.get_bounds(zone, guess, factor=1.2)
+
+    # bounds[0] = (5.848410588726615e-07, 5.848410588726615e-05)
+    # bounds[1] = (0.05848410588726615, 0.1169682117745323)
+    bounds[2] = (1.3, 1.5)
 
     # add_r_bound(zone, comp_model, , , bounds, (, ))
 
@@ -147,6 +148,7 @@ if __name__ == "__main__":
         'zone_cols': cols,
         'bounds': bounds,
         'comp_est': zone.comp_est.x,
+        'obj_fun': zone.comp_est.fun,
         'init_guess': param_guess,
         'model': comp_model.name,
         'model_params': comp_model.params,
