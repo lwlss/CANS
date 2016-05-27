@@ -1,6 +1,17 @@
 import numpy as np
 
 
+def add_r_bound(plate, model, i, j, bounds, bound):
+    """Add a bound given i and j of culture on plate.
+
+    i and j should start at zero.
+    bound should be a tuple.
+
+    """
+    index = model.r_index + i*plate.cols + j
+    bounds[index] = bound
+
+
 class Guesser:
     def __init__(self, model):
         self.model = model
