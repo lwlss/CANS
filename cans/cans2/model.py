@@ -1,10 +1,11 @@
 import numpy as np
+import time
 
 
 from scipy.integrate import odeint
 
 
-from cans2.cans_funcs import gauss_list, stdout_redirected
+from cans2.cans_funcs import gauss_list, stdout_redirected, get_mask
 
 
 # Need to generealize to allow power to be specified
@@ -92,6 +93,9 @@ def comp_model(params, neighbourhood):
     neighbourhood : list
         A list of tuples of neighbour indices for each culture.
     """
+    # Make mask an vector for calculating diffusion terms.
+    mask = get_mask(neighbourhood)
+    neigh_nos = np.array([len(tup) for tup in neighbourhood])
     # Separate out plate and culture level parameters.
     kn = params[0]
     r = np.asarray(params[1:])
@@ -102,12 +106,13 @@ def comp_model(params, neighbourhood):
         np.maximum(0, amounts, out=amounts)
         # Amounts of nutrients and signal.
         C, N = np.split(amounts, 2)
-        # Sums of nutrient and signal diffusion for each culture. This
-        # is the slowest part but I can't find anything faster.
-        N_diffusions = np.array([sum([nut - N[j] for j in neighbourhood[i]])
-                                 for i, nut in enumerate(N)])
+
+        # Sum of nutrient diffusion for each culture. This is the
+        # slowest part but I can't think of anything faster.
+        N_diffs = neigh_nos*N - np.sum(mask*N, axis=1)
+
         C_rates = r*C*N
-        N_rates = -C_rates - kn*N_diffusions
+        N_rates = -C_rates - kn*N_diffs
         rates = np.append(C_rates, N_rates)
         return rates
     return growth
