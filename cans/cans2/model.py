@@ -7,62 +7,11 @@ from scipy.integrate import odeint
 from cans2.cans_funcs import gauss_list, stdout_redirected
 
 
-def guess_model(params):
+# Need to generealize to allow power to be specified
+def power_model(params):
     """Simplified model for (hopefully) guessing r params.
 
-    Constains a constant k as an approximation for diffusion.
-
-    """
-    k = params[0]
-    r = params[1]
-    def guess_growth(amounts, times):
-        np.maximum(0, amounts, out=amounts)
-        rates = [r*amounts[0]*amounts[1], -r*amounts[0]*amounts[1] + k]
-        return rates
-    return guess_growth
-
-
-def power_model2(params):
-    """Simplified model for (hopefully) guessing r params.
-
-    Constains a constant k as an approximation for diffusion.
-
-    """
-    k1 = params[0]
-    k2 = params[1]
-    r = params[2]
-    def guess_growth(amounts, times):
-        print(times)
-        np.maximum(0, amounts, out=amounts)
-        rates = [r*amounts[0]*amounts[1],
-                -r*amounts[0]*amounts[1] + k1 + k2*times]
-        return rates
-    return guess_growth
-
-
-def power_model3(params):
-    """Simplified model for (hopefully) guessing r params.
-
-    Constains a constant k as an approximation for diffusion.
-
-    """
-    k1 = params[0]
-    k2 = params[1]
-    k3 = params[2]
-    r = params[3]
-    def guess_growth(amounts, times):
-        print(times)
-        np.maximum(0, amounts, out=amounts)
-        rates = [r*amounts[0]*amounts[1],
-                 -r*amounts[0]*amounts[1] + k1 + k2*times + k3*times*times]
-        return rates
-    return guess_growth
-
-
-def power_model5(params):
-    """Simplified model for (hopefully) guessing r params.
-
-    Constains a constant k as an approximation for diffusion.
+    Constains a power series as an approximation of diffusion.
 
     """
     k1 = params[0]
@@ -71,14 +20,14 @@ def power_model5(params):
     k4 = params[3]
     k5 = params[4]
     r = params[5]
-    def guess_growth(amounts, times):
+    def growth(amounts, times):
         print(times)
         np.maximum(0, amounts, out=amounts)
         rates = [r*amounts[0]*amounts[1],
                  -r*amounts[0]*amounts[1] + k1 + k2*times + k3*times*times
                  + k3*times**4 + k4*times**5]
         return rates
-    return guess_growth
+    return growth
 
 
 def neighbour_model(params, no_neighs=2):
@@ -118,7 +67,7 @@ def inde_model(params):
     # Separate out plate and culture level parameters.
     r_params = params
     # odeint requires times argument in cans_growth function.
-    def inde_growth(amounts, times):
+    def growth(amounts, times):
         """Return cans rates given current amounts and times."""
         # Cannot have negative amounts.
         np.maximum(0, amounts, out=amounts)
@@ -130,7 +79,7 @@ def inde_model(params):
         # function call (see np.maximum() above).
         rates = [rate for r, C, N in vals for rate in (r*N*C, -r*N*C)]
         return rates
-    return inde_growth
+    return growth
 
 
 def comp_model(params, neighbourhood):
@@ -145,27 +94,23 @@ def comp_model(params, neighbourhood):
     """
     # Separate out plate and culture level parameters.
     kn = params[0]
-    r_params = params[1:]
+    r = np.asarray(params[1:])
     # odeint requires times argument in cans_growth function.
-    def comp_growth(amounts, times):
+    def growth(amounts, times):
         """Return model rates given current amounts and times."""
         # Cannot have negative amounts.
         np.maximum(0, amounts, out=amounts)
         # Amounts of nutrients and signal.
-        nutrients = amounts[1::2]
-        # Sums of nutrient and signal diffusion for each culture.
-        N_diffusions = [sum([nutrient - nutrients[j] for j in neighbourhood[i]])
-                        for i, nutrient in enumerate(nutrients)]
-        # An iterator of values for variables/terms appearing in the model.
-        vals = zip(r_params, N_diffusions, *[iter(amounts)]*2)
-        # This will sometimes store negative amounts. This can
-        # be corrected in the results returned by odeint if call
-        # values are ALSO set to zero at the start of each
-        # function call (see np.maximum() above).
-        rates = [rate for r, Ndiff, C, N, in vals for rate
-                 in (r*N*C, -r*N*C - kn*Ndiff)]
+        C, N = np.split(amounts, 2)
+        # Sums of nutrient and signal diffusion for each culture. This
+        # is the slowest part but I can't find anything faster.
+        N_diffusions = np.array([sum([nut - N[j] for j in neighbourhood[i]])
+                                 for i, nut in enumerate(N)])
+        C_rates = r*C*N
+        N_rates = -C_rates - kn*N_diffusions
+        rates = np.append(C_rates, N_rates)
         return rates
-    return comp_growth
+    return growth
 
 
 class Model:
@@ -182,7 +127,9 @@ class Model:
     # about speed can create different solve methods with and
     # without the extra argument.
     def solve(self, plate, params, times=None):
-        init_amounts = np.tile(params[:self.no_species], plate.no_cultures)
+        init_amounts = np.repeat(params[:self.no_species], plate.no_cultures)
+
+        # init_amounts = np.tile(params[:self.no_species], plate.no_cultures)
         # Set C(t=0) to zero for empty locations.
         for index in plate.empties:
             init_amounts[self.no_species*index] = 0.0
@@ -203,11 +150,11 @@ class Model:
             growth_func = self.model(params[self.no_species:])
         # Optional smooth times for simulations/fits.
         if times is None:
-            with stdout_redirected():    # Redirect lsoda warnings
-                sol = odeint(growth_func, init_amounts, plate.times)
+            #with stdout_redirected():    # Redirect lsoda warnings
+            sol = odeint(growth_func, init_amounts, plate.times)
         else:
-            with stdout_redirected():    # Redirect lsoda warnings
-                sol = odeint(growth_func, init_amounts, times)
+            #with stdout_redirected():    # Redirect lsoda warnings
+            sol = odeint(growth_func, init_amounts, times)
         return np.maximum(0, sol)
 
 
@@ -252,43 +199,7 @@ class IndeModel(Model):
         self.name = 'Independent Model'
 
 
-class GuessModel(Model):
-    def __init__(self):
-        """Only suitable for single cultures."""
-        self.model = guess_model
-        self.r_index = 3
-        # Could actually fix C_0 and N_0 with init guess.
-        self.params = ['C_0', 'N_0', 'k', 'r']
-        self.species = ['C', 'N']
-        self.no_species = len(self.species)
-        self.name = 'Guess Model'
-
-
-class PowerModel2(Model):
-    def __init__(self):
-        """Only suitable for single cultures."""
-        self.model = power_model2
-        self.r_index = 4
-        # Could actually fix C_0 and N_0 with init guess.
-        self.params = ['C_0', 'N_0', 'k1', 'k2', 'r']
-        self.species = ['C', 'N']
-        self.no_species = len(self.species)
-        self.name = 'Power Model 2'
-
-
-class PowerModel3(Model):
-    def __init__(self):
-        """Only suitable for single cultures."""
-        self.model = power_model3
-        self.r_index = 5
-        # Could actually fix C_0 and N_0 with init guess.
-        self.params = ['C_0', 'N_0', 'k1', 'k2', 'k3', 'r']
-        self.species = ['C', 'N']
-        self.no_species = len(self.species)
-        self.name = 'Power Model 3'
-
-
-class PowerModel5(Model):
+class PowerModel(Model):
     def __init__(self):
         """Only suitable for single cultures."""
         self.model = power_model5
