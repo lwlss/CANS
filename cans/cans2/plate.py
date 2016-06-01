@@ -172,7 +172,8 @@ class Culture(BasePlate):
 
 
 if __name__ == '__main__':
+    from cans2.cans_funcs import get_mask
     plate1 = Plate(3, 3)
-    culture1 = Culture()
+    mask = get_mask(plate1.neighbourhood)
     print(plate1.neighbourhood)
-    print(culture1.neighbourhood)
+    print(mask)
