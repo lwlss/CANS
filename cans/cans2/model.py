@@ -1,5 +1,4 @@
 import numpy as np
-import time
 
 
 from scipy.integrate import odeint
@@ -93,7 +92,7 @@ def comp_model(params, neighbourhood):
     neighbourhood : list
         A list of tuples of neighbour indices for each culture.
     """
-    # Make mask an vector for calculating diffusion terms.
+    # Make mask and vector for calculating diffusion terms.
     mask = get_mask(neighbourhood)
     neigh_nos = np.array([len(tup) for tup in neighbourhood])
     # Separate out plate and culture level parameters.
