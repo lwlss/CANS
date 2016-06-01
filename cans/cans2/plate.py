@@ -115,7 +115,7 @@ class Plate(BasePlate):
         if self.sim_params is None:
             self._gen_sim_params(model, r_mean, r_var, custom_params)
         self.sim_amounts = model.solve(self, self.sim_params)
-        self.c_meas = self.sim_amounts.flatten()[::model.no_species]
+        self.c_meas = np.split(self.sim_amounts, model.no_species, axis=1)[0].flatten()
         if noise:
             self.add_noise()
         self._set_cultures()    # Set culture c_meas and times.
