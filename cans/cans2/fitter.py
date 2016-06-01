@@ -29,10 +29,10 @@ class Fitter:
         # params = copy.deepcopy(params)
         params[0] = params[0]/10000
         # Find amounts by solving the model using the estimated parameters.
-        amounts_est = self.model.solve(plate, params)
+        c_est = np.split(self.model.solve(plate, params),
+                         self.model.no_species, axis=1)[0].flatten()
         # Mutable so must scale C_0 back
         params[0] = params[0]*10000
-        c_est = amounts_est.flatten()[::self.model.no_species]
         # Zeros appear in here for empty plates but this shouldn't
         # have any effect.
         err = np.sqrt(np.sum((plate.c_meas - c_est)**2))
