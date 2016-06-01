@@ -59,7 +59,8 @@ class Plotter:
         # Smooth times for sims.
         sim_times = np.linspace(plate.times[0], plate.times[-1], 100)
         amounts = self.model.solve(plate, est_params, sim_times)
-
+        amounts = np.split(amounts, self.model.no_species, axis=1)
+        sim_amounts = np.split(plate.sim_amounts, self.model.no_species, axis=1)
         fig, grid = self._make_grid(plate, amounts, sim, title)
 
         for i, ax in enumerate(grid):
@@ -68,16 +69,15 @@ class Plotter:
                 ax.plot(plate.times, plate.c_meas[i::plate.no_cultures],
                         'x', label='Observed Cells', ms=ms, mew=mew)
             for j, species in enumerate(self.model.species):
-                ax.plot(sim_times, amounts[:, i * self.model.no_species + j],
-                        self.colours[j], label="Est "+species, lw=lw)
+                ax.plot(sim_times, amounts[j][:, i], self.colours[j],
+                        label="Est "+species, lw=lw)
                 if j == 0 and i in plate.empties:
                     continue
                 elif sim:
                     # Plot all true. These do not have noise added.
-                    ax.plot(plate.times,
-                            plate.sim_amounts[:, i*self.model.no_species + j],
-                            'x' + self.colours[j], label="True "+species,
-                            ms=ms, mew=mew)
+                    ax.plot(plate.times, sim_amounts[j][:, i],
+                            'x' + self.colours[j],
+                            label="True"+species, ms=ms, mew=mew)
                 else:
                     continue
         if legend:
