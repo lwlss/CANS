@@ -120,7 +120,6 @@ class Fitter:
         # Add extra attributes to scipy.optimize.OptimizeResult
         # object. Can access with keys() as this is just a subclass of
         # dict.
-        est_params.fit_time = t1 - t0
         est_params.init_guess = param_guess
         est_params.fit_options = dict_to_json(options)    # including ftol
         est_params.model = self.model
