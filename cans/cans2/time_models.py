@@ -14,8 +14,8 @@ from cans2.cans_funcs import dict_to_json
 
 code_version = 2
 coords = (3, 17)
-rows = 3
-cols = 3
+rows = 2
+cols = 2
 
 # path = "/home/dan/projects/CANS/data/p15/Output_Data/"
 # plate_data = get_plate_data(path)
