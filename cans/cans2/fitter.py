@@ -33,6 +33,10 @@ class Fitter:
         # Mutable so must scale C_0 back
         params[0] = params[0]*10000
         c_est = np.split(amount_est, self.model.no_species, axis=1)[0].flatten()
+        # The below is faster but requires transposing c_meas
+        # everywhere else. Solving is the slower line so not going to
+        # wory.
+        # c_est = amount_est.flatten("F")[:plate.no_cultures*len(plate.times)]
         # Zeros appear in here for empty plates but this shouldn't
         # have any effect.
         err = np.sqrt(np.sum((plate.c_meas - c_est)**2))
