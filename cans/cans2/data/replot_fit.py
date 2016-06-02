@@ -14,7 +14,7 @@ from cans2.plate import Plate
 # not used in fitting).
 rows = 16
 cols = 24
-guess_no = 8
+guess_no = 3
 # Stopping criteria: factr = 10**factr_pow
 factr_pow = 10
 
