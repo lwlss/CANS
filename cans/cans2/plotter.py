@@ -60,7 +60,11 @@ class Plotter:
         sim_times = np.linspace(plate.times[0], plate.times[-1], 100)
         amounts = self.model.solve(plate, est_params, sim_times)
         amounts = np.split(amounts, self.model.no_species, axis=1)
-        sim_amounts = np.split(plate.sim_amounts, self.model.no_species, axis=1)
+        if sim:
+            # Split by specie
+            sim_amounts = np.split(plate.sim_amounts, self.model.no_species,
+                                   axis=1)
+
         fig, grid = self._make_grid(plate, amounts, sim, title)
 
         for i, ax in enumerate(grid):
