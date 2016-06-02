@@ -82,7 +82,7 @@ def inde_model(params):
     return growth
 
 
-def comp_model(params, neighbourhood):
+def comp_model(params, neighbourhood, mask, neigh_nos):
     """Return a function for running the competition model.
 
     Args
@@ -92,9 +92,6 @@ def comp_model(params, neighbourhood):
     neighbourhood : list
         A list of tuples of neighbour indices for each culture.
     """
-    # Make mask and vector for calculating diffusion terms.
-    mask = get_mask(neighbourhood)
-    neigh_nos = np.array([len(tup) for tup in neighbourhood])
     # Separate out plate and culture level parameters.
     kn = params[0]
     r = np.asarray(params[1:])
@@ -149,7 +146,8 @@ class Model:
         # 'kn' below is more explicit.
         if 'kn' in self.params:
             growth_func = self.model(params[self.no_species:],
-                                     plate.neighbourhood)
+                                     plate.neighbourhood, plate.mask,
+                                     plate.neigh_nos)
         else:
             growth_func = self.model(params[self.no_species:])
         # Optional smooth times for simulations/fits.
