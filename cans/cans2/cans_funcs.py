@@ -11,8 +11,11 @@ from math import log10, floor
 
 
 def round_sig(x, sig=2):
-    """http://stackoverflow.com/a/3413529"""
-    return round(x, sig-int(floor(log10(x)))-1)
+    if x != 0:
+        """http://stackoverflow.com/a/3413529"""
+        return round(x, sig-int(floor(log10(x)))-1)
+    else:
+        return x
 
 
 def mad(a, b):

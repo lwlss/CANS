@@ -5,7 +5,7 @@ import datetime
 from sys import argv
 
 
-from cans2.zoning import get_zone_r_guess
+from cans2.zoning import get_zone_rs
 from cans2.plate import Plate
 from cans2.model import CompModel
 from cans2.plotter import Plotter
@@ -107,7 +107,7 @@ if guess_no >= 0:
         out_dir = "sim_fits/{0}x{1}_comp_model_kn_guess_0/init_guess_{2}/"
         out_dir = out_dir.format(rows, cols, guess_no)
     else:
-        out_dir = "sim_fits/{0}x{1}_comp_model/init_guess_{2}/"
+        out_dir = "sim_fits/{0}x{1}_comp_model_scale_C_0/init_guess_{2}/"
         out_dir = out_dir.format(rows, cols, guess_no)
 
     guess_file = "init_guess/16x24_rs_mean_5_var_3/16x24_rs_{}.json"
@@ -118,7 +118,7 @@ elif guess_no == -1:
         out_dir = "sim_fits/{0}x{1}_comp_model_kn_guess_0/uniform_guess/"
         out_dir = out_dir.format(rows, cols)
     else:
-        out_dir = "sim_fits/{0}x{1}_comp_model/uniform_guess/"
+        out_dir = "sim_fits/{0}x{1}_comp_model_scale_C_0/uniform_guess/"
         out_dir = out_dir.format(rows, cols)
 
     guess_file = 'No file: uniform guess using r_mean'
@@ -133,7 +133,9 @@ with open(true_file, 'r') as f:
 true_plate = Plate(rows, cols)
 true_plate.times = true_data['times']
 true_plate.sim_params = true_data['sim_params']
-true_plate.set_sim_data(model)
+true_plate.set_sim_data(model, noise=False)
+#print(true_plate.c_meas)
+#print(true_data['c_meas'])
 assert np.array_equal(true_plate.c_meas, true_data['c_meas'])
 
 
@@ -152,7 +154,7 @@ if guess_no >= 0:
     # initial guess from that zone. This may not make much of a
     # difference but is more consistant.
     if rows*cols < len(r_guess) and coords:
-        r_guess =  get_zone_r_guess(r_guess, 16, 24, coords, rows, cols)
+        r_guess =  get_zone_rs(r_guess, 16, 24, coords, rows, cols)
     elif rows*cols < len(r_guess) and not coords:
         r_guess = r_guess[:rows*cols]
 elif guess_no == -1:
@@ -190,7 +192,7 @@ for factr in factrs:
 
     this_plate.comp_est = true_plate.fit_model(model,
                                                this_plate.sim_params,
-                                               custom_options=fit_options)
+                                               minimizer_opts=fit_options)
 
     # need to accumulate fit_times, nfev, and nit.
     tot_fit_time += this_plate.comp_est.fit_time

@@ -80,11 +80,15 @@ def get_plate_data(path):
     return plate_data
 
 if __name__ == "__main__":
+    import json
+
     from cans2.plate import Plate
     from cans2.plotter import Plotter
     from cans2.model import CompModel
     from cans2.zoning import get_plate_zone
-    from cans2.guesser import Guesser
+    from cans2.guesser import Guesser, add_r_bound
+    from cans2.cans_funcs import dict_to_json
+
 
 
     path = "/home/dan/projects/CANS/data/p15/Output_Data/"
@@ -98,29 +102,63 @@ if __name__ == "__main__":
 
     #plotter.plot_c_meas(real_plate)
 
+    coords = (3, 17)
+    rows = 5
+    cols = 5
+
+
+    outdir =  "results/p15_fits/first_attempt/"
+    datafile = outdir + "coords_{0}_{1}_rows_{2}_cols_{3}_1.json"
+    datafile = datafile.format(coords[0], coords[1], rows, cols)
+    plotfile = outdir + "coords_{0}_{1}_rows_{2}_cols_{3}_1.pdf"
+    plotfile = plotfile.format(coords[0], coords[1], rows, cols)
+
     # This would have 5 rows and 5 cols
-    zone = get_plate_zone(real_plate, coords=[(4, 15), (7, 18)])
+    zone = get_plate_zone(real_plate, coords, rows, cols)
     # plotter.plot_c_meas(zone)
 
     comp_guesser = Guesser(CompModel())
     guess = comp_guesser.make_guess(zone)
-    param_guess = [guess["C_0"], guess["N_0"], 0.1]
+    param_guess = [guess["C_0"], guess["N_0"], 1.0]
     r_guess = [50.0 for i in range(zone.no_cultures)]
     param_guess = param_guess + r_guess
 
-    bounds = comp_guesser.set_bounds(zone, guess, factor=1.0)
-    bounds[0] = (guess["C_0"]/1000, guess["C_0"]/5)
-    bounds[1] = (guess["N_0"]*1.0, guess["N_0"]*1.15)
-    bounds[2] = (0.1, None)
-    print(bounds)
+    bounds = comp_guesser.get_bounds(zone, guess, factor=1.2)
+
+    # bounds[0] = (5.848410588726615e-07, 5.848410588726615e-05)
+    # bounds[1] = (0.05848410588726615, 0.1169682117745323)
+    bounds[2] = (1.3, 1.5)
+
+    # add_r_bound(zone, comp_model, , , bounds, (, ))
+
 
     zone.comp_est = zone.fit_model(CompModel(),
                                    param_guess=param_guess,
                                    minimizer_opts={'disp': True},
                                    bounds=bounds)
-    print(zone.comp_est.x)
-    plotter.plot_est(zone, zone.comp_est.x, title="Fit of a real zone")
 
+    print(bounds)
+    print(zone.comp_est.x)
+    plotter.plot_est(zone, zone.comp_est.x, title="Fit of a real zone",
+                     filename=plotfile)
+
+    data = {
+        'zone_coords': coords,
+        'zone_rows': rows,
+        'zone_cols': cols,
+        'bounds': bounds,
+        'comp_est': zone.comp_est.x,
+        'obj_fun': zone.comp_est.fun,
+        'init_guess': param_guess,
+        'model': comp_model.name,
+        'model_params': comp_model.params,
+        'model_species': comp_model.species
+    }
+    data = dict_to_json(data)
+
+
+    with open(datafile, 'w') as f:
+        json.dump(data, f, indent=4, sort_keys=True)
 
 
 

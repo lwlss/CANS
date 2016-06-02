@@ -7,43 +7,52 @@ from cans2.cans_funcs import dict_to_json
 
 
 def _get_zone(array, coords, rows, cols):
-    """Return a zone of an array."""
+    """Return a zone of a 2d array."""
     zone = array[coords[0]:coords[0]+rows, coords[1]:coords[1]+cols]
     return zone
 
 
-def get_plate_zone(plate, coords, resim=False):
+def resim_zone(plate, model, coords, rows, cols, noise=True):
+    """Resimulate a zone from the underlying parameters."""
+    zone = Plate(rows, cols)
+    zone.times = plate.times
+    r_index = len(plate.sim_params) - plate.no_cultures
+    plate_lvl = plate.sim_params[:r_index]
+    rs = plate.sim_params[r_index:]
+    zone_rs = get_zone_rs(rs, plate.rows, plate.cols, coords, rows, cols)
+    zone_params = np.append(plate_lvl, zone_rs)
+    zone.sim_params = zone_params
+    zone.set_sim_data(model, noise=noise)
+    return zone
+
+
+def get_plate_zone(plate, coords, rows, cols):
     """Return a plate from a zone of a larger plate.
 
-    If resim == True, resimulate from the underlying
-    parameters. Otherwise, return the c_measures from the larger
-    plate.
-
-    Coords are a list of coordinate tuples for the top left and bottom
-    right cultures of a rectangular zone.
+    Coords are a tuple for the top left culture of a rectangular
+    zone. rows and cols are the size of the new zone.
 
     """
     no_cultures = plate.no_cultures
     c_collected = [plate.c_meas[i::no_cultures] for i in range(no_cultures)]
     c_collected = np.array(c_collected)
     c_collected.shape = (plate.rows, plate.cols, len(plate.times))
-    zone_rows, zone_cols = np.subtract(coords[1], coords[0]) + 1
-    zone = _get_zone(c_collected, coords[0], zone_rows, zone_cols)
+    zone = _get_zone(c_collected, coords, rows, cols)
     c_meas = [zone[:, :, i] for i in range(len(plate.times))]
     c_meas = np.array(c_meas).flatten()
-    assert len(c_meas) == zone_rows*zone_cols*len(plate.times)
+    assert len(c_meas) == rows*cols*len(plate.times)
     zone_data = {
         "c_meas": c_meas,
         "times": plate.times,
         "empties": plate.empties
         }
-    zone_plate = Plate(zone_rows, zone_cols, data=zone_data)
+    zone_plate = Plate(rows, cols, data=zone_data)
     return zone_plate
 
 
-def get_zone_r_guess(r_guess, big_rows, big_cols, coords, rows, cols):
-    """Return initial r guesses or a zone"""
-    r_zone = np.array(r_guess, copy=True)
+def get_zone_rs(plate_rs, big_rows, big_cols, coords, rows, cols):
+    """Return rate constants r for a zone"""
+    r_zone = np.array(plate_rs, copy=True)
     r_zone.shape = (big_rows, big_cols)
     r_zone = _get_zone(r_zone, coords, rows, cols)
     r_zone = r_zone.flatten()
@@ -53,7 +62,7 @@ def get_zone_r_guess(r_guess, big_rows, big_cols, coords, rows, cols):
 def get_zone_params(plate_file, coords, rows, cols):
     """Return params for a zone of a plate saved as json.
 
-    Returns plate level parameters and in a flattened list.
+    Returns plate level parameters and r values in a flattened list.
 
     """
     # Read in the full plate.
@@ -85,6 +94,7 @@ def get_zone_params(plate_file, coords, rows, cols):
 
 
 def sim_zone(plate_file, model, coords, rows, cols):
+    """Resimulate and return a zone of a saved plate."""
     params = get_zone_params(plate_file, coords, rows, cols)
     with open(plate_file, 'r') as f:
         plate_data = json.load(f)
@@ -103,7 +113,7 @@ def sim_zone(plate_file, model, coords, rows, cols):
 
 
 def save_zone_as_json(zone, model, coords, plate_file, outfile):
-    # Plate data
+    """Save data for a zone of a simulated plate read from file."""
     with open(plate_file, 'r') as f:
         plate_data = json.load(f)
 

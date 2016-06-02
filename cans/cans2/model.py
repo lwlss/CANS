@@ -22,6 +22,91 @@ def guess_model(params):
     return guess_growth
 
 
+def power_model2(params):
+    """Simplified model for (hopefully) guessing r params.
+
+    Constains a constant k as an approximation for diffusion.
+
+    """
+    k1 = params[0]
+    k2 = params[1]
+    r = params[2]
+    def guess_growth(amounts, times):
+        print(times)
+        np.maximum(0, amounts, out=amounts)
+        rates = [r*amounts[0]*amounts[1],
+                -r*amounts[0]*amounts[1] + k1 + k2*times]
+        return rates
+    return guess_growth
+
+
+def power_model3(params):
+    """Simplified model for (hopefully) guessing r params.
+
+    Constains a constant k as an approximation for diffusion.
+
+    """
+    k1 = params[0]
+    k2 = params[1]
+    k3 = params[2]
+    r = params[3]
+    def guess_growth(amounts, times):
+        print(times)
+        np.maximum(0, amounts, out=amounts)
+        rates = [r*amounts[0]*amounts[1],
+                 -r*amounts[0]*amounts[1] + k1 + k2*times + k3*times*times]
+        return rates
+    return guess_growth
+
+
+def power_model5(params):
+    """Simplified model for (hopefully) guessing r params.
+
+    Constains a constant k as an approximation for diffusion.
+
+    """
+    k1 = params[0]
+    k2 = params[1]
+    k3 = params[2]
+    k4 = params[3]
+    k5 = params[4]
+    r = params[5]
+    def guess_growth(amounts, times):
+        print(times)
+        np.maximum(0, amounts, out=amounts)
+        rates = [r*amounts[0]*amounts[1],
+                 -r*amounts[0]*amounts[1] + k1 + k2*times + k3*times*times
+                 + k3*times**4 + k4*times**5]
+        return rates
+    return guess_growth
+
+
+def neighbour_model(params, no_neighs=2):
+    """Model for guessing r for single cultures.
+
+    Fast and slow growing neighbours (intended to have r bounded) with
+    different diffusion constants.
+
+    """
+    kn = params[:2]
+    r = params[2:]
+    def growth(amounts, times):
+        np.maximum(0, amounts, out=amounts)
+        C = amounts[::2]
+        N = amounts[1::2]
+        rates = [r[0]*N[0]*C[0],
+                 -r[0]*N[0]*C[0] - kn[0]*(N[0] - N[1]),
+                 r[2]*N[1]*C[1],
+                 # Factor of no_neighs in diffusion terms is for the
+                 # number of each pair of identical neighbours (zero
+                 # and fast growers).
+                 -r[2]*N[1]*C[1] - no_neighs*kn[0]*(N[1] - N[0]) - no_neighs*kn[1]*(N[1] - N[2]),
+                 r[1]*N[2]*C[2],
+                 -r[1]*N[2]*C[2] - kn[1]*(N[2] - N[1])]
+        return rates
+    return growth
+
+
 def inde_model(params):
     """Return a function for running the inde model.
 
@@ -177,6 +262,69 @@ class GuessModel(Model):
         self.species = ['C', 'N']
         self.no_species = len(self.species)
         self.name = 'Guess Model'
+
+
+class PowerModel2(Model):
+    def __init__(self):
+        """Only suitable for single cultures."""
+        self.model = power_model2
+        self.r_index = 4
+        # Could actually fix C_0 and N_0 with init guess.
+        self.params = ['C_0', 'N_0', 'k1', 'k2', 'r']
+        self.species = ['C', 'N']
+        self.no_species = len(self.species)
+        self.name = 'Power Model 2'
+
+
+class PowerModel3(Model):
+    def __init__(self):
+        """Only suitable for single cultures."""
+        self.model = power_model3
+        self.r_index = 5
+        # Could actually fix C_0 and N_0 with init guess.
+        self.params = ['C_0', 'N_0', 'k1', 'k2', 'k3', 'r']
+        self.species = ['C', 'N']
+        self.no_species = len(self.species)
+        self.name = 'Power Model 3'
+
+
+class PowerModel5(Model):
+    def __init__(self):
+        """Only suitable for single cultures."""
+        self.model = power_model5
+        self.r_index = 7
+        # Could actually fix C_0 and N_0 with init guess.
+        self.params = ['C_0', 'N_0', 'k1', 'k2', 'k3', 'k4', 'k5', 'r']
+        self.species = ['C', 'N']
+        self.no_species = len(self.species)
+        self.name = 'Power Model 5'
+
+
+class NeighModel(Model):
+    def __init__(self, no_neighs):
+        """Only suitable for single cultures."""
+        self.model = neighbour_model
+        self.r_index = 6
+        # Could actually fix C_0 and N_0 with init guess.
+        self.params = ['C_0', 'N_0', 'kn1', 'kn2', 'r-', 'r+', 'r']
+        self.species = ['C', 'N']
+        self.no_species = len(self.species)
+        self.name = 'Neighbour model'
+        self.no_neighs = no_neighs
+
+    def solve(self, plate, params, times=None):
+        # Can't inherit becuase tiling of intitial amounts needs to be
+        # different (3 for only one culture) and need to pass the
+        # number of each type of neighbour to the growth fuction.
+        init_amounts = np.tile(params[:self.no_species], 3)
+        growth_func = self.model(params[self.no_species:], self.no_neighs)
+        if times is None:
+            with stdout_redirected():    # Redirect lsoda warnings
+                sol = odeint(growth_func, init_amounts, plate.times)
+        else:
+            with stdout_redirected():    # Redirect lsoda warnings
+                sol = odeint(growth_func, init_amounts, times)
+        return np.maximum(0, sol)
 
 
 if __name__ == '__main__':
