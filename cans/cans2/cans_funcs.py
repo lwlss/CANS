@@ -19,7 +19,7 @@ def round_sig(x, sig=2):
 
 
 def get_mask(neighbourhood):
-    """Return an boolean array neighbour indices.
+    """Return an boolean array of neighbour indices.
 
     Each row is a culture; each column is an index.
     1 if neighbour 0 if not.
