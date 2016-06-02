@@ -5,7 +5,7 @@ import random
 
 from cans2.model import IndeModel
 from cans2.fitter import Fitter
-
+from cans2.cans_funcs import get_mask
 
 class BasePlate:
     def __init__(self, rows, cols, data=None):
@@ -49,6 +49,8 @@ class BasePlate:
                 # Then not in last row.
                 neighbours.append(i + self.cols)
             neighbourhood.append(tuple(neighbours))
+        self.neigh_nos = np.array([len(tup) for tup in neighbourhood])
+        self.mask = get_mask(neighbourhood)
         return neighbourhood
 
 
