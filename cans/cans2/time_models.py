@@ -36,12 +36,12 @@ full_plate.times = np.asarray(data["times"])
 full_plate.sim_params = np.asarray(data["params"])
 full_plate.set_sim_data(comp_model, noise=False)
 
-
-c_meas = full_plate.c_meas
-c_meas.shape = (len(full_plate.times), full_plate.no_cultures)
-c_meas = c_meas.flatten(order="F")
-print(c_meas)
-full_plate.c_meas = c_meas
+print(full_plate.c_meas)
+# c_meas = full_plate.c_meas
+# c_meas.shape = (len(full_plate.times), full_plate.no_cultures)
+# c_meas = c_meas.flatten(order="F")
+# print(c_meas)
+# full_plate.c_meas = c_meas
 
 print("hello")
 # data = {
@@ -76,19 +76,19 @@ resim_zone = resim_zone(full_plate, comp_model, coords, rows, cols, noise=True)
 # comp_plotter.plot_est(resim_zone, resim_zone.sim_params, sim=True)
 
 comp_guesser = Guesser(CompModel())
-guess = comp_guesser.make_guess(full_plate)
+guess = comp_guesser.make_guess(resim_zone)
 #guess = comp_guesser.make_guess(resim_zone)
-param_guess = comp_guesser.nparray_guess(full_plate, guess)
-r_guess = [20.0 for i in range(full_plate.no_cultures)]
+param_guess = comp_guesser.nparray_guess(resim_zone, guess)
+r_guess = [20.0 for i in range(resim_zone.no_cultures)]
 param_guess = np.append(param_guess, [1.0])    # kn guess
 param_guess = np.append(param_guess, r_guess)
-bounds = comp_guesser.get_bounds(full_plate, guess)
+bounds = comp_guesser.get_bounds(resim_zone, guess)
 bounds[2] = (0.5, 10.0)    # kn bounds
 
 
 # Time fitting
 t0 = time.time()
-full_plate.comp_est = full_plate.fit_model(CompModel(), param_guess=param_guess,
+resim_zone.comp_est = resim_zone.fit_model(CompModel(), param_guess=param_guess,
                                            minimizer_opts={'disp': False},
                                            bounds=bounds)
 t1 = time.time()
