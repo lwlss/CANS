@@ -111,10 +111,8 @@ class Fitter:
         bounds[0] = tuple(bounds[0][i]*10000 if bounds[0][i] is not None
                           else bounds[0][i] for i in range(2))
 
-        t0 = time.time()
         est_params = minimize(obj_f, param_guess, method='L-BFGS-B',
                               bounds=bounds, options=options)
-        t1 = time.time()
 
         # Scale C_0 to true amount in result.
         est_params.x[0] = est_params.x[0]/10000
