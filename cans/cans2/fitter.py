@@ -4,9 +4,31 @@ import copy
 
 from functools import partial
 from scipy.optimize import minimize
-
+from scipy.interpolate import splrep, splev
 
 from cans2.cans_funcs import dict_to_json
+
+
+class GradFitter:
+
+    def __init__(self, model=None):
+        self.model = model
+
+    def _obj_func(self, plate, params):
+        pass
+
+
+    # Need to do this for all cultures on the plate
+    def make_grad_obj(self, plate, k=5, s=0.01):
+        # k order of spline (3 for cubic). s, smoothing condition.
+        spline_pts = splrep(times, c_meas, k=k, s=s)
+        slopes = np.maximum(0, splev(times, spline_pts, der=1))
+        def obj():
+            pass
+        return obj
+
+    def fit_model(self, plate):
+        pass
 
 
 class Fitter:
