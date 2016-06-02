@@ -1,0 +1,7 @@
+Comp fits of a zone from p15 using different initial guesses of C_0 and kn.
+
+# init guesses
+r_avgs = np.linspace(25.0, 75.0, 11)
+kns = np.linspace(0.0, 10.0, 11)
+C_0s = np.logspace(-10, -1, 10)
+guess_vals = np.array([(C_0, r, kn) for C_0 in C_0s for r in r_avgs for kn in kns])
