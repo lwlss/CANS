@@ -29,6 +29,9 @@ class GradFitter:
             splines.append(spline_pts)
             slopes.append(cul_slopes)
         def obj():
+            # Values of gradients - b*C*N at timepoint. We are
+            # optimising parameter b, have C as a measurement, but
+            # what about N?
             pass
         return obj
 
@@ -51,8 +54,6 @@ if __name__ == "__main__":
     plate.set_sim_data(CompModel(), r_mean=40.0, r_var=15.0,
                        custom_params=sim_params, noise=True)
 
-    print(plate.c_meas)
-    print(plate.cultures[0].c_meas)
-
-    comp_plotter = Plotter(CompModel())
-    comp_plotter.plot_est(plate, plate.sim_params, sim=True)
+    # Spline each culture
+    grad_fitter = GradFitter(CompModel())
+    obj = grad_fitter.make_grad_obj(plate)
