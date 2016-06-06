@@ -12,9 +12,21 @@ from cans2.cans_funcs import dict_to_json
 from cans2.parser import get_plate_data
 
 
+# Which zone in the missing data do you want to repeat.
+coords_arg = sys.argv[2]
+
+# Read in coords and and missing args from file
+with open("missing_data.json", "r") as f:
+    missing = json.load(f)
+
+
+if str(sys.argv[1]) not in missing["missing_args"][coords_arg]:
+    quit()
+else:
+    pass
+
 # Define area of zone
-coords = (7, 13)    # Perhaps try a different zone
-# coords = (9, 15)
+coords = missing["coords"][coords_arg]
 rows = 5
 cols = 5
 
