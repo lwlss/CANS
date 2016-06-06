@@ -13,7 +13,7 @@ from cans2.parser import get_plate_data
 
 
 # Which zone in the missing data do you want to repeat.
-coords_arg = sys.argv[2]
+coords_arg = int(sys.argv[2])
 
 # Read in coords and and missing args from file
 with open("missing_data.json", "r") as f:
