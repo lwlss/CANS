@@ -4,5 +4,5 @@
 # set inital guesses of kn and C_0. Run using bash run_fits.sh &.
 for i in {0..1209}   # 1209
 do
-    python fit_real_zone.py $i 0 &
+    python fit_real_zone.py $i 1 &
 done
