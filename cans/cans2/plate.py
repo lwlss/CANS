@@ -65,12 +65,9 @@ class BasePlate:
 class Plate(BasePlate):
     def __init__(self, rows, cols, data=None):
         super(Plate, self).__init__(rows, cols, data)
+        self.cultures = [Culture() for i in range(self.no_cultures)]
         if self.data is not None:
-            # Feed data to Cultures. Depends on form of data but would
-            # like a dictionary with times and c_meas.
-            pass
-        else:
-            self.cultures = [Culture() for i in range(self.no_cultures)]
+            self._set_cultures()
 
 
     def _set_cultures(self):
