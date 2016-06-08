@@ -160,6 +160,44 @@ def create_param(model, id, constant, val, units=None):
         check(k.setUnits(units), "set parameter {0} units".format(id))
 
 
+def create_reactions(model, plate): #, growth_model):
+    for i in range(plate.no_cultures):
+        create_growth_reaction(model, i)
+        create_nut_diffusions(model, i, plate.neighbourhood[i])
+
+
+def create_growth_reaction(model, i):
+    r = create_reaction(model, "Growth_{0}".format(i))
+    C_ref = r.createReactant()
+    check(C_ref, "create reactant")
+    check(C_ref.setSpecies("C{0}".format(i)), "assign reactant C{0}".format(i))
+    check(C_ref.setConstant(False), "set 'constant' on reactant C{0}".format(id))
+
+def create_nut_diffusions(model, i, neighbours):
+    for j in neighbours:
+        create_nut_diffusion(model, i, j)
+
+
+def create_nut_diffusion(model, i, j):
+    """Diffusion of nutrients from culture i to j."""
+    r = create_reaction(model, "Diff_{0}_{1}".format(i, j))
+
+
+def create_reaction(model, id, reversible=False, fast=False):
+    r = model.createReaction()
+    check(r, "create reaction")
+    check(r.setId(id), "set reaction {0} id".format(id))
+    check(r.setReversible(reversible),
+          "set reaction {0} reversibility flag".format(id))
+    # "If a model does not distinguish between time scales, the fast
+    # attribute should be set to 'false' for all reactions." - from
+    # SBML L3V1R1 specification. Our hypothesis is that diffusion
+    # occurs quickly enough to affect growth so "fast" should be False
+    # for all.
+    check(r.setFast(fast), "set reaction {0} speed".format(id))
+    return r
+
+
 def create_model(plate, growth_model, params):
     """Return an SBML model given a plate and model.
 
@@ -180,11 +218,11 @@ def create_model(plate, growth_model, params):
     create_unit(model, id="day", kinds=[UNIT_KIND_SECOND],
                 exponents=[1], scales=[0], multipliers=[86400])
     check(model.setTimeUnits("day"), "set model-wide time units")
-    # Dimensionless units are intended for rations where they will
-    # cancel out. I use item rather than moles because we actually
-    # have intensity measurements as a proxy for amounts and do not
-    # know how they corresponds. Intensity output from Colonzyer is
-    # given in arbitrary units.
+    # In SBML dimensionless units are intended for ration where they
+    # will cancel out. I use item rather than moles because we
+    # actually have intensity measurements as a proxy for amounts and
+    # do not know how they correspond. Intensity measurments output by
+    # Colonzyer are given in arbitrary units.
     check(model.setExtentUnits("item"), "set model units of extent")
     check(model.setSubstanceUnits("item"), "set model substance units")
     # check(model.setExtentUnits("mole"), "set model units of extent")
@@ -207,16 +245,25 @@ def create_model(plate, growth_model, params):
     create_compartment(model, "c1", constant=True, size=1, dims=3,
                        units="dimensionless")
 
+    # Create species
     create_species(model, plate1, growth_model, params)
     print(list(model.getListOfSpecies()))
     for species in model.getListOfSpecies():
-        print(species.getInitialAmount(), species.getUnits())
+        print(species.getId(), species.getInitialAmount(), species.getUnits())
+
     # Create parameters
     create_params(model, plate, growth_model, params)
     for param in model.getListOfParameters():
         print(param.getValue(), param.getUnits())
 
-    # Create reactions
+    # Create reactions.
+    create_reactions(model, plate)
+    for r in model.getListOfReactions():
+        print(r.getId(), r.getKineticLaw())
+
+    # Also have a look at initial assignments, constraints, and
+    # rules. I don't think that we have any events.
+
 
 
 if __name__ == "__main__":
@@ -232,4 +279,9 @@ if __name__ == "__main__":
     plate1.set_sim_data(comp_model, r_mean=40.0, r_var=15.0,
                         custom_params=params)
 
+    # Convert comp model to SBML.
     create_model(plate1, comp_model, plate1.sim_params)
+
+
+    # Should try loading the model in Copasi and simulating/solving
+    # with libRoadRunner when I think it is finished.
