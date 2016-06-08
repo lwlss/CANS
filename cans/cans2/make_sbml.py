@@ -168,10 +168,17 @@ def create_reactions(model, plate): #, growth_model):
 
 def create_growth_reaction(model, i):
     r = create_reaction(model, "Growth_{0}".format(i))
-
     create_reactant(r, "C{0}".format(i))
     create_reactant(r, "N{0}".format(i))
     create_product(r, "C{0}".format(i), stoich=2)
+
+    # Why ast?
+    math_ast = parseL3Formula("r{} * C{} * N{}".format(*[i]*3))
+    check(math_ast, "create AST for rate expression")
+
+    kinetic_law = r.createKineticLaw()
+    check(kinetic_law, "create kinetic law")
+    check(kinetic_law.setMath(math_ast), "set math on kinetic law")
 
 
 def create_reactant(reaction, species_id, stoich=1):
@@ -286,13 +293,17 @@ def create_model(plate, growth_model, params):
 
     # Create reactions.
     create_reactions(model, plate)
+    # Print to check.
     for r in model.getListOfReactions():
         reactants = r.getListOfReactants()
         products = r.getListOfProducts()
-        print(r.getId(), r.getKineticLaw())
-#        for reactant in reactants:
+        if r.getKineticLaw() is not None:
+            print(r.getId(), r.getKineticLaw().getFormula())
+        else:
+            print(r.getId())
         print([(reactant.getSpecies(), reactant.getStoichiometry()) for reactant in reactants])
         print([(product.getSpecies(), product.getStoichiometry()) for product in products])
+
     # Also have a look at initial assignments, constraints, and
     # rules. I don't think that we have any events.
 
