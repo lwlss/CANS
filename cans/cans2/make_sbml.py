@@ -1,6 +1,12 @@
-"""Convert model to SBML. Addapted from: http://sbml.org/Software/libSBML/5.13.0/docs//python-api/libsbml-python-creating-model.html"""
+"""Convert model to SBML.
+
+Addapted from: http://sbml.org/Software/libSBML/5.13.0/docs/
+/python-api/libsbml-python-creating-model.html
+
+"""
 import sys
 from libsbml import *
+
 
 import numpy as np
 from cans2.plate import Plate
@@ -141,59 +147,22 @@ def create_model(plate, growth_model, params):
     create_compartment(model, "c1", constant=True, size=1, dims=3,
                        units="dimensionless")
 
-    create_species(model, plate1, comp_model)
+    create_species(model, plate1, growth_model, params)
     print(list(model.getListOfSpecies()))
 
 
-def create_species(model, plate, growth_model):
-    """Create each specie in a growth model for each culture on a Plate.
+if __name__ == "__main__":
+    # Simulate a plate with data and parameters.
+    plate1 = Plate(2, 2)
+    plate1.times = np.linspace(0, 5, 11)
+    comp_model = CompModel()
+    params = {
+        "C_0": 1e-6,
+        "N_0": 0.1,
+        "kn": 1.5
+    }
+    plate1.set_sim_data(CompModel(), r_mean=40.0, r_var=15.0, custom_params=params)
 
-    Species list is, e.g., C0, C1, ..., N0, N1, ... and can be
-    retrieved with the method Model.getListOfSpecies().
+    create_model(plate1, comp_model, plate1.sim_params)
 
-    """
-    for i, species in enumerate(growth_model.species):
-        for n in range(plate.no_cultures):
-            create_specie(model, species, n, plate.sim_params[i])
-
-
-def create_specie(model, species, culture_no, init_amount):
-    """Add a species to the SBML Model."""
-    s = model.createSpecies()
-    check(s, "create species s")
-    check(s.setId(species + str(culture_no)),
-          "set species {0}{1} id".format(species, culture_no))
-    check(s.setCompartment("c1"),
-          "set species {0}{1} compartment".format(species, culture_no))
-    # If "constant" and "boundaryCondition" both false,
-    # species can be both a product and a reactant.
-    check(s.setConstant(False),
-          "set constant attr on {0}{1}".format(species, culture_no))
-    check(s.setBoundaryCondition(False),
-          "set boundary condition on {0}{1}".format(species, culture_no))
-    check(s.setInitialAmount(init_amount),
-          "set init amount for {0}{1}".format(species, culture_no))
-    # May need to specify a different unit for amount.
-    check(s.setSubstanceUnits("dimensionless"),
-          "set substance units for {0}{1}".format(species, culture_no))
-    # Density/conc. or amount? Not sure which one to use. False is density.
-    check(s.setHasOnlySubstanceUnits(False),
-          "set hasOnlySubstanceUnits for {0}{1}".format(species, culture_no))
-
-
-# Simulate a plate with data and parameters.
-plate1 = Plate(2, 2)
-plate1.times = np.linspace(0, 5, 11)
-comp_model = CompModel()
-params = {
-    "C_0": 1e-6,
-    "N_0": 0.1,
-    "kn": 1.5
-}
-plate1.set_sim_data(CompModel(), r_mean=40.0, r_var=15.0, custom_params=params)
-
-# writeSBMLToFile(d, filename)
-
-create_model()
-
-
+    # writeSBMLToFile(d, filename)
