@@ -34,6 +34,42 @@ def check(value, message):
     else:
         return
 
+
+def create_unit(model, id, kind, exponent, scale, multiplier):
+    """Create a new unit for the SBML Model.
+
+    kind is a libsbml object e.g. UNIT_KIND_SECOND.
+    """
+    unit_def = model.createUnitDefinition()
+    check(unit_def, "create unit definition")
+    check(unit_def.setId(id), "set unit difinition id")
+    unit = unit_def.createUnit()
+    check(unit, "create unit on day")
+    # Requires all four of these.
+    check(unit.setKind(kind), "set unit kind")
+    check(unit.setExponent(exponent), "Set unit exponent")
+    check(unit.setScale(scale), "set unit scale")
+    check(unit.setMultiplier(multiplier), "set unit multiplier")
+
+
+def create_compartment(model, id, constant=True, size=1, dims=3,
+                       units="dimesionless"):
+    """Create a new compartment for the SBML Model.
+
+    "constant" is a boolean which determines whether the compartment
+    size can vary during a simulation.
+
+    """
+    c = model.createCompartment()
+    check(c, "create compartment")
+    check(c.setId(id), "set compartment id")
+    # 'constant' refers to size
+    check(c.setConstant(constant), "set compartment 'constant'")
+    check(c.setSize(size), "set compartment 'size'")
+    check(c.setSpatialDimensions(dims), "set compartment dimensions")
+    check(c.setUnits(units), "set compartment dimensions")
+
+
 def create_model():
     """Return an SBML model given a plate and model.
 
@@ -48,20 +84,8 @@ def create_model():
 
     model = document.createModel()
     check(model, "create model")
-
-    # Create a time unit of day.
-    day = model.createUnitDefinition()
-    check(day, "create unit definition")
-    check(day.setId("day"), "set unit difinition id")
-    unit = day.createUnit()
-    check(unit, "create unit on day")
-    # Requires all four of these.
-    check(unit.setKind(UNIT_KIND_SECOND), "set unit kind")
-    check(unit.setExponent(1), "Set unit exponent")
-    check(unit.setScale(0), "set unit scale")
-    check(unit.setMultiplier(86400), "set unit multiplier")
-
-
+    create_unit(model, id="day", kind=UNIT_KIND_SECOND,
+                exponent=1, scale=0, multiplier=86400)
     check(model.setTimeUnits("day"), "set model-wide time units")
     # Should these two be dimensionless?
     check(model.setExtentUnits("dimensionless"), "set model units of extent")
@@ -73,46 +97,47 @@ def create_model():
     # Not sure whether to use one compartment or a compartment for
     # each culture. Attempting to use dimensionless unit sizes and one
     # compartment. Not sure how all of this affects ODEs yet.
-    c1 = model.createCompartment()
-    check(c1, "create compartment")
-    check(c1.setId("c1"), "set compartment id")
-    # 'constant' refers to size
-    check(c1.setConstant(True), "set compartment 'constant'")
-    check(c1.setSize(1), "set compartment 'size'")
-    check(c1.setSpatialDimensions(3), "set compartment dimensions")
-    check(c1.setUnits("dimensionless"), "set compartment dimensions")
+    create_compartment(model, "c1", constant=True, size=1, dims=3,
+                       units="dimensionless")
 
     create_species(model, plate1, comp_model)
     print(list(model.getListOfSpecies()))
 
 
-def create_species(model, plate, comp_model):
-    for i, specie in enumerate(comp_model.species):
+def create_species(model, plate, growth_model):
+    """Create each specie in a growth model for each culture on a Plate.
+
+    Species list is, e.g., C0, C1, ..., N0, N1, ... and can be
+    retrieved with the method Model.getListOfSpecies().
+
+    """
+    for i, species in enumerate(growth_model.species):
         for n in range(plate.no_cultures):
-            create_specie(model, specie, n, plate.sim_params[i])
+            create_specie(model, species, n, plate.sim_params[i])
 
 
-def create_specie(model, specie, culture_no, init_amount):
+def create_specie(model, species, culture_no, init_amount):
+    """Add a species to the SBML Model."""
     s = model.createSpecies()
     check(s, "create species s")
-    check(s.setId(specie + str(culture_no)),
-          "set species {0}{1} id".format(specie, culture_no))
+    check(s.setId(species + str(culture_no)),
+          "set species {0}{1} id".format(species, culture_no))
     check(s.setCompartment("c1"),
-          "set species {0}{1} compartment".format(specie, culture_no))
+          "set species {0}{1} compartment".format(species, culture_no))
     # If "constant" and "boundaryCondition" both false,
     # species can be both a product and a reactant.
     check(s.setConstant(False),
-          "set constant attr on {0}{1}".format(specie, culture_no))
+          "set constant attr on {0}{1}".format(species, culture_no))
     check(s.setBoundaryCondition(False),
-          "set boundary condition on {0}{1}".format(specie, culture_no))
+          "set boundary condition on {0}{1}".format(species, culture_no))
     check(s.setInitialAmount(init_amount),
-          "set init amount for {0}{1}".format(specie, culture_no))
+          "set init amount for {0}{1}".format(species, culture_no))
     # May need to specify a different unit for amount.
     check(s.setSubstanceUnits("dimensionless"),
-          "set substance units for {0}{1}".format(specie, culture_no))
+          "set substance units for {0}{1}".format(species, culture_no))
     # Density/conc. or amount? Not sure which one to use. False is density.
     check(s.setHasOnlySubstanceUnits(False),
-          "set hasOnlySubstanceUnits for {0}{1}".format(specie, culture_no))
+          "set hasOnlySubstanceUnits for {0}{1}".format(species, culture_no))
 
 
 # Simulate a plate with data and parameters.
