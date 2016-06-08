@@ -45,21 +45,26 @@ def check(value, message):
         return
 
 
-def create_unit(model, id, kind, exponent, scale, multiplier):
+def create_unit(model, id, kinds, exponents, scales, multipliers):
     """Create a new unit for the SBML Model.
 
-    kind is a libsbml object e.g. UNIT_KIND_SECOND.
+    kinds, exponents, scalses, and multipliers are lists for each base
+    unit in the new unit. E.g. for kilometers_per_second, you would
+    require unit kinds of meter and second and the corresponding
+    exponents scales and multipliers.
+
     """
     unit_def = model.createUnitDefinition()
     check(unit_def, "create unit definition")
     check(unit_def.setId(id), "set unit difinition id")
-    unit = unit_def.createUnit()
-    check(unit, "create unit on day")
-    # Requires all four of these.
-    check(unit.setKind(kind), "set unit kind")
-    check(unit.setExponent(exponent), "Set unit exponent")
-    check(unit.setScale(scale), "set unit scale")
-    check(unit.setMultiplier(multiplier), "set unit multiplier")
+    for k, e, s, m in zip(kinds, exponents, scales, multipliers):
+        unit = unit_def.createUnit()
+        check(unit, "create unit on day")
+        # Requires all four of these.
+        check(unit.setKind(k), "set unit kind")
+        check(unit.setExponent(e), "Set unit exponent")
+        check(unit.setScale(s), "set unit scale")
+        check(unit.setMultiplier(m), "set unit multiplier")
 
 
 def create_compartment(model, id, constant=True, size=1, dims=3,
@@ -136,8 +141,8 @@ def create_model(plate, growth_model, params):
 
     model = document.createModel()
     check(model, "create model")
-    create_unit(model, id="day", kind=UNIT_KIND_SECOND,
-                exponent=1, scale=0, multiplier=86400)
+    create_unit(model, id="day", kinds=[UNIT_KIND_SECOND],
+                exponents=[1], scales=[0], multipliers=[86400])
     check(model.setTimeUnits("day"), "set model-wide time units")
     # Dimensionless units are intended for rations where they will
     # cancel out. I use item rather than moles because we actually
@@ -153,8 +158,8 @@ def create_model(plate, growth_model, params):
     # Create units for other params.  Not necessarry but may help with
     # error   checking  of   mathematical  formula.   Units  are   not
     # heirarchical so must use second as a base.
-    create_unit(model, id="per_day", kind=UNIT_KIND_SECOND, exponent=-1,
-                scale=0, multiplier=86400)
+    create_unit(model, id="per_day", kinds=[UNIT_KIND_SECOND], exponents=[-1],
+                scales=[0], multipliers=[86400])
 
 
     # Not sure whether to use one compartment or a compartment for
@@ -167,7 +172,7 @@ def create_model(plate, growth_model, params):
     print(list(model.getListOfSpecies()))
 
     # Create parameters
-
+    create_params(model, plate, growth_model, params)
 
     # Create reactions
 
@@ -184,17 +189,19 @@ def create_param(model, id, constant, val, units=None):
     """Create an SBML Model parameter.
 
     If "constant" is True then the parameter value cannot be changed
-    by any construct except initialAssignment.
+    by any construct except initialAssignment. Setting "constant"
+    False does not mean that the value must change.
 
-    Units is optional and can be discovered from
+    Units is optional.
+
     """
     k = model.createParameter()
     check(k, "create parameter {0}".format(id))
     check(k.setId(id), "set parameter {0} id".format(id))
-    check(k.setConsant(constant), "set parameter {0} 'constant'".format(id))
+    check(k.setConstant(constant), "set parameter {0} 'constant'".format(id))
     check(k.setValue(val), "set parameter {0} value".format(id))
     if units is not None:
-        check(k.setUnits(units), "set parameter {0} units".format(id))
+        check(k.setUnits("per_day"), "set parameter {0} units".format(id))
 
 
 if __name__ == "__main__":
