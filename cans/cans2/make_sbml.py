@@ -8,42 +8,31 @@ from cans2.model import CompModel
 
 
 def check(value, message):
-   """If 'value' is None, prints an error message constructed using
-   'message' and then exits with status code 1.  If 'value' is an integer,
-   it assumes it is a libSBML return status code.  If the code value is
-   LIBSBML_OPERATION_SUCCESS, returns without further action; if it is not,
-   prints an error message constructed using 'message' along with text from
-   libSBML explaining the meaning of the code, and exits with status code 1.
+    """If 'value' is None, prints an error message constructed using
+    'message' and then exits with status code 1.  If 'value' is an
+    integer, it assumes it is a libSBML return status code.  If the
+    code value is LIBSBML_OPERATION_SUCCESS, returns without further
+    action; if it is not, prints an error message constructed using
+    'message' along with text from libSBML explaining the meaning of
+    the code, and exits with status code 1.
 
-   http://sbml.org/Software/libSBML/5.13.0/docs/
-   /python-api/libsbml-python-creating-model.html
-   """
-   if value == None:
-     raise SystemExit('LibSBML returned a null value trying to '
-                      + message + '.')
-   elif type(value) is int:
-     if value == LIBSBML_OPERATION_SUCCESS:
-       return
-     else:
-       err_msg = 'Error encountered trying to ' + message + '.' \
-                 + 'LibSBML returned error code ' + str(value) + ': "' \
-                 + OperationReturnValue_toString(value).strip() + '"'
-       raise SystemExit(err_msg)
-   else:
-     return
+    http://sbml.org/Software/libSBML/5.13.0/docs/
+    /python-api/libsbml-python-creating-model.html
 
-# Simulate a plate with data and parameters.
-plate1 = Plate(2, 2)
-plate1.times = np.linspace(0, 5, 11)
-params = {
-    "C_0": 1e-6,
-    "N_0": 0.1,
-    "kn": 1.5
-}
-plate1.set_sim_data(CompModel(), r_mean=40.0, r_var=15.0, custom_params=params)
-
-# writeSBMLToFile(d, filename)
-
+    """
+    if value == None:
+        raise SystemExit('LibSBML returned a null value trying to '
+                         + message + '.')
+    elif type(value) is int:
+        if value == LIBSBML_OPERATION_SUCCESS:
+            return
+        else:
+            err_msg = 'Error encountered trying to ' + message + '.' \
+                       + 'LibSBML returned error code ' + str(value) + ': "' \
+                       + OperationReturnValue_toString(value).strip() + '"'
+            raise SystemExit(err_msg)
+    else:
+        return
 
 def create_model():
     """Return an SBML model given a plate and model.
@@ -57,6 +46,8 @@ def create_model():
     except ValueError:
         raise SystemExit("Could not create SBMLDocument object")
 
+    model = document.createModel()
+    check(model, "create model")
 
     # Create a time unit of day.
     day = model.createUnitDefinition()
@@ -71,8 +62,6 @@ def create_model():
     check(unit.setMultiplier(86400), "set unit multiplier")
 
 
-    model = document.createModel()
-    check(model, "create model")
     check(model.setTimeUnits("day"), "set model-wide time units")
     # Should these two be dimensionless?
     check(model.setExtentUnits("dimensionless"), "set model units of extent")
@@ -93,9 +82,37 @@ def create_model():
     check(c1.setSpatialDimensions(3), "set compartment dimensions")
     check(c1.setUnits("dimensionless"), "set compartment dimensions")
 
+    create_species(model, plate1, comp_model)
+    print(list(model.getListOfSpecies()))
 
-    def create_species():
-        # for i in len(plate.no_cultures):
-        # for species in comp_model.species:
-        s = model.createSpecies()
-        # s.setId('
+def create_species(model, plate, comp_model):
+    for i, specie in enumerate(comp_model.species):
+        for n in range(plate.no_cultures):
+            s = model.createSpecies()
+            check(s, "create species s")
+            check(s.setId(specie + str(n)),
+                  "set species {0}{1} id".format(specie, n))
+            print(plate.sim_params[i])
+            check(s.setCompartment("c1"),
+                  "set species {0}{1} compartment".format(specie, n))
+            s.setInitialAmount(plate.sim_params[i])
+            # May need to specify a different unit for amount.
+            s.setSubstanceUnits("dimensionless")
+
+
+# Simulate a plate with data and parameters.
+plate1 = Plate(2, 2)
+plate1.times = np.linspace(0, 5, 11)
+comp_model = CompModel()
+params = {
+    "C_0": 1e-6,
+    "N_0": 0.1,
+    "kn": 1.5
+}
+plate1.set_sim_data(CompModel(), r_mean=40.0, r_var=15.0, custom_params=params)
+
+# writeSBMLToFile(d, filename)
+
+create_model()
+
+
