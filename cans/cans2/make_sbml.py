@@ -3,6 +3,10 @@
 Addapted from: http://sbml.org/Software/libSBML/5.13.0/docs/
 /python-api/libsbml-python-creating-model.html
 
+See also the SBML Level 3 Version 1 Release 1 specifications.
+http://sbml.org/Software/libSBML/docs/python-api/ \
+libsbml-sbml-specifications.html
+
 """
 import sys
 from libsbml import *
@@ -76,7 +80,7 @@ def create_compartment(model, id, constant=True, size=1, dims=3,
     check(c.setUnits(units), "set compartment dimensions")
 
 
-def create_specie(model, species, culture_no, init_amount):
+def create_a_species(model, species, culture_no, init_amount):
     """Add a species to the SBML Model."""
     s = model.createSpecies()
     check(s, "create species s")
@@ -95,8 +99,9 @@ def create_specie(model, species, culture_no, init_amount):
     # May need to specify a different unit for amount.
     check(s.setSubstanceUnits("dimensionless"),
           "set substance units for {0}{1}".format(species, culture_no))
-    # Density/conc. or amount? Not sure which one to use. False is density.
-    check(s.setHasOnlySubstanceUnits(False),
+    # If False: unit of amount / unit of size. If True: unit of amount
+    # only. I.e. desnity or amount?
+    check(s.setHasOnlySubstanceUnits(True),
           "set hasOnlySubstanceUnits for {0}{1}".format(species, culture_no))
 
 
@@ -111,7 +116,7 @@ def create_species(model, plate, growth_model, params):
     """
     for i, species in enumerate(growth_model.species):
         for n in range(plate.no_cultures):
-            create_specie(model, species, n, params[i])
+            create_a_species(model, species, n, params[i])
 
 
 def create_model(plate, growth_model, params):
@@ -134,11 +139,22 @@ def create_model(plate, growth_model, params):
     create_unit(model, id="day", kind=UNIT_KIND_SECOND,
                 exponent=1, scale=0, multiplier=86400)
     check(model.setTimeUnits("day"), "set model-wide time units")
-    # Should these two be dimensionless?
-    check(model.setExtentUnits("dimensionless"), "set model units of extent")
-    check(model.setSubstanceUnits("dimensionless"), "set model substance units")
+    # Dimensionless units are intended for rations where they will
+    # cancel out. I use item rather than moles because we actually
+    # have intensity measurements as a proxy for amounts and do not
+    # know how they corresponds. Intensity output from Colonzyer is
+    # given in arbitrary units.
+    check(model.setExtentUnits("item"), "set model units of extent")
+    check(model.setSubstanceUnits("item"), "set model substance units")
     # check(model.setExtentUnits("mole"), "set model units of extent")
     # check(model.setSubstanceUnits("mole"), "set model substance units")
+
+
+    # Create units for other params.  Not necessarry but may help with
+    # error   checking  of   mathematical  formula.   Units  are   not
+    # heirarchical so must use second as a base.
+    create_unit(model, id="per_day", kind=UNIT_KIND_SECOND, exponent=-1,
+                scale=0, multiplier=86400)
 
 
     # Not sure whether to use one compartment or a compartment for
@@ -149,6 +165,36 @@ def create_model(plate, growth_model, params):
 
     create_species(model, plate1, growth_model, params)
     print(list(model.getListOfSpecies()))
+
+    # Create parameters
+
+
+    # Create reactions
+
+def create_params(model, plate, growth_model, params):
+    # Create kn. This code is not very general but could be made more
+    # general if units were specified for parameters in Model
+    # difinitions in the model.py module of the cans package.
+
+    #  May need to define new units per_day or item_per_day.
+    create_param(model, "kn", constant=True, val=params[2], units="per_day")
+    # Create r
+
+def create_param(model, id, constant, val, units=None):
+    """Create an SBML Model parameter.
+
+    If "constant" is True then the parameter value cannot be changed
+    by any construct except initialAssignment.
+
+    Units is optional and can be discovered from
+    """
+    k = model.createParameter()
+    check(k, "create parameter {0}".format(id))
+    check(k.setId(id), "set parameter {0} id".format(id))
+    check(k.setConsant(constant), "set parameter {0} 'constant'".format(id))
+    check(k.setValue(val), "set parameter {0} value".format(id))
+    if units is not None:
+        check(k.setUnits(units), "set parameter {0} units".format(id))
 
 
 if __name__ == "__main__":
@@ -161,7 +207,8 @@ if __name__ == "__main__":
         "N_0": 0.1,
         "kn": 1.5
     }
-    plate1.set_sim_data(CompModel(), r_mean=40.0, r_var=15.0, custom_params=params)
+    plate1.set_sim_data(comp_model, r_mean=40.0, r_var=15.0,
+                        custom_params=params)
 
     create_model(plate1, comp_model, plate1.sim_params)
 
