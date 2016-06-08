@@ -85,19 +85,34 @@ def create_model():
     create_species(model, plate1, comp_model)
     print(list(model.getListOfSpecies()))
 
+
 def create_species(model, plate, comp_model):
     for i, specie in enumerate(comp_model.species):
         for n in range(plate.no_cultures):
-            s = model.createSpecies()
-            check(s, "create species s")
-            check(s.setId(specie + str(n)),
-                  "set species {0}{1} id".format(specie, n))
-            print(plate.sim_params[i])
-            check(s.setCompartment("c1"),
-                  "set species {0}{1} compartment".format(specie, n))
-            s.setInitialAmount(plate.sim_params[i])
-            # May need to specify a different unit for amount.
-            s.setSubstanceUnits("dimensionless")
+            create_specie(model, specie, n, plate.sim_params[i])
+
+
+def create_specie(model, specie, culture_no, init_amount):
+    s = model.createSpecies()
+    check(s, "create species s")
+    check(s.setId(specie + str(culture_no)),
+          "set species {0}{1} id".format(specie, culture_no))
+    check(s.setCompartment("c1"),
+          "set species {0}{1} compartment".format(specie, culture_no))
+    # If "constant" and "boundaryCondition" both false,
+    # species can be both a product and a reactant.
+    check(s.setConstant(False),
+          "set constant attr on {0}{1}".format(specie, culture_no))
+    check(s.setBoundaryCondition(False),
+          "set boundary condition on {0}{1}".format(specie, culture_no))
+    check(s.setInitialAmount(init_amount),
+          "set init amount for {0}{1}".format(specie, culture_no))
+    # May need to specify a different unit for amount.
+    check(s.setSubstanceUnits("dimensionless"),
+          "set substance units for {0}{1}".format(specie, culture_no))
+    # Density/conc. or amount? Not sure which one to use. False is density.
+    check(s.setHasOnlySubstanceUnits(False),
+          "set hasOnlySubstanceUnits for {0}{1}".format(specie, culture_no))
 
 
 # Simulate a plate with data and parameters.
