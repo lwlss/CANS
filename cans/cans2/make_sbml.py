@@ -70,11 +70,52 @@ def create_compartment(model, id, constant=True, size=1, dims=3,
     check(c.setUnits(units), "set compartment dimensions")
 
 
-def create_model():
+def create_specie(model, species, culture_no, init_amount):
+    """Add a species to the SBML Model."""
+    s = model.createSpecies()
+    check(s, "create species s")
+    check(s.setId(species + str(culture_no)),
+          "set species {0}{1} id".format(species, culture_no))
+    check(s.setCompartment("c1"),
+          "set species {0}{1} compartment".format(species, culture_no))
+    # If "constant" and "boundaryCondition" both false,
+    # species can be both a product and a reactant.
+    check(s.setConstant(False),
+          "set constant attr on {0}{1}".format(species, culture_no))
+    check(s.setBoundaryCondition(False),
+          "set boundary condition on {0}{1}".format(species, culture_no))
+    check(s.setInitialAmount(init_amount),
+          "set init amount for {0}{1}".format(species, culture_no))
+    # May need to specify a different unit for amount.
+    check(s.setSubstanceUnits("dimensionless"),
+          "set substance units for {0}{1}".format(species, culture_no))
+    # Density/conc. or amount? Not sure which one to use. False is density.
+    check(s.setHasOnlySubstanceUnits(False),
+          "set hasOnlySubstanceUnits for {0}{1}".format(species, culture_no))
+
+
+def create_species(model, plate, growth_model, params):
+    """Create each specie in a growth model for each culture on a Plate.
+
+    Species list is, e.g., C0, C1, ..., N0, N1, ... and can be
+    retrieved with the method Model.getListOfSpecies(). Requires
+    either plate.sim_params or plate.est_params as the params argument
+    in order to set initial amounts.
+
+    """
+    for i, species in enumerate(growth_model.species):
+        for n in range(plate.no_cultures):
+            create_specie(model, species, n, params[i])
+
+
+def create_model(plate, growth_model, params):
     """Return an SBML model given a plate and model.
 
     http://sbml.org/Software/libSBML/5.13.0/docs/
     /python-api/libsbml-python-creating-model.html
+
+    Requires either plate.sim_params or plate.est_params (or whatever
+    attribute estimated parameters are assigned to) as the params argument.
 
     """
     try:
