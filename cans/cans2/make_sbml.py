@@ -171,48 +171,35 @@ def create_growth_reaction(model, i):
 
     create_reactant(r, "C{0}".format(i))
     create_reactant(r, "N{0}".format(i))
-    create_product(r, "C{0}".format(i))
-
-    # C_ref = r.createReactant()
-    # check(C_ref, "create C reactant")
-    # check(C_ref.setSpecies("C{0}".format(i)),
-    #       "assign reactant C{0} for reaction {1}".format(i, r.getId()))
-    # # "constant" dictates whether the stochiometry be changed during a reaction.
-    # check(C_ref.setConstant(False)
-    #       "set 'constant' on reactant N{0} in reaction {1}".format(i, r.getId()))
-
-    # N_ref = r.createReactant()
-    # create_reaction_species(N_ref, r, i)
-    # check(N_ref, "create N reactant")
-    # check(N_ref.setSpecies("N{0}".format(i)),
-    #       "assign reactant N{0} for reaction {1}".format(i, r.getId()))
-    # check(N_ref.setConstant(False),
-    #       "set 'constant' on reactant N{0} in reaction {1}".format(i, r.getId()))
-
-    # C_prod_ref = r.createProduct()
-    # check(C_prod_ref, "create C product")
-    # check(C_prod_ref.setSpecies("C{0}".format(i)),
-    #       "assign product C{0} for reaction {1}".format(i, r.getId()))
-    # check(C_prod_ref.setConstant(False),
-    #       "set 'constant' on product C{0} in reaction {1}".format(i, r.getId()))
+    create_product(r, "C{0}".format(i), stoich=2)
 
 
-def create_reactant(reaction, species_id):
+def create_reactant(reaction, species_id, stoich=1):
     """Add a reactant to a libsbml Reaction."""
     r_id = reaction.getId()
+    reactant_in_r = "reactant {0} in reaction {1}".format(species_id, r_id)
     R_ref = reaction.createReactant()
     check(R_ref, "create {0} reactant".format(species_id))
-    check(R_ref.setSpecies(species_id),
-          "assign reactant {0} for reaction {1}".format(species_id,
-                                                        r_id))
-    # "constant" dictates whether the stochiometry be changed during a reaction.
-    check(R_ref.setConstant(False),
-          "set 'constant' on reactant {0} in reaction {1}".format(species_id,
-                                                                  r_id))
+    check(R_ref.setSpecies(species_id), "assign " + reactant_in_r)
+    # "constant" dictates whether the stochiometry can be changed
+    # during a reaction.
+    check(R_ref.setConstant(False), "set 'constant' on " + reactant_in_r)
+    check(R_ref.setStoichiometry(stoich),
+          "set stoichiometry for " + reactant_in_r)
 
-def create_product(reaction, species_id):
+
+def create_product(reaction, species_id, stoich=1):
     """Add a product to a libsbml Reaction."""
-    pass
+    r_id = reaction.getId()
+    prod_in_r = "product {0} in reaction {1}".format(species_id, r_id)
+    P_ref = reaction.createProduct()
+    check(P_ref, "create {0} product".format(species_id))
+    check(P_ref.setSpecies(species_id), "assign " + prod_in_r)
+    # "constant" dictates whether the stochiometry can be changed
+    # during a reaction.
+    check(P_ref.setConstant(False), "set 'constant' on " + prod_in_r)
+    check(P_ref.setStoichiometry(stoich), "set stoichiometry for " + prod_in_r)
+
 
 def create_nut_diffusions(model, i, neighbours):
     for j in neighbours:
@@ -300,8 +287,12 @@ def create_model(plate, growth_model, params):
     # Create reactions.
     create_reactions(model, plate)
     for r in model.getListOfReactions():
+        reactants = r.getListOfReactants()
+        products = r.getListOfProducts()
         print(r.getId(), r.getKineticLaw())
-
+#        for reactant in reactants:
+        print([(reactant.getSpecies(), reactant.getStoichiometry()) for reactant in reactants])
+        print([(product.getSpecies(), product.getStoichiometry()) for product in products])
     # Also have a look at initial assignments, constraints, and
     # rules. I don't think that we have any events.
 
