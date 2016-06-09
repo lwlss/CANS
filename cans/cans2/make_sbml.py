@@ -65,7 +65,7 @@ def create_unit(model, id, kinds, exponents, scales, multipliers):
 
 
 def create_compartment(model, id, constant=True, size=1, dims=3,
-                       units="dimesionless"):
+                       units="volume"):
     """Create a new compartment for the SBML Model.
 
     "constant" is a boolean which determines whether the compartment
@@ -79,7 +79,7 @@ def create_compartment(model, id, constant=True, size=1, dims=3,
     check(c.setConstant(constant), "set compartment 'constant'")
     check(c.setSize(size), "set compartment 'size'")
     check(c.setSpatialDimensions(dims), "set compartment dimensions")
-    check(c.setUnits(units), "set compartment dimensions")
+    check(c.setUnits(units), "set compartment units")
 
 
 def create_a_species(model, species, culture_no, init_amount,
@@ -111,7 +111,7 @@ def create_a_species(model, species, culture_no, init_amount,
 
 
 def create_species(model, plate, growth_model, params):
-    """Create each specie in a growth model for each culture on a Plate.
+    """Create each species in a growth model for each culture on a Plate.
 
     Species list is, e.g., C0, C1, ..., N0, N1, ... and can be
     retrieved with the method Model.getListOfSpecies(). Requires
@@ -194,7 +194,7 @@ def create_nut_diffusion(model, i, j):
 
     # Diffusion rate. Does this require a rule/constraint to be always
     # positive?
-    math_ast = parseL3Formula("kn * (N{0} - N{1})".format(i, j))
+    math_ast = parseL3Formula("kn * N{0}".format(i))
     check(math_ast, "create AST for diffusion N{0} -> N{1}".format(i, j))
 
     kinetic_law = r.createKineticLaw()
@@ -294,7 +294,7 @@ def create_model(plate, growth_model, params, outfile=""):
     # each culture. Attempting to use dimensionless unit sizes and one
     # compartment. Not sure how all of this affects ODEs yet.
     create_compartment(model, "c1", constant=True, size=1, dims=3,
-                       units="dimensionless")
+                       units="volume")
 
     # Create species
     create_species(model, plate1, growth_model, params)
@@ -342,6 +342,7 @@ if __name__ == "__main__":
     from cans2.model import CompModel
     from cans2.plotter import Plotter
 
+
     # Simulate a plate with data and parameters.
     rows = 2
     cols = 2
@@ -357,13 +358,18 @@ if __name__ == "__main__":
                         custom_params=params)
 
     # Convert comp model to SBML.
-    # create_model(plate1, comp_model, plate1.sim_params,
-    #              outfile="sbml_models/simulated_{0}x{1}_plate.xml".format(rows, cols))
+    create_model(plate1, comp_model, plate1.sim_params,
+                 outfile="sbml_models/simulated_{0}x{1}_plate.xml".format(rows, cols))
 
+
+#    plate1.sim_params[2] = 2*params["kn"]
+    plate1.set_sim_data(comp_model)
     comp_plotter = Plotter(CompModel())
     comp_plotter.plot_est(plate1, plate1.sim_params,
-                          title="Simulated growth", sim=True)
-                         # filename="sbml_models/plots/cans_{0}x{1}_sim.pdf".format(rows, cols))
+                          title="Simulated growth", sim=True,
+                          filename="sbml_models/plots/cans_{0}x{1}_sim.pdf".format(rows, cols))
 
     # Should try loading the model in Copasi and simulating/solving
     # with libRoadRunner when I think it is finished.
+
+    print(plate1.sim_amounts)
