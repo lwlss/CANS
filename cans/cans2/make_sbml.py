@@ -1,11 +1,12 @@
 """Convert model to SBML.
 
-Addapted from: http://sbml.org/Software/libSBML/5.13.0/docs/
-/python-api/libsbml-python-creating-model.html
+Addapted from:
+(Michael Hucka) "Tutorial: creating a simple model"
+http://sbml.org/Software/libSBML/5.13.0/docs//python-api/libsbml-python-creating-model.html
+http://sbml.org/Software/libSBML/docs/python-api/create_simple_model_8py-example.html
 
 See also the SBML Level 3 Version 1 Release 1 specifications.
-http://sbml.org/Software/libSBML/docs/python-api/ \
-libsbml-sbml-specifications.html
+http://sbml.org/Software/libSBML/docs/python-api/libsbml-sbml-specifications.html
 
 """
 import sys
@@ -26,8 +27,9 @@ def check(value, message):
     'message' along with text from libSBML explaining the meaning of
     the code, and exits with status code 1.
 
-    http://sbml.org/Software/libSBML/5.13.0/docs/
-    /python-api/libsbml-python-creating-model.html
+    (Michael Hucka) "Tutorial: creating a simple model"
+    http://sbml.org/Software/libSBML/5.13.0/docs//python-api/libsbml-python-creating-model.html
+    http://sbml.org/Software/libSBML/docs/python-api/create_simple_model_8py-example.html
 
     """
     if value == None:
