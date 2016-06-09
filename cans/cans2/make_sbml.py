@@ -170,17 +170,57 @@ def create_reactions(model, plate): #, growth_model):
 
 def create_growth_reaction(model, i):
     r = create_reaction(model, "Growth_{0}".format(i))
-    create_reactant(r, "C{0}".format(i))
-    create_reactant(r, "N{0}".format(i))
+    create_reactant(r, "C{0}".format(i), stoich=1)
+    create_reactant(r, "N{0}".format(i), stoich=1)
     create_product(r, "C{0}".format(i), stoich=2)
 
-    # Why ast?
+    # Abstract syntax tree are used by libSBML (not SBML) for storing
+    # mathematical equtations.
+    # http://sbml.org/Special/Software/libSBML/3.4.1/docs/java-api/org/sbml/libsbml/ASTNode.html
     math_ast = parseL3Formula("r{} * C{} * N{}".format(*[i]*3))
-    check(math_ast, "create AST for rate expression")
+    check(math_ast, "create AST for culture {0} growth expression".format(i))
 
     kinetic_law = r.createKineticLaw()
-    check(kinetic_law, "create kinetic law")
-    check(kinetic_law.setMath(math_ast), "set math on kinetic law")
+    check(kinetic_law, "create kinetic law for culture {0} growth".format(i))
+    check(kinetic_law.setMath(math_ast),
+          "set math on kinetic law for culture {0} growth".format(i))
+
+
+def create_nut_diffusions(model, i, neighbours):
+    for j in neighbours:
+        create_nut_diffusion(model, i, j)
+
+
+def create_nut_diffusion(model, i, j):
+    """Diffusion of nutrients from culture i to j."""
+    r = create_reaction(model, "Diff_{0}_{1}".format(i, j))
+    create_reactant(r, "N{0}".format(i), stoich=1)
+    create_product(r, "N{0}".format(j), stoich=1)
+
+    # Diffusion rate. Does this require a rule/constraint to be always
+    # positive?
+    math_ast = parseL3Formula("kn * (N{0} - N{1})".format(i, j))
+    check(math_ast, "create AST for diffusion N{0} -> N{1}".format(i, j))
+
+    kinetic_law = r.createKineticLaw()
+    check(kinetic_law, "create kinetic law for N{0} -> N{1}".format(i, j))
+    check(kinetic_law.setMath(math_ast),
+          "set math on kinetic law for N{0} -> N{1}".format(i, j))
+
+
+def create_reaction(model, id, reversible=False, fast=False):
+    r = model.createReaction()
+    check(r, "create reaction")
+    check(r.setId(id), "set reaction {0} id".format(id))
+    check(r.setReversible(reversible),
+          "set reaction {0} reversibility flag".format(id))
+    # "If a model does not distinguish between time scales, the fast
+    # attribute should be set to 'false' for all reactions." - from
+    # SBML L3V1R1 specification. Our hypothesis is that diffusion
+    # occurs quickly enough to affect growth so "fast" should be False
+    # for all.
+    check(r.setFast(fast), "set reaction {0} speed".format(id))
+    return r
 
 
 def create_reactant(reaction, species_id, stoich=1):
@@ -208,31 +248,6 @@ def create_product(reaction, species_id, stoich=1):
     # during a reaction.
     check(P_ref.setConstant(False), "set 'constant' on " + prod_in_r)
     check(P_ref.setStoichiometry(stoich), "set stoichiometry for " + prod_in_r)
-
-
-def create_nut_diffusions(model, i, neighbours):
-    for j in neighbours:
-        create_nut_diffusion(model, i, j)
-
-
-def create_nut_diffusion(model, i, j):
-    """Diffusion of nutrients from culture i to j."""
-    r = create_reaction(model, "Diff_{0}_{1}".format(i, j))
-
-
-def create_reaction(model, id, reversible=False, fast=False):
-    r = model.createReaction()
-    check(r, "create reaction")
-    check(r.setId(id), "set reaction {0} id".format(id))
-    check(r.setReversible(reversible),
-          "set reaction {0} reversibility flag".format(id))
-    # "If a model does not distinguish between time scales, the fast
-    # attribute should be set to 'false' for all reactions." - from
-    # SBML L3V1R1 specification. Our hypothesis is that diffusion
-    # occurs quickly enough to affect growth so "fast" should be False
-    # for all.
-    check(r.setFast(fast), "set reaction {0} speed".format(id))
-    return r
 
 
 def create_model(plate, growth_model, params):
@@ -310,6 +325,9 @@ def create_model(plate, growth_model, params):
     # rules. I don't think that we have any events.
 
 
+    # Return a text string containing the SBML document in xml format.
+    return writeSBMLToString(document)
+
 
 if __name__ == "__main__":
     # Simulate a plate with data and parameters.
@@ -325,8 +343,9 @@ if __name__ == "__main__":
                         custom_params=params)
 
     # Convert comp model to SBML.
-    create_model(plate1, comp_model, plate1.sim_params)
+    sbml = create_model(plate1, comp_model, plate1.sim_params)
 
+    print(sbml)
 
     # Should try loading the model in Copasi and simulating/solving
     # with libRoadRunner when I think it is finished.
