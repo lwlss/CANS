@@ -13,11 +13,6 @@ import sys
 from libsbml import *
 
 
-import numpy as np
-from cans2.plate import Plate
-from cans2.model import CompModel
-
-
 def check(value, message):
     """If 'value' is None, prints an error message constructed using
     'message' and then exits with status code 1.  If 'value' is an
@@ -250,14 +245,18 @@ def create_product(reaction, species_id, stoich=1):
     check(P_ref.setStoichiometry(stoich), "set stoichiometry for " + prod_in_r)
 
 
-def create_model(plate, growth_model, params):
+def create_model(plate, growth_model, params, outfile=""):
     """Return an SBML model given a plate and model.
 
     http://sbml.org/Software/libSBML/5.13.0/docs/
     /python-api/libsbml-python-creating-model.html
 
     Requires either plate.sim_params or plate.est_params (or whatever
-    attribute estimated parameters are assigned to) as the params argument.
+    attribute estimated parameters are assigned to) as the params
+    argument.
+
+    If outfile ends with the suffix ".gz", the written xml file is
+    compressed.
 
     """
     try:
@@ -299,18 +298,20 @@ def create_model(plate, growth_model, params):
 
     # Create species
     create_species(model, plate1, growth_model, params)
+    # Print species as check.
     print(list(model.getListOfSpecies()))
     for species in model.getListOfSpecies():
         print(species.getId(), species.getInitialAmount(), species.getUnits())
 
     # Create parameters
     create_params(model, plate, growth_model, params)
+    # Print params as check.
     for param in model.getListOfParameters():
         print(param.getValue(), param.getUnits())
 
     # Create reactions.
     create_reactions(model, plate)
-    # Print to check.
+    # Print reactions as check.
     for r in model.getListOfReactions():
         reactants = r.getListOfReactants()
         products = r.getListOfProducts()
@@ -318,18 +319,29 @@ def create_model(plate, growth_model, params):
             print(r.getId(), r.getKineticLaw().getFormula())
         else:
             print(r.getId())
-        print([(reactant.getSpecies(), reactant.getStoichiometry()) for reactant in reactants])
-        print([(product.getSpecies(), product.getStoichiometry()) for product in products])
+        print([(reactant.getSpecies(), reactant.getStoichiometry())
+               for reactant in reactants])
+        print([(product.getSpecies(), product.getStoichiometry())
+               for product in products])
 
     # Also have a look at initial assignments, constraints, and
     # rules. I don't think that we have any events.
 
+    if outfile:
+        writeSBMLToFile(document, outfile)
 
     # Return a text string containing the SBML document in xml format.
     return writeSBMLToString(document)
 
 
 if __name__ == "__main__":
+    import numpy as np
+
+
+    from cans2.plate import Plate
+    from cans2.model import CompModel
+
+
     # Simulate a plate with data and parameters.
     plate1 = Plate(2, 2)
     plate1.times = np.linspace(0, 5, 11)
@@ -343,7 +355,8 @@ if __name__ == "__main__":
                         custom_params=params)
 
     # Convert comp model to SBML.
-    sbml = create_model(plate1, comp_model, plate1.sim_params)
+    sbml = create_model(plate1, comp_model, plate1.sim_params,
+                        outfile="sbml_models/simulated_2x2_plate.xml")
 
     print(sbml)
 
