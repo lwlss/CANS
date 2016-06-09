@@ -157,16 +157,16 @@ def create_param(model, id, constant, val, units=None):
         check(k.setUnits(units), "set parameter {0} units".format(id))
 
 
-def create_reactions(model, plate): #, growth_model):
+def create_reactions(model, plate):
     for i in range(plate.no_cultures):
         create_growth_reaction(model, i)
         # For reversible reactions only want to count each pair once.
         higher_neighs = [neigh for neigh in plate.neighbourhood[i] if neigh > i]
-        create_reversible_nut_diffusions(model, i, higher_neighs)
-      #  create_nut_diffusions(model, i, plate.neighbourhood[i])
+        create_nut_diffusions(model, i, higher_neighs)
 
 
 def create_growth_reaction(model, i):
+    """Create growth reaction for culture i."""
     r = create_reaction(model, "Growth_{0}".format(i))
     create_reactant(r, "C{0}".format(i), stoich=1)
     create_reactant(r, "N{0}".format(i), stoich=1)
@@ -184,46 +184,34 @@ def create_growth_reaction(model, i):
           "set math on kinetic law for culture {0} growth".format(i))
 
 
-def create_nut_diffusions(model, i, neighbours):
-    for j in neighbours:
+def create_nut_diffusions(model, i, higher_neighbours):
+    """Create diffusions for culture pair.
+
+    As each reaction is reversible, "higher_neighbours" should have a
+    culture index greater than the culture index i so that each
+    reaction is only counted once.
+
+    """
+    for j in higher_neighbours:
         create_nut_diffusion(model, i, j)
 
 
 def create_nut_diffusion(model, i, j):
-    """Diffusion of nutrients from culture i to j."""
-    r = create_reaction(model, "Diff_{0}_{1}".format(i, j))
-    create_reactant(r, "N{0}".format(i), stoich=1)
-    create_product(r, "N{0}".format(j), stoich=1)
+    """Diffusion of nutrients from culture i to j.
 
-    # Diffusion of Nutrients from culture i to j. There is a
-    # corresponding reverse reaction so that the overall reaction rate
-    # of Ni<->Nj is kn*(Ni-Nj). Each individual reaction is
-    # irreversible, as defined in the kinetic law, and this should be
-    # specified in the create_reaction function using
-    # model.setReversible(False).
-    math_ast = parseL3Formula("kn * N{0}".format(i))
-    check(math_ast, "create AST for diffusion N{0} -> N{1}".format(i, j))
+    Reactions are reversible so to only count them once i should be
+    less than j.
 
-    kinetic_law = r.createKineticLaw()
-    check(kinetic_law, "create kinetic law for N{0} -> N{1}".format(i, j))
-    check(kinetic_law.setMath(math_ast),
-          "set math on kinetic law for N{0} -> N{1}".format(i, j))
-
-def create_reversible_nut_diffusions(model, i, neighbours):
-    for j in neighbours:
-        create_rev_nut_diffusion(model, i, j)
-
-def create_rev_nut_diffusion(model, i, j):
-    """Diffusion of nutrients from culture i to j."""
-    assert i < j
+    """
+    assert i < j, "To count reversible diffusion only once requires i < j."
     r = create_reaction(model, "Diff_{0}_{1}".format(i, j), reversible=True)
     create_reactant(r, "N{0}".format(i), stoich=1)
     create_product(r, "N{0}".format(j), stoich=1)
 
-    # Diffusion of Nutrients from culture i to j. The overall reaction
-    # rate of Ni<->Nj is kn*(Ni-Nj). Each reaction is reversible, as
-    # defined in the kinetic law, and this should be specified in the
-    # create_reaction function using model.setReversible(False).
+    # The overall reaction rate of Ni<->Nj is kn*(Ni-Nj). Each
+    # reaction is reversible, as defined in the kinetic law, and this
+    # should be specified in the create_reaction function using
+    # model.setReversible(False).
     math_ast = parseL3Formula("kn * (N{0} - N{1})".format(i, j))
     check(math_ast, "create AST for diffusion N{0} -> N{1}".format(i, j))
 
@@ -302,17 +290,15 @@ def create_model(plate, growth_model, params, outfile=""):
     create_unit(model, id="day", kinds=[UNIT_KIND_SECOND],
                 exponents=[1], scales=[0], multipliers=[86400])
     check(model.setTimeUnits("day"), "set model-wide time units")
-    # In SBML dimensionless units are intended for ration where they
-    # will cancel out. I use item rather than moles because we
-    # actually have intensity measurements as a proxy for amounts and
-    # do not know how they correspond. Intensity measurments output by
-    # Colonzyer are given in arbitrary units.
+
+    # Intensity measurments output by Colonzyer are given in arbitrary
+    # units so use item (rather than moles) for substance amounts.
     check(model.setExtentUnits("item"), "set model units of extent")
     check(model.setSubstanceUnits("item"), "set model substance units")
 
-    # Create units for other params.  Not necessarry but may help with
-    # error checking  of   mathematical  formula.   Units  are   not
-    # heirarchical so must use second as a base.
+    # Create units for kinetic parameters. Not necessarry but may help
+    # with error checking of mathematical formula. Units are not
+    # heirarchical so must use second as a base rather than day.
     create_unit(model, id="per_day", kinds=[UNIT_KIND_SECOND], exponents=[-1],
                 scales=[0], multipliers=[86400])
     create_unit(model, id="day_per_item",
@@ -320,42 +306,14 @@ def create_model(plate, growth_model, params, outfile=""):
                 exponents=[1, -1], scales=[0, 0],
                 multipliers=[86400, 1])
 
-    # Not sure whether to use one compartment or a compartment for
-    # each culture. Attempting to use dimensionless unit sizes and one
-    # compartment. Not sure how all of this affects ODEs yet.
+    # Use one compartment for all species and reactions.
     create_compartment(model, "c1", constant=True, size=1, dims=0,
                        units="dimensionless")
 
-    # Create species
+
     create_species(model, plate1, growth_model, params)
-    # # Print species as check.
-    # print(list(model.getListOfSpecies()))
-    # for species in model.getListOfSpecies():
-    #     print(species.getId(), species.getInitialAmount(), species.getUnits())
-
-    # Create parameters
     create_params(model, plate, growth_model, params)
-    # # Print params as check.
-    # for param in model.getListOfParameters():
-    #     print(param.getValue(), param.getUnits())
-
-    # Create reactions.
     create_reactions(model, plate)
-    # # Print reactions as check.
-    # for r in model.getListOfReactions():
-    #     reactants = r.getListOfReactants()
-    #     products = r.getListOfProducts()
-    #     if r.getKineticLaw() is not None:
-    #         print(r.getId(), r.getKineticLaw().getFormula())
-    #     else:
-    #         print(r.getId())
-    #     print([(reactant.getSpecies(), reactant.getStoichiometry())
-    #            for reactant in reactants])
-    #     print([(product.getSpecies(), product.getStoichiometry())
-    #            for product in products])
-
-    # Also have a look at initial assignments, constraints, and
-    # rules. I don't think that we have any events.
 
     if outfile:
         writeSBMLToFile(document, outfile)
@@ -391,9 +349,7 @@ if __name__ == "__main__":
     create_model(plate1, comp_model, plate1.sim_params,
                  outfile="sbml_models/simulated_{0}x{1}_plate.xml".format(rows, cols))
 
-
-#    plate1.sim_params[2] = 2*params["kn"]
-    plate1.set_sim_data(comp_model)
+    # Plot a cans model simulation to compare.
     comp_plotter = Plotter(CompModel())
     comp_plotter.plot_est(plate1, plate1.sim_params,
                           title="Simulated growth", sim=True,
@@ -401,5 +357,3 @@ if __name__ == "__main__":
 
     # Should try loading the model in Copasi and simulating/solving
     # with libRoadRunner when I think it is finished.
-
-    # print(plate1.sim_amounts)
