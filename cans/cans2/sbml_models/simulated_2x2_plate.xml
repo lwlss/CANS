@@ -34,10 +34,10 @@
     </listOfSpecies>
     <listOfParameters>
       <parameter id="kn" value="1.5" units="per_day" constant="true"/>
-      <parameter id="r" value="15.0118865261592" units="day_per_item" constant="true"/>
-      <parameter id="r" value="64.1898709453253" units="day_per_item" constant="true"/>
-      <parameter id="r" value="35.4844552689987" units="day_per_item" constant="true"/>
-      <parameter id="r" value="46.4106485668374" units="day_per_item" constant="true"/>
+      <parameter id="r0" value="50.7944192607482" units="day_per_item" constant="true"/>
+      <parameter id="r1" value="42.1544022695598" units="day_per_item" constant="true"/>
+      <parameter id="r2" value="37.7256373775045" units="day_per_item" constant="true"/>
+      <parameter id="r3" value="37.462552615109" units="day_per_item" constant="true"/>
     </listOfParameters>
     <listOfReactions>
       <reaction id="Growth_0" reversible="false" fast="false">
