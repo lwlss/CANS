@@ -309,12 +309,9 @@ def create_model(plate, growth_model, params, outfile=""):
     # Colonzyer are given in arbitrary units.
     check(model.setExtentUnits("item"), "set model units of extent")
     check(model.setSubstanceUnits("item"), "set model substance units")
-    # check(model.setExtentUnits("mole"), "set model units of extent")
-    # check(model.setSubstanceUnits("mole"), "set model substance units")
-
 
     # Create units for other params.  Not necessarry but may help with
-    # error   checking  of   mathematical  formula.   Units  are   not
+    # error checking  of   mathematical  formula.   Units  are   not
     # heirarchical so must use second as a base.
     create_unit(model, id="per_day", kinds=[UNIT_KIND_SECOND], exponents=[-1],
                 scales=[0], multipliers=[86400])
@@ -326,36 +323,36 @@ def create_model(plate, growth_model, params, outfile=""):
     # Not sure whether to use one compartment or a compartment for
     # each culture. Attempting to use dimensionless unit sizes and one
     # compartment. Not sure how all of this affects ODEs yet.
-    create_compartment(model, "c1", constant=True, size=1, dims=3,
-                       units="volume")
+    create_compartment(model, "c1", constant=True, size=1, dims=0,
+                       units="dimensionless")
 
     # Create species
     create_species(model, plate1, growth_model, params)
-    # Print species as check.
-    print(list(model.getListOfSpecies()))
-    for species in model.getListOfSpecies():
-        print(species.getId(), species.getInitialAmount(), species.getUnits())
+    # # Print species as check.
+    # print(list(model.getListOfSpecies()))
+    # for species in model.getListOfSpecies():
+    #     print(species.getId(), species.getInitialAmount(), species.getUnits())
 
     # Create parameters
     create_params(model, plate, growth_model, params)
-    # Print params as check.
-    for param in model.getListOfParameters():
-        print(param.getValue(), param.getUnits())
+    # # Print params as check.
+    # for param in model.getListOfParameters():
+    #     print(param.getValue(), param.getUnits())
 
     # Create reactions.
     create_reactions(model, plate)
-    # Print reactions as check.
-    for r in model.getListOfReactions():
-        reactants = r.getListOfReactants()
-        products = r.getListOfProducts()
-        if r.getKineticLaw() is not None:
-            print(r.getId(), r.getKineticLaw().getFormula())
-        else:
-            print(r.getId())
-        print([(reactant.getSpecies(), reactant.getStoichiometry())
-               for reactant in reactants])
-        print([(product.getSpecies(), product.getStoichiometry())
-               for product in products])
+    # # Print reactions as check.
+    # for r in model.getListOfReactions():
+    #     reactants = r.getListOfReactants()
+    #     products = r.getListOfProducts()
+    #     if r.getKineticLaw() is not None:
+    #         print(r.getId(), r.getKineticLaw().getFormula())
+    #     else:
+    #         print(r.getId())
+    #     print([(reactant.getSpecies(), reactant.getStoichiometry())
+    #            for reactant in reactants])
+    #     print([(product.getSpecies(), product.getStoichiometry())
+    #            for product in products])
 
     # Also have a look at initial assignments, constraints, and
     # rules. I don't think that we have any events.
@@ -363,8 +360,8 @@ def create_model(plate, growth_model, params, outfile=""):
     if outfile:
         writeSBMLToFile(document, outfile)
 
-    # Return a text string containing the SBML document in xml format.
-    return writeSBMLToString(document)
+    # # Return a text string containing the SBML document in xml format.
+    # return writeSBMLToString(document)
 
 
 if __name__ == "__main__":
@@ -405,4 +402,4 @@ if __name__ == "__main__":
     # Should try loading the model in Copasi and simulating/solving
     # with libRoadRunner when I think it is finished.
 
-    print(plate1.sim_amounts)
+    # print(plate1.sim_amounts)
