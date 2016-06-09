@@ -133,7 +133,7 @@ def create_params(model, plate, growth_model, params):
     create_param(model, "kn", constant=True, val=params[2], units="per_day")
     # Create r
     for i in range(plate.no_cultures):
-        create_param(model, "r".format(i), constant=True,
+        create_param(model, "r{0}".format(i), constant=True,
                      val=params[growth_model.r_index + i],
                      units="day_per_item")
 
@@ -343,7 +343,9 @@ if __name__ == "__main__":
 
 
     # Simulate a plate with data and parameters.
-    plate1 = Plate(2, 2)
+    rows = 2
+    cols = 2
+    plate1 = Plate(rows, cols)
     plate1.times = np.linspace(0, 5, 11)
     comp_model = CompModel()
     params = {
@@ -356,9 +358,9 @@ if __name__ == "__main__":
 
     # Convert comp model to SBML.
     sbml = create_model(plate1, comp_model, plate1.sim_params,
-                        outfile="sbml_models/simulated_2x2_plate.xml")
+                        outfile="sbml_models/simulated_{0}x{1}_plate.xml".format(rows, cols))
 
-    print(sbml)
+
 
     # Should try loading the model in Copasi and simulating/solving
     # with libRoadRunner when I think it is finished.
