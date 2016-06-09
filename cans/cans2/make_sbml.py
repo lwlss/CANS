@@ -318,8 +318,8 @@ def create_model(plate, growth_model, params, outfile=""):
     if outfile:
         writeSBMLToFile(document, outfile)
 
-    # # Return a text string containing the SBML document in xml format.
-    # return writeSBMLToString(document)
+    # Return a text string containing the SBML document in xml format.
+    return writeSBMLToString(document)
 
 
 if __name__ == "__main__":
@@ -346,14 +346,16 @@ if __name__ == "__main__":
                         custom_params=params)
 
     # Convert comp model to SBML.
-    create_model(plate1, comp_model, plate1.sim_params,
-                 outfile="sbml_models/simulated_{0}x{1}_plate.xml".format(rows, cols))
+    sbml = create_model(plate1, comp_model, plate1.sim_params)
+                        # outfile="sbml_models/simulated_{0}x{1}_plate.xml".format(rows, cols))
+
+    print(sbml)
 
     # Plot a cans model simulation to compare.
-    comp_plotter = Plotter(CompModel())
-    comp_plotter.plot_est(plate1, plate1.sim_params,
-                          title="Simulated growth", sim=True,
-                          filename="sbml_models/plots/cans_{0}x{1}_sim.pdf".format(rows, cols))
+    # comp_plotter = Plotter(CompModel())
+    # comp_plotter.plot_est(plate1, plate1.sim_params,
+    #                       title="Simulated growth", sim=True,
+    #                       filename="sbml_models/plots/cans_{0}x{1}_sim.pdf".format(rows, cols))
 
     # Should try loading the model in Copasi and simulating/solving
     # with libRoadRunner when I think it is finished.
