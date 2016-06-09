@@ -160,7 +160,10 @@ def create_param(model, id, constant, val, units=None):
 def create_reactions(model, plate): #, growth_model):
     for i in range(plate.no_cultures):
         create_growth_reaction(model, i)
-        create_nut_diffusions(model, i, plate.neighbourhood[i])
+        # For reversible reactions only want to count each pair once.
+        higher_neighs = [neigh for neigh in plate.neighbourhood[i] if neigh > i]
+        create_reversible_nut_diffusions(model, i, higher_neighs)
+      #  create_nut_diffusions(model, i, plate.neighbourhood[i])
 
 
 def create_growth_reaction(model, i):
@@ -192,9 +195,36 @@ def create_nut_diffusion(model, i, j):
     create_reactant(r, "N{0}".format(i), stoich=1)
     create_product(r, "N{0}".format(j), stoich=1)
 
-    # Diffusion rate. Does this require a rule/constraint to be always
-    # positive?
+    # Diffusion of Nutrients from culture i to j. There is a
+    # corresponding reverse reaction so that the overall reaction rate
+    # of Ni<->Nj is kn*(Ni-Nj). Each individual reaction is
+    # irreversible, as defined in the kinetic law, and this should be
+    # specified in the create_reaction function using
+    # model.setReversible(False).
     math_ast = parseL3Formula("kn * N{0}".format(i))
+    check(math_ast, "create AST for diffusion N{0} -> N{1}".format(i, j))
+
+    kinetic_law = r.createKineticLaw()
+    check(kinetic_law, "create kinetic law for N{0} -> N{1}".format(i, j))
+    check(kinetic_law.setMath(math_ast),
+          "set math on kinetic law for N{0} -> N{1}".format(i, j))
+
+def create_reversible_nut_diffusions(model, i, neighbours):
+    for j in neighbours:
+        create_rev_nut_diffusion(model, i, j)
+
+def create_rev_nut_diffusion(model, i, j):
+    """Diffusion of nutrients from culture i to j."""
+    assert i < j
+    r = create_reaction(model, "Diff_{0}_{1}".format(i, j), reversible=True)
+    create_reactant(r, "N{0}".format(i), stoich=1)
+    create_product(r, "N{0}".format(j), stoich=1)
+
+    # Diffusion of Nutrients from culture i to j. The overall reaction
+    # rate of Ni<->Nj is kn*(Ni-Nj). Each reaction is reversible, as
+    # defined in the kinetic law, and this should be specified in the
+    # create_reaction function using model.setReversible(False).
+    math_ast = parseL3Formula("kn * (N{0} - N{1})".format(i, j))
     check(math_ast, "create AST for diffusion N{0} -> N{1}".format(i, j))
 
     kinetic_law = r.createKineticLaw()
@@ -207,6 +237,9 @@ def create_reaction(model, id, reversible=False, fast=False):
     r = model.createReaction()
     check(r, "create reaction")
     check(r.setId(id), "set reaction {0} id".format(id))
+    # Reversibility is actually determined by the rate equation and it
+    # is up to the programmer to make sure that this attribute is
+    # consistant with it.
     check(r.setReversible(reversible),
           "set reaction {0} reversibility flag".format(id))
     # "If a model does not distinguish between time scales, the fast
