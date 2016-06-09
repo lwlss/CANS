@@ -146,3 +146,25 @@ class Plotter:
         else:
             plt.savefig(filename)
         plt.close()
+
+
+if __name__ == "__main__":
+    from cans2.plate import Plate
+    from cans2.model import CompModel
+
+    rows = 2
+    cols = 2
+    plate1 = Plate(rows, cols)
+    plate1.times = np.linspace(0, 5, 11)
+    comp_model = CompModel()
+    params = {
+        "C_0": 1e-6,
+        "N_0": 0.1,
+        "kn": 1.5
+    }
+    plate1.set_sim_data(comp_model, r_mean=40.0, r_var=15.0,
+                        custom_params=params)
+
+    comp_plotter = Plotter(comp_model)
+    comp_plotter.plot_est(plate1, plate1.sim_params, title="Simulated growth",
+                          sim=True)
