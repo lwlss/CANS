@@ -332,8 +332,8 @@ if __name__ == "__main__":
 
 
     # Simulate a plate with data and parameters.
-    rows = 2
-    cols = 2
+    rows = 16
+    cols = 24
     plate1 = Plate(rows, cols)
     plate1.times = np.linspace(0, 5, 11)
     comp_model = CompModel()
@@ -346,8 +346,8 @@ if __name__ == "__main__":
                         custom_params=params)
 
     # Convert comp model to SBML.
-    sbml = create_model(plate1, comp_model, plate1.sim_params)
-                        # outfile="sbml_models/simulated_{0}x{1}_plate.xml".format(rows, cols))
+    sbml = create_model(plate1, comp_model, plate1.sim_params,
+                        outfile="sbml_models/simulated_{0}x{1}_plate.xml".format(rows, cols))
 
     print(sbml)
 
