@@ -198,7 +198,7 @@ class CompModel(Model):
                 "products": [(2, "C{0}")]
                 "reversible": False,
                 "neighs": False
-            }
+            },
             {
                 "name": "Diff_{0}_{1}",
                 "rate": "kn * N{0} - kn * N{1}",
