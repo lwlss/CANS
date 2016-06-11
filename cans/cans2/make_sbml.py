@@ -125,22 +125,17 @@ def create_species(model, plate, growth_model, params):
 
 
 def create_params(model, plate, growth_model, params):
-    # Create kn. This code is not very general but could be made more
-    # general if units were specified for parameters in Model
-    # difinitions in the model.py module of the cans package.
-
     # Parameters after initial amounts and before r_index.
     for i, param in enumerate(growth_model.params[growth_model.no_species:growth_model.r_index]):
-        create_param(model, param, constant=True, val=params[i]) #,
-        # units="per_day")
-
+        create_param(model, param, constant=True,
+                     val=params[growth_model.no_species + i])
     # Create params occuring at or after the r_index. Should be one of
     # these for each culture.
     for i, param in enumerate(growth_model.params[growth_model.r_index:]):
         for j in range(plate.no_cultures):
             create_param(model, param + str(j), constant=True,
-                         val=params[i*growth_model.r_index + j]),
-    #                     units="day_per_item")
+                         val=params[growth_model.r_index
+                                    + i*plate.no_cultures + j])
 
 
 def create_param(model, id, constant, val, units=None):
@@ -200,7 +195,7 @@ def create_two_culture_reactions(model, plate, reaction):
 
 
 def create_reaction(model, reaction, indices):
-    """Create a reaction with.
+    """Create a reaction.
 
     Species can come from more than one culture with culture indices
     passed in the indices tuple.
@@ -265,6 +260,7 @@ def create_product(reaction, stoich, species_id):
     # during a reaction.
     check(P_ref.setConstant(False), "set 'constant' on " + prod_in_r)
     check(P_ref.setStoichiometry(stoich), "set stoichiometry for " + prod_in_r)
+
 
 def create_model(plate, growth_model, params, outfile=""):
     """Return an SBML model given a plate and model.
