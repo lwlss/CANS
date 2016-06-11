@@ -218,7 +218,7 @@ def create_two_culture_reactions(model, plate, reaction):
         for j in range(neighs[i]):
             # if not reaction["reversible"]:
             #     assert i < j, "Reversible reaction requires culture i < j."
-            create_a_reaction(model, reaction, (i, j))
+            create_reaction(model, reaction, (i, j))
 
 
 def create_a_reaction(model, reaction, indices)
@@ -228,8 +228,8 @@ def create_a_reaction(model, reaction, indices)
     stored in the indices tuple.
 
     """
-    r = create_reaction(model, reaction["name"].format(*indices),
-                        reversible=reaction["reversible"])
+    r = init_reaction(model, reaction["name"].format(*indices),
+                      reversible=reaction["reversible"])
     for stoich, reactant in reaction["reactants"]:
         create_reactant(r, stoich, reactant.format(*indices))
     for stoich, product in reaction["products"]:
@@ -243,46 +243,6 @@ def create_a_reaction(model, reaction, indices)
           "create kinetic law for " + reaction["name"].format(*indices))
     check(kinetic_law.setMath(math_ast),
           "set math on kinetic law for " + reaction["name"].format(*indices))
-
-########################################################################################
-
-def create_reactions(model, plate, growth_model):
-    for i, reaction_name in enumerate(growth_model.reaction_names):
-        create_rates()
-        create_rs()
-        create_reactants()
-        create_products()
-        for j in range(plate.no_cultures):
-
-            r = create_reaction(model, reaction_name+str(j),
-                                reversible=growth_model.reversible[i],
-                                fast=False)
-            create_reactants(growth_model.reactants[i], j)
-            create_products(growth_model.products[i], j)
-            # need kinetic laws
-            def create_law(r, growth_model, i, j)
-
-            # create_growth_reaction(model, i)
-            # # For reversible reactions only want to count each pair once.
-            # all_neighs = plate.neighbourhood[i]
-            # higher_neighs = [neigh for neigh in all_neighs if neigh > i]
-            # if rev:
-            #     create_nut_diffusions(model, i, higher_neighs)
-            # elif not rev:
-            #     create_ir_nut_diffusions(model, i, all_neighs)
-
-
-
-def create_law(r, growth_model, i, j):
-    if growth_model.reaction_neighs[i]:
-        neighs =
-    math_ast = parseL3Formula(rate_string.format(i))#, j))
-    check(math_ast, "create AST for culture {0} growth expression".format(i))
-
-    kinetic_law = r.createKineticLaw()
-    check(kinetic_law, "create kinetic law for culture {0} growth".format(i))
-    check(kinetic_law.setMath(math_ast),
-          "set math on kinetic law for culture {0} growth".format(i))
 
 
 # Need to handle neighbours in the reactants.
@@ -308,7 +268,7 @@ def create_products(r, products, j):
         create_product(r, stoich, product+str(j))
 
 
-def create_reaction(model, id, reversible=False, fast=False):
+def init_reaction(model, id, reversible=False, fast=False):
     r = model.createReaction()
     check(r, "create reaction")
     check(r.setId(id), "set reaction {0} id".format(id))
@@ -325,7 +285,7 @@ def create_reaction(model, id, reversible=False, fast=False):
     check(r.setFast(fast), "set reaction {0} speed".format(id))
     return r
 
-
+################################################################################
 
 def create_growth_reaction(model, i):
     """Create growth reaction for culture i."""
