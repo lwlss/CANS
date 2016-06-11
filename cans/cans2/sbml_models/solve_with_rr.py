@@ -5,12 +5,20 @@ Requires libroadrunner installed in python2.
 """
 import roadrunner
 import time
-import roadrunner.testing as rrtest
+import timeit
 
 
-rr = roadrunner.RoadRunner("simulated_16x24_plate.xml")
-t0 = time.time()
-result = rr.simulate()
-t1 = time.time()
-print(t1 - t0)
-rr.plot()
+def sim():
+    rr.simulate()
+
+
+if __name__ == "__main__":
+
+    rr = roadrunner.RoadRunner("simulated_16x24_plate_ir_1.xml")
+    print(timeit.timeit("sim()", setup="from __main__ import sim", number=1000))
+
+    rr = roadrunner.RoadRunner("simulated_16x24_plate_rev_1.xml")
+    print(timeit.timeit("sim()", setup="from __main__ import sim", number=1000))
+
+    rr = roadrunner.RoadRunner("simulated_16x24_plate_rev_2.xml")
+    print(timeit.timeit("sim()", setup="from __main__ import sim", number=1000))
