@@ -187,12 +187,25 @@ def create_reactions2(model, plate, growth_model):
 def create_model_reactions(model, plate, growth_model):
     for reaction in growth_model.reactions:
         if reaction["neighs"]:
-            create_diffusions(model, plate, reaction, growth_model)
+            create_two_culture_reactions(model, plate, reaction)
         elif not reaction["neighs"]:
-            create_growths(model, plate, reaction, growth_model)
+            create_one_culture_reactions(model, plate, reaction)
 
 
-def create_diffusions(model, plate, reaction, growth_model):
+def create_one_culture_reactions(model, plate, reaction):
+    """Create reactions with species from only one culture.
+
+    Intended for growth type reactions rather than diffusion.
+    """
+    for i in range(plate.no_cultures):
+        # The single culture indices must be supplied in a tuple so
+        # that a general function, which can handle reactions with
+        # species from more than one culture, can be used.
+        create_one_culture_reaction(model, reaction, (i,))
+
+
+def create_two_culture_reactions(model, plate, reaction):
+    """Intended for diffusion type reactions."""
     if reaction["reversible"]:
         # Only inculde higher neighbours so that reactions are not
         # counted twice.
@@ -205,37 +218,33 @@ def create_diffusions(model, plate, reaction, growth_model):
         for j in range(neighs[i]):
             # if not reaction["reversible"]:
             #     assert i < j, "Reversible reaction requires culture i < j."
-            create_two_culture_reaction(model, reaction, growth_model, i, j)
+            create_a_reaction(model, reaction, (i, j))
 
 
-def create_two_culture_reaction(model, i, j)
-    """Create a reaction with species from two cultures.
+def create_a_reaction(model, reaction, indices)
+    """Create a reaction with.
 
-    For e.g. diffusion type reactions.
+    Species can come from more than one culture with culture indices
+    stored in the indices tuple.
+
     """
-    r = create_reaction(model, reaction["name"].format(i, j),
+    r = create_reaction(model, reaction["name"].format(*indices),
                         reversible=reaction["reversible"])
     for stoich, reactant in reaction["reactants"]:
-        create_reactant(r, stoich, reactant.format(i, j))
+        create_reactant(r, stoich, reactant.format(*indices))
     for stoich, product in reaction["products"]:
-        create_product(r, stoich, product.format(i, j))
+        create_product(r, stoich, product.format(*indices))
 
-
-    # The overall reaction rate of Ni<->Nj is kn*(Ni-Nj). Each
-    # reaction is reversible, as defined in the kinetic law, and this
-    # should be specified in the create_reaction function using
-    # model.setReversible(False).
-    math_ast = parseL3Formula(reaction["rate"].format(i, j))
-    check(math_ast, "create AST for " + reaction["name"].format(i, j))
+    math_ast = parseL3Formula(reaction["rate"].format(*indices))
+    check(math_ast, "create AST for " + reaction["name"].format(*indices))
 
     kinetic_law = r.createKineticLaw()
-    check(kinetic_law, "create kinetic law for N{0} -> N{1}".format(i, j))
+    check(kinetic_law,
+          "create kinetic law for " + reaction["name"].format(*indices))
     check(kinetic_law.setMath(math_ast),
-"set math on kinetic law for N{0} -> N{1}".format(i, j))
+          "set math on kinetic law for " + reaction["name"].format(*indices))
 
-def create_reaction_type(model, plate, reaction, growth_model):
-    if reaction["neighs"]:
-        pass
+########################################################################################
 
 def create_reactions(model, plate, growth_model):
     for i, reaction_name in enumerate(growth_model.reaction_names):
