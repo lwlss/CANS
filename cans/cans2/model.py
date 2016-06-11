@@ -182,7 +182,7 @@ class Model(object):
 
         
 class CompModel(Model):
-    def __init__(self, reversible=True):
+    def __init__(self, reversible_diff=True):
         self.model = comp_model
         self.r_index = 3
         self.params = ['C_0', 'N_0', 'kn', 'r']
@@ -195,20 +195,21 @@ class CompModel(Model):
                 "name": "Growth_{0}",
                 "rate": "r{0} * C{0} * N{0}",
                 "reactants": [(1, "N{0}"), (1, "C{0}")],
-                "products": [(2, "C{0}")]
+                "products": [(2, "C{0}")],
                 "reversible": False,
+                # True if species of neighbouring cultures are involved.
                 "neighs": False
             },
             {
                 "name": "Diff_{0}_{1}",
                 "rate": "kn * N{0} - kn * N{1}",
                 "reactants": [(1, "N{0}")],
-                "products": [(1, "N{1}")]
-                "reversible": reversible,
+                "products": [(1, "N{1}")],
+                "reversible": reversible_diff,
                 "neighs": True
             }
         ]
-        if not reversible:
+        if not reversible_diff:
             self.reactions[1]["rate"] = "kn * N{0}"
         self.no_species = len(self.species)
         self.name = 'Competition Model'
