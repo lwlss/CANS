@@ -185,17 +185,18 @@ class CompModel(Model):
     def __init__(self):
         self.model = comp_model
         self.r_index = 3
-        self.params = ['C_0', 'N_0', 'kn', 'rs']
+        self.params = ['C_0', 'N_0', 'kn', 'r']
         self.species = ['C', 'N']
         self.no_species = len(self.species)
         self.name = 'Competition Model'
+
 
 
 class IndeModel(Model):
     def __init__(self):
         self.model = inde_model
         self.r_index = 2
-        self.params = ['C_0', 'N_0', 'rs']
+        self.params = ['C_0', 'N_0', 'r']
         self.species = ['C', 'N']
         self.no_species = len(self.species)
         self.name = 'Independent Model'
