@@ -266,104 +266,6 @@ def create_product(reaction, stoich, species_id):
     check(P_ref.setConstant(False), "set 'constant' on " + prod_in_r)
     check(P_ref.setStoichiometry(stoich), "set stoichiometry for " + prod_in_r)
 
-
-
-################################################################################
-
-# def create_growth_reaction(model, i):
-#     """Create growth reaction for culture i."""
-#     r = create_reaction(model, "Growth_{0}".format(i))
-#     create_reactant(r, "C{0}".format(i), stoich=1)
-#     create_reactant(r, "N{0}".format(i), stoich=1)
-#     create_product(r, "C{0}".format(i), stoich=2)
-
-#     # Abstract syntax tree are used by libSBML (not SBML) for storing
-#     # mathematical equtations.
-#     # http://sbml.org/Special/Software/libSBML/3.4.1/docs/java-api/org/sbml/libsbml/ASTNode.html
-#     math_ast = parseL3Formula("r{} * C{} * N{}".format(*[i]*3))
-#     check(math_ast, "create AST for culture {0} growth expression".format(i))
-
-#     kinetic_law = r.createKineticLaw()
-#     check(kinetic_law, "create kinetic law for culture {0} growth".format(i))
-#     check(kinetic_law.setMath(math_ast),
-#           "set math on kinetic law for culture {0} growth".format(i))
-
-
-# def create_ir_nut_diffusions(model, i, neighs):
-#     """Create diffusions for culture pair.
-
-#     As each reaction is irreversible, "neighbours" should have a
-#     culture index for every neighbour.
-
-#     """
-#     for j in neighs:
-#         create_ir_nut_diffusion(model, i, j)
-
-
-# def create_ir_nut_diffusion(model, i, j):
-#     """Diffusion of nutrients from culture i to j.
-
-#     Reactions are irreversible. There is a corresponding
-#     reverse reaction for nutrients from j to i.
-
-#     """
-#     r = create_reaction(model, "Diff_{0}_{1}".format(i, j), reversible=False)
-#     create_reactant(r, "N{0}".format(i), stoich=1)
-#     create_product(r, "N{0}".format(j), stoich=1)
-
-#     # The overall reaction rate of Ni<->Nj is kn*(Ni-Nj). Each
-#     # reaction is reversible, as defined in the kinetic law, and this
-#     # should be specified in the create_reaction function using
-#     # model.setReversible(False).
-#     math_ast = parseL3Formula("kn * N{0}".format(i))
-#     check(math_ast, "create AST for diffusion N{0} -> N{1}".format(i, j))
-
-#     kinetic_law = r.createKineticLaw()
-#     check(kinetic_law, "create kinetic law for N{0} -> N{1}".format(i, j))
-#     check(kinetic_law.setMath(math_ast),
-#           "set math on kinetic law for N{0} -> N{1}".format(i, j))
-
-
-
-# def create_nut_diffusions(model, i, higher_neighs):
-#     """Create diffusions for culture pair.
-
-#     As each reaction is reversible, "higher_neighs" should have a
-#     culture index greater than the culture index i so that each
-#     reaction is only counted once.
-
-#     """
-#     for j in higher_neighs:
-#         create_nut_diffusion(model, i, j)
-
-
-# def create_nut_diffusion(model, i, j):
-#     """Diffusion of nutrients from culture i to j.
-
-#     Reactions are reversible so to only count them once i should be
-#     less than j.
-
-#     """
-#     assert i < j, "To count reversible diffusion only once requires i < j."
-#     r = create_reaction(model, "Diff_{0}_{1}".format(i, j), reversible=True)
-#     create_reactant(r, "N{0}".format(i), stoich=1)
-#     create_product(r, "N{0}".format(j), stoich=1)
-
-#     # The overall reaction rate of Ni<->Nj is kn*(Ni-Nj). Each
-#     # reaction is reversible, as defined in the kinetic law, and this
-#     # should be specified in the create_reaction function using
-#     # model.setReversible(False).
-#     if stdform:
-#         math_ast = parseL3Formula("kn * N{0} - kn * N{1}".format(i, j))
-#     elif not stdform:
-#         math_ast = parseL3Formula("kn * (N{0} - N{1})".format(i, j))
-#     check(math_ast, "create AST for diffusion N{0} -> N{1}".format(i, j))
-
-#     kinetic_law = r.createKineticLaw()
-#     check(kinetic_law, "create kinetic law for N{0} -> N{1}".format(i, j))
-#     check(kinetic_law.setMath(math_ast),
-#           "set math on kinetic law for N{0} -> N{1}".format(i, j))
-
 def create_model(plate, growth_model, params, outfile=""):
     """Return an SBML model given a plate and model.
 
@@ -447,10 +349,9 @@ if __name__ == "__main__":
 
 
     # Convert comp model to SBML.
-    sbml = create_model(plate1, comp_model, plate1.sim_params)
-            #            outfile="sbml_models/simulated_{0}x{1a}_plate_ir_1.xml".format(rows, cols))
+    sbml = create_model(plate1, comp_model, plate1.sim_params,
+                        outfile="sbml_models/simulated_{0}x{1}_test_plate.xml".format(rows, cols))
 
-    print(sbml)
     # Plot a cans model simulation to compare.
     # comp_plotter = Plotter(CompModel())
     # comp_plotter.plot_est(plate1, plate1.sim_params,
