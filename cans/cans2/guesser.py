@@ -12,7 +12,7 @@ def add_r_bound(plate, model, i, j, bounds, bound):
     bounds[index] = bound
 
 
-class Guesser:
+class Guesser(object):
     def __init__(self, model):
         self.model = model
 

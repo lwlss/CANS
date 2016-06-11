@@ -7,7 +7,7 @@ from cans2.model import IndeModel
 from cans2.fitter import Fitter
 from cans2.cans_funcs import get_mask
 
-class BasePlate:
+class BasePlate(object):
     def __init__(self, rows, cols, data=None):
         self.rows = rows
         self.cols = cols

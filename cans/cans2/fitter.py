@@ -9,7 +9,7 @@ from scipy.optimize import minimize
 from cans2.cans_funcs import dict_to_json
 
 
-class Fitter:
+class Fitter(object):
     # Can either fit different Models to data on a given Plate or fit
     # the same Model to data on different Plates. It is more natural
     # that we will want to fit different Models to the same data. I

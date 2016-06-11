@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import AxesGrid
 
 
-class Plotter:
+class Plotter(object):
 
     def __init__(self, model):
         self.model = model

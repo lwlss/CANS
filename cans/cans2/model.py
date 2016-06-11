@@ -114,7 +114,7 @@ def comp_model(params, neighbourhood, mask, neigh_nos):
     return growth
 
 
-class Model:
+class Model(object):
     def __init__(self, model, r_index, params, species):
         self.model = model
         self.r_index = r_index
