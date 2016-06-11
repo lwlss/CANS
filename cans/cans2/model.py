@@ -182,14 +182,49 @@ class Model(object):
 
         
 class CompModel(Model):
-    def __init__(self):
+    def __init__(self, reversible=True):
         self.model = comp_model
         self.r_index = 3
         self.params = ['C_0', 'N_0', 'kn', 'r']
         self.species = ['C', 'N']
+        # The reversible attribute specifies two representations of
+        # the model with reversible or irreversible nutrient
+        # diffusion.
+        if reversible:
+           self.reaction_rates = [
+                "r{0} * C{0} * N{0}",
+                "kn * N{0} - kn * N{1}"
+            ]
+           self.reversible = [False, True]
+           # # Do neighbours appear in the reaction rates.
+           # self.rate_neighs = [False, True]
+        elif not reversible:
+            self.reaction_rates = [
+                "r{0} * C{0} * N{0}",
+                "kn * N{0}"
+            ]
+            self.reversible = [False, False]
+            # # Do neighbours appear in the reaction rates.
+            # self.rate_neighs = [False, False]
+        # Could parse this from strings. Each row is a different
+        # reaction. Row 1: N+C->2C, Row 2: N_i->N_j. Below, species
+        # are indexd {0} for the central culture are {1} for a
+        # neighbour. Reactions cannot involve species from more than
+        # just the central culture and one of its neighbours.
+        self.reactants = [
+            [(1, "N{0}"), (1, "C{0}")],
+            [(1, "N{0}")]
+        ]
+        self.products = [
+            [(2, "C{0}")],
+            [(1, "N{1}")]    # Ah bollocks.
+        ]
+        # Are there species from neighbours in the reactions. Could
+        # just check this and the rate_neighs from the appearance of
+        # "{1}" in reactants, products and rate equations.
+        self.reaction_neighs = [False, True]
         self.no_species = len(self.species)
         self.name = 'Competition Model'
-
 
 
 class IndeModel(Model):
