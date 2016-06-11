@@ -129,13 +129,18 @@ def create_params(model, plate, growth_model, params):
     # general if units were specified for parameters in Model
     # difinitions in the model.py module of the cans package.
 
-    #  May need to define new units per_day or item_per_day.
-    create_param(model, "kn", constant=True, val=params[2], units="per_day")
-    # Create r
-    for i in range(plate.no_cultures):
-        create_param(model, "r{0}".format(i), constant=True,
-                     val=params[growth_model.r_index + i],
-                     units="day_per_item")
+    # Parameters after initial amounts and before r_index.
+    for i, param in enumerate(growth_model.params[growth_model.no_species:growth_model.r_index]):
+        create_param(model, param, constant=True, val=params[i]) #,
+        # units="per_day")
+
+    # Create params occuring at or after the r_index. Should be one of
+    # these for each culture.
+    for i, param in enumerate(growth_model.params[growth_model.r_index:]):
+        for j in range(plate.no_cultures):
+            create_param(model, param + str(j), constant=True,
+                         val=params[i*growth_model.r_index + j]),
+    #                     units="day_per_item")
 
 
 def create_param(model, id, constant, val, units=None):
@@ -157,12 +162,160 @@ def create_param(model, id, constant, val, units=None):
         check(k.setUnits(units), "set parameter {0} units".format(id))
 
 
-def create_reactions(model, plate):
+
+def create_reactions2(model, plate, growth_model):
+
+    r_info = zip(growth_model.rates,
+                 growth_model.r_neighs,
+                 growth_model.r_names,
+                 growth_model.reversible)
+
+    for rr, neighs, name, rev in r_info:
+            rrs = [rr.format(i, j) for i in range(plate.no_cultures)
+                   for j in plate.neighbhourhood(i) if i<j]
+            reactions = [create_reaction(model, name.format(i), rev)
+                         for i in range(len(rrs)) for j in ]
+
+        elif not neighs:
+            rrs = [rr.format(i) for i in range(plate.no_cultures)]
+            reactions = [create_reaction(model, name.format(i), rev)
+                         for i in range(len(rrs))]
+
+        # create reactions
+
+
+def create_model_reactions(model, plate, growth_model):
+    for reaction in growth_model.reactions:
+        if reaction["neighs"]:
+            create_diffusions(model, plate, reaction, growth_model)
+        elif not reaction["neighs"]:
+            create_growths(model, plate, reaction, growth_model)
+
+
+def create_diffusions(model, plate, reaction, growth_model):
+    if reaction["reversible"]:
+        # Only inculde higher neighbours so that reactions are not
+        # counted twice.
+        neighs = [tuple(j for j in plate.neighbourhood[i] if i<j)
+                  for i in range(plate.no_cultures)]
+    elif not reaction["reversible"]:
+        neighs = plate.neighbourhood
+
     for i in range(plate.no_cultures):
-        create_growth_reaction(model, i)
-        # For reversible reactions only want to count each pair once.
-        higher_neighs = [neigh for neigh in plate.neighbourhood[i] if neigh > i]
-        create_nut_diffusions(model, i, higher_neighs)
+        for j in range(neighs[i]):
+            # if not reaction["reversible"]:
+            #     assert i < j, "Reversible reaction requires culture i < j."
+            create_two_culture_reaction(model, reaction, growth_model, i, j)
+
+
+def create_two_culture_reaction(model, i, j)
+    """Create a reaction with species from two cultures.
+
+    For e.g. diffusion type reactions.
+    """
+    r = create_reaction(model, reaction["name"].format(i, j),
+                        reversible=reaction["reversible"])
+    for stoich, reactant in reaction["reactants"]:
+        create_reactant(r, stoich, reactant.format(i, j))
+    for stoich, product in reaction["products"]:
+        create_product(r, stoich, product.format(i, j))
+
+
+    # The overall reaction rate of Ni<->Nj is kn*(Ni-Nj). Each
+    # reaction is reversible, as defined in the kinetic law, and this
+    # should be specified in the create_reaction function using
+    # model.setReversible(False).
+    math_ast = parseL3Formula(reaction["rate"].format(i, j))
+    check(math_ast, "create AST for " + reaction["name"].format(i, j))
+
+    kinetic_law = r.createKineticLaw()
+    check(kinetic_law, "create kinetic law for N{0} -> N{1}".format(i, j))
+    check(kinetic_law.setMath(math_ast),
+"set math on kinetic law for N{0} -> N{1}".format(i, j))
+
+def create_reaction_type(model, plate, reaction, growth_model):
+    if reaction["neighs"]:
+        pass
+
+def create_reactions(model, plate, growth_model):
+    for i, reaction_name in enumerate(growth_model.reaction_names):
+        create_rates()
+        create_rs()
+        create_reactants()
+        create_products()
+        for j in range(plate.no_cultures):
+
+            r = create_reaction(model, reaction_name+str(j),
+                                reversible=growth_model.reversible[i],
+                                fast=False)
+            create_reactants(growth_model.reactants[i], j)
+            create_products(growth_model.products[i], j)
+            # need kinetic laws
+            def create_law(r, growth_model, i, j)
+
+            # create_growth_reaction(model, i)
+            # # For reversible reactions only want to count each pair once.
+            # all_neighs = plate.neighbourhood[i]
+            # higher_neighs = [neigh for neigh in all_neighs if neigh > i]
+            # if rev:
+            #     create_nut_diffusions(model, i, higher_neighs)
+            # elif not rev:
+            #     create_ir_nut_diffusions(model, i, all_neighs)
+
+
+
+def create_law(r, growth_model, i, j):
+    if growth_model.reaction_neighs[i]:
+        neighs =
+    math_ast = parseL3Formula(rate_string.format(i))#, j))
+    check(math_ast, "create AST for culture {0} growth expression".format(i))
+
+    kinetic_law = r.createKineticLaw()
+    check(kinetic_law, "create kinetic law for culture {0} growth".format(i))
+    check(kinetic_law.setMath(math_ast),
+          "set math on kinetic law for culture {0} growth".format(i))
+
+
+# Need to handle neighbours in the reactants.
+def create_reactants(r, reactants, j):
+    """Create reactants for culture j.
+
+    Reactants come as a list of tulple (stoich, species) for a single
+    reaction e.g. [(1, N) + (1, C)] for N+C->2C.
+
+    """
+    for stoich, reactant in reactants:
+        create_reactant(r, stoich, reactant+str(j))
+
+
+# Need to handle neighbours in the products.
+def create_products(r, products, j):
+    """Create products for culture j.
+
+    Products come as a list of tulple (stoich, species) for a single
+    reaction e.g. [(2, C)] for N+C->2C.
+    """
+    for stoich, product in products:
+        create_product(r, stoich, product+str(j))
+
+
+def create_reaction(model, id, reversible=False, fast=False):
+    r = model.createReaction()
+    check(r, "create reaction")
+    check(r.setId(id), "set reaction {0} id".format(id))
+    # Reversibility is actually determined by the rate equation and it
+    # is up to the programmer to make sure that this attribute is
+    # consistant with it.
+    check(r.setReversible(reversible),
+          "set reaction {0} reversibility flag".format(id))
+    # "If a model does not distinguish between time scales, the fast
+    # attribute should be set to 'false' for all reactions." - from
+    # SBML L3V1R1 specification. Our hypothesis is that diffusion
+    # occurs quickly enough to affect growth so "fast" should be False
+    # for all.
+    check(r.setFast(fast), "set reaction {0} speed".format(id))
+    return r
+
 
 
 def create_growth_reaction(model, i):
@@ -184,15 +337,51 @@ def create_growth_reaction(model, i):
           "set math on kinetic law for culture {0} growth".format(i))
 
 
-def create_nut_diffusions(model, i, higher_neighbours):
+def create_ir_nut_diffusions(model, i, neighs):
     """Create diffusions for culture pair.
 
-    As each reaction is reversible, "higher_neighbours" should have a
+    As each reaction is irreversible, "neighbours" should have a
+    culture index for every neighbour.
+
+    """
+    for j in neighs:
+        create_ir_nut_diffusion(model, i, j)
+
+
+def create_ir_nut_diffusion(model, i, j):
+    """Diffusion of nutrients from culture i to j.
+
+    Reactions are irreversible. There is a corresponding
+    reverse reaction for nutrients from j to i.
+
+    """
+    r = create_reaction(model, "Diff_{0}_{1}".format(i, j), reversible=False)
+    create_reactant(r, "N{0}".format(i), stoich=1)
+    create_product(r, "N{0}".format(j), stoich=1)
+
+    # The overall reaction rate of Ni<->Nj is kn*(Ni-Nj). Each
+    # reaction is reversible, as defined in the kinetic law, and this
+    # should be specified in the create_reaction function using
+    # model.setReversible(False).
+    math_ast = parseL3Formula("kn * N{0}".format(i))
+    check(math_ast, "create AST for diffusion N{0} -> N{1}".format(i, j))
+
+    kinetic_law = r.createKineticLaw()
+    check(kinetic_law, "create kinetic law for N{0} -> N{1}".format(i, j))
+    check(kinetic_law.setMath(math_ast),
+          "set math on kinetic law for N{0} -> N{1}".format(i, j))
+
+
+
+def create_nut_diffusions(model, i, higher_neighs):
+    """Create diffusions for culture pair.
+
+    As each reaction is reversible, "higher_neighs" should have a
     culture index greater than the culture index i so that each
     reaction is only counted once.
 
     """
-    for j in higher_neighbours:
+    for j in higher_neighs:
         create_nut_diffusion(model, i, j)
 
 
@@ -212,7 +401,10 @@ def create_nut_diffusion(model, i, j):
     # reaction is reversible, as defined in the kinetic law, and this
     # should be specified in the create_reaction function using
     # model.setReversible(False).
-    math_ast = parseL3Formula("kn * (N{0} - N{1})".format(i, j))
+    if stdform:
+        math_ast = parseL3Formula("kn * N{0} - kn * N{1}".format(i, j))
+    elif not stdform:
+        math_ast = parseL3Formula("kn * (N{0} - N{1})".format(i, j))
     check(math_ast, "create AST for diffusion N{0} -> N{1}".format(i, j))
 
     kinetic_law = r.createKineticLaw()
@@ -221,25 +413,8 @@ def create_nut_diffusion(model, i, j):
           "set math on kinetic law for N{0} -> N{1}".format(i, j))
 
 
-def create_reaction(model, id, reversible=False, fast=False):
-    r = model.createReaction()
-    check(r, "create reaction")
-    check(r.setId(id), "set reaction {0} id".format(id))
-    # Reversibility is actually determined by the rate equation and it
-    # is up to the programmer to make sure that this attribute is
-    # consistant with it.
-    check(r.setReversible(reversible),
-          "set reaction {0} reversibility flag".format(id))
-    # "If a model does not distinguish between time scales, the fast
-    # attribute should be set to 'false' for all reactions." - from
-    # SBML L3V1R1 specification. Our hypothesis is that diffusion
-    # occurs quickly enough to affect growth so "fast" should be False
-    # for all.
-    check(r.setFast(fast), "set reaction {0} speed".format(id))
-    return r
 
-
-def create_reactant(reaction, species_id, stoich=1):
+def create_reactant(reaction, stoich, species_id):
     """Add a reactant to a libsbml Reaction."""
     r_id = reaction.getId()
     reactant_in_r = "reactant {0} in reaction {1}".format(species_id, r_id)
@@ -253,7 +428,7 @@ def create_reactant(reaction, species_id, stoich=1):
           "set stoichiometry for " + reactant_in_r)
 
 
-def create_product(reaction, species_id, stoich=1):
+def create_product(reaction, stoich, species_id):
     """Add a product to a libsbml Reaction."""
     r_id = reaction.getId()
     prod_in_r = "product {0} in reaction {1}".format(species_id, r_id)
@@ -296,15 +471,16 @@ def create_model(plate, growth_model, params, outfile=""):
     check(model.setExtentUnits("item"), "set model units of extent")
     check(model.setSubstanceUnits("item"), "set model substance units")
 
-    # Create units for kinetic parameters. Not necessarry but may help
-    # with error checking of mathematical formula. Units are not
-    # heirarchical so must use second as a base rather than day.
-    create_unit(model, id="per_day", kinds=[UNIT_KIND_SECOND], exponents=[-1],
-                scales=[0], multipliers=[86400])
-    create_unit(model, id="day_per_item",
-                kinds=[UNIT_KIND_SECOND, UNIT_KIND_ITEM],
-                exponents=[1, -1], scales=[0, 0],
-                multipliers=[86400, 1])
+    # Removed to make more general. Let units for kinitic parameters
+    # be automatically generated from other units.  # Create units for
+    # kinetic parameters. Not necessarry but may help # with error
+    # checking of mathematical formula. Units are not # heirarchical
+    # so must use second as a base rather than day.
+    # create_unit(model, id="per_day", kinds=[UNIT_KIND_SECOND],
+    # exponents=[-1], scales=[0], multipliers=[86400])
+    # create_unit(model, id="day_per_item", kinds=[UNIT_KIND_SECOND,
+    # UNIT_KIND_ITEM], exponents=[1, -1], scales=[0, 0],
+    # multipliers=[86400, 1])
 
     # Use one compartment for all species and reactions.
     create_compartment(model, "c1", constant=True, size=1, dims=0,
@@ -345,11 +521,27 @@ if __name__ == "__main__":
     plate1.set_sim_data(comp_model, r_mean=40.0, r_var=15.0,
                         custom_params=params)
 
+
+
+    rev = False
     # Convert comp model to SBML.
     sbml = create_model(plate1, comp_model, plate1.sim_params,
-                        outfile="sbml_models/simulated_{0}x{1}_plate.xml".format(rows, cols))
+                        outfile="sbml_models/simulated_{0}x{1}_plate_ir_1.xml".format(rows, cols))
 
-    print(sbml)
+    rev = True
+    stdform = True
+    sbml = create_model(plate1, comp_model, plate1.sim_params,
+                        outfile="sbml_models/simulated_{0}x{1}_plate_rev_1.xml".format(rows, cols))
+
+
+    stdform = False
+    sbml = create_model(plate1, comp_model, plate1.sim_params,
+                        outfile="sbml_models/simulated_{0}x{1}_plate_rev_2.xml".format(rows, cols))
+
+    # sbml = create_model(plate1, comp_model, plate1.sim_params,
+    #                     outfile="sbml_models/simulated_{0}x{1}_plate_ir_1.xml".format(rows, cols))
+
+
 
     # Plot a cans model simulation to compare.
     # comp_plotter = Plotter(CompModel())
