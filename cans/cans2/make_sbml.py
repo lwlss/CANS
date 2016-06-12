@@ -329,11 +329,11 @@ if __name__ == "__main__":
 
 
     # Simulate a plate with data and parameters.
-    rows = 16
-    cols = 24
+    rows = 2
+    cols = 2
     plate1 = Plate(rows, cols)
     plate1.times = np.linspace(0, 5, 11)
-    comp_model = CompModel()
+    comp_model = CompModel(rev_diff=True)
     params = {
         "C_0": 1e-6,
         "N_0": 0.1,
@@ -344,14 +344,18 @@ if __name__ == "__main__":
 
     # Convert comp model to SBML.
     sbml = create_model(plate1, comp_model, plate1.sim_params,
-                        outfile="sbml_models/simulated_{0}x{1}_test_plate.xml".format(rows, cols))
+                        outfile="sbml_models/simulated_{0}x{1}_test_plate_rev.xml".format(rows, cols))
 
-    print(sbml)
+    comp_model_ir = CompModel(rev_diff=False)
+    sbml = create_model(plate1, comp_model_ir, plate1.sim_params,
+                        outfile="sbml_models/simulated_{0}x{1}_test_plate_ir.xml".format(rows, cols))
+
     # Plot a cans model simulation to compare.
-    # comp_plotter = Plotter(CompModel())
-    # comp_plotter.plot_est(plate1, plate1.sim_params,
-    #                       title="Simulated growth", sim=True,
-    #                       filename="sbml_models/plots/cans_{0}x{1}_sim.pdf".format(rows, cols))
+    comp_plotter = Plotter(CompModel())
+    comp_plotter.plot_est(plate1, plate1.sim_params,
+                          title="CompModel Simulated Growth (SciPy)", sim=True,
+                          filename="sbml_models/plots/cans_{0}x{1}_sim.pdf".format(rows, cols))
 
+    print(plate1.sim_amounts)
     # Should try loading the model in Copasi and simulating/solving
     # with libRoadRunner when I think it is finished.
