@@ -81,6 +81,7 @@ def get_plate_data(path):
 
 if __name__ == "__main__":
     import json
+    import time
 
     from cans2.plate import Plate
     from cans2.plotter import Plotter
@@ -131,11 +132,13 @@ if __name__ == "__main__":
 
     # add_r_bound(zone, comp_model, , , bounds, (, ))
 
-
+    t0 = time.time()
     zone.comp_est = zone.fit_model(CompModel(),
                                    param_guess=param_guess,
                                    minimizer_opts={'disp': True},
                                    bounds=bounds)
+    t1 = time.time()
+    print(t1-t0)
 
     print(bounds)
     print(zone.comp_est.x)
@@ -159,9 +162,6 @@ if __name__ == "__main__":
 
     with open(datafile, 'w') as f:
         json.dump(data, f, indent=4, sort_keys=True)
-
-
-
 
 
     # plate1 = Plate(5, 5)

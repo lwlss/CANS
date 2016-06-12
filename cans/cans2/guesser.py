@@ -12,7 +12,7 @@ def add_r_bound(plate, model, i, j, bounds, bound):
     bounds[index] = bound
 
 
-class Guesser:
+class Guesser(object):
     def __init__(self, model):
         self.model = model
 
@@ -65,11 +65,12 @@ class Guesser:
         return guess
 
 
-    def list_guess(self, plate, guess):
-        guess_list = np.empty([1, self.model.r_index + plate.no_cultures])
+    def nparray_guess(self, plate, guess):
+        guess_list = np.zeros(self.model.r_index - 1)# + plate.no_cultures])
         for k, v in guess.items():
             index = self.model.params.index(k)
             guess_list[index] = v
+        return guess_list
         # Need to make guesses or kn and rs (maybe as a list with a
         # guess for each r).
 
@@ -99,7 +100,7 @@ class Guesser:
                 bounds[index] = (v, 2*v)
             elif k == "kn":
                 pass
-        return bounds
+        return np.asarray(bounds)
 
 
 

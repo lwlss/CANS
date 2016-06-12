@@ -1,16 +1,15 @@
 import numpy as np
-import time
 import copy
 
 
 from functools import partial
 from scipy.optimize import minimize
-
+# from scipy.interpolate import splrep, splev
 
 from cans2.cans_funcs import dict_to_json
 
 
-class Fitter:
+class Fitter(object):
     # Can either fit different Models to data on a given Plate or fit
     # the same Model to data on different Plates. It is more natural
     # that we will want to fit different Models to the same data. I
@@ -29,10 +28,10 @@ class Fitter:
         # params = copy.deepcopy(params)
         params[0] = params[0]/10000
         # Find amounts by solving the model using the estimated parameters.
-        amounts_est = self.model.solve(plate, params)
+        amount_est = self.model.solve(plate, params)
         # Mutable so must scale C_0 back
         params[0] = params[0]*10000
-        c_est = amounts_est.flatten()[::self.model.no_species]
+        c_est = np.split(amount_est, self.model.no_species, axis=1)[0].flatten()
         # Zeros appear in here for empty plates but this shouldn't
         # have any effect.
         err = np.sqrt(np.sum((plate.c_meas - c_est)**2))
@@ -90,11 +89,7 @@ class Fitter:
         if bounds is None:
             # All values non-negative.
             bounds = [(0.0, None) for param in param_guess]
-        # Remove bounds for k in guess model
-        # if 'k' in self.model.params:
-        #     bounds[0] = (param_guess[0], param_guess[0])
-        #     bounds[1] = (param_guess[1], param_guess[1])
-        #     bounds[2] = (-0.03, 0.03)
+
         # Add r (0, 0) bounds for empty sites according to plate.empties.
         for index in plate.empties:
             bounds[self.model.r_index + index] = (0.0, 0.0)
@@ -112,10 +107,8 @@ class Fitter:
         bounds[0] = tuple(bounds[0][i]*10000 if bounds[0][i] is not None
                           else bounds[0][i] for i in range(2))
 
-        t0 = time.time()
         est_params = minimize(obj_f, param_guess, method='L-BFGS-B',
                               bounds=bounds, options=options)
-        t1 = time.time()
 
         # Scale C_0 to true amount in result.
         est_params.x[0] = est_params.x[0]/10000
@@ -123,7 +116,6 @@ class Fitter:
         # Add extra attributes to scipy.optimize.OptimizeResult
         # object. Can access with keys() as this is just a subclass of
         # dict.
-        est_params.fit_time = t1 - t0
         est_params.init_guess = param_guess
         est_params.fit_options = dict_to_json(options)    # including ftol
         est_params.model = self.model

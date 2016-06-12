@@ -18,6 +18,24 @@ def round_sig(x, sig=2):
         return x
 
 
+def get_mask(neighbourhood):
+    """Return an boolean array of neighbour indices.
+
+    Each row is a culture; each column is an index.
+    1 if neighbour 0 if not.
+    """
+    # Make an nxn array
+    mask = np.zeros([len(neighbourhood)]*2)
+    # Find coords in mask from neighbour indices.
+    places = []
+    [[places.append((i, val)) for val in tup]
+     for i, tup in enumerate(neighbourhood)]
+    # 1 if culture of row has neighbour w/ index of column.
+    for place in places:
+        mask[place] = 1
+    return mask
+
+
 def mad(a, b):
     """Return mean absolute deviation."""
     return np.mean(np.abs(a - b))

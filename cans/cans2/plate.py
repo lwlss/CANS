@@ -5,9 +5,9 @@ import random
 
 from cans2.model import IndeModel
 from cans2.fitter import Fitter
+from cans2.cans_funcs import get_mask
 
-
-class BasePlate:
+class BasePlate(object):
     def __init__(self, rows, cols, data=None):
         self.rows = rows
         self.cols = cols
@@ -49,6 +49,8 @@ class BasePlate:
                 # Then not in last row.
                 neighbours.append(i + self.cols)
             neighbourhood.append(tuple(neighbours))
+        self.neigh_nos = np.array([len(tup) for tup in neighbourhood])
+        self.mask = get_mask(neighbourhood)
         return neighbourhood
 
 
@@ -63,12 +65,9 @@ class BasePlate:
 class Plate(BasePlate):
     def __init__(self, rows, cols, data=None):
         super(Plate, self).__init__(rows, cols, data)
+        self.cultures = [Culture() for i in range(self.no_cultures)]
         if self.data is not None:
-            # Feed data to Cultures. Depends on form of data but would
-            # like a dictionary with times and c_meas.
-            pass
-        else:
-            self.cultures = [Culture() for i in range(self.no_cultures)]
+            self._set_cultures()
 
 
     def _set_cultures(self):
@@ -115,7 +114,7 @@ class Plate(BasePlate):
         if self.sim_params is None:
             self._gen_sim_params(model, r_mean, r_var, custom_params)
         self.sim_amounts = model.solve(self, self.sim_params)
-        self.c_meas = self.sim_amounts.flatten()[::model.no_species]
+        self.c_meas = np.split(self.sim_amounts, model.no_species, axis=1)[0].flatten()
         if noise:
             self.add_noise()
         self._set_cultures()    # Set culture c_meas and times.
@@ -172,7 +171,8 @@ class Culture(BasePlate):
 
 
 if __name__ == '__main__':
+    from cans2.cans_funcs import get_mask
     plate1 = Plate(3, 3)
-    culture1 = Culture()
+    mask = get_mask(plate1.neighbourhood)
     print(plate1.neighbourhood)
-    print(culture1.neighbourhood)
+    print(mask)

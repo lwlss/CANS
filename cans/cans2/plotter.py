@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import AxesGrid
 
 
-class Plotter:
+class Plotter(object):
 
     def __init__(self, model):
         self.model = model
@@ -59,6 +59,11 @@ class Plotter:
         # Smooth times for sims.
         sim_times = np.linspace(plate.times[0], plate.times[-1], 100)
         amounts = self.model.solve(plate, est_params, sim_times)
+        amounts = np.split(amounts, self.model.no_species, axis=1)
+        if sim:
+            # Split by specie
+            sim_amounts = np.split(plate.sim_amounts, self.model.no_species,
+                                   axis=1)
 
         fig, grid = self._make_grid(plate, amounts, sim, title)
 
@@ -68,16 +73,15 @@ class Plotter:
                 ax.plot(plate.times, plate.c_meas[i::plate.no_cultures],
                         'x', label='Observed Cells', ms=ms, mew=mew)
             for j, species in enumerate(self.model.species):
-                ax.plot(sim_times, amounts[:, i * self.model.no_species + j],
-                        self.colours[j], label="Est "+species, lw=lw)
+                ax.plot(sim_times, amounts[j][:, i], self.colours[j],
+                        label="Est "+species, lw=lw)
                 if j == 0 and i in plate.empties:
                     continue
                 elif sim:
                     # Plot all true. These do not have noise added.
-                    ax.plot(plate.times,
-                            plate.sim_amounts[:, i*self.model.no_species + j],
-                            'x' + self.colours[j], label="True "+species,
-                            ms=ms, mew=mew)
+                    ax.plot(plate.times, sim_amounts[j][:, i],
+                            'x' + self.colours[j],
+                            label="True"+species, ms=ms, mew=mew)
                 else:
                     continue
         if legend:
@@ -142,3 +146,25 @@ class Plotter:
         else:
             plt.savefig(filename)
         plt.close()
+
+
+if __name__ == "__main__":
+    from cans2.plate import Plate
+    from cans2.model import CompModel
+
+    rows = 2
+    cols = 2
+    plate1 = Plate(rows, cols)
+    plate1.times = np.linspace(0, 5, 11)
+    comp_model = CompModel()
+    params = {
+        "C_0": 1e-6,
+        "N_0": 0.1,
+        "kn": 1.5
+    }
+    plate1.set_sim_data(comp_model, r_mean=40.0, r_var=15.0,
+                        custom_params=params)
+
+    comp_plotter = Plotter(comp_model)
+    comp_plotter.plot_est(plate1, plate1.sim_params, title="Simulated growth",
+                          sim=True)
