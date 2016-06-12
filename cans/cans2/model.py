@@ -182,7 +182,12 @@ class Model(object):
 
         
 class CompModel(Model):
-    def __init__(self, reversible_diff=True):
+    def __init__(self, rev_diff=True):
+        """Instantiate CompModel.
+
+        If rev_diff is True use reversible reaction equations for
+        diffusion.
+        """
         self.model = comp_model
         self.r_index = 3
         self.params = ['C_0', 'N_0', 'kn', 'r']
@@ -205,11 +210,11 @@ class CompModel(Model):
                 "rate": "kn * N{0} - kn * N{1}",
                 "reactants": [(1, "N{0}")],
                 "products": [(1, "N{1}")],
-                "reversible": reversible_diff,
+                "reversible": rev_diff,
                 "neighs": True
             }
         ]
-        if not reversible_diff:
+        if not rev_diff:
             self.reactions[1]["rate"] = "kn * N{0}"
         self.no_species = len(self.species)
         self.name = 'Competition Model'
