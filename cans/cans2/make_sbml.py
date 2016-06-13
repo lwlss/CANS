@@ -262,7 +262,7 @@ def create_product(reaction, stoich, species_id):
     check(P_ref.setStoichiometry(stoich), "set stoichiometry for " + prod_in_r)
 
 
-def create_model(plate, growth_model, params, outfile=""):
+def create_sbml(plate, growth_model, params, outfile=""):
     """Return an SBML model given a plate and model.
 
     http://sbml.org/Software/libSBML/5.13.0/docs/
@@ -308,7 +308,7 @@ def create_model(plate, growth_model, params, outfile=""):
                        units="dimensionless")
 
 
-    create_species(model, plate1, growth_model, params)
+    create_species(model, plate, growth_model, params)
     create_params(model, plate, growth_model, params)
     create_reactions(model, plate, growth_model)
 
@@ -329,8 +329,8 @@ if __name__ == "__main__":
 
 
     # Simulate a plate with data and parameters.
-    rows = 2
-    cols = 2
+    rows = 16
+    cols = 24
     plate1 = Plate(rows, cols)
     plate1.times = np.linspace(0, 5, 11)
     comp_model = CompModel(rev_diff=True)
@@ -343,19 +343,18 @@ if __name__ == "__main__":
                         custom_params=params)
 
     # Convert comp model to SBML.
-    sbml = create_model(plate1, comp_model, plate1.sim_params,
+    sbml = create_sbml(plate1, comp_model, plate1.sim_params,
                         outfile="sbml_models/simulated_{0}x{1}_test_plate_rev.xml".format(rows, cols))
 
     comp_model_ir = CompModel(rev_diff=False)
-    sbml = create_model(plate1, comp_model_ir, plate1.sim_params,
+    sbml = create_sbml(plate1, comp_model_ir, plate1.sim_params,
                         outfile="sbml_models/simulated_{0}x{1}_test_plate_ir.xml".format(rows, cols))
 
-    # Plot a cans model simulation to compare.
-    comp_plotter = Plotter(CompModel())
-    comp_plotter.plot_est(plate1, plate1.sim_params,
-                          title="CompModel Simulated Growth (SciPy)", sim=True,
-                          filename="sbml_models/plots/cans_{0}x{1}_sim.pdf".format(rows, cols))
+    # # Plot a cans model simulation to compare.
+    # comp_plotter = Plotter(CompModel())
+    # comp_plotter.plot_est(plate1, plate1.sim_params,
+    #                       title="CompModel Simulated Growth (SciPy)", sim=True,
+    #                       filename="sbml_models/plots/cans_{0}x{1}_sim.pdf".format(rows, cols))
 
-    print(plate1.sim_amounts)
     # Should try loading the model in Copasi and simulating/solving
     # with libRoadRunner when I think it is finished.
