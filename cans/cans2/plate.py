@@ -6,6 +6,8 @@ import random
 from cans2.model import IndeModel
 from cans2.fitter import Fitter
 from cans2.cans_funcs import get_mask
+from cans2.make_sbml import create_sbml
+
 
 class BasePlate(object):
     def __init__(self, rows, cols, data=None):
@@ -52,6 +54,16 @@ class BasePlate(object):
         self.neigh_nos = np.array([len(tup) for tup in neighbourhood])
         self.mask = get_mask(neighbourhood)
         return neighbourhood
+
+
+    def set_rr_model(self, model, params, outfile=""):
+        """Set RoadRunner object for the model.
+
+        model: A CANS Model instance.
+        params: A list of parameters for the CANS model.
+        """
+        self.rr_name = model.name
+        self.rr = create_sbml(self, model, params, outfile)
 
 
     def fit_model(self, model, param_guess=None, minimizer_opts=None,
