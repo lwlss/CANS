@@ -90,11 +90,17 @@ class BasePlate(object):
         return a
 
 
+    #def rr_fit(self, model, param_guess=None, bounds=None)
+
     def fit_model(self, model, param_guess=None, minimizer_opts=None,
-                  bounds=None):
-        """Return estimates from fitting model to plate."""
+                  bounds=None, rr=False):
+        """Return estimates from fitting model to plate.
+
+        Set rr True to use roadrunner solver.
+
+        """
         fitter = Fitter(model)
-        est = fitter.fit_model(self, param_guess, minimizer_opts, bounds)
+        est = fitter.fit_model(self, param_guess, minimizer_opts, bounds, rr)
         return est
 
 
