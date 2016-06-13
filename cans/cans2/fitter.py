@@ -37,6 +37,25 @@ class Fitter(object):
         err = np.sqrt(np.sum((plate.c_meas - c_est)**2))
         return err
 
+
+    # We can also select to return only C from the rr_solver to make
+    # this faster.
+    def _rr_obj(self, plate, params):
+        # Find amounts by solving the roadrunner sbml model using the
+        # estimated parameters (including init amounts).
+        params[0] = params[0]/10000
+        # Need to supply params to the sbml roadrunner model.
+        amount_est = self.rr_solve(plate, params)
+        # plate.rr.reset()    # Do I need to reset?
+        # Mutable so must scale C_0 back
+        params[0] = params[0]*10000
+        c_est = np.split(amount_est, self.model.no_species, axis=1)[0].flatten()
+        # Zeros appear in here for empty plates but this shouldn't
+        # have any effect.
+        err = np.sqrt(np.sum((plate.c_meas - c_est)**2))
+        return err
+
+
     def _neigh_obj_func(self, plate, params):
         """Obj fun for arbitrary neighbour model.
 
@@ -56,7 +75,7 @@ class Fitter(object):
 
 
     def fit_model(self, plate, param_guess=None, custom_options=None,
-                  bounds=None):
+                  bounds=None, rr=False):
         """Fit the model to data on the plate.
 
         If passed use param guess as the initial guess for
@@ -78,6 +97,9 @@ class Fitter(object):
         assert(plate.c_meas is not None)
         if self.model.name == "Neighbour model":
             obj_f = partial(self._neigh_obj_func, plate)
+
+        if rr:
+            obj_f = partial(self._rr_obj, plate)
         else:
             obj_f = partial(self._obj_func, plate)
         if param_guess is None:
