@@ -1,6 +1,9 @@
 import numpy as np
 import copy
 import random
+import sys
+if sys.version_info[0] == 2:
+    import roadrunner
 
 
 from cans2.model import IndeModel
@@ -61,9 +64,30 @@ class BasePlate(object):
 
         model: A CANS Model instance.
         params: A list of parameters for the CANS model.
+
+        If outfile is given the SBML model will also be saved.
         """
-        self.rr_name = model.name
-        self.rr = create_sbml(self, model, params, outfile)
+        # Set a shape to initailize an empty np array when using
+        # Model.solve(). Do it here rather than repeatedly in the
+        # function.
+        self.data_shape = (len(self.times), self.no_cultures*model.no_species)
+        self.rr = roadrunner.RoadRunner(create_sbml(self, model,
+                                                    params, outfile))
+
+    def rr_solve(self):
+        """Solve between timepoints using roadrunner.
+
+        Returns an 2d array with rows times and cols species. Species are
+        of order e.g., [C0, C1,..., N0, N1,...] with numbers indicating
+        culture index.
+        """
+        a = np.empty(self.data_shape)
+        # Set init values in result.
+        a[0] = self.rr.model.getFloatingSpeciesInitConcentrations()
+        for i, t0, t1 in zip(range(len(self.times)),
+                             self.times[:-1], self.times[1:]):
+            a[i+1] = self.rr.simulate(t0, t1, 1)[1][1:]
+        return a
 
 
     def fit_model(self, model, param_guess=None, minimizer_opts=None,
