@@ -1,4 +1,7 @@
 import numpy as np
+import sys
+if sys.version_info[0] == 2:
+    import roadrunner
 
 
 from scipy.integrate import odeint
@@ -12,7 +15,6 @@ def power_model(params):
     """Simplified model for (hopefully) guessing r params.
 
     Constains a power series as an approximation of diffusion.
-
     """
     k1 = params[0]
     k2 = params[1]
@@ -152,12 +154,33 @@ class Model(object):
             growth_func = self.model(params[self.no_species:])
         # Optional smooth times for simulations/fits.
         if times is None:
-            with stdout_redirected():    # Redirect lsoda warnings
-                sol = odeint(growth_func, init_amounts, plate.times)
+            # with stdout_redirected():    # Redirect lsoda warnings
+            # mxhnil is the maximum number of messages to be printed.
+            sol = odeint(growth_func, init_amounts, plate.times,
+                         atol=1.49012e-8, rtol=1.49012e-8, mxhnil=0)
         else:
-            with stdout_redirected():    # Redirect lsoda warnings
-                sol = odeint(growth_func, init_amounts, times)
+            # with stdout_redirected():    # Redirect lsoda warnings
+            sol = odeint(growth_func, init_amounts, times,
+                         atol=0.0001, rtol=0.0001, mxhnil=0)
         return np.maximum(0, sol)
+
+
+
+
+    def rr_solve(self, plate, params):
+        init_amounts = np.repeat(params[:self.no_species], plate.no_cultures)
+        # for index in plate.empties:
+        #     init_amounts[self.no_species*index] = 0.0
+
+        # Set init amounts in plate.rr. Do we need to set both of theese?
+        plate.rr.model.setFloatingSpeciesInitConcentrations(init_amounts)
+        plate.rr.model.setFloatingSpeciesInitAmounts(init_amounts)
+
+        # Set parameters in SBML. Want to do this as a partial function.
+        plate.rr.model.setGlobalParameterValues(params[self.no_species:])
+        sol = plate.rr_solve()
+        #plate.rr.reset()   # Need this?
+        return sol
 
 
     def gen_params(self, plate, mean=1.0, var=0.0):
@@ -192,9 +215,9 @@ class CompModel(Model):
         self.r_index = 3
         self.params = ['C_0', 'N_0', 'kn', 'r']
         self.species = ['C', 'N']
-        # The reversible attribute specifies two representations of
-        # the model with reversible or irreversible nutrient
-        # diffusion.
+        self.no_species = len(self.species)
+        self.name = 'Competition Model'
+        # Define SBML model.
         self.reactions = [
             {
                 "name": "Growth_{0}",
@@ -214,10 +237,9 @@ class CompModel(Model):
                 "neighs": True
             }
         ]
+        # Alternative irriversible representation of nutrient diffusion.
         if not rev_diff:
             self.reactions[1]["rate"] = "kn * N{0}"
-        self.no_species = len(self.species)
-        self.name = 'Competition Model'
 
 
 class IndeModel(Model):
