@@ -74,6 +74,11 @@ class BasePlate(object):
         self.rr = roadrunner.RoadRunner(create_sbml(self, model,
                                                     params, outfile))
 
+
+    # This, and more importantly fitting, could be made even faster if
+    # we just pass C meas in a flattened array. We could just use the
+    # slower odeint solver when we want nutrients or a 2nd version of
+    # this function with an extra argument.
     def rr_solve(self):
         """Solve SBML model between timepoints using roadrunner.
 
