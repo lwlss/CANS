@@ -75,9 +75,9 @@ class BasePlate(object):
                                                     params, outfile))
 
     def rr_solve(self):
-        """Solve between timepoints using roadrunner.
+        """Solve SBML model between timepoints using roadrunner.
 
-        Returns an 2d array with rows times and cols species. Species are
+        Returns an 2d array of times x species. Species are
         of order e.g., [C0, C1,..., N0, N1,...] with numbers indicating
         culture index.
         """
