@@ -36,7 +36,7 @@ guess_no = 200
 
 # Set out dir/files for data and plots.
 outdir =  "results/rr_fit_test"
-datafile = outdir + "coords_{0}_{1}_{2}x{3}_argv_{4}.json"
+datafile = outdir + "/coords_{0}_{1}_{2}x{3}_argv_{4}.json"
 datafile = datafile.format(coords[0], coords[1], rows, cols, guess_no)
 plotfile = outdir + "/plots/coords_{0}_{1}_{2}x{3}_argv_{4}.pdf"
 plotfile = plotfile.format(coords[0], coords[1], rows, cols, guess_no)
