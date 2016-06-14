@@ -1,9 +1,14 @@
 import numpy as np
 import time
+import json
 
 from cans2.plate import Plate
 from cans2.model import CompModel
-from cans2.fitter import Fitter
+from cans2.plotter import Plotter
+from cans2.parser import get_plate_data
+from cans2.zoning import get_plate_zone
+from cans2.guesser import Guesser
+from cans2.cans_funcs import dict_to_json
 
 # # Simulate a plate with data and parameters.
 # rows = 2
@@ -24,16 +29,17 @@ from cans2.fitter import Fitter
 
 
 # Define area of zone
-coords = (7, 7)
-rows = 5
-cols = 5
+coords = (4, 4)
+rows = 8
+cols = 8
+guess_no = 200
 
 # Set out dir/files for data and plots.
-outdir =  "results/rr_fit_test/"
+outdir =  "results/rr_fit_test"
 datafile = outdir + "coords_{0}_{1}_{2}x{3}_argv_{4}.json"
-datafile = datafile.format(coords[0], coords[1], rows, cols, 0)
+datafile = datafile.format(coords[0], coords[1], rows, cols, guess_no)
 plotfile = outdir + "/plots/coords_{0}_{1}_{2}x{3}_argv_{4}.pdf"
-plotfile = plotfile.format(coords[0], coords[1], rows, cols, 0)
+plotfile = plotfile.format(coords[0], coords[1], rows, cols, guess_no)
 
 # Read in real plate and make zone
 data_path = "../../data/p15/Output_Data/"
@@ -53,7 +59,7 @@ r_avgs = np.linspace(25.0, 75.0, 11)
 kns = np.linspace(0.0, 10.0, 11)
 C_0s = np.logspace(-10, -1, 10)
 guess_vals = np.array([(C_0, r, kn) for C_0 in C_0s for r in r_avgs for kn in kns])
-guess_val = guess_vals[int(sys.argv[1])]
+guess_val = guess_vals[int(guess_no)]
 C_0_guess = guess_val[0]*guess["N_0"]    # Scale by value of N_0 guess
 r_guess = guess_val[1]
 kn_guess = guess_val[2]
@@ -62,6 +68,10 @@ kn_guess = guess_val[2]
 param_guess = [C_0_guess, guess["N_0"], kn_guess]
 r_guesses = [r_guess for i in range(zone.no_cultures)]
 param_guess = param_guess + r_guesses
+
+
+# Set roadrunner model uning initial parameter guess.
+zone.set_rr_model(comp_model, param_guess)
 
 # Set bounds
 bounds = comp_guesser.get_bounds(zone, guess)
@@ -72,8 +82,9 @@ bounds[2] = (0.0, 11.00)
 t0 = time.time()
 zone.comp_est = zone.fit_model(CompModel(),
                                param_guess=param_guess,
-                               minimizer_opts={'disp': False},
-                               bounds=bounds)
+                               minimizer_opts={'disp': True},
+                               bounds=bounds,
+                               rr=True)
 t1 = time.time()
 
 # print(t1-t0)
@@ -82,7 +93,7 @@ t1 = time.time()
 # print(zone.comp_est.fun)
 
 data = {
-    'argv': int(sys.argv[1]),
+    'argv': int(guess_no),
     'fit_time': t1-t0,
     'zone_coords': coords,
     'zone_rows': rows,
@@ -104,5 +115,5 @@ with open(datafile, 'w') as f:
 
 plotter = Plotter(comp_model)
 plotter.plot_est(zone, zone.comp_est.x,
-                 title="Fit of p15 ({0},{1}) 5x5 zone".format(*coords),
+                 title="Fit of p15 ({0},{1}) {2}x{3} zone".format(*[coords, rows, cols]),
                  filename=plotfile)
