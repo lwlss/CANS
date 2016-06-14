@@ -115,5 +115,5 @@ with open(datafile, 'w') as f:
 
 plotter = Plotter(comp_model)
 plotter.plot_est(zone, zone.comp_est.x,
-                 title="Fit of p15 ({0},{1}) {2}x{3} zone".format(*[coords, rows, cols]),
+                 title="Fit of p15 ({0},{1}) {2}x{3} zone".format(*(list(coords) + [rows, cols])),
                  filename=plotfile)
