@@ -45,7 +45,7 @@ class Fitter(object):
         # estimated parameters (including init amounts).
         params[0] = params[0]/10000
         # Need to supply params to the sbml roadrunner model.
-        amount_est = self.rr_solve(plate, params)
+        amount_est = self.model.rr_solve(plate, params)
         # plate.rr.reset()    # Do I need to reset?
         # Mutable so must scale C_0 back
         params[0] = params[0]*10000
