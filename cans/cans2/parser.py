@@ -92,9 +92,16 @@ if __name__ == "__main__":
 
 
 
-    path = "/home/dan/projects/CANS/data/p15/Output_Data/"
+    path = "../../data/p15/Output_Data/"
 
     plate_data = get_plate_data(path)
+    times = plate_data["times"]
+    print(times)
+    steps = [times[i + 1] - times[i] for i in range(len(times) - 1)]
+    print(steps)
+
+
+    assert False
     real_plate = Plate(plate_data["rows"], plate_data["cols"],
                        data=plate_data)
 
