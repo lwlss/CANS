@@ -166,20 +166,15 @@ class Model(object):
 
 
 
-
     def rr_solve(self, plate, params):
+        """Set SBML parameters and solve using RoadRunner."""
         init_amounts = np.repeat(params[:self.no_species], plate.no_cultures)
-        # for index in plate.empties:
-        #     init_amounts[self.no_species*index] = 0.0
-
-        # Set init amounts in plate.rr. Do we need to set both of theese?
+        # Set init concs. and amounts in plate.rr.
         plate.rr.model.setFloatingSpeciesInitConcentrations(init_amounts)
         plate.rr.model.setFloatingSpeciesInitAmounts(init_amounts)
-
-        # Set parameters in SBML. Want to do this as a partial function.
+        # Set parameters in SBML.
         plate.rr.model.setGlobalParameterValues(params[self.no_species:])
         sol = plate.rr_solve()
-        #plate.rr.reset()   # Need this?
         return sol
 
 
