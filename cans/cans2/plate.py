@@ -91,7 +91,13 @@ class BasePlate(object):
         a[0] = self.rr.model.getFloatingSpeciesInitConcentrations()
         for i, t0, t1 in zip(range(len(self.times)),
                              self.times[:-1], self.times[1:]):
-            a[i+1] = self.rr.simulate(t0, t1, 1)[1][1:]
+            # Solves using SUNDIALS CVODE with MXSTEP_DEFAULT=500. I
+            # set minimumTimeStep at about minute resolution for a
+            # simulation over 5 days (i.e. 1/(5*24*60)) and
+            # maximumNumSteps greater than 5/minimumTimeStep so that
+            # it should never be encountered in a typical experiment.
+            a[i+1] = self.rr.simulate(t0, t1, 1, mininumTimeStep=1.39e-4,
+                                      maximumNumSteps=40000)[1][1:]
         return a
 
 
