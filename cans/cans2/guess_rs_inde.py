@@ -3,7 +3,7 @@ cultures."""
 import numpy as np
 
 
-from cans2.model import IndeModel, CompModel, GuessModel
+from cans2.model import IndeModel, CompModel
 from cans2.guesser import Guesser
 from cans2.plate import Plate
 from cans2.plotter import Plotter
@@ -19,9 +19,9 @@ comp_plotter = Plotter(CompModel())
 # Simulate a 16x24 plate with noise
 full_plate = Plate(16, 24)
 full_plate.times = np.linspace(0, 5, 11)
-true_params = {'N_0': 0.1, 'kn': 1.0}
-true_params['C_0'] = true_params['N_0']/10000
-full_plate.set_sim_data(comp_model, r_mean=30.0, r_var=15.0,
+true_params = {'N_0': 0.1, 'kn': 0.1}
+true_params['C_0'] = true_params['N_0']/100000
+full_plate.set_sim_data(comp_model, r_mean=100.0, r_var=50.0,
                         custom_params=true_params)
 
 
@@ -46,8 +46,8 @@ for culture in resim_zone.cultures:
     print(inde_param_guess)
 
     culture.est = culture.fit_model(IndeModel(), param_guess=inde_param_guess,
-                                         bounds=inde_bounds,
-                                         minimizer_opts={'disp': False})
+                                    bounds=inde_bounds,
+                                    minimizer_opts={'disp': False})
     inde_rate_guesses.append(culture.est.x[-1])
     inde_N_0_guess.append(culture.est.x[1])
 
@@ -60,7 +60,13 @@ inde_plotter.plot_est(culture, culture.est.x,
 
 comp_plotter.plot_est(resim_zone, resim_zone.sim_params)
 
+for culture in resim_zone.cultures:
+    print(culture.est.x)
+
 comp_plotter.plot_culture_fits(resim_zone, inde_model, sim=True)
+
+for culture in resim_zone.cultures:
+    print(culture.est.x)
 
 # To Do
 # Guess using the power series model
