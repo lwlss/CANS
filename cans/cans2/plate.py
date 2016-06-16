@@ -101,8 +101,6 @@ class BasePlate(object):
         return a
 
 
-    #def rr_fit(self, model, param_guess=None, bounds=None)
-
     def fit_model(self, model, param_guess=None, minimizer_opts=None,
                   bounds=None, rr=False):
         """Return estimates from fitting model to plate.
@@ -137,11 +135,11 @@ class Plate(BasePlate):
                 culture.empties = [0]
 
 
-    def _gen_sim_params(self, model, r_mean, r_var, custom_params):
+    def _gen_sim_params(self, model, b_mean, b_var, custom_params):
         """Generate a set of simulation parameters for a model."""
         # There is a bug here if model instance is being used
         # somewhere else then plate fails to be passed.
-        self.sim_params = model.gen_params(self, mean=r_mean, var=r_var)
+        self.sim_params = model.gen_params(self, mean=b_mean, var=b_var)
         if custom_params is not None:
             for k, v in custom_params.items():
                 try:
@@ -150,12 +148,12 @@ class Plate(BasePlate):
                 except ValueError:
                     print("No plate level {0} in {1}.".format(k, model.name))
                     raise
-        # Set r params for zero for empty plates. Could also go with nan.
+        # Set b params for zero for empty plates. Could also go with nan.
         for index in self.empties:
-            self.sim_params[model.r_index+index] = 0.0
+            self.sim_params[model.b_index+index] = 0.0
 
 
-    def set_sim_data(self, model, r_mean=1.0, r_var=1.0,
+    def set_sim_data(self, model, b_mean=1.0, b_var=1.0,
                      custom_params=None, noise=True):
         """Set simulation data.
 
@@ -165,7 +163,7 @@ class Plate(BasePlate):
 
         """
         if self.sim_params is None:
-            self._gen_sim_params(model, r_mean, r_var, custom_params)
+            self._gen_sim_params(model, b_mean, b_var, custom_params)
         self.sim_amounts = model.solve(self, self.sim_params)
         self.c_meas = np.split(self.sim_amounts, model.no_species, axis=1)[0].flatten()
         if noise:
@@ -205,14 +203,14 @@ class Plate(BasePlate):
         for culture in self.cultures:
             culture.inde_est = culture.fit_model(inde_model)
         params = np.array([c.inde_est.x for c in self.cultures])
-        # Only take averages if r>0 otherwise amount estimates are arbitrary.
+        # Only take averages if b>0 otherwise amount estimates are arbitrary.
         avgs = np.average([p for p in params if p[-1]], axis=0)
         if np.all(np.isnan(avgs)):
-            print("Warning: All rs were zero so estimates may not be reliable.")
+            print("Warning: All bs were zero so estimates may not be reliable.")
             avgs = np.average(params, axis=0)
         # Averages only for plate level params.
-        avg_params = np.append(avgs[:inde_model.r_index],
-                               params[:, inde_model.r_index])
+        avg_params = np.append(avgs[:inde_model.b_index],
+                               params[:, inde_model.b_index])
         self.avg_culture_ests = avg_params
         return avg_params
 
