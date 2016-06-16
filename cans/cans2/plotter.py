@@ -131,9 +131,7 @@ class Plotter(object):
                 if j == 0 and i in zone.empties:
                     continue
                 elif sim and j != 0:
-                    # Plot all true for zone. These do not have noise added.
-                    ax.plot(zone.times,
-                            zone.sim_amounts[:, i*self.model.no_species + j],
+                    ax.plot(zone.times, zone.sim_amounts[:, j*zone.no_cultures],
                             'x' + self.colours[j], label="True "+species,
                             ms=ms, mew=mew)
                 else:
