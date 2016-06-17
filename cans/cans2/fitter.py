@@ -129,7 +129,7 @@ class Fitter(object):
         elif rr and not sel:
             obj_f = partial(self._rr_obj, plate)
         elif not rr and sel:
-            raise ValueError, "Can only make a selection if rr=True"
+            raise ValueError("Can only make a selection if rr=True")
         else:
             obj_f = partial(self._obj_func, plate)
         if param_guess is None:
