@@ -305,7 +305,7 @@ if __name__ == '__main__':
 
     true_params = {'N_0': 0.1, 'kn': 0.1}
     true_params['C_0'] = true_params['N_0']/1000000
-    plate1.set_sim_data(comp_model, b_mean=30.0, b_var=15.0,
+    plate1.set_sim_data(comp_model, b_mean=50.0, b_var=15.0,
                         custom_params=true_params)
 
     comp_plotter.plot_c_meas(plate1)
@@ -315,6 +315,7 @@ if __name__ == '__main__':
     plate1.est = plate1.fit_model(comp_model, minimizer_opts={"disp": True},
                                   rr=True, sel=True)
     print(plate1.est.x)
+    print(plate1.true_params)
 
 
     comp_plotter.plot_est(plate1, plate1.est.x, sim=True)
