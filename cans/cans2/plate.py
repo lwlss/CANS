@@ -123,7 +123,7 @@ class BasePlate(object):
             a[i+1] = self.rr.simulate(t0, t1, 1,
                                       mininumTimeStep=1.39e-4,
                                       maximumNumSteps=40000,
-                                      sel=self.plate.timeCourseSelections)[1]
+                                      sel=self.timeCourseSelections)[1]
         return a.flatten()
 
 
@@ -165,20 +165,20 @@ class BasePlate(object):
         # Set a shape for simulated timecourse arrays.
         self.sel_shape = (len(self.times), len(selections))
         # Set c_meas_sel for objective function evaluations.
-        selection_cs = [self.c_meas[i*(self.no_cultuers):(i+1)*self.no_cultures]
-                        for i in indices]
-        self.c_meas_sel = np.array(selection_cs).flatten()
+        c_sels = [self.c_meas[i::self.no_cultures] for i in indices]
+        self.c_meas_sel = np.array(c_sels).flatten(order="F")
 
 
     def fit_model(self, model, param_guess=None, minimizer_opts=None,
-                  bounds=None, rr=False):
+                  bounds=None, rr=False, sel=False):
         """Return estimates from fitting model to plate.
 
-        Set rr True to use roadrunner solver.
-
+        Set rr True to use roadrunner solver. Set sel True to use a
+        selection of cultures in the objective function.
         """
         fitter = Fitter(model)
-        est = fitter.fit_model(self, param_guess, minimizer_opts, bounds, rr)
+        est = fitter.fit_model(self, param_guess, minimizer_opts,
+                               bounds, rr, sel)
         return est
 
 
@@ -291,17 +291,22 @@ class Culture(BasePlate):
 
 
 if __name__ == '__main__':
-    from cans2.cans_funcs import get_mask
-    from cans2.model import CompModel
     import roadrunner
 
-    plate1 = Plate(4, 3)
-    mask = get_mask(plate1.neighbourhood)
-    print(plate1.neighbourhood)
-    print(mask)
-    plate1.times = np.linspace(0, 5, 11)
-    plate1.set_sim_data(CompModel())
-    plate1.set_rr_model(CompModel(), plate1.sim_params)
+    from cans2.cans_funcs import get_mask
+    from cans2.model import CompModel
+    from cans2.plotter import Plotter
 
-    plate1.set_rr_selections()
-    print(plate1.rr_solve_selections())
+    comp_model = CompModel()
+
+    plate1 = Plate(7, 7)
+    plate1.times = np.linspace(0, 5, 11)
+    plate1.set_sim_data(comp_model)
+    plate1.set_rr_model(comp_model, plate1.sim_params)
+    plate1.set_rr_selections(indices="internals")
+    plate1.est = plate1.fit_model(comp_model, minimizer_opts={"disp": True},
+                           rr=True, sel=True)
+    print(plate1.est.x)
+
+    comp_plotter = Plotter(comp_model)
+    comp_plotter.plot_est(plate1, plate1.est.x, sim=True)
