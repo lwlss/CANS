@@ -38,15 +38,16 @@ class Fitter(object):
         return err
 
 
-    # We can also select to return only C from the rr_solver to make
-    # this faster.
     def _rr_obj(self, plate, params):
-        # Find amounts by solving the roadrunner sbml model using the
-        # estimated parameters (including init amounts).
+        """Return the objective function from RoadRunner simulations.
+
+        The solver returns amounts for all species on the plate. There
+        is an alternative method which just returns a user defined
+        selection. params includes init amounts.
+
+        """
         params[0] = params[0]/10000
-        # Need to supply params to the sbml roadrunner model.
         amount_est = self.model.rr_solve(plate, params)
-        # plate.rr.reset()    # Do I need to reset?
         # Mutable so must scale C_0 back
         params[0] = params[0]*10000
         c_est = np.split(amount_est, self.model.no_species, axis=1)[0].flatten()
@@ -54,6 +55,25 @@ class Fitter(object):
         # have any effect.
         err = np.sqrt(np.sum((plate.c_meas - c_est)**2))
         return err
+
+
+    # We can also select to return only C from the rr_solver to make
+    # this faster.
+    def _rr_selection_obj(self, plate, params):
+        """Return the objective function from RoadRunner simulations.
+
+        The solver returns C amounts from a user defined selection of
+        cultures. These are set by the Plate method
+        set_rr_selections. params includes init amounts.
+
+        """
+        params[0] = params[0]/10000
+        c_est = self.model.rr_solve_selections(plate, params)
+        # Mutable so must scale C_0 back
+        params[0] = params[0]*10000
+        err = np.sqrt(np.sum((plate.c_meas_sel - c_est)**2))
+        return err
+
 
 
     def _neigh_obj_func(self, plate, params):
@@ -75,7 +95,7 @@ class Fitter(object):
 
 
     def fit_model(self, plate, param_guess=None, custom_options=None,
-                  bounds=None, rr=False):
+                  bounds=None, rr=False, sel=False):
         """Fit the model to data on the plate.
 
         If passed use param guess as the initial guess for
@@ -88,6 +108,12 @@ class Fitter(object):
         model.params. Individual bounds must be included at the end
         for each r parameter.
 
+        If rr is true, solve using RaodRunner (faster).
+
+        If sel is True, use only cell amounts from a selection of
+        cultures in the objective function. These can be set with the
+        Plate method set_rr_selections.
+
         """
         # Make deep_copies of param_guesses and bounds because of
         # rescaling for the minimizer and mutability.
@@ -98,8 +124,12 @@ class Fitter(object):
         if self.model.name == "Neighbour model":
             obj_f = partial(self._neigh_obj_func, plate)
 
-        if rr:
+        if rr and sel:
+            obj_f = partial(self._rr_selection_obj, plate)
+        elif rr and not sel:
             obj_f = partial(self._rr_obj, plate)
+        elif not rr and sel:
+            raise ValueError, "Can only make a selection if rr=True"
         else:
             obj_f = partial(self._obj_func, plate)
         if param_guess is None:
