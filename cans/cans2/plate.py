@@ -101,6 +101,75 @@ class BasePlate(object):
         return a
 
 
+    def rr_solve_selections(self):
+        """Solve for selected species between timepoints using roadrunner.
+
+        Returns a flattened array ready for the objective function.
+        """
+        a = np.empty(self.sel_shape)
+        # must pass a np.ndarray of indices for initial species
+        a[0] = self.rr.model.getFloatingSpeciesInitConcentrations()[self.selection_inds]
+        for i, t0, t1 in zip(range(len(self.times)),
+                             self.times[:-1], self.times[1:]):
+            # Solves using SUNDIALS CVODE with MXSTEP_DEFAULT=500. I
+            # set minimumTimeStep at about minute resolution for a
+            # simulation over 5 days (i.e. 1/(5*24*60)) and
+            # maximumNumSteps greater than 5/minimumTimeStep so that
+            # it should never be encountered in a typical experiment.
+            # I would like to have set rr.timeCourseSelections just
+            # once to return the species I want but the API does not
+            # seem to work like the documentation. Therefore just pass
+            # the selections using the sel argument.
+            a[i+1] = self.rr.simulate(t0, t1, 1,
+                                      mininumTimeStep=1.39e-4,
+                                      maximumNumSteps=40000,
+                                      sel=self.plate.timeCourseSelections)[1]
+        return a.flatten()
+
+
+    def get_internals(self):
+        """Return the indicies of internal cultures."""
+        internals = [i for i, neighs in enumerate(self.neighbourhood)
+                     if len(neighs) == 4]
+        return np.array(internals)
+
+
+    def set_rr_selections(self, id="[C{0}]", indices="internals"):
+        """Set the return C amount indices for RoadRunner simulations.
+
+        At the moment we only ever want to set this for C amounts. The
+        intended use is to eliminate edge cultures from the objective
+        function. If we want to select other species it will suffice
+        to solve for all species and then index the output as speed is
+        not important.
+
+        ids: Id of cells in SBML model with positional references for
+        formatting of indices of the selected cultures.
+
+        indices: list of culture indices.
+        """
+        if indices == "internals":
+            internals = self.get_internals()
+            indices = internals
+            self.selection_inds = internals    # Should be a numpy array
+        else:
+            self.selection_inds = np.array(indices)
+        selections = [id.format(i) for i in indices]
+        # For some reason RoadRunner's timeCourseSelections API is not
+        # working (Maybe I have an older verion or could have been an
+        # issue with swig version on installation) so just set as a
+        # plate attribute and fix in future if possible/needed by
+        # changing to a RoadRunner attribute and altering the call to
+        # rr.simulate in the rr_solve_selections method.
+        self.timeCourseSelections = selections
+        # Set a shape for simulated timecourse arrays.
+        self.sel_shape = (len(self.times), len(selections))
+        # Set c_meas_sel for objective function evaluations.
+        selection_cs = [self.c_meas[i*(self.no_cultuers):(i+1)*self.no_cultures]
+                        for i in indices]
+        self.c_meas_sel = np.array(selection_cs).flatten()
+
+
     def fit_model(self, model, param_guess=None, minimizer_opts=None,
                   bounds=None, rr=False):
         """Return estimates from fitting model to plate.
@@ -223,7 +292,16 @@ class Culture(BasePlate):
 
 if __name__ == '__main__':
     from cans2.cans_funcs import get_mask
-    plate1 = Plate(3, 3)
+    from cans2.model import CompModel
+    import roadrunner
+
+    plate1 = Plate(4, 3)
     mask = get_mask(plate1.neighbourhood)
     print(plate1.neighbourhood)
     print(mask)
+    plate1.times = np.linspace(0, 5, 11)
+    plate1.set_sim_data(CompModel())
+    plate1.set_rr_model(CompModel(), plate1.sim_params)
+
+    plate1.set_rr_selections()
+    print(plate1.rr_solve_selections())
