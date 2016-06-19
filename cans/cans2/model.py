@@ -147,6 +147,18 @@ class Model(object):
         return np.maximum(0, sol)
 
 
+    def rr_solve(self, plate, params):
+        """Set SBML parameters and solve using RoadRunner.
+
+        Return amounts of all species on the Plate.
+        """
+        init_amounts = np.repeat(params[:self.no_species], plate.no_cultures)
+        plate.rr.model.setFloatingSpeciesInitConcentrations(init_amounts)
+        plate.rr.model.setFloatingSpeciesInitAmounts(init_amounts)
+        plate.rr.model.setGlobalParameterValues(params[self.param_index:])
+        sol = plate.rr_solve()
+        return sol
+
     def rr_solve_selections(self, plate, params):
         """Set SBML parameters and solve using RoadRunner.
 
@@ -157,24 +169,12 @@ class Model(object):
         init_amounts = np.repeat(params[:self.no_species], plate.no_cultures)
         plate.rr.model.setFloatingSpeciesInitConcentrations(init_amounts)
         plate.rr.model.setFloatingSpeciesInitAmounts(init_amounts)
-        plate.rr.model.setGlobalParameterValues(params[self.no_species:])
+        plate.rr.model.setGlobalParameterValues(params[self.param_index:])
         sol = plate.rr_solve_selections()
         return sol
 
 
-    def rr_solve(self, plate, params):
-        """Set SBML parameters and solve using RoadRunner.
-
-        Return amounts of all species on the Plate.
-        """
-        init_amounts = np.repeat(params[:self.no_species], plate.no_cultures)
-        plate.rr.model.setFloatingSpeciesInitConcentrations(init_amounts)
-        plate.rr.model.setFloatingSpeciesInitAmounts(init_amounts)
-        plate.rr.model.setGlobalParameterValues(params[self.no_species:])
-        sol = plate.rr_solve()
-        return sol
-
-
+    # Could generalize for other culture level parameters.
     def gen_params(self, plate, mean=1.0, var=0.0):
         """Generate and return a np.array of parameter values.
 
@@ -263,7 +263,7 @@ class CompModelBC(CompModel):
         init_amounts[plate.edges + plate.no_cultures] = params[3]
         plate.rr.model.setFloatingSpeciesInitConcentrations(init_amounts)
         plate.rr.model.setFloatingSpeciesInitAmounts(init_amounts)
-        plate.rr.model.setGlobalParameterValues(params[self.no_species:])
+        plate.rr.model.setGlobalParameterValues(params[self.param_index:])
         sol = plate.rr_solve()
         return sol
 
