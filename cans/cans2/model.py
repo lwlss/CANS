@@ -250,6 +250,40 @@ class CompModel(Model):
         # Alternative irriversible representation of nutrient diffusion.
         if not rev_diff:
             self.reactions[1]["rate"] = "kn * N{0}"
+        self.rr_solver = self.rr_solve
+
+
+class CompModelBC(CompModel):
+    """Competition model with special treatment of boundaries.
+
+    The extra parameter NE_0 is the initial amount of nutrients in
+    edge cultures.
+    """
+    def __init__(self, rev_diff=True):
+        super(CompModelBC, self).__init__(rev_diff=rev_diff)
+        self.r_index = 4
+        self.params = ["C_0", "N_0", "NE_0", "kn", "r"]
+        self.species = ["C", "N"]
+        self.no_species = len(self.species)
+        self.name = 'Competition Model BC'
+        self.rr_solver = self.rr_solve_bc
+
+
+    def rr_solve_bc(self, plate, params):
+        """Solve with RoadRunner using a different N_0 for the boundaries.
+
+        Assumes a species order of C, N, ... and that NE_0 is the 3rd
+        parameter in params.
+
+        """
+        init_amounts = np.repeat(params[:self.no_species], plate.no_cultures)
+        # Replace edge N_0 with NE_0. plate.edges should be a numpy array.
+        init_amounts[plate.edges + plate.no_cultures] = params[3]
+        plate.rr.model.setFloatingSpeciesInitConcentrations(init_amounts)
+        plate.rr.model.setFloatingSpeciesInitAmounts(init_amounts)
+        plate.rr.model.setGlobalParameterValues(params[self.no_species:])
+        sol = plate.rr_solve()
+        return sol
 
 
 class IndeModel(Model):
@@ -306,3 +340,6 @@ if __name__ == '__main__':
     inde_mod = IndeModel()
     print(inde_mod.model)
     print(comp_mod.model)
+    comp_mod_bc = CompModelBC()
+    print(comp_mod_bc.__dict__)
+    print(comp_mod_bc.rr_solver)
