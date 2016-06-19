@@ -47,7 +47,10 @@ class Fitter(object):
 
         """
         params[0] = params[0]/10000
-        amount_est = self.model.rr_solve(plate, params)
+        # There are multiple alternative Model methods for solving
+        # using RoadRunner. The specific method is stored as a
+        # Model attribute rr_solver.
+        amount_est = self.model.rr_solver(plate, params)
         # Mutable so must scale C_0 back
         params[0] = params[0]*10000
         c_est = np.split(amount_est, self.model.no_species, axis=1)[0].flatten()
