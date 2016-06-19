@@ -28,7 +28,7 @@ class Fitter(object):
         # params = copy.deepcopy(params)
         params[0] = params[0]/10000
         # Find amounts by solving the model using the estimated parameters.
-        amount_est = self.model.solve(plate, params)
+        amount_est = self.model.solve(plate, params, plate.times)
         # Mutable so must scale C_0 back
         params[0] = params[0]*10000
         c_est = np.split(amount_est, self.model.no_species, axis=1)[0].flatten()
@@ -88,7 +88,7 @@ class Fitter(object):
         """
         params[0] = params[0]/10000
         # Find amounts by solving the model using the estimated parameters.
-        amounts_est = self.model.solve(plate, params)
+        amounts_est = self.model.solve(plate, params, plate.times)
         # Mutable so must scale C_0 back
         params[0] = params[0]*10000
         c_est = amounts_est.flatten()[::self.model.no_species]
