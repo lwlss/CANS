@@ -260,7 +260,7 @@ class CompModelBC(CompModel):
         """
         init_amounts = np.repeat(params[:self.no_species], plate.no_cultures)
         # Replace edge N_0 with NE_0. plate.edges should be a numpy array.
-        init_amounts[plate.edges + plate.no_cultures] = params[3]
+        init_amounts[plate.edges + plate.no_cultures] = params[2]
         plate.rr.model.setFloatingSpeciesInitConcentrations(init_amounts)
         plate.rr.model.setFloatingSpeciesInitAmounts(init_amounts)
         plate.rr.model.setGlobalParameterValues(params[self.param_index:])
