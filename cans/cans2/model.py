@@ -146,8 +146,12 @@ class Model(object):
         # Might be cheaper to pass neighbourhood for the independent
         # model but do nothing with it. However, the comparison with
         # 'kn' below is more explicit.
-        if 'kn' in self.params:
+        if self.name == "Competition Model":
             growth_func = self.model(params[self.no_species:],
+                                     plate.neighbourhood, plate.mask,
+                                     plate.neigh_nos)
+        elif self.name == "Competition Model BC":
+            growth_func = self.model(params[self.no_species+1:],
                                      plate.neighbourhood, plate.mask,
                                      plate.neigh_nos)
         else:
@@ -222,7 +226,7 @@ class CompModel(Model):
         self.defaults = [1e-6, 0.1, 0.1]
         self.species = ['C', 'N']
         self.no_species = len(self.species)
-        self.name = 'Competition Model'
+        self.name = "Competition Model"
         # Define SBML model.
         self.reactions = [
             {
@@ -263,7 +267,7 @@ class CompModelBC(CompModel):
         self.defaults = [1e-6, 0.1, 0.2, 0.1]
         self.species = ["C", "N"]
         self.no_species = len(self.species)
-        self.name = 'Competition Model BC'
+        self.name = "Competition Model BC"
         self.rr_solver = self.rr_solve_bc
 
 
