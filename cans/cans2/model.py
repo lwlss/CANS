@@ -58,13 +58,19 @@ def neighbour_model(params, no_neighs=2):
     return growth
 
 
-def inde_model(params):
+
+def inde_model(params, plate):
     """Return a function for running the inde model.
 
     Args
     ----
     params : list
         Model parameters
+
+    Nothing is done with the passes plate. It is there for constitancy
+    with comp_model which needs attributes from the plate for rate
+    calculations. This way we can have one model.solve method.
+
     """
     # Separate out plate and culture level parameters.
     b_params = params
@@ -84,7 +90,7 @@ def inde_model(params):
     return growth
 
 
-def comp_model(params, neighbourhood, mask, neigh_nos):
+def comp_model(params, plate):
     """Return a function for running the competition model.
 
     Args
@@ -97,6 +103,9 @@ def comp_model(params, neighbourhood, mask, neigh_nos):
     # Separate out plate and culture level parameters.
     kn = params[0]
     b = np.asarray(params[1:])
+    neighbourhood = plate.neighbourhood
+    mask = plate.mask
+    neigh_nos = plate.neigh_nos
     # odeint requires times argument in cans_growth function.
     def growth(amounts, times):
         """Return model rates given current amounts and times."""
@@ -125,47 +134,16 @@ class Model(object):
         self.no_species = len(self.species)
 
 
-    # Require the neighbourhood and no_cultures from the plate but not
-    # any other data. Optional times is for simulations. If worried
-    # about speed can create different solve methods with and
-    # without the extra argument.
-    def solve(self, plate, params, times=None):
+    # Optional times is for simulations. For fits should be called
+    # with plate.times.
+    def solve(self, plate, params, times):
         init_amounts = np.repeat(params[:self.no_species], plate.no_cultures)
-
-        # init_amounts = np.tile(params[:self.no_species], plate.no_cultures)
         # Set C(t=0) to zero for empty locations.
-        for index in plate.empties:
-            init_amounts[self.no_species*index] = 0.0
-        # For alternative approach without using (0,0) bounds can
-        # insert b=0 values according to indices in empties. In this
-        # approach the b values would be absent from the params so
-        # would have to be inserted rather than replaced. These would
-        # then have to be reentered in the final result from the
-        # minimizer as nan in order for placings to correspond.
-
-        # Might be cheaper to pass neighbourhood for the independent
-        # model but do nothing with it. However, the comparison with
-        # 'kn' below is more explicit.
-        if self.name == "Competition Model":
-            growth_func = self.model(params[self.no_species:],
-                                     plate.neighbourhood, plate.mask,
-                                     plate.neigh_nos)
-        elif self.name == "Competition Model BC":
-            growth_func = self.model(params[self.no_species+1:],
-                                     plate.neighbourhood, plate.mask,
-                                     plate.neigh_nos)
-        else:
-            growth_func = self.model(params[self.no_species:])
-        # Optional smooth times for simulations/fits.
-        if times is None:
-            # with stdout_redirected():    # Redirect lsoda warnings
-            # mxhnil is the maximum number of messages to be printed.
-            sol = odeint(growth_func, init_amounts, plate.times,
-                         atol=1.49012e-8, rtol=1.49012e-8, mxhnil=0)
-        else:
-            # with stdout_redirected():    # Redirect lsoda warnings
-            sol = odeint(growth_func, init_amounts, times,
-                         atol=0.0001, rtol=0.0001, mxhnil=0)
+        init_amounts[plate.empties] = 0.0
+        growth_func = self.model(params[self.param_index:], plate)
+        # mxhnil is the maximum number of messages to be printed.
+        sol = odeint(growth_func, init_amounts, plate.times,
+                     atol=1.49012e-8, rtol=1.49012e-8, mxhnil=0)
         return np.maximum(0, sol)
 
 
@@ -221,6 +199,7 @@ class CompModel(Model):
         """
         self.model = comp_model
         self.b_index = 3
+        self.param_index = 3    # First param that is not an amount.
         self.params = ['C_0', 'N_0', 'kn', 'b']
         # Default values of plate level params for simulations.
         self.defaults = [1e-6, 0.1, 0.1]
@@ -262,6 +241,7 @@ class CompModelBC(CompModel):
     def __init__(self, rev_diff=True):
         super(CompModelBC, self).__init__(rev_diff=rev_diff)
         self.b_index = 4
+        self.param_index = 3    # First param that is not an amount.
         self.params = ["C_0", "N_0", "NE_0", "kn", "b"]
         # Default values of plate level params for simulations.
         self.defaults = [1e-6, 0.1, 0.2, 0.1]
@@ -292,6 +272,7 @@ class IndeModel(Model):
     def __init__(self):
         self.model = inde_model
         self.b_index = 2
+        self.param_index = 2    # First param that is not an amount.
         self.params = ['C_0', 'N_0', 'b']
         self.species = ['C', 'N']
         self.no_species = len(self.species)
@@ -303,6 +284,7 @@ class PowerModel(Model):
         """Only suitable for single cultures."""
         self.model = power_model5
         self.b_index = 7
+        self.param_index = 2
         # Could actually fix C_0 and N_0 with init guess.
         self.params = ['C_0', 'N_0', 'k1', 'k2', 'k3', 'k4', 'k5', 'b']
         self.species = ['C', 'N']
@@ -315,6 +297,7 @@ class NeighModel(Model):
         """Only suitable for single cultures."""
         self.model = neighbour_model
         self.b_index = 6
+        self.param_index = 2
         # Could actually fix C_0 and N_0 with init guess.
         self.params = ['C_0', 'N_0', 'kn1', 'kn2', 'b-', 'b+', 'b']
         self.species = ['C', 'N']
