@@ -2,6 +2,8 @@ import numpy as np
 import copy
 import random
 import sys
+# RoadRunner is not yet availible in Python3. You can still use
+# methods which call SciPy's odeint solver.
 if sys.version_info[0] == 2:
     import roadrunner
 
@@ -18,6 +20,8 @@ class BasePlate(object):
         self.cols = cols
         self.no_cultures = rows*cols
         self.neighbourhood = self.find_neighbourhood()
+        self.edges = np.array([i for i, ns in enumerate(self.neighbourhood)
+                               if len(ns) != 4])
         self.data = data
         # Is data going to be a dictionary of observation times and
         # cell measurements? Let's assume so.
@@ -300,8 +304,10 @@ if __name__ == '__main__':
     comp_model = CompModel()
     comp_plotter = Plotter(comp_model)
 
-    plate1 = Plate(7, 7)
+    plate1 = Plate(16, 24)
     plate1.times = np.linspace(0, 5, 11)
+
+    print("edges", plate1.edges)
 
     true_params = {'N_0': 0.1, 'kn': 0.1}
     true_params['C_0'] = true_params['N_0']/1000000
@@ -315,7 +321,7 @@ if __name__ == '__main__':
     plate1.est = plate1.fit_model(comp_model, minimizer_opts={"disp": True},
                                   rr=True, sel=True)
     print(plate1.est.x)
-    print(plate1.true_params)
+    print(plate1.sim_params)
 
 
     comp_plotter.plot_est(plate1, plate1.est.x, sim=True)
