@@ -109,7 +109,7 @@ class Fitter(object):
         Bounds should be passed in as a full list of tuples with
         correct position for the model according to
         model.params. Individual bounds must be included at the end
-        for each r parameter.
+        for each b parameter.
 
         If rr is true, solve using RaodRunner (faster).
 
@@ -139,15 +139,15 @@ class Fitter(object):
             # Fit using uniform parameters
             param_guess = self.model.gen_params(plate)
         else:
-            assert(len(param_guess) == self.model.r_index + plate.no_cultures)
+            assert(len(param_guess) == self.model.b_index + plate.no_cultures)
 
         if bounds is None:
             # All values non-negative.
             bounds = [(0.0, None) for param in param_guess]
 
-        # Add r (0, 0) bounds for empty sites according to plate.empties.
+        # Add b (0, 0) bounds for empty sites according to plate.empties.
         for index in plate.empties:
-            bounds[self.model.r_index + index] = (0.0, 0.0)
+            bounds[self.model.b_index + index] = (0.0, 0.0)
 
         options = {
             # 'disp': True,
