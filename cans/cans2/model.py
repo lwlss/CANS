@@ -312,10 +312,8 @@ class NeighModel(Model):
         init_amounts = np.tile(params[:self.no_species], 3)
         growth_func = self.model(params[self.no_species:], self.no_neighs)
         if times is None:
-#            with stdout_redirected():    # Redirect lsoda warnings
             sol = odeint(growth_func, init_amounts, plate.times)
         else:
-#            with stdout_redirected():    # Redirect lsoda warnings
             sol = odeint(growth_func, init_amounts, times)
         return np.maximum(0, sol)
 
