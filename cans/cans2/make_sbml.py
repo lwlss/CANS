@@ -125,16 +125,16 @@ def create_species(model, plate, growth_model, params):
 
 
 def create_params(model, plate, growth_model, params):
-    # Parameters after initial amounts and before r_index.
-    for i, param in enumerate(growth_model.params[growth_model.no_species:growth_model.r_index]):
+    # Parameters after initial amounts and before b_index.
+    for i, param in enumerate(growth_model.params[growth_model.no_species:growth_model.b_index]):
         create_param(model, param, constant=True,
                      val=params[growth_model.no_species + i])
-    # Create params occuring at or after the r_index. Should be one of
+    # Create params occuring at or after the b_index. Should be one of
     # these for each culture.
-    for i, param in enumerate(growth_model.params[growth_model.r_index:]):
+    for i, param in enumerate(growth_model.params[growth_model.b_index:]):
         for j in range(plate.no_cultures):
             create_param(model, param + str(j), constant=True,
-                         val=params[growth_model.r_index
+                         val=params[growth_model.b_index
                                     + i*plate.no_cultures + j])
 
 
