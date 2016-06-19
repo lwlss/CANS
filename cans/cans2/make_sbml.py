@@ -121,21 +121,37 @@ def create_species(model, plate, growth_model, params):
     """
     for i, species in enumerate(growth_model.species):
         for n in range(plate.no_cultures):
-            create_a_species(model, species, n, params[i], units="item")
+            # Different N_0 for cultures at the boundaries in some
+            # models.
+            if species == "N" and n in plate.edges:
+                init_amount = params[i+1]
+            else:
+                init_amount = params[i]
+            create_a_species(model, species, n, init_amount, units="item")
 
 
 def create_params(model, plate, growth_model, params):
-    # Parameters after initial amounts and before b_index.
-    for i, param in enumerate(growth_model.params[growth_model.no_species:growth_model.b_index]):
+    """Create plate and culture level parameters.
+
+    Values provided in the params argument should be ordered according
+    to the names in growth_model.params. growth_model.param_index is
+    the index of the first parameter in growth_model.params that is
+    not an amount. growth_model.b_index is the index of the first
+    culture level parameter in growth_model.params.
+
+    """
+    pi = growth_model.param_index
+    bi = growth_model.b_index
+    # Plate level parameters (excluding init amounts).
+    for i, param in enumerate(growth_model.params[pi:bi]):
         create_param(model, param, constant=True,
-                     val=params[growth_model.no_species + i])
-    # Create params occuring at or after the b_index. Should be one of
-    # these for each culture.
-    for i, param in enumerate(growth_model.params[growth_model.b_index:]):
+                     val=params[pi + i])
+    # Culture level parameters.
+    for i, param in enumerate(growth_model.params[bi:]):
+        first_index = bi + i*plate.no_cultures
         for j in range(plate.no_cultures):
             create_param(model, param + str(j), constant=True,
-                         val=params[growth_model.b_index
-                                    + i*plate.no_cultures + j])
+                         val=params[first_index + j])
 
 
 def create_param(model, id, constant, val, units=None):
