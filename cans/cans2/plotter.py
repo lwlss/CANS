@@ -160,7 +160,7 @@ if __name__ == "__main__":
         "N_0": 0.1,
         "kn": 1.5
     }
-    plate1.set_sim_data(comp_model, r_mean=40.0, r_var=15.0,
+    plate1.set_sim_data(comp_model, b_mean=40.0, b_var=15.0,
                         custom_params=params)
 
     comp_plotter = Plotter(comp_model)
