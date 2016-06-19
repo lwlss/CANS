@@ -8,6 +8,9 @@ http://sbml.org/Software/libSBML/docs/python-api/create_simple_model_8py-example
 See also the SBML Level 3 Version 1 Release 1 specifications.
 http://sbml.org/Software/libSBML/docs/python-api/libsbml-sbml-specifications.html
 
+There is one explicit reference to a species (N) in the function
+create_spcecies. This is done to assign initial amounts at boundaries.
+
 """
 import sys
 from libsbml import *
@@ -121,9 +124,9 @@ def create_species(model, plate, growth_model, params):
     """
     for i, species in enumerate(growth_model.species):
         for n in range(plate.no_cultures):
-            # Different N_0 for cultures at the boundaries in some
-            # models.
             if species == "N" and n in plate.edges:
+                # Different N_0 for cultures at the boundaries in some
+                # models.
                 init_amount = params[i+1]
             else:
                 init_amount = params[i]
@@ -189,7 +192,8 @@ def create_one_culture_reactions(model, plate, reaction):
     for i in range(plate.no_cultures):
         # The single culture indices must be supplied in a tuple so
         # that a general function, which can handle reactions with
-        # species from more than one culture, can be used.
+        # species from more than one culture, can be used to format
+        # names.
         create_reaction(model, reaction, (i,))
 
 
@@ -205,8 +209,6 @@ def create_two_culture_reactions(model, plate, reaction):
 
     for i in range(plate.no_cultures):
         for j in neighs[i]:
-            # if not reaction["reversible"]:
-            #     assert i < j, "Reversible reaction requires culture i < j."
             create_reaction(model, reaction, (i, j))
 
 
