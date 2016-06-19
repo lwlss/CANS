@@ -58,7 +58,7 @@ class Plotter(object):
                  mew=0.5, lw =1.0):
         # Smooth times for sims.
         sim_times = np.linspace(plate.times[0], plate.times[-1], 100)
-        amounts = self.model.solve(plate, est_params, sim_times)
+        amounts = self.model.rr_solver(plate, est_params)#, sim_times)
         amounts = np.split(amounts, self.model.no_species, axis=1)
         if sim:
             # Split by specie
@@ -73,7 +73,7 @@ class Plotter(object):
                 ax.plot(plate.times, plate.c_meas[i::plate.no_cultures],
                         'x', label='Observed Cells', ms=ms, mew=mew)
             for j, species in enumerate(self.model.species):
-                ax.plot(sim_times, amounts[j][:, i], self.colours[j],
+                ax.plot(plate.times, amounts[j][:, i], self.colours[j],
                         label="Est "+species, lw=lw)
                 if j == 0 and i in plate.empties:
                     continue
