@@ -22,6 +22,8 @@ class BasePlate(object):
         self.neighbourhood = self.find_neighbourhood()
         self.edges = np.array([i for i, ns in enumerate(self.neighbourhood)
                                if len(ns) != 4])
+        self.internals = np.array([i for i, neighs in enumerate(self.neighbourhood)
+                                   if len(neighs) == 4])
         self.data = data
         # Is data going to be a dictionary of observation times and
         # cell measurements? Let's assume so.
@@ -131,11 +133,11 @@ class BasePlate(object):
         return a.flatten()
 
 
-    def get_internals(self):
-        """Return the indicies of internal cultures."""
-        internals = [i for i, neighs in enumerate(self.neighbourhood)
-                     if len(neighs) == 4]
-        return np.array(internals)
+    # def get_internals(self):
+    #     """Return the indicies of internal cultures."""
+    #     internals = [i for i, neighs in enumerate(self.neighbourhood)
+    #                  if len(neighs) == 4]
+    #     return np.array(internals)
 
 
     def set_rr_selections(self, id="[C{0}]", indices="internals"):
@@ -153,8 +155,7 @@ class BasePlate(object):
         indices: list of culture indices.
         """
         if indices == "internals":
-            internals = self.get_internals()
-            indices = internals
+            indices = self.internals
             self.selection_inds = internals    # Should be a numpy array
         else:
             self.selection_inds = np.array(indices)
