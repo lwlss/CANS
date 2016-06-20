@@ -243,9 +243,9 @@ def create_two_culture_reactions(model, plate, reaction):
     """Intended for diffusion type reactions.
 
     Different reactions for boundaries and internal cultures,
-    specified using reaction["edges"] and reaction["internals"], is not
-    yet supported for reversible reactions. Instead use irreversible
-    reactions in Model.reactions definitions.
+    specified using reaction["edges"] and reaction["internals"], are
+    not yet supported for reversible reactions. Instead use
+    irreversible reactions in Model.reactions definitions.
 
     """
     if reaction["reversible"]:
