@@ -223,32 +223,50 @@ def create_reactions(model, plate, growth_model):
 
 
 def create_one_culture_reactions(model, plate, reaction):
-
     """Create reactions with species from only one culture.
 
     Intended for growth type reactions rather than diffusion.
     """
-    for i in range(plate.no_cultures):
-        # The single culture indices must be supplied in a tuple so
-        # that a general function, which can handle reactions with
-        # species from more than one culture, can be used to format
-        # names.
-        create_reaction(model, reaction, (i,))
+    if reaction["internals"]:
+        for i in plate.internals:
+            # The single culture indices must be supplied in a tuple
+            # so that a general function, which can handle reactions
+            # with species from more than one culture, can be used to
+            # format names.
+            create_reaction(model, reaction, (i,))
+    if reaction["edges"]:
+        for i in plate.edges:
+            create_reaction(model, reaction, (i,))
 
 
 def create_two_culture_reactions(model, plate, reaction):
-    """Intended for diffusion type reactions."""
+    """Intended for diffusion type reactions.
+
+    Different reactions for boundaries and internal cultures,
+    specified using reaction["edges"] and reaction["internals"], is not
+    yet supported for reversible reactions. Instead use irreversible
+    reactions in Model.reactions definitions.
+
+    """
     if reaction["reversible"]:
         # Only inculde higher neighbours so that reactions are not
         # counted twice.
         neighs = [tuple(j for j in plate.neighbourhood[i] if i<j)
                   for i in range(plate.no_cultures)]
+        for i in range(plate.no_cultures):
+            for j in neighs[i]:
+                create_reaction(model, reaction, (i, j))
     elif not reaction["reversible"]:
-        neighs = plate.neighbourhood
-
-    for i in range(plate.no_cultures):
-        for j in neighs[i]:
-            create_reaction(model, reaction, (i, j))
+        if reaction["edges"]:
+            neighs = plate.neighbourhood[plate.edges]
+            for i, neighs in zip(plate.edges, neighs):
+                for j in neighs:
+                    create_reaction(model, reaction, (i, j))
+        if reaction["internals"]:
+            neighs = plate.neighbourhood[plate.internals]
+            for i, neighs in zip(plate.edges, neighs):
+                for j in neighs:
+                    create_reaction(model, reaction, (i, j))
 
 
 def create_reaction(model, reaction, indices):
