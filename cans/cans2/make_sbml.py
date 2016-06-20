@@ -131,10 +131,9 @@ def create_param(model, id, constant, val, units=None):
         check(k.setUnits(units), "set parameter {0} units".format(id))
 
 
-def create_a_species(model, species, culture_no, init_amount,
-                     compartment="c1", units="item",
-                     has_only_substance_units=True, constant=False,
-                     bc=False):
+def create_a_species(model, species, culture_no, compartment="c1",
+                     units="item", has_only_substance_units=True,
+                     constant=False, bc=False):
     """Add a species to the SBML Model."""
     s = model.createSpecies()
     check(s, "create species s")
@@ -148,8 +147,11 @@ def create_a_species(model, species, culture_no, init_amount,
           "set constant attr on {0}{1}".format(species, culture_no))
     check(s.setBoundaryCondition(bc),
           "set boundary condition on {0}{1}".format(species, culture_no))
-    check(s.setInitialAmount(init_amount),
-          "set init amount for {0}{1}".format(species, culture_no))
+
+    # Now setting with InitialAssignment in assign_init_vals().
+    # check(s.setInitialAmount(init_amount),
+    #       "set init amount for {0}{1}".format(species, culture_no))
+
     # May need to specify a different unit for amount.
     check(s.setSubstanceUnits(units),
           "set substance units for {0}{1}".format(species, culture_no))
@@ -170,15 +172,16 @@ def create_species(model, plate, growth_model, params):
     """
     for i, species in enumerate(growth_model.species):
         for n in range(plate.no_cultures):
-            if species == "N" and n in plate.edges:
-                # Different N_0 for cultures at the boundaries in some
-                # models.
-                print(model.getParameter("C_0").getValue())
-                # Need to reference the SBML parameter
-                init_amount = params[i+1]
-            else:
-                init_amount = params[i]
-            create_a_species(model, species, n, init_amount, units="item")
+            # Now setting with InitialAssignment in assign_init_vals().
+            # if species == "N" and n in plate.edges:
+            #     # Different N_0 for cultures at the boundaries in some
+            #     # models.
+            #     print(model.getParameter("C_0").getValue())
+            #     # Need to reference the SBML parameter
+            #     init_amount = params[i+1]
+            # else:
+            #     init_amount = params[i]
+            create_a_species(model, species, n, units="item")
 
 
 def assign_init_vals(model, plate, growth_model):
@@ -195,7 +198,7 @@ def assign_init_vals(model, plate, growth_model):
     """
     # How does the initial assigment know which species it references?
     for i in range(plate.no_cultures):
-        for s, bc in zip(growth_model.species, growth_model.species_bcs):
+        for s, bc in zip(growth_model.species, growth_model.species_bc):
             init = model.createInitialAssignment()
             check(init, "Create InitialAssignment for {0}".format(s + str(i)))
             check(init.setSymbol(s + str(i)),
@@ -209,12 +212,6 @@ def assign_init_vals(model, plate, growth_model):
                 math_ast = parseL3Formula(init_param)
 
             check(init.setMath(math_ast), "set math for {0}".format(s + str(i)))
-
-    for species in model.getListOfSpecies():
-        print(species.getId())
-        init = model.createInitialAssignment()
-        init.setSymbol("C_0")
-        print(init.getSymbol())
 
 
 def create_reactions(model, plate, growth_model):
@@ -386,7 +383,7 @@ if __name__ == "__main__":
 
 
     from cans2.plate import Plate
-    from cans2.model import CompModel
+    from cans2.model import CompModelBC, CompModel
     from cans2.plotter import Plotter
 
 
@@ -395,7 +392,7 @@ if __name__ == "__main__":
     cols = 3
     plate1 = Plate(rows, cols)
     plate1.times = np.linspace(0, 5, 11)
-    comp_model = CompModel(rev_diff=True)
+    comp_model = CompModelBC()
     params = {
         "C_0": 1e-6,
         "N_0": 0.1,
@@ -406,7 +403,7 @@ if __name__ == "__main__":
 
     # Convert comp model to SBML.
     sbml = create_sbml(plate1, comp_model, plate1.sim_params,
-                        outfile="sbml_models/simulated_{0}x{1}_test_plate_rev.xml".format(rows, cols))
+                        outfile="sbml_models/simulated_{0}x{1}_test_plate_bc.xml".format(rows, cols))
 
     comp_model_ir = CompModel(rev_diff=False)
     sbml = create_sbml(plate1, comp_model_ir, plate1.sim_params,
