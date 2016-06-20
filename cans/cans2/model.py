@@ -199,13 +199,14 @@ class CompModel(Model):
         """
         self.model = comp_model
         self.b_index = 3
-        self.param_index = 3    # First param that is not an amount.
+        self.param_index = 2    # First param that is not an amount.
         self.params = ['C_0', 'N_0', 'kn', 'b']
         # Default values of plate level params for simulations.
         self.defaults = [1e-6, 0.1, 0.1]
         self.species = ['C', 'N']
         self.no_species = len(self.species)
         self.name = "Competition Model"
+        self.rr_solver = self.rr_solve
         # Define SBML model.
         self.reactions = [
             {
@@ -215,7 +216,9 @@ class CompModel(Model):
                 "products": [(2, "C{0}")],
                 "reversible": False,
                 # True if species of neighbouring cultures are involved.
-                "neighs": False
+                "neighs": False,
+                "internals": True,
+                "edges": True,
             },
             {
                 "name": "Diff_{0}_{1}",
@@ -223,23 +226,25 @@ class CompModel(Model):
                 "reactants": [(1, "N{0}")],
                 "products": [(1, "N{1}")],
                 "reversible": rev_diff,
-                "neighs": True
+                "neighs": True,
+                "internals": True,
+                "edges": True,
             }
         ]
         # Alternative irriversible representation of nutrient diffusion.
         if not rev_diff:
             self.reactions[1]["rate"] = "kn * N{0}"
-        self.rr_solver = self.rr_solve
 
 
-class CompModelBC(CompModel):
+class CompModelBC(Model):
     """Competition model with special treatment of boundaries.
 
     The extra parameter NE_0 is the initial amount of nutrients in
     edge cultures.
     """
     def __init__(self, rev_diff=True):
-        super(CompModelBC, self).__init__(rev_diff=rev_diff)
+#        super(CompModelBC, self).__init__(rev_diff=rev_diff)
+        self.model = comp_model    # Does not work yet.
         self.b_index = 4
         self.param_index = 3    # First param that is not an amount.
         self.params = ["C_0", "N_0", "NE_0", "kn", "b"]
@@ -249,6 +254,61 @@ class CompModelBC(CompModel):
         self.no_species = len(self.species)
         self.name = "Competition Model BC"
         self.rr_solver = self.rr_solve_bc
+        self.reactions = [
+            {
+                "name": "Growth_{0}",
+                "rate": "b{0} * C{0} * N{0}",
+                "reactants": [(1, "N{0}"), (1, "C{0}")],
+                "products": [(2, "C{0}")],
+                "reversible": False,
+                # True if species of neighbouring cultures are involved.
+                "neighs": False,
+                "internals": True,
+                "edges": False,
+            },
+            {
+                "name": "Diff_{0}_{1}",
+                "rate": "kn * N{0}",
+                "reactants": [(1, "N{0}")],
+                "products": [(1, "N{1}")],
+                "reversible": False,
+                "neighs": True,
+                "internals": True,
+                "edges": False,
+            },
+            # Reactions just for boundaries:
+            # {...,
+            # "internals": False,
+            # "edges": True,
+            # ...}
+            {
+                "name": "Growth_{0}_bc",
+                # Scale the amount of nutrients by the ratio N_0/NE_0
+                # to make a concentration. Edge cultures have more
+                # starting nutrients proportional to the greater area
+                # belonging to them. I could
+                "rate": "b{0} * C{0} * N{0} * N_0/NE_0",
+                "reactants": [(1, "N{0}"), (1, "C{0}")],
+                "products": [(2, "C{0}")],
+                "reversible": False,
+                # True if species of neighbouring cultures are involved.
+                "neighs": False,
+                "internals": False,
+                "edges": True,
+            },
+            {
+                "name": "Diff_{0}_{1}_bc",
+                "rate": "kn * N{0} * N_0/NE_0",
+                "reactants": [(1, "N{0}")],
+                "products": [(1, "N{1}")],
+                "reversible": False,
+                "neighs": True,
+                "internals": False,
+                "edges": True,
+            }
+
+        ]
+
 
 
     def rr_solve_bc(self, plate, params):
