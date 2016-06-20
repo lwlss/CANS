@@ -182,6 +182,34 @@ def create_species(model, plate, growth_model, params):
 
 
 def assign_init_vals(model, plate, growth_model):
+    """Assign initial values to species.
+
+    Assignment using an InitialAssignment object allows assignment
+    using rules. The alternative, directly assigning values to the
+    species with e.g. setInitialAmount(val), does not allow this. In
+    our case we wish to reference initial amount parameters in the
+    initial assignment. This way we should be able to fit initial
+    amounts that belong to more than one culture collectively in
+    COPASI.
+
+    """
+    # How does the initial assigment know which species it references?
+    for i in range(plate.no_cultures):
+        for s, bc in zip(growth_model.species, growth_model.species_bcs):
+            init = model.createInitialAssignment()
+            check(init, "Create InitialAssignment for {0}".format(s + str(i)))
+            check(init.setSymbol(s + str(i)),
+                  "Set symbol for {0}".format(s + str(i)))
+
+            if i in plate.edges and bc:    # String or empty string.
+                math_ast = parseL3Formula(bc)
+                check(math_ast, "create AST for {0}".format(s + str(i)))
+            else:
+                init_param = growth_model.params[growth_model.species.index(s)]
+                math_ast = parseL3Formula(init_param)
+
+            check(init.setMath(math_ast), "set math for {0}".format(s + str(i)))
+
     for species in model.getListOfSpecies():
         print(species.getId())
         init = model.createInitialAssignment()
@@ -198,6 +226,7 @@ def create_reactions(model, plate, growth_model):
 
 
 def create_one_culture_reactions(model, plate, reaction):
+
     """Create reactions with species from only one culture.
 
     Intended for growth type reactions rather than diffusion.
