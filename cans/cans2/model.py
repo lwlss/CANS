@@ -251,6 +251,7 @@ class CompModelBC(Model):
         # Default values of plate level params for simulations.
         self.defaults = [1e-6, 0.1, 0.2, 0.1]
         self.species = ["C", "N"]
+        self.species_bc = ["", "NE_0"]
         self.no_species = len(self.species)
         self.name = "Competition Model BC"
         self.rr_solver = self.rr_solve_bc
