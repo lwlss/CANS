@@ -204,6 +204,9 @@ class CompModel(Model):
         # Default values of plate level params for simulations.
         self.defaults = [1e-6, 0.1, 0.1]
         self.species = ['C', 'N']
+        # Do the species have different initial concentrations at
+        # boundaries? Evaluates False for empty string.
+        self.species_bc = ["", ""]
         self.no_species = len(self.species)
         self.name = "Competition Model"
         self.rr_solver = self.rr_solve
