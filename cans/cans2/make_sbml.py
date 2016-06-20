@@ -257,15 +257,14 @@ def create_two_culture_reactions(model, plate, reaction):
             for j in neighs[i]:
                 create_reaction(model, reaction, (i, j))
     elif not reaction["reversible"]:
+        neighs = plate.neighbourhood
         if reaction["edges"]:
-            neighs = plate.neighbourhood[plate.edges]
-            for i, neighs in zip(plate.edges, neighs):
-                for j in neighs:
+            for i in plate.edges:
+                for j in neighs[i]:
                     create_reaction(model, reaction, (i, j))
         if reaction["internals"]:
-            neighs = plate.neighbourhood[plate.internals]
-            for i, neighs in zip(plate.edges, neighs):
-                for j in neighs:
+            for i in plate.internals:
+                for j in neighs[i]:
                     create_reaction(model, reaction, (i, j))
 
 
@@ -410,17 +409,17 @@ if __name__ == "__main__":
     cols = 3
     plate1 = Plate(rows, cols)
     plate1.times = np.linspace(0, 5, 11)
-    comp_model = CompModelBC()
+    comp_model_bc = CompModelBC()
     params = {
         "C_0": 1e-6,
         "N_0": 0.1,
         "kn": 1.5
     }
-    plate1.set_sim_data(comp_model, b_mean=40.0, b_var=15.0,
+    plate1.set_sim_data(comp_model_bc, b_mean=40.0, b_var=15.0,
                         custom_params=params)
 
     # Convert comp model to SBML.
-    sbml = create_sbml(plate1, comp_model, plate1.sim_params,
+    sbml = create_sbml(plate1, comp_model_bc, plate1.sim_params,
                         outfile="sbml_models/simulated_{0}x{1}_test_plate_bc.xml".format(rows, cols))
 
     comp_model_ir = CompModel(rev_diff=False)
