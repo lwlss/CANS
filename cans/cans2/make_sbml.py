@@ -85,6 +85,52 @@ def create_compartment(model, id, constant=True, size=1, dims=3,
     check(c.setUnits(units), "set compartment units")
 
 
+def create_params(model, plate, growth_model, params):
+    """Create plate and culture level parameters.
+
+    Values provided in the params argument should be ordered according
+    to the names in growth_model.params. growth_model.param_index is
+    the index of the first parameter in growth_model.params that is
+    not an amount. growth_model.b_index is the index of the first
+    culture level parameter in growth_model.params.
+
+    """
+    pi = growth_model.param_index
+    bi = growth_model.b_index
+    # Create params for init amounts.
+    for i, init_amount in enumerate(growth_model.params[:pi]):
+        create_param(model, init_amount, constant=True, val=params[i],
+                     units="item")
+    # Plate level parameters (excluding init amounts).
+    for i, param in enumerate(growth_model.params[pi:bi]):
+        create_param(model, param, constant=True, val=params[pi + i])
+    # Culture level parameters.
+    for i, param in enumerate(growth_model.params[bi:]):
+        first_index = bi + i*plate.no_cultures
+        for j in range(plate.no_cultures):
+            create_param(model, param + str(j), constant=True,
+                         val=params[first_index + j])
+
+
+def create_param(model, id, constant, val, units=None):
+    """Create an SBML Model parameter.
+
+    If "constant" is True then the parameter value cannot be changed
+    by any construct except initialAssignment. Setting "constant"
+    False does not mean that the value must change.
+
+    Units is optional.
+
+    """
+    k = model.createParameter()
+    check(k, "create parameter {0}".format(id))
+    check(k.setId(id), "set parameter {0} id".format(id))
+    check(k.setConstant(constant), "set parameter {0} 'constant'".format(id))
+    check(k.setValue(val), "set parameter {0} value".format(id))
+    if units is not None:
+        check(k.setUnits(units), "set parameter {0} units".format(id))
+
+
 def create_a_species(model, species, culture_no, init_amount,
                      compartment="c1", units="item",
                      has_only_substance_units=True, constant=False,
@@ -127,53 +173,20 @@ def create_species(model, plate, growth_model, params):
             if species == "N" and n in plate.edges:
                 # Different N_0 for cultures at the boundaries in some
                 # models.
+                print(model.getParameter("C_0").getValue())
+                # Need to reference the SBML parameter
                 init_amount = params[i+1]
             else:
                 init_amount = params[i]
             create_a_species(model, species, n, init_amount, units="item")
 
 
-def create_params(model, plate, growth_model, params):
-    """Create plate and culture level parameters.
-
-    Values provided in the params argument should be ordered according
-    to the names in growth_model.params. growth_model.param_index is
-    the index of the first parameter in growth_model.params that is
-    not an amount. growth_model.b_index is the index of the first
-    culture level parameter in growth_model.params.
-
-    """
-    pi = growth_model.param_index
-    bi = growth_model.b_index
-    # Plate level parameters (excluding init amounts).
-    for i, param in enumerate(growth_model.params[pi:bi]):
-        create_param(model, param, constant=True,
-                     val=params[pi + i])
-    # Culture level parameters.
-    for i, param in enumerate(growth_model.params[bi:]):
-        first_index = bi + i*plate.no_cultures
-        for j in range(plate.no_cultures):
-            create_param(model, param + str(j), constant=True,
-                         val=params[first_index + j])
-
-
-def create_param(model, id, constant, val, units=None):
-    """Create an SBML Model parameter.
-
-    If "constant" is True then the parameter value cannot be changed
-    by any construct except initialAssignment. Setting "constant"
-    False does not mean that the value must change.
-
-    Units is optional.
-
-    """
-    k = model.createParameter()
-    check(k, "create parameter {0}".format(id))
-    check(k.setId(id), "set parameter {0} id".format(id))
-    check(k.setConstant(constant), "set parameter {0} 'constant'".format(id))
-    check(k.setValue(val), "set parameter {0} value".format(id))
-    if units is not None:
-        check(k.setUnits(units), "set parameter {0} units".format(id))
+def assign_init_vals(model, plate, growth_model):
+    for species in model.getListOfSpecies():
+        print(species.getId())
+        init = model.createInitialAssignment()
+        init.setSymbol("C_0")
+        print(init.getSymbol())
 
 
 def create_reactions(model, plate, growth_model):
@@ -290,8 +303,7 @@ def create_sbml(plate, growth_model, params, outfile=""):
     attribute estimated parameters are assigned to) as the params
     argument.
 
-    If outfile ends with the suffix ".gz", the written xml file is
-    compressed.
+    If outfile ends with the suffix ".gz", the xml file is compressed.
 
     """
     try:
@@ -325,9 +337,12 @@ def create_sbml(plate, growth_model, params, outfile=""):
     create_compartment(model, "c1", constant=True, size=1, dims=0,
                        units="dimensionless")
 
-
-    create_species(model, plate, growth_model, params)
     create_params(model, plate, growth_model, params)
+    create_species(model, plate, growth_model, params)
+
+    # Assing rulebased initial values to species
+    assign_init_vals(model, plate, growth_model)
+
     create_reactions(model, plate, growth_model)
 
     if outfile:
@@ -347,8 +362,8 @@ if __name__ == "__main__":
 
 
     # Simulate a plate with data and parameters.
-    rows = 16
-    cols = 24
+    rows = 3
+    cols = 3
     plate1 = Plate(rows, cols)
     plate1.times = np.linspace(0, 5, 11)
     comp_model = CompModel(rev_diff=True)
@@ -357,7 +372,7 @@ if __name__ == "__main__":
         "N_0": 0.1,
         "kn": 1.5
     }
-    plate1.set_sim_data(comp_model, r_mean=40.0, r_var=15.0,
+    plate1.set_sim_data(comp_model, b_mean=40.0, b_var=15.0,
                         custom_params=params)
 
     # Convert comp model to SBML.
