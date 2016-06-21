@@ -66,7 +66,7 @@ class Guesser(object):
 
 
     def nparray_guess(self, plate, guess):
-        guess_list = np.zeros(self.model.r_index - 1)# + plate.no_cultures])
+        guess_list = np.zeros(self.model.b_index - 1)# + plate.no_cultures])
         for k, v in guess.items():
             index = self.model.params.index(k)
             guess_list[index] = v
@@ -81,7 +81,7 @@ class Guesser(object):
         Must be suitable for scipy.optimize.minimize.
 
         """
-        no_params = self.model.r_index + plate.no_cultures
+        no_params = self.model.b_index + plate.no_cultures
         # First set all bounds greater than zero
         bounds = [(0.0, None) for param in range(no_params)]
         # Then change the bounds for parameters for which there is a
