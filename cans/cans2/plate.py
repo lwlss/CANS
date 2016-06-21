@@ -102,7 +102,9 @@ class BasePlate(object):
             # simulation over 5 days (i.e. 1/(5*24*60)) and
             # maximumNumSteps greater than 5/minimumTimeStep so that
             # it should never be encountered in a typical experiment.
-            a[i+1] = self.rr.simulate(t0, t1, 1, mininumTimeStep=1.39e-4,
+            a[i+1] = self.rr.simulate(t0, t1, 1, absolute=1.49012e-8,
+                                      relative=1.49012e-8,
+                                      mininumTimeStep=1.0e-8,
                                       maximumNumSteps=40000)[1][1:]
         return a
 
