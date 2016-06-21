@@ -152,10 +152,7 @@ class Model(object):
 
         Return amounts of all species on the Plate.
         """
-        init_amounts = np.repeat(params[:self.no_species], plate.no_cultures)
-        plate.rr.model.setFloatingSpeciesInitConcentrations(init_amounts)
-        plate.rr.model.setFloatingSpeciesInitAmounts(init_amounts)
-        plate.rr.model.setGlobalParameterValues(params[self.param_index:])
+        plate.rr.model.setGlobalParameterValues(params)
         sol = plate.rr_solve()
         return sol
 
@@ -175,7 +172,7 @@ class Model(object):
 
 
     # Could generalize for other culture level parameters.
-    def gen_params(self, plate, mean=1.0, var=0.0):
+    def gen_params(self, plate, mean=50.0, var=0.0):
         """Generate and return a np.array of parameter values.
 
         Useful for simulations and initial guesses in fitting.
@@ -257,7 +254,7 @@ class CompModelBC(Model):
         self.species_bc = ["", "NE_0"]
         self.no_species = len(self.species)
         self.name = "Competition Model BC"
-        self.rr_solver = self.rr_solve_bc
+        self.rr_solver = self.rr_solve
         self.reactions = [
             {
                 "name": "Growth_{0}",
@@ -312,24 +309,6 @@ class CompModelBC(Model):
             }
 
         ]
-
-
-
-    def rr_solve_bc(self, plate, params):
-        """Solve with RoadRunner using a different N_0 for the boundaries.
-
-        Assumes a species order of C, N, ... and that NE_0 is the 3rd
-        parameter in params.
-
-        """
-        init_amounts = np.repeat(params[:self.no_species], plate.no_cultures)
-        # Replace edge N_0 with NE_0. plate.edges should be a numpy array.
-        init_amounts[plate.edges + plate.no_cultures] = params[2]
-        plate.rr.model.setFloatingSpeciesInitConcentrations(init_amounts)
-        plate.rr.model.setFloatingSpeciesInitAmounts(init_amounts)
-        plate.rr.model.setGlobalParameterValues(params[self.param_index:])
-        sol = plate.rr_solve()
-        return sol
 
 
 class IndeModel(Model):
