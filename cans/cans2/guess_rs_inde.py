@@ -20,12 +20,12 @@ comp_plotter = Plotter(CompModel())
 full_plate = Plate(16, 24)
 full_plate.times = np.linspace(0, 5, 11)
 true_params = {'N_0': 0.1, 'kn': 0.1}
-true_params['C_0'] = true_params['N_0']/100000
-full_plate.set_sim_data(comp_model, r_mean=100.0, r_var=50.0,
+true_params['C_0'] = true_params['N_0']/1000000
+full_plate.set_sim_data(comp_model, b_mean=100.0, b_var=50.0,
                         custom_params=true_params)
 
 
-# Guess rs for resimed 3x3 zone (i.e. a plate) with noise.
+# Guess bs for resimed 3x3 zone (i.e. a plate) with noise.
 resim_zone = resim_zone(full_plate, comp_model, (5, 5), 3, 3, noise=True)
 resim_amount_guess = comp_guesser.make_guess(resim_zone)
 # No basis for an r_guess yet so just use 20.0 (may have to make
@@ -37,7 +37,7 @@ inde_bounds = [(0, None) for i in range(3)]
 inde_bounds[0] = (resim_amount_guess["C_0"], resim_amount_guess["C_0"])
 
 # Guess using the independent model
-inde_rate_guesses = []
+inde_b_guesses = []
 inde_N_0_guess = []
 for culture in resim_zone.cultures:
     # Fit the independent model allowing N_0 to vary and compare to
@@ -48,12 +48,12 @@ for culture in resim_zone.cultures:
     culture.est = culture.fit_model(IndeModel(), param_guess=inde_param_guess,
                                     bounds=inde_bounds,
                                     minimizer_opts={'disp': False})
-    inde_rate_guesses.append(culture.est.x[-1])
+    inde_b_guesses.append(culture.est.x[-1])
     inde_N_0_guess.append(culture.est.x[1])
 
 
 print(resim_zone.sim_params)
-print(inde_rate_guesses)
+print(inde_b_guesses)
 print(inde_N_0_guess)
 inde_plotter.plot_est(culture, culture.est.x,
                       title="Inde fit with unbounded N_0")
@@ -67,8 +67,3 @@ comp_plotter.plot_culture_fits(resim_zone, inde_model, sim=True)
 
 for culture in resim_zone.cultures:
     print(culture.est.x)
-
-# To Do
-# Guess using the power series model
-# Guess rs for a plate and use on a zone
-# Guess rs for a zone and use on the zone
