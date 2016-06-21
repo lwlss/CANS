@@ -1,8 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import copy
 
 
 from mpl_toolkits.axes_grid1 import AxesGrid
+
+
+from cans2.plate import Plate
 
 
 class Plotter(object):
@@ -10,7 +14,7 @@ class Plotter(object):
     def __init__(self, model):
         self.model = model
         # Can decide on other colours when adding models with more species.
-        self.colours = ['b', 'y', 'r']
+        self.colours = ['b', 'y', 'r', 'g']
 
 
     def _find_ymax(self, amounts):
@@ -54,18 +58,26 @@ class Plotter(object):
     # Plate may have plate.inde_est and plate.comp_est so need to pass
     # one of these.
     def plot_est(self, plate, est_params, title='Estimated Growth',
-                 sim=False, filename=None, legend=False, ms=6.0,
-                 mew=0.5, lw =1.0):
+                 sim=False, filename=None, legend=False,
+                 ms=6.0, mew=0.5, lw =1.0):
         # Smooth times for sims.
         sim_times = np.linspace(plate.times[0], plate.times[-1], 100)
-        amounts = self.model.rr_solver(plate, est_params)#, sim_times)
-        amounts = np.split(amounts, self.model.no_species, axis=1)
+        # Cannot deepcopy swig objects so define new plate.
+        est_plate = Plate(plate.rows, plate.cols)
+        est_plate.times = sim_times
+        est_plate.set_rr_model(self.model, est_params)
+        est_amounts = self.model.rr_solve(est_plate, est_params)    # Smooth estimates
+        est_amounts = np.split(est_amounts, self.model.no_species, axis=1)
+
         if sim:
-            # Split by specie
+            # sim_plate = Plate(plate.rows, plate.cols)
+            # sim_plate.times = sim_times
+            # sim_amounts = self.model.rr_solve(plate, est_params)
+            # "Real" data at observation times.
             sim_amounts = np.split(plate.sim_amounts, self.model.no_species,
                                    axis=1)
 
-        fig, grid = self._make_grid(plate, amounts, sim, title)
+        fig, grid = self._make_grid(plate, est_amounts, sim, title)
 
         for i, ax in enumerate(grid):
             if not sim and i not in plate.empties:
@@ -73,12 +85,14 @@ class Plotter(object):
                 ax.plot(plate.times, plate.c_meas[i::plate.no_cultures],
                         'x', label='Observed Cells', ms=ms, mew=mew)
             for j, species in enumerate(self.model.species):
-                ax.plot(plate.times, amounts[j][:, i], self.colours[j],
-                        label="Est "+species, lw=lw)
+                ax.plot(sim_times, est_amounts[j][:, i], self.colours[j],
+                        label="Est " + species, lw=lw)
                 if j == 0 and i in plate.empties:
+                    # Do not plot c_meas for empty cultures.
                     continue
                 elif sim:
-                    # Plot all true. These do not have noise added.
+                    # Plot all "true" amounts (e.g. including C and
+                    # unobservable, but known, N.)
                     ax.plot(plate.times, sim_amounts[j][:, i],
                             'x' + self.colours[j],
                             label="True"+species, ms=ms, mew=mew)
