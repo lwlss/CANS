@@ -50,12 +50,17 @@ class Fitter(object):
         # There are multiple alternative Model methods for solving
         # using RoadRunner. The specific method is stored as a
         # Model attribute rr_solver.
-        amount_est = self.model.rr_solver(plate, params)
+        amount_est = self.model.rr_solve(plate, params)
+#        print("amount_est", amount_est)
         # Mutable so must scale C_0 back
         params[0] = params[0]*10000
         c_est = np.split(amount_est, self.model.no_species, axis=1)[0].flatten()
         # Zeros appear in here for empty plates but this shouldn't
         # have any effect.
+        # print(len(c_est))
+        # print(len(plate.c_meas))
+#        print("c_meas", plate.c_meas)
+#        print("c_est", c_est)
         err = np.sqrt(np.sum((plate.c_meas - c_est)**2))
         return err
 
