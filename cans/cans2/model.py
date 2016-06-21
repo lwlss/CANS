@@ -23,7 +23,6 @@ def power_model(params):
     k5 = params[4]
     b = params[5]
     def growth(amounts, times):
-        print(times)
         np.maximum(0, amounts, out=amounts)
         rates = [b*amounts[0]*amounts[1],
                  -b*amounts[0]*amounts[1] + k1 + k2*times + k3*times*times
@@ -152,8 +151,12 @@ class Model(object):
 
         Return amounts of all species on the Plate.
         """
-        plate.rr.model.setGlobalParameterValues(params)
+#       print("params", params)
+        plate.rr.model.setGlobalParameterValues(params[:])
+#        print("rr_params", plate.rr.model.getGlobalParameterValues())
+#        print("rr_inits", plate.rr.model.getFloatingSpeciesInitAmounts())
         sol = plate.rr_solve()
+        # plate.rr.reset()
         return sol
 
     def rr_solve_selections(self, plate, params):
