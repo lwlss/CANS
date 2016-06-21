@@ -94,7 +94,7 @@ class BasePlate(object):
         """
         a = np.empty(self.data_shape)
         # Set init values in result.
-        a[0] = self.rr.model.getFloatingSpeciesInitConcentrations()
+        a[0] = self.rr.model.getFloatingSpeciesInitAmounts()
         for i, t0, t1 in zip(range(len(self.times)),
                              self.times[:-1], self.times[1:]):
             # Solves using SUNDIALS CVODE with MXSTEP_DEFAULT=500. I
@@ -238,7 +238,8 @@ class Plate(BasePlate):
         """
         if self.sim_params is None:
             self._gen_sim_params(model, b_mean, b_var, custom_params)
-        self.sim_amounts = model.solve(self, self.sim_params, self.times)
+        self.set_rr_model(model, self.sim_params)
+        self.sim_amounts = model.rr_solver(self, self.sim_params)
         self.c_meas = np.split(self.sim_amounts, model.no_species, axis=1)[0].flatten()
         if noise:
             self.add_noise()
