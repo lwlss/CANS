@@ -58,7 +58,8 @@ class Fitter(object):
 
 
     # TODO. Better to make this more general by returning C and N and
-    # splitting.
+    # splitting and using rr_solver. Also have to rename sel_shape and
+    # data_shape to the same name.
     def _rr_selection_obj(self, plate, params):
         """Return the objective function from RoadRunner simulations.
 
