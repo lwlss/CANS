@@ -43,9 +43,16 @@ params = {
     "kn": 1.5
 }
 
-plate1.set_sim_data(comp_model, r_mean=40.0, r_var=15.0,
+plate1.set_sim_data(comp_model, b_mean=40.0, b_var=15.0,
                     custom_params=params)
+
+
 
 # time RoadRunner
 p1_sbml = create_sbml(plate1, comp_model, plate1.sim_params)
 rr = roadrunner.RoadRunner(p1_sbml)
+t0 = time.time()
+rr.simulate(0, 5, 50)
+t1 = time.time()
+print(t1 - t0)
+rr.simulate
