@@ -4,7 +4,7 @@ import copy
 
 from functools import partial
 from scipy.optimize import minimize
-# from scipy.interpolate import splrep, splev
+
 
 from cans2.cans_funcs import dict_to_json
 
@@ -22,10 +22,7 @@ class Fitter(object):
     # params must be correct for the Model.
     def _obj_func(self, plate, params):
         """Objective function for fitting model."""
-        # Scale C_0 back to actual amount here. Lists are mutable!
-        # Probably faster to operate on the zero index twice than to
-        # deepcopy the entire list.
-        # params = copy.deepcopy(params)
+        # Scale C_0 back to actual amount here.
         params[0] = params[0]/10000
         # Find amounts by solving the model using the estimated parameters.
         amount_est = self.model.solve(plate, params, plate.times)
@@ -51,22 +48,17 @@ class Fitter(object):
         # using RoadRunner. The specific method is stored as a
         # Model attribute rr_solver.
         amount_est = self.model.rr_solve(plate, params)
-#        print("amount_est", amount_est)
         # Mutable so must scale C_0 back
         params[0] = params[0]*10000
         c_est = np.split(amount_est, self.model.no_species, axis=1)[0].flatten()
         # Zeros appear in here for empty plates but this shouldn't
         # have any effect.
-        # print(len(c_est))
-        # print(len(plate.c_meas))
-#        print("c_meas", plate.c_meas)
-#        print("c_est", c_est)
         err = np.sqrt(np.sum((plate.c_meas - c_est)**2))
         return err
 
 
-    # We can also select to return only C from the rr_solver to make
-    # this faster.
+    # TODO. Better to make this more general by returning C and N and
+    # splitting.
     def _rr_selection_obj(self, plate, params):
         """Return the objective function from RoadRunner simulations.
 
@@ -81,7 +73,6 @@ class Fitter(object):
         params[0] = params[0]*10000
         err = np.sqrt(np.sum((plate.c_meas_sel - c_est)**2))
         return err
-
 
 
     def _neigh_obj_func(self, plate, params):
@@ -102,19 +93,19 @@ class Fitter(object):
         return err
 
 
-    def fit_model(self, plate, param_guess=None, custom_options=None,
+    def fit_model(self, plate, param_guess=None, minimizer_opts=None,
                   bounds=None, rr=False, sel=False):
         """Fit the model to data on the plate.
 
         If passed use param guess as the initial guess for
-        minimization, else generate a uniform guess. custom_options
+        minimization, else generate a uniform guess. minimizer_opts
         should be a dictionary. Commmon options to set are ftol and
         maxiter.
 
         Bounds should be passed in as a full list of tuples with
-        correct position for the model according to
-        model.params. Individual bounds must be included at the end
-        for each b parameter.
+        correct position for the model according to Fitter.model (a
+        Model instance) params attribute. Individual bounds must be
+        included at the end for each b parameter.
 
         If rr is true, solve using RaodRunner (faster).
 
@@ -124,22 +115,23 @@ class Fitter(object):
 
         """
         # Make deep_copies of param_guesses and bounds because of
-        # rescaling for the minimizer and mutability.
+        # rescaling for the minimizer.
         param_guess = copy.deepcopy(param_guess)
         bounds = copy.deepcopy(bounds)
 
         assert(plate.c_meas is not None)
         if self.model.name == "Neighbour model":
             obj_f = partial(self._neigh_obj_func, plate)
-
-        if rr and sel:
+        elif rr and sel:
             obj_f = partial(self._rr_selection_obj, plate)
         elif rr and not sel:
             obj_f = partial(self._rr_obj, plate)
         elif not rr and sel:
             raise ValueError("Can only make a selection if rr=True")
         else:
+            # odeint solver.
             obj_f = partial(self._obj_func, plate)
+
         if param_guess is None:
             # Fit using uniform parameters
             param_guess = self.model.gen_params(plate)
@@ -157,12 +149,17 @@ class Fitter(object):
         options = {
             # 'disp': True,
             'maxfun': np.inf,
+            # 'maxcor': 20,
+            # 'eps': 1e-06,
+            'maxls': 20,    # max line searches per iter.
             #'ftol': 10.0*np.finfo(float).eps
         }
-        if custom_options is not None:
-            options.update(custom_options)
 
-        # Scale C_0 for the minmizer. Also have to scale the bounds.
+        if minimizer_opts is not None:
+            options.update(minimizer_opts)
+
+        # Scale C_0 for the minmizer. Also have to scale upper and
+        # lower C bounds.
         param_guess[0] = param_guess[0]*10000
         bounds[0] = tuple(bounds[0][i]*10000 if bounds[0][i] is not None
                           else bounds[0][i] for i in range(2))
