@@ -103,7 +103,10 @@ class BasePlate(object):
     # the slower odeint solver when we want nutrients or a 2nd version
     # of this function with an extra argument. It is easier to write
     # new sbml models than the equivilant python so the latter option
-    # should be preferred.
+    # should be preferred. I tried to do this with the selections
+    # method below (i.e. passing a sel argument to simulate) and it
+    # was in fact slower. Slicing only to end of C in the for loop may
+    # be faster but probably not by much.
     def rr_solve(self):
         """Solve SBML model between timepoints using roadrunner.
 
@@ -128,9 +131,12 @@ class BasePlate(object):
             # set minimumTimeStep at about minute resolution for a
             # simulation over 5 days (i.e. 1/(5*24*60)) and
             # maximumNumSteps greater than 5/minimumTimeStep so that
-            # it should never be encountered in a typical experiment.
-            a[i+1] = self.rr.simulate(t0, t1, 1, absolute=1e-16,
-                                      relative=1e-16,
+            # it should never be encountered in a typical
+            # experiment. absolute and relative are set to the same
+            # values used by Scipy's odeint.
+            a[i+1] = self.rr.simulate(t0, t1, 1,
+                                      absolute=1.49012e-8,
+                                      relative=1.49012e-8,
                                       mininumTimeStep=1.0e-8,
                                       maximumNumSteps=40000)[1][1:]
         return a
