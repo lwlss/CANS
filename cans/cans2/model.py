@@ -57,7 +57,6 @@ def neighbour_model(params, no_neighs=2):
     return growth
 
 
-
 def inde_model(params, plate):
     """Return a function for running the inde model.
 
@@ -95,14 +94,16 @@ def comp_model(params, plate):
     Args
     ----
     params : list
-        Model parameters
-    neighbourhood : list
-        A list of tuples of neighbour indices for each culture.
+        Model parameters excluding intial amounts.
+    plate : Plate
+        A corresponding plate with attributes describing the neighbourhood.
     """
     # Separate out plate and culture level parameters.
     kn = params[0]
     b = np.asarray(params[1:])
     neighbourhood = plate.neighbourhood
+    # Boolean array of neighbours for each culture. Rows are current
+    # culture; cols are neighbours.
     mask = plate.mask
     neigh_nos = plate.neigh_nos
     # odeint requires times argument in cans_growth function.
@@ -141,7 +142,7 @@ class Model(object):
         init_amounts[plate.empties] = 0.0
         growth_func = self.model(params[self.param_index:], plate)
         # mxhnil is the maximum number of messages to be printed.
-        sol = odeint(growth_func, init_amounts, plate.times,
+        sol = odeint(growth_func, init_amounts, times,
                      atol=1.49012e-8, rtol=1.49012e-8, mxhnil=0)
         return np.maximum(0, sol)
 
@@ -151,13 +152,12 @@ class Model(object):
 
         Return amounts of all species on the Plate.
         """
-#       print("params", params)
-        plate.rr.model.setGlobalParameterValues(params[:])
-#        print("rr_params", plate.rr.model.getGlobalParameterValues())
-#        print("rr_inits", plate.rr.model.getFloatingSpeciesInitAmounts())
+        # Initial amounts are assigned to all species using the
+        # expressions in the InitialAssignments of the SBML model.
+        plate.rr.model.setGlobalParameterValues(params)
         sol = plate.rr_solve()
-        # plate.rr.reset()
         return sol
+
 
     def rr_solve_selections(self, plate, params):
         """Set SBML parameters and solve using RoadRunner.
@@ -166,10 +166,7 @@ class Model(object):
         set by Plate method set_rr_timecourse_selections.
 
         """
-        init_amounts = np.repeat(params[:self.no_species], plate.no_cultures)
-        plate.rr.model.setFloatingSpeciesInitConcentrations(init_amounts)
-        plate.rr.model.setFloatingSpeciesInitAmounts(init_amounts)
-        plate.rr.model.setGlobalParameterValues(params[self.param_index:])
+        plate.rr.model.setGlobalParameterValues(params)
         sol = plate.rr_solve_selections()
         return sol
 
@@ -246,8 +243,7 @@ class CompModelBC(Model):
     edge cultures.
     """
     def __init__(self, rev_diff=True):
-#        super(CompModelBC, self).__init__(rev_diff=rev_diff)
-        self.model = comp_model    # Does not work yet.
+        # self.model =     # Not implemented in python yet
         self.b_index = 4
         self.param_index = 3    # First param that is not an amount.
         self.params = ["C_0", "N_0", "NE_0", "kn", "b"]
