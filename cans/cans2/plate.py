@@ -16,6 +16,27 @@ from cans2.make_sbml import create_sbml
 
 class BasePlate(object):
     def __init__(self, rows, cols, data=None):
+        """Instantiate BasePlate.
+
+        rows and cols give the dimensions of cultures on the plate.
+
+        If provided, data should be in a dictionary with the following
+        keys.
+
+        "c_meas" : Values for cell measurements.
+            A flat np.array with zero observation values added for
+            empty spots. Order C0(t=t0), C1(t=t0), ..., C0(t=t1),
+            C1(t=t1),... .
+
+        "times" : np.array of observation times in units days.
+
+        "empties" : Locations of empty cultures (optional).
+            Locations are integers from zero to (rows*cols - 1) with
+            the culture array flattened in row-major style e.g. for a
+            2x2 plate (0, 0), (0, 1), (1, 0), (1, 1) corresponds to
+            cultures [0, 1, 2, 3]
+
+        """
         self.rows = rows
         self.cols = cols
         self.no_cultures = rows*cols
@@ -25,11 +46,7 @@ class BasePlate(object):
         self.internals = np.array([i for i, neighs in enumerate(self.neighbourhood)
                                    if len(neighs) == 4])
         self.data = data
-        # Is data going to be a dictionary of observation times and
-        # cell measurements? Let's assume so.
         if data is not None:
-            # c_measn should be a flat np.array with zero observation
-            # values added for empty spots
             self.c_meas = data['c_meas']
             self.times = data['times']
             self.empties = data['empties']    # List of indices of empty sites
@@ -82,9 +99,11 @@ class BasePlate(object):
 
 
     # This, and more importantly fitting, could be made even faster if
-    # we just pass C meas in a flattened array. We could just use the
-    # slower odeint solver when we want nutrients or a 2nd version of
-    # this function with an extra argument.
+    # we return only c_meas in a flattened array. We could just use
+    # the slower odeint solver when we want nutrients or a 2nd version
+    # of this function with an extra argument. It is easier to write
+    # new sbml models than the equivilant python so the latter option
+    # should be preferred.
     def rr_solve(self):
         """Solve SBML model between timepoints using roadrunner.
 
@@ -92,6 +111,14 @@ class BasePlate(object):
         of order e.g., [C0, C1,..., N0, N1,...] with numbers indicating
         culture index.
         """
+        # Reset species amounts to init values. Do this here rather
+        # than after the simulation because it is possible that the rr
+        # has been accessed and simulated elsewhere. Outside the below
+        # loop it never occurs that I want to carry over species
+        # amounts between simulations. It may also be wise to reset rr
+        # before this function call returns but I leave it free for
+        # now.
+        self.rr.reset()
         a = np.empty(self.data_shape)
         # Set init values in result.
         a[0] = self.rr.model.getFloatingSpeciesInitAmounts()
@@ -102,8 +129,8 @@ class BasePlate(object):
             # simulation over 5 days (i.e. 1/(5*24*60)) and
             # maximumNumSteps greater than 5/minimumTimeStep so that
             # it should never be encountered in a typical experiment.
-            a[i+1] = self.rr.simulate(t0, t1, 1, absolute=1.49012e-8,
-                                      relative=1.49012e-8,
+            a[i+1] = self.rr.simulate(t0, t1, 1, absolute=1e-16,
+                                      relative=1e-16,
                                       mininumTimeStep=1.0e-8,
                                       maximumNumSteps=40000)[1][1:]
         return a
@@ -114,9 +141,10 @@ class BasePlate(object):
 
         Returns a flattened array ready for the objective function.
         """
+        # Reset species amounts to init values.
+        self.rr.reset()
         a = np.empty(self.sel_shape)
-        # must pass a np.ndarray of indices for initial species
-        a[0] = self.rr.model.getFloatingSpeciesInitConcentrations()[self.selection_inds]
+        a[0] = self.rr.model.getFloatingSpeciesInitAmounts()[self.selection_inds]
         for i, t0, t1 in zip(range(len(self.times)),
                              self.times[:-1], self.times[1:]):
             # Solves using SUNDIALS CVODE with MXSTEP_DEFAULT=500. I
@@ -133,13 +161,6 @@ class BasePlate(object):
                                       maximumNumSteps=40000,
                                       sel=self.timeCourseSelections)[1]
         return a.flatten()
-
-
-    # def get_internals(self):
-    #     """Return the indicies of internal cultures."""
-    #     internals = [i for i, neighs in enumerate(self.neighbourhood)
-    #                  if len(neighs) == 4]
-    #     return np.array(internals)
 
 
     def set_rr_selections(self, id="[C{0}]", indices="internals"):
@@ -163,11 +184,14 @@ class BasePlate(object):
             self.selection_inds = np.array(indices)
         selections = [id.format(i) for i in indices]
         # For some reason RoadRunner's timeCourseSelections API is not
-        # working (Maybe I have an older verion or could have been an
-        # issue with swig version on installation) so just set as a
-        # plate attribute and fix in future if possible/needed by
-        # changing to a RoadRunner attribute and altering the call to
-        # rr.simulate in the rr_solve_selections method.
+        # working (maybe I have an older verion or could have been an
+        # issue with swig version on installation) so just set
+        # timeCourseSelections as a Plate attribute and fix in future
+        # if possible/needed by changing to a RoadRunner attribute and
+        # altering the argument in call to rr.simulate in the method
+        # Plate.rr_solve_selections. i.e. change below to
+        # self.rr.timesCourseSelections and remore sel attr from
+        # simulate.
         self.timeCourseSelections = selections
         # Set a shape for simulated timecourse arrays.
         self.sel_shape = (len(self.times), len(selections))
@@ -290,7 +314,6 @@ class Plate(BasePlate):
                                params[:, inde_model.b_index])
         self.avg_culture_ests = avg_params
         return avg_params
-
 
 
 class Culture(BasePlate):
