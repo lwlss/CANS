@@ -115,11 +115,11 @@ class BasePlate(object):
         culture index.
         """
         # Reset species amounts to init values. Do this here rather
-        # than after the simulation because it is possible that the rr
-        # has been accessed and simulated elsewhere. Outside the below
+        # than after the simulation because it is possible that rr has
+        # been accessed and simulated elsewhere. Outside the below
         # loop it never occurs that I want to carry over species
-        # amounts between simulations. It may also be wise to reset rr
-        # before this function call returns but I leave it free for
+        # amounts between simulations so it may also be wise to reset
+        # rr before this function call returns but I leave it free for
         # now.
         self.rr.reset()
         a = np.empty(self.data_shape)
