@@ -279,7 +279,8 @@ class Plate(BasePlate):
         self._set_cultures()    # Set culture c_meas and times.
 
 
-
+    # Easier ways of doing this with numpy. See Conor's feedback from
+    # code review.
     def add_noise(self, sigma=None):
         """Add random noise to c_meas."""
         # Find a scale
@@ -309,6 +310,10 @@ class Plate(BasePlate):
         inde_model = IndeModel()
         # Make inde fits for individual Cultures.
         for culture in self.cultures:
+            # This does not work for a model with two init Ns
+            # yet. Perhaps implement a logistic equivilant model in
+            # SBML. Or just supply the correct N for each culture
+            # depending if the plate model requires it.
             culture.inde_est = culture.fit_model(inde_model,
                                                  param_guess=param_guess,
                                                  bounds=bounds)
