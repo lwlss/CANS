@@ -94,8 +94,8 @@ class Fitter(object):
         return err
 
 
-    def fit_model(self, plate, param_guess=None, minimizer_opts=None,
-                  bounds=None, rr=False, sel=False):
+    def fit_model(self, plate, param_guess=None, bounds=None,
+                  rr=False, sel=False, minimizer_opts=None):
         """Fit the model to data on the plate.
 
         If passed use param guess as the initial guess for
