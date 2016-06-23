@@ -17,6 +17,30 @@ class Guesser(object):
         self.model = model
 
 
+    def _guess_init_N(self, plate, ratio=1):
+        """Guess starting amounts of Nutrients.
+
+        ratio: Ratio of (edge culture area / internal culture
+        area). This is not the area of the cultures, which are assumed
+        equal, but the area of agar that is closest to, and could be
+        said to belong to, a culture.
+
+        """
+        no_tps = len(plate.times)
+        # Assuming complete reactions and relatively small starting
+        # amounts of cells, total nutrient amount is equal to the
+        # total final cell amount.
+        N_tot = plate.c_meas[plate.no_cultures*(no_tps-1):]
+        # Number of internal and edge cultures.
+        ni = len(plate.internals)
+        ne = len(plate.edges)
+        # Init nutrients in internal and edge cultures. Derived from
+        # the following relationships: N_tot = ni*Ni + ne*Ne; Ne =
+        # Ni*ratio.
+        Ni = N_tot / (ni + ne*ratio)
+        Ne = (N_tot - ni*Ni) / ne
+
+
     def _guess_N_0(self, plate):
         # slice the last measure of C and take average
         # C_0 is 1/10,000 of this
@@ -76,6 +100,7 @@ class Guesser(object):
 
 
     def get_bounds(self, plate, guess, factor=0.5):
+
         """A list of tuples for each parameter in the model.
 
         Must be suitable for scipy.optimize.minimize.
@@ -168,7 +193,7 @@ if __name__ == '__main__':
 
         col = 1
         colors = ['k', 'r', 'b', 'g', 'y']
-        for r_dist, fit in zip(b_dists, fits):
+        for b_dist, fit in zip(b_dists, fits):
             plt.plot(kns, fit[2], label="b ~ N({0}, {1})".format(*b_dist),
                      marker='x', linestyle='None', color=colors[col])
             plt.plot(kns, kns*fit[0] + fit[1], color=colors[col],
