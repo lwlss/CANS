@@ -20,7 +20,7 @@ class Guesser(object):
     def _guess_init_N(self, plate, ratio=1):
         """Guess starting amounts of Nutrients.
 
-        ratio: Ratio of (edge culture area / internal culture
+        ratio : Ratio of (edge culture area / internal culture
         area). This is not the area of the cultures, which are assumed
         equal, but the area of agar that is closest to, and could be
         said to belong to, a culture.
@@ -39,6 +39,22 @@ class Guesser(object):
         # Ni*ratio.
         Ni = N_tot / (ni + ne*ratio)
         Ne = (N_tot - ni*Ni) / ne
+
+
+    def _guess_init_C(self, plate, ratio=1e-5):
+        """Guess initial cell amounts.
+
+        ratio : (Final cell amounts / init cell amounts). The user
+        must provide a guess for the ratio based on knoledge about the
+        experiment. The data does not have resolution enough to
+        determine starting cell amounts and, unlike nutrient amounts,
+        there is no easy way to infer a guess without fitting.
+
+        Can this be done by fitting the logistic model or
+        imaginary neighbour model? Those fits would still require a
+        guess.
+
+        """
 
 
     def _guess_N_0(self, plate):
