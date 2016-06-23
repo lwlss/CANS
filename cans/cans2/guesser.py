@@ -1,6 +1,9 @@
 import numpy as np
 
 
+from cans2.model import IndeModel
+
+
 def add_b_bound(plate, model, i, j, bounds, bound):
     """Add a bound given i and j of culture on plate.
 
@@ -104,7 +107,7 @@ class Guesser(object):
         return [C_0]
 
 
-    def _bounds_init_amounts(self, guess, C_doubt=1e3, N_doubt=2):
+    def _bound_init_amounts(self, guess, C_doubt=1e3, N_doubt=2):
         """Return list of bounds for init amounts.
 
         guess : List of guesses of init amounts.
@@ -148,7 +151,7 @@ class Guesser(object):
     # which to scale would depend on kn and the absolute value of the
     # average (and possibly also initial cell amounts?). I hope to
     # find reasonable geusses without the need for this.
-    def guess_b_logistic(self, b_guess, C_doubt=1e3, N_doubt=2):
+    def guess_b_logistic(self, b_guess, C_doubt=1e3, N_doubt=2.0):
         """Guess b by fitting the logistic equivalent model.
 
         Fits to individual cultures. For speed, there is no collective
@@ -172,16 +175,66 @@ class Guesser(object):
         amount_guess = C_0_guess + N_0_guess
         param_guess = np.array(amount_guess + [b_guess])
 
-        bounds = self._bound_init_amounts(amount_guess, C_doubt, N_doubt)
+        bounds = self._bound_init_amounts(amount_guess,
+                                          C_doubt=C_doubt, N_doubt=N_doubt)
         bounds.append(0.0, None)    # Append bounds on b to init amount bounds.
         bounds = np.array(bounds)
 
-        # avg_params = plate.est_from_cultures(param_guess, bounds)
+        # Separate and list guesses and bounds so that they have just
+        # one N_0.
+        if len(param_guess) == 3:
+            param_guess = [param_guess]
+            bounds = [bounds]
+        elif len(params_guess) == 4:
+            param_guess = [param_guess.delete[2], param_guess.delete[1]]
+            bounds = [bounds.delete[2], bounds.delete[1]]
+
+        # Determine params_guess and bounds for each culture and fit
+        # the logistic equivalent model.
+        log_eq_mod = IndeModel()
+        for i, culture in enumerate(self.plate.cultures):
+            if len(param_guess) == 1:
+                index = 0
+            elif len(param_guess) == 2 and i in self.plate.internals:
+                index = 0
+            elif len(param_guess) == 2 and i in self.plate.edges:
+                index = 1
+
+            culture.log_est = culture.fit_model(log_eq_mod,
+                                                param_guess=param_geuss[index],
+                                                bounds=bounds[index])
+
+        processed_ests = self._process_quick_ests(est_name="log_est")
 
 
     def guess_b_imag_neighs(self, plate):
         """Guess b by fitting the imaginary neighbour model."""
         pass
+
+
+    def _process_quick_ests(self, est_name):
+        """Process estimates from quick fits.
+
+        est_name : Name of the Culture attribute where estimated
+        values are stored. Either "log_est" or "im_neigh_est".
+
+        """
+        # Just allow to raise AttributeError if bad name.
+        all_ests = np.array([getattr(c, est_name).x
+                             for c in self.plate.cultures])
+        b_ests = ests[:, log_eq_mod.b_index]
+
+        # Take average of estimated amounts. Do so only if b estimate
+        # is greater than zero otherwise amount estimates are
+        # arbitrary.
+        C_0_ests = [est[0] for est in all_ests if est[-1]]
+        if:
+            N_0_ests
+        elif:
+            for i in plate.internals:
+                pass
+            for e in plate.edges:
+                pass
 
 
 ##########################
