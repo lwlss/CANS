@@ -1,14 +1,14 @@
 import numpy as np
 
 
-def add_r_bound(plate, model, i, j, bounds, bound):
+def add_b_bound(plate, model, i, j, bounds, bound):
     """Add a bound given i and j of culture on plate.
 
     i and j should start at zero.
     bound should be a tuple.
 
     """
-    index = model.r_index + i*plate.cols + j
+    index = model.b_index + i*plate.cols + j
     bounds[index] = bound
 
 
@@ -44,9 +44,9 @@ class Guesser(object):
         pass
 
 
-    def _guess_r(self):
+    def _guess_b(self):
         # fit independent model fixing with C_0 and N_0 guesses and
-        # take average r. Could just select those closest to C_f =
+        # take average b. Could just select those closest to C_f =
         # N_0.
         pass
 
@@ -60,7 +60,7 @@ class Guesser(object):
         # guess kn
         # get C_f_var for growers
         #C_f_var = self._get_growers_C_f_var(plate, guess['C_0'])
-        # guess r
+        # guess b
         # arrange guess according to index in model.
         return guess
 
@@ -71,8 +71,8 @@ class Guesser(object):
             index = self.model.params.index(k)
             guess_list[index] = v
         return guess_list
-        # Need to make guesses or kn and rs (maybe as a list with a
-        # guess for each r).
+        # Need to make guesses or kn and bs (maybe as a list with a
+        # guess for each b).
 
 
     def get_bounds(self, plate, guess, factor=0.5):
@@ -117,7 +117,7 @@ if __name__ == '__main__':
 
 
     def fit_C_f_var_vs_kn(kns, times, model, guesser, rows=16,
-                          cols=24, r_mean=50.0, r_var=25.0):
+                          cols=24, b_mean=50.0, b_var=25.0):
         C_f_vars = []
         for kn in kns:
             # Simulate a plate and data
@@ -125,7 +125,7 @@ if __name__ == '__main__':
             plate1.times = times
             true_params = {'N_0': 0.1, 'kn': kn}
             true_params['C_0'] = true_params['N_0']/10000
-            plate1.set_sim_data(model, r_mean, r_var, true_params)
+            plate1.set_sim_data(model, b_mean, b_var, true_params)
 
             # comp_plotter.plot_est(plate1, plate1.sim_params)
 
@@ -142,7 +142,7 @@ if __name__ == '__main__':
 
     # For fixed r_mean and r_var, the variance in final cell
     # measurement follows a linear relationship with kn. If we can
-    # make good (enough) guesses for r then we can guess kn (and
+    # make good (enough) guesses for b then we can guess kn (and
     # possibly constrain it).
     rows = 16
     cols = 24
@@ -156,68 +156,68 @@ if __name__ == '__main__':
     # kns = np.array([0.5, 0.1])
 
 
-    # plot cf vs kn for two different r dists and linear fit and eqn.
-    def plot_fits(kns, times, model, guesser, rows, cols, r_dists):
+    # plot cf vs kn for two different b dists and linear fit and eqn.
+    def plot_fits(kns, times, model, guesser, bows, cols, b_dists):
         fits = []
-        for r_mean, r_var in r_dists:
+        for b_mean, b_var in b_dists:
             fit = fit_C_f_var_vs_kn(kns, times, comp_model,
                                     comp_guesser, rows=rows,
-                                    cols=cols, r_mean=r_mean,
-                                    r_var=r_var)
+                                    cols=cols, b_mean=b_mean,
+                                    b_var=b_var)
             fits.append(fit)
 
         col = 1
         colors = ['k', 'r', 'b', 'g', 'y']
-        for r_dist, fit in zip(r_dists, fits):
-            plt.plot(kns, fit[2], label="r ~ N({0}, {1})".format(*r_dist),
+        for r_dist, fit in zip(b_dists, fits):
+            plt.plot(kns, fit[2], label="b ~ N({0}, {1})".format(*b_dist),
                      marker='x', linestyle='None', color=colors[col])
             plt.plot(kns, kns*fit[0] + fit[1], color=colors[col],
                      label="y = {0}x + {1}".format(round_sig(fit[0]),
                                                    round_sig(fit[1])))
             col += 1
-        plt.title("Fits of C_final variance vs kn for different r distributions")
+        plt.title("Fits of C_final variance vs kn for different b distributions")
         plt.xlabel("kn")
         plt.ylabel("Variance in final cell amount")
         plt.legend(loc='best')
         plt.show()
         plt.close()
 
-    r_dists = [(50.0, 25.0), (100.0, 50.0)]
-    plot_fits(kns, times, comp_model, comp_guesser, rows, cols, r_dists)
+    b_dists = [(50.0, 25.0), (100.0, 50.0)]
+    plot_fits(kns, times, comp_model, comp_guesser, rows, cols, b_dists)
 
-    # Study r_mean and r_var effect on gradient
-    r_means = [20.0, 40.0, 60.0, 80.0, 100.0]
-    r_vars = [x*10.0 for x in range(8)]
+    # Study b_mean and b_var effect on gradient
+    b_means = [20.0, 40.0, 60.0, 80.0, 100.0]
+    b_vars = [x*10.0 for x in range(8)]
 
-    # vary r_mean and plot against gradient in C_f_var vs kn.
-    r_mean_m_c = []
-    for r_mean in r_means:
-        r_mean_m_c.append(list(fit_C_f_var_vs_kn(kns, times, comp_model,
+    # vary b_mean and plot against gradient in C_f_var vs kn.
+    b_mean_m_c = []
+    for b_mean in b_means:
+        b_mean_m_c.append(list(fit_C_f_var_vs_kn(kns, times, comp_model,
                                                  comp_guesser, rows=rows,
-                                                 cols=cols, r_mean=r_mean)[:2]))
-    r_mean_m_c = np.array(r_mean_m_c)
+                                                 cols=cols, b_mean=b_mean)[:2]))
+    b_mean_m_c = np.array(b_mean_m_c)
 
-    # vary r_var and plot against gradient in C_f_var vs kn.
-    r_var_m_c = []
-    for r_var in r_vars:
-        r_var_m_c.append(list(fit_C_f_var_vs_kn(kns, times, comp_model,
-                                                comp_guesser, r_var=r_var)[:2]))
-    r_var_m_c = np.array(r_var_m_c)
+    # vary b_var and plot against gradient in C_f_var vs kn.
+    b_var_m_c = []
+    for b_var in b_vars:
+        b_var_m_c.append(list(fit_C_f_var_vs_kn(kns, times, comp_model,
+                                                comp_guesser, b_var=b_var)[:2]))
+    b_var_m_c = np.array(b_var_m_c)
 
-    print(r_mean_m_c)
-    print(r_var_m_c)
-    # plot m against r_mean
-    plt.plot(r_means, r_mean_m_c[:, 0], linestyle='None', marker='x')
-    plt.title("Gradient vs r mean")
+    print(b_mean_m_c)
+    print(b_var_m_c)
+    # plot m against b_mean
+    plt.plot(b_means, b_mean_m_c[:, 0], linestyle='None', marker='x')
+    plt.title("Gradient vs b mean")
     plt.ylabel("m")
-    plt.xlabel("r mean")
+    plt.xlabel("b mean")
     plt.show()
     plt.close()
 
-    # plot m against r_var
-    plt.plot(r_vars, r_var_m_c[:, 0], linestyle='None', marker='x')
-    plt.title("Gradient vs r var")
+    # plot m against b_var
+    plt.plot(b_vars, b_var_m_c[:, 0], linestyle='None', marker='x')
+    plt.title("Gradient vs b var")
     plt.ylabel("m")
-    plt.xlabel("r var")
+    plt.xlabel("b var")
     plt.show()
     plt.close()
