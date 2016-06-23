@@ -185,7 +185,7 @@ class BasePlate(object):
         """
         if indices == "internals":
             indices = self.internals
-            self.selection_inds = internals    # Should be a numpy array
+            self.selection_inds = self.internals    # Should be a numpy array
         else:
             self.selection_inds = np.array(indices)
         selections = [id.format(i) for i in indices]
@@ -337,7 +337,7 @@ if __name__ == '__main__':
     comp_model = CompModel()
     comp_plotter = Plotter(comp_model)
 
-    plate1 = Plate(16, 24)
+    plate1 = Plate(2, 2)
     plate1.times = np.linspace(0, 5, 11)
 
     print("edges", plate1.edges)
@@ -350,11 +350,11 @@ if __name__ == '__main__':
     comp_plotter.plot_c_meas(plate1)
 
     plate1.set_rr_model(comp_model, plate1.sim_params)
-    plate1.set_rr_selections(indices="internals")
+    # plate1.set_rr_selections(indices="internals")
     plate1.est = plate1.fit_model(comp_model, minimizer_opts={"disp": True},
-                                  rr=True, sel=True)
+                                  rr=True, sel=False)
     print(plate1.est.x)
     print(plate1.sim_params)
-
+    print(plate1.c_meas)
 
     comp_plotter.plot_est(plate1, plate1.est.x, sim=True)
