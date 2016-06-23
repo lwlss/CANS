@@ -206,16 +206,17 @@ class BasePlate(object):
         self.c_meas_sel = np.array(c_sels).flatten(order="F")
 
 
-    def fit_model(self, model, param_guess=None, minimizer_opts=None,
-                  bounds=None, rr=False, sel=False):
+    def fit_model(self, model, param_guess=None, bounds=None,
+                  rr=False, sel=False, minimizer_opts=None):
         """Return estimates from fitting model to plate.
 
         Set rr True to use roadrunner solver. Set sel True to use a
         selection of cultures in the objective function.
         """
         fitter = Fitter(model)
-        est = fitter.fit_model(self, param_guess, minimizer_opts,
-                               bounds, rr, sel)
+        est = fitter.fit_model(self, param_guess=param_guess,
+                               bounds=bounds, rr=rr, sel=sel,
+                               minimizer_opts=minimizer_opts)
         return est
 
 
@@ -295,7 +296,7 @@ class Plate(BasePlate):
         self.c_meas = noisey
 
 
-    def est_from_cultures(self):
+    def est_from_cultures(self, param_guess, bounds):
         """Estimate parameters from inde fits of individual Cultures.
 
         Set idependent estimates (with scipy.integrate.odeint data) as
@@ -308,7 +309,9 @@ class Plate(BasePlate):
         inde_model = IndeModel()
         # Make inde fits for individual Cultures.
         for culture in self.cultures:
-            culture.inde_est = culture.fit_model(inde_model)
+            culture.inde_est = culture.fit_model(inde_model,
+                                                 param_guess=param_guess,
+                                                 bounds=bounds)
         params = np.array([c.inde_est.x for c in self.cultures])
         # Only take averages if b>0 otherwise amount estimates are arbitrary.
         avgs = np.average([p for p in params if p[-1]], axis=0)
