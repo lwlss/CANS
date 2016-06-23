@@ -159,12 +159,13 @@ class Guesser(object):
         cultures.
 
         """
-        if len(param_guess) == 3:
-            param_guess = [param_guess]
-            bounds = [bounds]
-        elif len(params_guess) == 4:
+        N_index = self.model.species.index("N")
+        if self.model.species_bc[N_index]:
             param_guess = [param_guess.delete[2], param_guess.delete[1]]
             bounds = [bounds.delete[2], bounds.delete[1]]
+        else:
+            param_guess = [param_guess]
+            bounds = [bounds]
         return param_guess, bounds
 
 
