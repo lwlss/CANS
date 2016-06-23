@@ -145,6 +145,29 @@ class Guesser(object):
         return bounds
 
 
+    def _sep_by_N_0(self, param_guess, bounds):
+        """Separate parameter guesses and bounds by N_0 guess.
+
+        This way guesses and bounds can be used to fit single
+        cultures.
+
+        param_guess and bounds should be numpy arrays with N_0 indices
+        starting at one.
+
+        Returns lists of length one if there is one N_0 in the model
+        and lists of length two if there is is also an N_0 for edge
+        cultures.
+
+        """
+        if len(param_guess) == 3:
+            param_guess = [param_guess]
+            bounds = [bounds]
+        elif len(params_guess) == 4:
+            param_guess = [param_guess.delete[2], param_guess.delete[1]]
+            bounds = [bounds.delete[2], bounds.delete[1]]
+        return param_guess, bounds
+
+
     # It would be possible to find specific estimates for b, before
     # any fitting, by scaling an average guess by final cell
     # amounts. Alternatively we could guess a maximum and scale
@@ -181,14 +204,9 @@ class Guesser(object):
         bounds.append(0.0, None)    # Append bounds on b to init amount bounds.
         bounds = np.array(bounds)
 
-        # Separate and list guesses and bounds so that they have just
-        # one N_0.
-        if len(param_guess) == 3:
-            param_guess = [param_guess]
-            bounds = [bounds]
-        elif len(params_guess) == 4:
-            param_guess = [param_guess.delete[2], param_guess.delete[1]]
-            bounds = [bounds.delete[2], bounds.delete[1]]
+        # Separate lists for each N_0 suitable for fits of single
+        # cultures.
+        param_guess, bounds = self._sep_by_N_0(param_guess, bounds)
 
         # Determine params_guess and bounds for each culture and fit
         # the logistic equivalent model.
