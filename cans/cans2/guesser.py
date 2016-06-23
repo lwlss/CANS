@@ -23,7 +23,7 @@ class Guesser(object):
         area_ratio : Ratio of (edge culture area / internal culture
         area). This is not the area of the cultures, which are assumed
         equal, but the area of agar that is closest to, and could be
-        said to belong to, a culture.
+        said to belong to, a culture. (Assumed equal to Ne/Ni.)
 
         C_ratio : (Init cell amounts / final cell amounts). The user
         must provide a guess for the ratio based on knowledge about
@@ -104,13 +104,51 @@ class Guesser(object):
         return [C_0]
 
 
+    def _bounds_init_amounts(self, guess, C_doubt=1e3, N_doubt=2):
+        """Return list of bounds for init amounts.
+
+        guess : List of guesses of init amounts.
+
+        C_doubt : Factor for Uncertainty in guess of initial cell
+        amounts. Divides and multiplies the initial guess of C_0 to create
+        lower and upper bounds.
+
+        N_doubt : Factor for Uncertainty in guess of initial nutrient
+        amounts. Divides and/or multiplies the initial guess(es) to
+        create lower and upper bounds. See code for exact usage.
+
+        """
+        # Bound cells.
+        bounds = [(guess[0]/C_doubt, guess[0]*C_doubt)]
+        # Bound nutrients.
+        N_index = self.model.species.index("N")
+        if not self.model.species_bc[N_index]:
+            # Bound N_0. This is strongly coupled to the final amount
+            # of cells so, assuming relatively small intial cell
+            # amounts, we can be fairly strict with a lower bound. The
+            # upper bound depends on whether the reactions are
+            # complete at the time of the final cell measurement.
+            bounds.append((guess[1]*0.9, guess[1]*N_doubt))
+        else:
+            # Bound N_0 and NE_0. Cannot be as strict with N_0 in this
+            # case as the minimum value is dependent on the accuracy
+            # of the area_ratio and the level of diffusion between
+            # edges and internals which is unknown. If we were sure of
+            # the value of area_ratio and that all nutrients were used
+            # up we could bound one limit of each amount using the
+            # guess of the other amount. I choose not to be so strict.
+            bounds.append((guess[1]/N_doubt, guess[1]*N_doubt))
+            bounds.append((guess[2]/N_doubt, guess[2]*N_doubt))
+        return bounds
+
+
     # It would be possible to find specific estimates for b by scaling
     # an average guess by final cell amounts. Alternatively we could
     # guess a maximum and scale towards zero. However, the factor by
     # which to scale would depend on kn and the absolute value of the
     # average (and possibly also initial cell amounts?). I hope to
     # find reasonable geusses without the need for this.
-    def guess_b_logistic(self, b_guess, C_doubt=1e3):
+    def guess_b_logistic(self, b_guess, C_doubt=1e3, N_doubt=2):
         """Guess b by fitting the logistic equivalent model.
 
         Fits to individual cultures. For speed, there is no collective
@@ -124,30 +162,21 @@ class Guesser(object):
         amounts. Divides and multiplies the initial guess of C_0 to
         create lower and upper bounds.
 
+        N_doubt : Factor for Uncertainty in guess of initial nutrient
+        amounts. Divides and/or multiplies the initial guess(es) to
+        create lower and upper bounds. See code for exact usage.
+
         """
         C_0_guess = self._guess_init_C()
         N_0_guess = self._guess_init_N()    # No elements depends on model.
-        param_guess = np.array(C_0_guess + N_0_guess + [b_guess])
+        amount_guess = C_0_guess + N_0_guess
+        param_guess = np.array(amount_guess + [b_guess])
 
-        bounds = [(C_0_guess[0]/C_doubt, C_0_guess[0]*C_doubt)]
-        if len(bounds) == 1:
-            # Bound N_0. This is strongly coupled to the final amount
-            # of cells so, assuming relatively small intial cell
-            # amounts, we can be fairly strict with a lower bound. The
-            # upper bound depends on whether the reactions are
-            # complete at the time of the final cell measurement.
-            pass
-        elif len(bounds) == 2:
-            # bound N_0 and NE_0. Cannot be as strict with N_0 in this
-            # case as the minimum value is dependent on the accuracy
-            # of the area_ratio and the level of diffusion between
-            # edges and internals which is unknown.
-            pass
-#            bounds.append = (self.area_ratio*,
-        bounds_b = (0.0, None)
+        bounds = self._bound_init_amounts(amount_guess, C_doubt, N_doubt)
+        bounds.append(0.0, None)    # Append bounds on b to init amount bounds.
+        bounds = np.array(bounds)
 
-        avg_params = plate.est_from_cultures(param_guess, bounds)
-
+        # avg_params = plate.est_from_cultures(param_guess, bounds)
 
 
     def guess_b_imag_neighs(self, plate):
