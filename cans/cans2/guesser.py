@@ -145,12 +145,13 @@ class Guesser(object):
         return bounds
 
 
-    # It would be possible to find specific estimates for b by scaling
-    # an average guess by final cell amounts. Alternatively we could
-    # guess a maximum and scale towards zero. However, the factor by
-    # which to scale would depend on kn and the absolute value of the
-    # average (and possibly also initial cell amounts?). I hope to
-    # find reasonable geusses without the need for this.
+    # It would be possible to find specific estimates for b, before
+    # any fitting, by scaling an average guess by final cell
+    # amounts. Alternatively we could guess a maximum and scale
+    # towards zero. However, the factor by which to scale would depend
+    # on kn and the absolute value of the average (and possibly also
+    # initial cell amounts?). I hope to find reasonable geusses
+    # without the need for this.
     def guess_b_logistic(self, b_guess, C_doubt=1e3, N_doubt=2.0):
         """Guess b by fitting the logistic equivalent model.
 
