@@ -44,17 +44,32 @@ class Guesser(object):
     def _guess_init_C(self, plate, ratio=1e-5):
         """Guess initial cell amounts.
 
-        ratio : (Final cell amounts / init cell amounts). The user
-        must provide a guess for the ratio based on knoledge about the
-        experiment. The data does not have resolution enough to
-        determine starting cell amounts and, unlike nutrient amounts,
-        there is no easy way to infer a guess without fitting.
+        ratio : (Init cell amounts / final cell amounts). The user
+        must provide a guess for the ratio based on knowledge about
+        the experiment. The data does not have resolution enough to
+        determine starting cell amounts and, unlike for nutrient
+        amounts, there is no easy way to infer a guess without
+        fitting.
 
-        Can this be done by fitting the logistic model or
-        imaginary neighbour model? Those fits would still require a
-        guess.
+        We may revise the guess after fitting the logistic equivalent
+        or imaginary neighbour model but these still require a guess.
 
         """
+        # Just take ratio of average of final cells without special
+        # treatment of edge and internal cultures because, for typical
+        # dilution methods, the ratio is likely to be a fairly rough
+        # guess anyway. We will revise the guess anyway after fitting
+        # the logistic equivalent of imaginary neighbour
+        # model. Previously
+        # (https://boo62.github.io/blog/fits-of-overlapping-5x5-zones/),
+        # I carried out many fits using a grid of initial guesses and
+        # these were not very dependent on the accuracy of the initial
+        # guess of C_0.
+        no_tps = len(plate.times)
+        final_Cs = plate.c_meas[plate.no_cultures*(no_tps-1):]
+        C_0 = np.mean(final_Cs)*ratio
+        return C_0
+
 
 
     def _guess_N_0(self, plate):
