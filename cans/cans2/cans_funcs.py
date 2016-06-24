@@ -63,11 +63,11 @@ def gauss_list(n, mean=1.0, var=1.0, negs=False):
 
     If negs is False (default), negative values are round to zero.
     """
-    vals = [random.gauss(mean, var) for i in range(n)]
+    vals = np.random.normal(loc=mean, scale=np.sqrt(var), size=n)
     if negs:
         return vals
     else:
-        return [max(0, v) for v in vals]
+        return vals.clip(min=0)
 
 
 def dict_to_json(dct):
