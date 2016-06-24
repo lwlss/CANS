@@ -63,7 +63,7 @@ bounds[2] = (0.0, 11.00)
 comp_mod_bc = CompModelBC()
 comp_plotter_bc = Plotter(comp_mod_bc)
 
-plate_bc = Plate(5, 5)
+plate_bc = Plate(16, 24)
 plate_bc.times = np.linspace(0, 5, 11)
 
 true_params_bc = {"N_0": 0.1, "NE_0": 0.15, "kn": 1.0}
