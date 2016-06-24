@@ -2,7 +2,7 @@ import numpy as np
 import sys
 if sys.version_info[0] == 2:
     import roadrunner
-
+import time
 
 from scipy.integrate import odeint
 
@@ -154,7 +154,10 @@ class Model(object):
         """
         # Initial amounts are assigned to all species using the
         # expressions in the InitialAssignments of the SBML model.
+        t0 = time.time()
         plate.rr.model.setGlobalParameterValues(params)
+        t1 = time.time()
+        print("set_params", t1-t0)
         sol = plate.rr_solve()
         return sol
 
