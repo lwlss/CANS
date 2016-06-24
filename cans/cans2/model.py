@@ -7,7 +7,7 @@ if sys.version_info[0] == 2:
 from scipy.integrate import odeint
 
 
-from cans2.cans_funcs import gauss_list, stdout_redirected, get_mask
+from cans2.cans_funcs import gauss_list, get_mask
 
 
 # Need to generealize to allow power to be specified
@@ -183,7 +183,7 @@ class Model(object):
             b = gauss_list(plate.no_cultures, mean=mean, var=var, negs=False)
         else:
             b = [mean]*plate.no_cultures
-        params = np.array(plate_lvl + b)
+        params = np.append(plate_lvl, b)
         return params
 
         
