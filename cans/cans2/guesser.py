@@ -224,7 +224,8 @@ class Guesser(object):
                                                 param_guess=param_geuss[index],
                                                 bounds=bounds[index])
 
-        processed_ests = self._process_quick_ests(est_name="log_est")
+        processed_ests = self._process_quick_ests(param_guess,
+                                                  est_name="log_est")
 
 
     def guess_b_imag_neighs(self, plate):
@@ -232,29 +233,61 @@ class Guesser(object):
         pass
 
 
-    def _process_quick_ests(self, est_name):
+    def _process_quick_ests(self, original_guess, est_name):
         """Process estimates from quick fits.
+
+        original_guess : guess_used for quick fitting. We will keep
+        the N_0 guesses rather than updating.
 
         est_name : Name of the Culture attribute where estimated
         values are stored. Either "log_est" or "im_neigh_est".
 
         """
         # Just allow to raise AttributeError if bad name.
-        all_ests = np.array([getattr(c, est_name).x
-                             for c in self.plate.cultures])
-        b_ests = ests[:, log_eq_mod.b_index]
+        all_ests = [getattr(c, est_name).x for c in self.plate.cultures]
+        b_ests = all_ests[:, log_eq_mod.b_index]
 
         # Take average of estimated amounts. Do so only if b estimate
         # is greater than zero otherwise amount estimates are
-        # arbitrary.
-        C_0_ests = [est[0] for est in all_ests if est[-1]]
-        if:
-            N_0_ests
-        elif:
-            for i in plate.internals:
-                pass
-            for e in plate.edges:
-                pass
+        # arbitrary. In practice it seems that b is always
+        # overestimated for slow and zero growers. Need to check how
+        # far off the corresponding C_0 and N_0 estimates are in order
+        # to determine a cutoff of b below which these estimates are
+        # unreliable. Although b estimates are poor for fast growers
+        # in the simulated cases that I have studied I suspect that
+        # the amounts would be more reliable. Could perhaps take
+        # estmates from just the half with the highest final cells.
+
+        # Select estimates to use for taking averages of init amounts.
+        included_ests = self._top_half_C_fs(all_ests)
+        C_0_mean = np.mean([est[0] for est in included_ests])
+
+        # Return the new guess
+        N_index = self.species.index("N")
+        new = [C_0_mean] + list(np.array(param_guess)[:, N_index]) + b_ests
+        return np.array(new)
+
+
+    def _get_top_half_C_f_ests(all_ests):
+        """Return estimates for Cultures with highest final Cells.
+
+        If the number of cultures is odd return the larger portion.
+
+        all_ests : estimates for all cultures.
+
+        """
+        no_tps = len(self.plate.times)
+        C_fs = self.plate.c_meas[self.plate.no_cultures*(no_tps-1):]
+        C_f_sorted = [est for (C_f, est) in sorted(zip(C_fs, all_ests))]
+
+        # Indices of cultures sorted by C_f. May use later.
+        # labelled_C_fs = [tup for tup in enumerate(C_fs)]
+        # ordered_C_fs = sorted(labelled_C_fs, key=lambda tup: tup[1])
+        # C_f_sorted_indices = [i for i, C in ordered_C_fs]
+
+        top_half_ests = C_f_sorted_ests[self.plate.no_cultures//2:]
+        return top_half_ests
+
 
 
 ##########################
