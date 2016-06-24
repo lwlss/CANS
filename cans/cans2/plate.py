@@ -296,38 +296,38 @@ class Plate(BasePlate):
         np.maximum(0, noisey, out=noisey)
         self.c_meas = noisey
 
+    # Functionality has moved to Guesser.quick_fit_log_eq in guesser.py.
+    # def est_from_cultures(self, param_guess, bounds):
+    #     """Estimate parameters from inde fits of individual Cultures.
 
-    def est_from_cultures(self, param_guess, bounds):
-        """Estimate parameters from inde fits of individual Cultures.
+    #     Set idependent estimates (with scipy.integrate.odeint data) as
+    #     culture attribute inde_est and return averaged values. Also
+    #     set the average as the plate attribute avg_culture_ests.
 
-        Set idependent estimates (with scipy.integrate.odeint data) as
-        culture attribute inde_est and return averaged values. Also
-        set the average as the plate attribute avg_culture_ests.
-
-        """
-        # Could be generalized by supplying Model as argument. For
-        # instance if we have different independent models.
-        inde_model = IndeModel()
-        # Make inde fits for individual Cultures.
-        for culture in self.cultures:
-            # This does not work for a model with two init Ns
-            # yet. Perhaps implement a logistic equivilant model in
-            # SBML. Or just supply the correct N for each culture
-            # depending if the plate model requires it.
-            culture.inde_est = culture.fit_model(inde_model,
-                                                 param_guess=param_guess,
-                                                 bounds=bounds)
-        params = np.array([c.inde_est.x for c in self.cultures])
-        # Only take averages if b>0 otherwise amount estimates are arbitrary.
-        avgs = np.average([p for p in params if p[-1]], axis=0)
-        if np.all(np.isnan(avgs)):
-            print("Warning: All bs were zero so estimates may not be reliable.")
-            avgs = np.average(params, axis=0)
-        # Averages only for plate level params.
-        avg_params = np.append(avgs[:inde_model.b_index],
-                               params[:, inde_model.b_index])
-        self.avg_culture_ests = avg_params
-        return avg_params
+    #     """
+    #     # Could be generalized by supplying Model as argument. For
+    #     # instance if we have different independent models.
+    #     inde_model = IndeModel()
+    #     # Make inde fits for individual Cultures.
+    #     for culture in self.cultures:
+    #         # This does not work for a model with two init Ns
+    #         # yet. Perhaps implement a logistic equivilant model in
+    #         # SBML. Or just supply the correct N for each culture
+    #         # depending if the plate model requires it.
+    #         culture.inde_est = culture.fit_model(inde_model,
+    #                                              param_guess=param_guess,
+    #                                              bounds=bounds)
+    #     params = np.array([c.inde_est.x for c in self.cultures])
+    #     # Only take averages if b>0 otherwise amount estimates are arbitrary.
+    #     avgs = np.average([p for p in params if p[-1]], axis=0)
+    #     if np.all(np.isnan(avgs)):
+    #         print("Warning: All bs were zero so estimates may not be reliable.")
+    #         avgs = np.average(params, axis=0)
+    #     # Averages only for plate level params.
+    #     avg_params = np.append(avgs[:inde_model.b_index],
+    #                            params[:, inde_model.b_index])
+    #     self.avg_culture_ests = avg_params
+    #     return avg_params
 
 
 class Culture(BasePlate):
