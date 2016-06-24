@@ -26,7 +26,8 @@ class Guesser(object):
         area_ratio : Ratio of (edge culture area / internal culture
         area). This is not the area of the cultures, which are assumed
         equal, but the area of agar that is closest to, and could be
-        said to belong to, a culture. (Assumed equal to Ne/Ni.)
+        said to belong to, a culture. (Assumed equal to Ne/Ni.) Used
+        if model is CompModelBC but ignored if model is CompModel.
 
         C_ratio : (Init cell amounts / final cell amounts). The user
         must provide a guess for the ratio based on knowledge about
@@ -223,13 +224,18 @@ class Guesser(object):
     # on kn and the absolute value of the average (and possibly also
     # initial cell amounts?). I hope to find reasonable geusses
     # without the need for this.
-    def guess_b_logistic(self, b_guess, C_doubt=1e3, N_doubt=2.0):
+    def quick_fit_log_eq(self, b_guess, C_doubt=1e3, N_doubt=2.0):
         """Guess b by fitting the logistic equivalent model.
+
+        Returns guesses for all parameters in self.model for a
+        self.model of CompModel or CompModelBC.
 
         Fits to individual cultures. For speed, there is no collective
         fitting of plate level parameters, e.g. initial
         amounts. Instead, an average can be taken after the individual
-        fits.
+        fits. Guesses for C_0 and individual b parameters result from
+        fitting, whereas guesses for N_0 are infered from average
+        final measurements and not updated after fitting.
 
         b_guess : guess for b parameter. The same for all cultures.
 
@@ -244,13 +250,16 @@ class Guesser(object):
         """
         C_0_guess = self._guess_init_C()
         N_0_guess = self._guess_init_N()    # No elements depends on model.
-        amount_guess = C_0_guess + N_0_guess
-        param_guess = np.array(amount_guess + [b_guess])
+        amount_guess = np.append(C_0_guess, N_0_guess)
+        print(amount_guess)   # Fix here
+        param_guess = np.append(amount_guess, b_guess)
 
         bounds = self._bound_init_amounts(amount_guess,
                                           C_doubt=C_doubt, N_doubt=N_doubt)
-        bounds.append(0.0, None)    # Append bounds on b to init amount bounds.
+        bounds.append((0.0, None))    # Append bounds on b to init amount bounds.
         bounds = np.array(bounds)
+        print(bounds)
+        print(param_guess)
 
         # Separate lists for each N_0 suitable for fits of single
         # cultures.
@@ -268,13 +277,13 @@ class Guesser(object):
                 index = 1
 
             culture.log_est = culture.fit_model(log_eq_mod,
-                                                param_guess=param_geuss[index],
+                                                param_guess=param_guess[index],
                                                 bounds=bounds[index])
         new_guess = self._process_quick_ests(param_guess, est_name="log_est")
         return new_guess
 
 
-    def guess_b_imag_neighs(self, plate):
+    def quick_fit_imag_neighs(self, plate):
         """Guess b by fitting the imaginary neighbour model."""
         pass
 
