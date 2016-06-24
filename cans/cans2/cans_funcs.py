@@ -67,7 +67,7 @@ def gauss_list(n, mean=1.0, var=1.0, negs=False):
     if negs:
         return vals
     else:
-        return vals.clip(min=0)
+        return vals.clip(min=0.0)
 
 
 def dict_to_json(dct):
@@ -81,58 +81,57 @@ def dict_to_json(dct):
     return dct
 
 
-def add_noise(data, sigma=0.02):
-    """Return data with added random noise as np.ndarray."""
-    if not isinstance(data, np.ndarray):
-        noisey = np.asarray(copy.deepcopy(data), dtype=np.float64)
-    else:
-        noisey = copy.deepcopy(data)
-    for x in np.nditer(noisey, op_flags=['readwrite']):
-        x[...] = x + random.gauss(0, sigma)
-    np.maximum(0, noisey, out=noisey)
-    return noisey
+def add_noise(data, var=0.02):
+    """Return data with added random noise as np.ndarray.
 
-
-
-def fileno(file_or_fd):
+    Also clip negative values to zero.
     """
-    http://stackoverflow.com/a/22434262/190597 (J.F. Sebastian)
-    http://stackoverflow.com/a/22434262
-    http://stackoverflow.com/a/31682892 (unutbu)
-    """
-    fd = getattr(file_or_fd, 'fileno', lambda: file_or_fd)()
-    if not isinstance(fd, int):
-        raise ValueError("Expected a file (`.fileno()`) or a file descriptor")
-    return fd
+    noise = np.random.normal(0.0, np.sqrt(var), len(data))
+    noisey = np.asarray(data, dtype=np.float64) + noise
+    return noisey.clip(min=0.0)
 
 
-@contextlib.contextmanager
-def stdout_redirected(to=os.devnull, stdout=None):
-    """Redirect standard output.
+#####################
+# Hopefully not using. Delete before submission. Just redirect output
+# to devnull when executed with bash as less os dependent.
+# def fileno(file_or_fd):
+#     """
+#     http://stackoverflow.com/a/22434262/190597 (J.F. Sebastian)
+#     http://stackoverflow.com/a/22434262
+#     http://stackoverflow.com/a/31682892 (unutbu)
+#     """
+#     fd = getattr(file_or_fd, 'fileno', lambda: file_or_fd)()
+#     if not isinstance(fd, int):
+#         raise ValueError("Expected a file (`.fileno()`) or a file descriptor")
+#     return fd
+# @contextlib.contextmanager
+# def stdout_redirected(to=os.devnull, stdout=None):
+#     """Redirect standard output.
 
-    http://stackoverflow.com/a/22434262/190597 (J.F. Sebastian)
-    http://stackoverflow.com/a/22434262
-    http://stackoverflow.com/a/31682892 (unutbu)
+#     http://stackoverflow.com/a/22434262/190597 (J.F. Sebastian)
+#     http://stackoverflow.com/a/22434262
+#     http://stackoverflow.com/a/31682892 (unutbu)
 
-    I use this in model.py to suppress odeint lsoda warnings.
-    """
-    if stdout is None:
-       stdout = sys.stdout
+#     I use this in model.py to suppress odeint lsoda warnings.
+#     """
+#     if stdout is None:
+#        stdout = sys.stdout
 
-    stdout_fd = fileno(stdout)
-    # copy stdout_fd before it is overwritten
-    #NOTE: `copied` is inheritable on Windows when duplicating a standard stream
-    with os.fdopen(os.dup(stdout_fd), 'wb') as copied:
-        stdout.flush()  # flush library buffers that dup2 knows nothing about
-        try:
-            os.dup2(fileno(to), stdout_fd)  # $ exec >&to
-        except ValueError:  # filename
-            with open(to, 'wb') as to_file:
-                os.dup2(to_file.fileno(), stdout_fd)  # $ exec > to
-        try:
-            yield stdout # allow code to be run with the redirected stdout
-        finally:
-            # restore stdout to its previous value
-            #NOTE: dup2 makes stdout_fd inheritable unconditionally
-            stdout.flush()
-            os.dup2(copied.fileno(), stdout_fd)  # $ exec >&copied
+#     stdout_fd = fileno(stdout)
+#     # copy stdout_fd before it is overwritten
+#     #NOTE: `copied` is inheritable on Windows when duplicating a standard stream
+#     with os.fdopen(os.dup(stdout_fd), 'wb') as copied:
+#         stdout.flush()  # flush library buffers that dup2 knows nothing about
+#         try:
+#             os.dup2(fileno(to), stdout_fd)  # $ exec >&to
+#         except ValueError:  # filename
+#             with open(to, 'wb') as to_file:
+#                 os.dup2(to_file.fileno(), stdout_fd)  # $ exec > to
+#         try:
+#             yield stdout # allow code to be run with the redirected stdout
+#         finally:
+#             # restore stdout to its previous value
+#             #NOTE: dup2 makes stdout_fd inheritable unconditionally
+#             stdout.flush()
+#             os.dup2(copied.fileno(), stdout_fd)  # $ exec >&copied
+######################
