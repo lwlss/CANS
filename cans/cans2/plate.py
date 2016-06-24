@@ -272,7 +272,7 @@ class Plate(BasePlate):
         if self.sim_params is None:
             self._gen_sim_params(model, b_mean, b_var, custom_params)
         self.set_rr_model(model, self.sim_params)
-        self.sim_amounts = model.rr_solver(self, self.sim_params)
+        self.sim_amounts = model.rr_solve(self, self.sim_params)
         self.c_meas = np.split(self.sim_amounts, model.no_species, axis=1)[0].flatten()
         if noise:
             self.add_noise()
