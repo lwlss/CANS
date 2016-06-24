@@ -224,8 +224,8 @@ class Guesser(object):
                                                 param_guess=param_geuss[index],
                                                 bounds=bounds[index])
 
-        processed_ests = self._process_quick_ests(param_guess,
-                                                  est_name="log_est")
+        new_guess = self._process_quick_ests(param_guess, est_name="log_est")
+        return new_guess
 
 
     def guess_b_imag_neighs(self, plate):
@@ -260,11 +260,11 @@ class Guesser(object):
 
         # Select estimates to use for taking averages of init amounts.
         included_ests = self._top_half_C_fs(all_ests)
-        C_0_mean = np.mean([est[0] for est in included_ests])
+        C_0_mean = list(np.mean([est[0] for est in included_ests]))
 
         # Return the new guess
         N_index = self.species.index("N")
-        new = [C_0_mean] + list(np.array(param_guess)[:, N_index]) + b_ests
+        new_guess = C_0_mean + list(np.array(param_guess)[:, N_index]) + b_ests
         return np.array(new)
 
 
