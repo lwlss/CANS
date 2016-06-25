@@ -59,7 +59,7 @@ class Guesser(object):
         # Assuming complete reactions and relatively small starting
         # amounts of cells, total nutrient amount is equal to the
         # total final cell amount.
-        N_tot = self.plate.c_meas[self.plate.no_cultures*(no_tps-1):]
+        N_tot = np.sum(self.plate.c_meas[self.plate.no_cultures*(no_tps-1):])
         N_index = self.model.species.index("N")
         if self.model.species_bc[N_index]:
             # Number of internal and edge cultures.
@@ -251,15 +251,12 @@ class Guesser(object):
         C_0_guess = self._guess_init_C()
         N_0_guess = self._guess_init_N()    # No elements depends on model.
         amount_guess = np.append(C_0_guess, N_0_guess)
-        print(amount_guess)   # Fix here
         param_guess = np.append(amount_guess, b_guess)
 
         bounds = self._bound_init_amounts(amount_guess,
                                           C_doubt=C_doubt, N_doubt=N_doubt)
         bounds.append((0.0, None))    # Append bounds on b to init amount bounds.
         bounds = np.array(bounds)
-        print(bounds)
-        print(param_guess)
 
         # Separate lists for each N_0 suitable for fits of single
         # cultures.
