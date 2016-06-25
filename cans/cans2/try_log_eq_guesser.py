@@ -42,10 +42,12 @@ def sim_and_fit(rows, cols, times, plate_model, true_params, fit_model,
                       area_ratio=area_ratio, C_ratio=C_ratio)
 
     if fit_model == "log_eq":
-        guesser.quick_fit_log_eq(b_guess, C_doubt=C_doubt, N_doubt=N_doubt)
+        quick_guess = guesser.quick_fit_log_eq(b_guess, C_doubt=C_doubt,
+                                               N_doubt=N_doubt)
     elif fit_model == "imag_neighs":
         message = "Imaginary neighbour quick fitting not yet implemented."
         raise ValueError(message)
+    return quick_guess
 
 
 model = CompModel()
@@ -74,4 +76,8 @@ quick_fit_kwargs = {
     "C_ratio": 1e-5,    # Guess of init_cells/final_cells.
 }
 
-plate_with_ests = sim_and_fit(**quick_fit_kwargs)
+quick_guess = sim_and_fit(**quick_fit_kwargs)
+# Need to add in a kn guess.
+
+print(true_params)
+print(quick_guess)
