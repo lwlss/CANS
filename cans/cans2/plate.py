@@ -6,7 +6,7 @@ import sys
 # methods which call SciPy's odeint solver.
 if sys.version_info[0] == 2:
     import roadrunner
-import time
+# import time
 
 
 from cans2.model import IndeModel
@@ -122,11 +122,7 @@ class BasePlate(object):
         # amounts between simulations so it may also be wise to reset
         # rr before this function call returns but I leave it free for
         # now.
-        t0 = time.time()
         self.rr.reset()
-        t1 = time.time()
-        print("reset", t1-t0)
-        sim_t0 = time.time()
         a = np.empty(self.data_shape)
         # Set init values in result.
         a[0] = self.rr.model.getFloatingSpeciesInitAmounts()
@@ -144,8 +140,6 @@ class BasePlate(object):
                                       relative=1.49012e-8,
                                       mininumTimeStep=1.0e-8,
                                       maximumNumSteps=40000)[1][1:]
-        sim_t1 = time.time()
-        print("sim", sim_t1 - sim_t0)
         return a
 
 
