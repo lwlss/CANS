@@ -162,11 +162,11 @@ class Guesser(object):
         """
         N_index = self.model.species.index("N")
         if self.model.species_bc[N_index]:
-            param_guess = [param_guess.delete[2], param_guess.delete[1]]
-            bounds = [bounds.delete[2], bounds.delete[1]]
+            param_guess = np.array([param_guess.delete[2], param_guess.delete[1]])
+            bounds = np.array([bounds.delete[2], bounds.delete[1]])
         else:
-            param_guess = [param_guess]
-            bounds = [bounds]
+            param_guess = np.array([param_guess])
+            bounds = np.array([bounds])
         return param_guess, bounds
 
 
@@ -190,11 +190,12 @@ class Guesser(object):
         return np.array(top_half_ests)
 
 
-    def _process_quick_ests(self, original_guess, quick_mod, est_name):
+    def _process_quick_ests(self, quick_mod, est_name):
         """Process estimates from quick fits.
 
-        original_guess : guess_used for quick fitting. We will keep
-        the N_0 guesses rather than updating from the estimates.
+        Take a mean of estimated C_0s, use the N_0 guess(es) made from
+        average final cell amounts, and add on b guesses from the
+        quick fit.
 
         quick_mod : Instance of the model used for quick fit.
 
@@ -214,22 +215,20 @@ class Guesser(object):
         # to the plate having gaps we could use plate.empties to deal
         # with this.
         included_ests = self._get_top_half_C_f_ests(all_ests)
-
         C_0_mean = [np.mean(included_ests[:, 0])]
 
-        N_index = self.species.index("N")
-        N_guess = original_guess[:, N_index]
+        # Use N_0 guess(es) made from average final cell amounts.
+        N_0_guess = self._guess_init_N()
+        # N_guess may be a single value. We need an iterable to
+        # concatenate with guesses of other parameters.
+        try:
+            list(N_0_guess)
+        except TypeError:
+            N_0_guess = [N_0_guess]
+
         # N_guess may be a single value. We need an iterable to
         # concatenate with other guesses.
-        try:
-            list(N_guess)
-        except TypeError:
-            N_guess = [N_guess]
-
-        new_guess = np.concatenate(C_0_mean, N_guess, b_ests)
-        print(new_guess)
-        new_guess = C_0_mean + list(np.array(original_guess)[:, N_index]) + b_ests
-        print(new_guess)
+        new_guess = np.concatenate((C_0_mean, N_0_guess, b_ests))
         return np.array(new_guess)
 
 
@@ -265,35 +264,44 @@ class Guesser(object):
 
         """
         C_0_guess = self._guess_init_C()
-        N_0_guess = self._guess_init_N()    # No elements depends on model.
-        amount_guess = np.append(C_0_guess, N_0_guess)
-        param_guess = np.append(amount_guess, b_guess)
-
-        bounds = self._bound_init_amounts(amount_guess,
-                                          C_doubt=C_doubt, N_doubt=N_doubt)
-        bounds.append((0.0, None))    # Append bounds on b to init amount bounds.
-        bounds = np.array(bounds)
-
-        # Separate lists for each N_0 suitable for fits of single
+        # This N_0_guess is not used in logistic equivalent fits but
+        # is returned in the new_guess; logistic estimated N_0s are not
+        # realistic for the competition model. The number of elements
+        # depends on whether the model has a separate N_0 for edge
         # cultures.
-        param_guess, bounds = self._sep_by_N_0(param_guess, bounds)
+        N_0_guess = self._guess_init_N()
+        amount_guess = np.append(C_0_guess, N_0_guess)
+        first_guess = np.append(amount_guess, b_guess)
 
-        # Determine params_guess and bounds for each culture and fit
-        # the logistic equivalent model.
+        # Use final amounts of cells as inital guesses of nutrients
+        # because logistic equivalent growth is governed by N + C ->
+        # 2C, there is no diffusion, and C_0 is assumed to be
+        # relatively small.
+        tps = len(self.plate.times)
+        C_fs = self.plate.c_meas[self.plate.no_cultures*(tps-1):]
+        log_eq_N_0_guesses = C_fs
+        log_eq_guesses = [C_0_guess + [N_0, b_guess] for N_0 in log_eq_N_0_guesses]
+
+        # For logistic equivalent fit fix C_0 and allow N_0 and b to
+        # vary freely. Could also try varying C_0 freely but would
+        # likely get inconsistent estimates. It would perhaps be
+        # better to fit C_0 collectively but this would be much
+        # slower. [C_0, N_0, b]
+        log_eq_bounds = [(C_0_guess[0], C_0_guess[0]), (0.0, None), (0.0, None)]
+
         log_eq_mod = IndeModel()
-        for i, culture in enumerate(self.plate.cultures):
-            if len(param_guess) == 1:
-                N_0_index = 0
-            elif len(param_guess) == 2 and i in self.plate.internals:
-                N_0_index = 0
-            elif len(param_guess) == 2 and i in self.plate.edges:
-                N_0_index = 1
-
+        print(log_eq_bounds)
+        for guess, culture in zip(log_eq_guesses, self.plate.cultures):
             culture.log_est = culture.fit_model(log_eq_mod,
-                                                param_guess=param_guess[N_0_index],
-                                                bounds=bounds[N_0_index])
-        new_guess = self._process_quick_ests(param_guess, log_eq_mod,
-                                             est_name="log_est")
+                                                param_guess=guess,
+                                                bounds=log_eq_bounds)
+
+        new_guess = self._process_quick_ests(log_eq_mod, est_name="log_est")
+
+        # Insert nan at index of kn.
+        kn_index = self.model.params.index("kn")
+        new_guess = np.insert(new_guess, kn_index, np.nan)
+
         return new_guess
 
 
