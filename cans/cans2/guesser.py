@@ -170,8 +170,8 @@ class Guesser(object):
         return param_guess, bounds
 
 
-    def _get_top_half_C_f_ests(all_ests):
-        """Return estimates for Cultures with highest final Cells.
+    def _get_top_half_C_f_ests(self, all_ests):
+        """Return np.array of estimates for Cultures with highest final Cells.
 
         If the number of cultures is odd return the larger portion.
 
@@ -186,34 +186,50 @@ class Guesser(object):
         # labelled_C_fs = [tup for tup in enumerate(C_fs)]
         # ordered_C_fs = sorted(labelled_C_fs, key=lambda tup: tup[1])
         # C_f_sorted_indices = [i for i, C in ordered_C_fs]
-        top_half_ests = C_f_sorted_ests[self.plate.no_cultures//2:]
-        return top_half_ests
+        top_half_ests = C_f_sorted[self.plate.no_cultures//2:]
+        return np.array(top_half_ests)
 
 
-    def _process_quick_ests(self, original_guess, est_name):
+    def _process_quick_ests(self, original_guess, quick_mod, est_name):
         """Process estimates from quick fits.
 
         original_guess : guess_used for quick fitting. We will keep
         the N_0 guesses rather than updating from the estimates.
+
+        quick_mod : Instance of the model used for quick fit.
 
         est_name : Name of the Culture attribute where estimated
         values are stored. Either "log_est" or "im_neigh_est".
 
         """
         # Allow to raise AttributeError if bad est_name.
-        all_ests = [getattr(c, est_name).x for c in self.plate.cultures]
-        b_ests = all_ests[:, log_eq_mod.b_index]
+        all_ests = np.array([getattr(c, est_name).x for c in self.plate.cultures])
+        b_ests = all_ests[:, quick_mod.b_index]
 
-        # Select estimates to use for taking average of init C_0. It
-        # is possible that more than half of cultures have a zero b
-        # estimate in which case init amount ests are arbitrary. In
-        # this case we would have to remove more than just the lowest
-        # half.
+        # Select estimates to use for taking average of init
+        # C_0. Cultures with a zero b estimate have arbitrary init
+        # amount ests. It is possible that more than half of cultures
+        # have a zero b estimate, in which case we would have to
+        # remove more than just the lowest half. If the issue is due
+        # to the plate having gaps we could use plate.empties to deal
+        # with this.
         included_ests = self._get_top_half_C_f_ests(all_ests)
-        C_0_mean = list(np.mean([est[0] for est in included_ests]))
+
+        C_0_mean = [np.mean(included_ests[:, 0])]
 
         N_index = self.species.index("N")
-        new_guess = C_0_mean + list(np.array(param_guess)[:, N_index]) + b_ests
+        N_guess = original_guess[:, N_index]
+        # N_guess may be a single value. We need an iterable to
+        # concatenate with other guesses.
+        try:
+            list(N_guess)
+        except TypeError:
+            N_guess = [N_guess]
+
+        new_guess = np.concatenate(C_0_mean, N_guess, b_ests)
+        print(new_guess)
+        new_guess = C_0_mean + list(np.array(original_guess)[:, N_index]) + b_ests
+        print(new_guess)
         return np.array(new_guess)
 
 
@@ -267,16 +283,17 @@ class Guesser(object):
         log_eq_mod = IndeModel()
         for i, culture in enumerate(self.plate.cultures):
             if len(param_guess) == 1:
-                index = 0
+                N_0_index = 0
             elif len(param_guess) == 2 and i in self.plate.internals:
-                index = 0
+                N_0_index = 0
             elif len(param_guess) == 2 and i in self.plate.edges:
-                index = 1
+                N_0_index = 1
 
             culture.log_est = culture.fit_model(log_eq_mod,
-                                                param_guess=param_guess[index],
-                                                bounds=bounds[index])
-        new_guess = self._process_quick_ests(param_guess, est_name="log_est")
+                                                param_guess=param_guess[N_0_index],
+                                                bounds=bounds[N_0_index])
+        new_guess = self._process_quick_ests(param_guess, log_eq_mod,
+                                             est_name="log_est")
         return new_guess
 
 
