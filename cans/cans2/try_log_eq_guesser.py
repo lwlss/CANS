@@ -2,9 +2,10 @@ import numpy as np
 
 
 from cans2.plate import Plate
-from cans2.model import CompModel, CompModelBC
+from cans2.model import CompModel, CompModelBC, IndeModel
 from cans2.guesser import Guesser
 from cans2.cans_funcs import gauss_list
+from cans2.plotter import Plotter
 
 
 def sim_and_fit(rows, cols, times, plate_model, true_params, fit_model,
@@ -47,7 +48,7 @@ def sim_and_fit(rows, cols, times, plate_model, true_params, fit_model,
     elif fit_model == "imag_neighs":
         message = "Imaginary neighbour quick fitting not yet implemented."
         raise ValueError(message)
-    return quick_guess
+    return quick_guess, guesser
 
 
 model = CompModel()
@@ -76,8 +77,14 @@ quick_fit_kwargs = {
     "C_ratio": 1e-5,    # Guess of init_cells/final_cells.
 }
 
-quick_guess = sim_and_fit(**quick_fit_kwargs)
+quick_guess, quick_guesser = sim_and_fit(**quick_fit_kwargs)
 # Need to add in a kn guess.
 
 print(true_params)
 print(quick_guess)
+quick_guess = np.delete(quick_guess, model.params.index("kn"))
+print(quick_guess)
+
+inde_model = IndeModel()
+plotter = Plotter(model)
+plotter.plot_culture_fits(quick_guesser.plate, inde_model, sim=True)
