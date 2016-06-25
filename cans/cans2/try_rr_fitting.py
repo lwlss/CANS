@@ -29,10 +29,10 @@ from cans2.cans_funcs import dict_to_json
 
 
 # Define area of zone
-coords = (4, 4)
-rows = 8
-cols = 8
-guess_no = 200
+coords = (0, 0)
+rows = 16
+cols = 24
+guess_no = 201
 
 # Set out dir/files for data and plots.
 outdir =  "results/rr_fit_test"
