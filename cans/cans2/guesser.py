@@ -107,11 +107,10 @@ class Guesser(object):
         amounts [Ni, Ne].
 
         """
-        no_tps = len(self.plate.times)
         # Assuming complete reactions and relatively small starting
         # amounts of cells, total nutrient amount is equal to the
         # total final cell amount.
-        N_tot = np.sum(self.plate.c_meas[self.plate.no_cultures*(no_tps-1):])
+        N_tot = np.sum(self.plate.c_meas[-self.plate.no_cultures:])
         N_index = self.model.species.index("N")
         if self.model.species_bc[N_index]:
             # Number of internal and edge cultures.
@@ -154,8 +153,7 @@ class Guesser(object):
         # I carried out many fits using a grid of initial guesses and
         # these were not very dependent on the accuracy of the initial
         # guess of C_0.
-        no_tps = len(self.plate.times)
-        final_Cs = self.plate.c_meas[self.plate.no_cultures*(no_tps-1):]
+        final_Cs = self.plate.c_meas[-self.plate.no_cultures:]
         C_0 = np.mean(final_Cs)*self.C_ratio
         return [C_0]
 
@@ -230,9 +228,8 @@ class Guesser(object):
         all_ests : estimates for all cultures.
 
         """
-        no_tps = len(self.plate.times)
         # Measured final cell amounts.
-        C_fs = self.plate.c_meas[self.plate.no_cultures*(no_tps-1):]
+        C_fs = self.plate.c_meas[-self.plate.no_cultures:]
         C_f_sorted = [est for (C_f, est) in sorted(zip(C_fs, all_ests))]
         # Indices of cultures sorted by C_f. May use later.
         # labelled_C_fs = [tup for tup in enumerate(C_fs)]
@@ -347,8 +344,7 @@ class Guesser(object):
         # because logistic equivalent growth is governed by N + C ->
         # 2C, there is no diffusion, and C_0 is assumed to be
         # relatively small.
-        tps = len(self.plate.times)
-        C_fs = self.plate.c_meas[self.plate.no_cultures*(tps-1):]
+        C_fs = self.plate.c_meas[-self.plate.no_cultures:]
         log_eq_N_0_guesses = C_fs
         log_eq_guesses = [C_0_guess + [N_0, b_guess] for N_0 in log_eq_N_0_guesses]
         # For logistic equivalent bound C_0 and allow N_0 and b to
@@ -444,6 +440,48 @@ class Guesser(object):
         return new_guess
 
 
+    def guess_kn(start, stop, step, plate, model, params):
+        """Guess kn from final cell measurement variance.
+
+        params should have a dummy value, e.g. nan, in place of kn.
+
+        """
+        # Find a range of kn
+        kns = np.linspace(start, stop, step)
+        kn_index = model.parameters.index("kn")
+        # simulate amounts for each kn.
+        C_f_vars = []
+        for kn in kns:
+            params[kn_index] = kn
+            plate.sim_params(params)
+            plate.set_sim_data(model)
+
+            C_fs = plate.c_meas[-plate.no_cultures:]
+            C_f_vars.append()
+
+
+        C_f_vars = []
+        for kn in kns:
+            # Simulate a plate and data
+            plate1 = Plate(16, 24)
+            plate1.times = times
+            true_params = {'N_0': 0.1, 'kn': kn}
+            true_params['C_0'] = true_params['N_0']/10000
+            plate1.set_sim_data(model, b_mean, b_var, true_params)
+
+            # comp_plotter.plot_est(plate1, plate1.sim_params)
+
+            # The variance in final cell volumes is temporarily our
+            # guess for kn.
+            guess = guesser.make_guess(plate1)
+            C_f_vars.append(guesser._get_growers_C_f_var(plate1, guess['C_0']))
+
+        # Fit a line by least squares.
+        A = np.vstack([kns, np.ones(len(kns))]).T
+        m, c = np.linalg.lstsq(A, C_f_vars)[0]
+        return m, c, C_f_vars
+
+
 ##########################
 
 
@@ -451,8 +489,7 @@ class Guesser(object):
         # slice the last measure of C and take average
         # C_0 is 1/10,000 of this
         # Can also use these as lower bounds with current (C and N only) models.
-        tps = len(plate.times)
-        N_0_guess = np.mean(plate.c_meas[plate.no_cultures*(tps-1):])
+        N_0_guess = np.mean(plate.c_meas[-plate.no_cultures:])
         return N_0_guess
 
 
@@ -461,8 +498,7 @@ class Guesser(object):
 
 
     def _get_growers_C_f_var(self, plate, C_0_guess):
-        no_tps = len(plate.times)
-        C_finals = plate.c_meas[plate.no_cultures*(no_tps - 1):]
+        C_finals = plate.c_meas[-plate.no_cultures:]
         # Use C_0 guess not C_0_meas due to resolution to discard
         # non-growers.
         C_f_growers = (f for f in C_finals if f > 100*C_0_guess)
