@@ -1,12 +1,22 @@
 import numpy as np
 
 
-from cans2.model import IndeModel. ImagNeighModel
+from cans2.model import IndeModel, ImagNeighModel
 from cans2.plate import Plate
 
 
-def sim_and_fit(rows, cols, times, plate_model, true_params, b_guess,
-                area_ratio=1.0, C_ratio=1e-5,):
+def sim_a_plate(rows, cols, times, model, params):
+    """Simulate timecourses for and return a Plate."""
+    plate = Plate(rows, cols)
+    plate.times = times
+    plate.sim_params = params
+    # set_sim_data also sets rr_model with the simulated params.
+    plate.set_sim_data(model, noise=False)
+    return plate
+
+
+def fit_log_eq(plate, plate_model, b_guess,
+               area_ratio=1.0, C_ratio=1e-5):
     """Simulate a Plate and carry out a quick fit.
 
     Return a Plate containing the estimates in Cultures.
@@ -23,29 +33,14 @@ def sim_and_fit(rows, cols, times, plate_model, true_params, b_guess,
     See Guesser documentation for area_ratio and C_ratio.
 
     """
-    plate = Plate(rows, cols)
-    plate.times = times
-    plate.sim_params = true_params
-    # set_sim_data also sets rr_model with the simulated params.
-    plate.set_sim_data(plate_model, noise=False)
     guesser = Guesser(plate, plate_model,
                       area_ratio=area_ratio, C_ratio=C_ratio)
     quick_guess = guesser.quick_fit_log_eq(b_guess)
     return quick_guess, guesser
 
 
-def sim_a_plate(rows, cols, times, model, params):
-    """Simulate timecourses for and return a Plate."""
-    plate = Plate(rows, cols)
-    plate.times = times
-    plate.sim_params = true_params
-    # set_sim_data also sets rr_model with the simulated params.
-    plate.set_sim_data(plate_model, noise=False)
-    return plate
-
-
-def fit_imag_neigh(plate, plate_model, imag_neigh_params, C_doubt=1e3,
-                   N_doubt=2.0, area_ratio=1.0, C_ratio=1e-5, ):
+def fit_imag_neigh(plate, plate_model, area_ratio, C_ratio,
+                   imag_neigh_params, no_neighs=None):# C_doubt=1e3, N_doubt=2.0
     """Simulate a Plate and carry out a quick fit.
 
     Return a tuple of a parameter guess and a Plate containing the
@@ -62,12 +57,13 @@ def fit_imag_neigh(plate, plate_model, imag_neigh_params, C_doubt=1e3,
     """
     guesser = Guesser(plate, plate_model,
                       area_ratio=area_ratio, C_ratio=C_ratio)
-
-    if fit_model == "log_eq":
-        quick_guess = guesser.quick_fit_log_eq(b_guess)
-    elif fit_model == "imag_neighs":
-        quick_guess = guesser.quick_fit_imag_neighs(b_guess, C_doubt=C_doubt,
-                                                    N_doubt=N_doubt)
+    kwargs = {
+        "imag_neigh_params": imag_neigh_params,
+        "no_neighs": no_neighs,
+        # "C_doubt": C_doubt,
+        # "N_doubt": N_doubt,
+    }
+    quick_guess = guesser.quick_fit_imag_neighs(**kwargs)
     return quick_guess, guesser
 
 
@@ -218,8 +214,8 @@ class Guesser(object):
         """
         N_index = self.model.species.index("N")
         if self.model.species_bc[N_index]:
-            param_guess = np.array([param_guess.delete[2], param_guess.delete[1]])
-            bounds = np.array([bounds.delete[2], bounds.delete[1]])
+            param_guess = np.array([np.delete(param_guess, 2), np.delete(param_guess, 1)])
+            bounds = np.array([np.delete(bounds, 2, 0), np.delete(bounds, 1, 0)])
         else:
             param_guess = np.array([param_guess])
             bounds = np.array([bounds])
@@ -374,34 +370,75 @@ class Guesser(object):
         return new_guess
 
 
-    def quick_fit_imag_neighs(self, C_doubt=1e3, N_doubt=2.0,
-                              no_neighs=2, imag_neigh_params=imag_neigh_params):
+    def quick_fit_imag_neighs(self, imag_neigh_params,# C_doubt=1e3, N_doubt=2.0,
+                              no_neighs=None):
         """Guess b by fitting the imaginary neighbour model.
 
         b_guess : guess for b parameter. The same for all cultures.
 
-        C_doubt : Factor for Uncertainty in guess of initial cell
-        amounts. Divides and multiplies the initial guess of C_0 to
-        create lower and upper bounds.
+        # Don't allow to vary as too many parameters.
+        # C_doubt : Factor for Uncertainty in guess of initial cell
+        # amounts. Divides and multiplies the initial guess of C_0 to
+        # create lower and upper bounds.
 
-        N_doubt : Factor for Uncertainty in guess of initial nutrient
-        amounts. Divides and/or multiplies the initial guess(es) to
-        create lower and upper bounds. See code for exact usage.
+        # N_doubt : Factor for Uncertainty in guess of initial nutrient
+        # amounts. Divides and/or multiplies the initial guess(es) to
+        # create lower and upper bounds. See code for exact usage.
 
         no_neighs : The number of each type of imaginary neighbour to
-        include in the model. Ideally this should be great enough so
-        that the final amount of cells in the highest growing cultures
-        is less than the total amount of nutrients available from the
-        culture and the slow growing neighbours.
+        include in the model. If None an number will be calculated
+        such that the final amount of cells in the highest growing
+        cultures is less than the total amount of nutrients available
+        from the culture and the slow growing neighbours.
 
         """
+        b_guess = imag_neigh_params[-1]
+        # Construct a first parameter guess of Guesser.model
+        # parameters from final cell amounts and user supplied values.
         first_guess = self.make_first_guess(b_guess)
-        neigh_bounds = [(C_0_guess[0], C_0_guess[0]), (0.0, None), (0.0, None)]
+        print(first_guess)
+
+
+        if no_neighs is None:
+            N_0_min = min(self._guess_init_N())
+            C_f_max = max(self.plate.c_meas[-self.plate.no_cultures:])
+            no_neighs = int(np.ceil(float(C_f_max)/N_0_min))
+
+
         imag_neigh_mod = ImagNeighModel(no_neighs)
+        # Construct imaginary neighbour model parameter guess.
+
+
+        # Make bounds.
+        amount_bounds = [(amount, amount) for amount in first_guess[:-1]]
+        other_bounds = [
+            (0.0, None), (0.0, None),
+            (imag_neigh_params[2], imag_neigh_params[2]),
+            (imag_neigh_params[3], imag_neigh_params[3]),
+            (0.0,  None)
+        ]
+        neigh_bounds = np.concatenate((amount_bounds, other_bounds))
+        print("neigh_bounds", neigh_bounds)
+
+        # Add user supplied guesses of ['kn1', 'kn2', 'b-', 'b+', 'b']
+        # to first guess.
+        imag_neigh_params = np.concatenate((first_guess, imag_neigh_params))
+        print(imag_neigh_params)
+        # Separate guess and bounds for internal and edge cultures.
+        imag_neigh_params, neigh_bounds = self._sep_by_N_0(imag_neigh_params,
+                                                           neigh_bounds)
+
+        # Make bounds on parameters of neighbourhood model.
+        print(imag_neigh_params)
+        print("neigh_bounds",neigh_bounds)
+
         for guess, culture in zip(log_eq_guesses, self.plate.cultures):
-            culture.log_est = culture.fit_model(log_eq_mod,
+            culture.log_est = culture.fit_model(imag_neigh_mod,
                                                 param_guess=guess,
-                                                bounds=log_eq_bounds)
+                                                bounds=neigh_bounds)
+
+
+
 
         new_guess = self._process_quick_ests(log_eq_mod,
                                              est_name="log_est",
