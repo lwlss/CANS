@@ -334,7 +334,7 @@ class PowerModel(Model):
         self.name = 'Power Model 5'
 
 
-class NeighModel(Model):
+class ImagNeighModel(Model):
     def __init__(self, no_neighs):
         """Only suitable for single cultures."""
         self.model = neighbour_model
