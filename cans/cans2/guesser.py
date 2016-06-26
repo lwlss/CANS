@@ -100,7 +100,7 @@ class Guesser(object):
 
         If the model treats all cultures as having the same starting
         amount of nutrients (i.e. if model.species_bc contains an
-        empty string at the index of species "N"), returns a single
+        empty string at the index of species "N"), returns a single.
         element list [N_all]. If the model contains separate
         parameters for initial nutrients in internal and edge
         cultures, returns a two element list of initial nutrient
@@ -440,46 +440,33 @@ class Guesser(object):
         return new_guess
 
 
-    def guess_kn(start, stop, step, plate, model, params):
+    def guess_kn(self, start, stop, num, params):
         """Guess kn from final cell measurement variance.
 
-        params should have a dummy value, e.g. nan, in place of kn.
+        params should have a dummy value, e.g. nan, in place of
+        kn. Returns this array with the guess of kn inserted.
 
         """
-        # Find a range of kn
-        kns = np.linspace(start, stop, step)
-        kn_index = model.parameters.index("kn")
-        # simulate amounts for each kn.
+        C_f_var_true = np.var(self.plate.c_meas[-self.plate.no_cultures:])
+        kns = np.linspace(start, stop, num)
+        kn_index = self.model.params.index("kn")
+        # Make a new Plate so that we do not alter the original
+        # containing true data.
+        sim_plate = Plate(self.plate.rows, self.plate.cols)
+        sim_plate.times = self.plate.times
         C_f_vars = []
         for kn in kns:
             params[kn_index] = kn
-            plate.sim_params(params)
-            plate.set_sim_data(model)
-
-            C_fs = plate.c_meas[-plate.no_cultures:]
-            C_f_vars.append()
-
-
-        C_f_vars = []
-        for kn in kns:
-            # Simulate a plate and data
-            plate1 = Plate(16, 24)
-            plate1.times = times
-            true_params = {'N_0': 0.1, 'kn': kn}
-            true_params['C_0'] = true_params['N_0']/10000
-            plate1.set_sim_data(model, b_mean, b_var, true_params)
-
-            # comp_plotter.plot_est(plate1, plate1.sim_params)
-
-            # The variance in final cell volumes is temporarily our
-            # guess for kn.
-            guess = guesser.make_guess(plate1)
-            C_f_vars.append(guesser._get_growers_C_f_var(plate1, guess['C_0']))
-
+            sim_plate.sim_params = params
+            sim_plate.set_sim_data(self.model)
+            C_fs = sim_plate.c_meas[-sim_plate.no_cultures:]
+            C_f_vars.append(np.var(C_fs))
         # Fit a line by least squares.
         A = np.vstack([kns, np.ones(len(kns))]).T
         m, c = np.linalg.lstsq(A, C_f_vars)[0]
-        return m, c, C_f_vars
+        kn_guess = (C_f_var_true - c)/float(m)
+        params[kn_index] = kn_guess
+        return params.clip(min=0.0)
 
 
 ##########################
