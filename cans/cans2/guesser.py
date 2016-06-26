@@ -2,17 +2,49 @@ import numpy as np
 
 
 from cans2.model import IndeModel
+from cans2.plate import Plate
 
 
-def add_b_bound(plate, model, i, j, bounds, bound):
-    """Add a bound given i and j of culture on plate.
+def sim_and_fit(rows, cols, times, plate_model, true_params, fit_model,
+                b_guess, C_doubt=1e3, N_doubt=2.0,
+                area_ratio=1.0, C_ratio=1e-5,):
+    """Simulate a Plate and carry out a quick fit.
 
-    i and j should start at zero.
-    bound should be a tuple.
+    Return a Plate containing the estimates in Cultures.
+
+    plate_model : CANS Model instance to simulate values for the plate.
+
+    true_params : np.array of all parameters required for comp_model
+    ordered according to comp_model.params and with culture level
+    parameters supplied for all cultures.
+
+    fit_model : (str) "log_eq" or "imag_neighs" for logistic equivalent or
+    imaginary neighbour model.
+
+    b_guess : Guess for parameter b. One guess for all cultures. The
+    quick fit aims to improve upon this.
+
+    See Guesser.quick_fit_log_eq documentation for information on
+    C_doubt and N_doubt and how the
+
+    See Guesser documentation for area_ratio and C_ratio.
 
     """
-    index = model.b_index + i*plate.cols + j
-    bounds[index] = bound
+    plate = Plate(rows, cols)
+    plate.times = times
+    plate.sim_params = true_params
+    # set_sim_data also sets rr_model with the simulated params.
+    plate.set_sim_data(plate_model, noise=False)
+
+    guesser = Guesser(plate, plate_model,
+                      area_ratio=area_ratio, C_ratio=C_ratio)
+
+    if fit_model == "log_eq":
+        quick_guess = guesser.quick_fit_log_eq(b_guess)
+    elif fit_model == "imag_neighs":
+        quick_guess = guesser.quick_fit_imag_neighs(b_guess, C_doubt=C_doubt,
+                                                    N_doubt=N_doubt)
+    return quick_guess, guesser
 
 
 class Guesser(object):
@@ -270,7 +302,7 @@ class Guesser(object):
     # on kn and the absolute value of the average (and possibly also
     # initial cell amounts?). I hope to find reasonable geusses
     # without the need for this.
-    def quick_fit_log_eq(self, b_guess)
+    def quick_fit_log_eq(self, b_guess):
         """Guess b by fitting the logistic equivalent model.
 
         Returns guesses for all parameters in self.model for a
@@ -439,6 +471,16 @@ class Guesser(object):
                 pass
         return np.asarray(bounds)
 
+
+def add_b_bound(plate, model, i, j, bounds, bound):
+    """Add a bound given i and j of culture on plate.
+
+    i and j should start at zero.
+    bound should be a tuple.
+
+    """
+    index = model.b_index + i*plate.cols + j
+    bounds[index] = bound
 
 
 if __name__ == '__main__':
