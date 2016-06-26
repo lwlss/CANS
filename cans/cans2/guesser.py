@@ -1,12 +1,11 @@
 import numpy as np
 
 
-from cans2.model import IndeModel
+from cans2.model import IndeModel. ImagNeighModel
 from cans2.plate import Plate
 
 
-def sim_and_fit(rows, cols, times, plate_model, true_params, fit_model,
-                b_guess, C_doubt=1e3, N_doubt=2.0,
+def sim_and_fit(rows, cols, times, plate_model, true_params, b_guess,
                 area_ratio=1.0, C_ratio=1e-5,):
     """Simulate a Plate and carry out a quick fit.
 
@@ -18,14 +17,8 @@ def sim_and_fit(rows, cols, times, plate_model, true_params, fit_model,
     ordered according to comp_model.params and with culture level
     parameters supplied for all cultures.
 
-    fit_model : (str) "log_eq" or "imag_neighs" for logistic equivalent or
-    imaginary neighbour model.
-
     b_guess : Guess for parameter b. One guess for all cultures. The
     quick fit aims to improve upon this.
-
-    See Guesser.quick_fit_log_eq documentation for information on
-    C_doubt and N_doubt and how the
 
     See Guesser documentation for area_ratio and C_ratio.
 
@@ -35,7 +28,38 @@ def sim_and_fit(rows, cols, times, plate_model, true_params, fit_model,
     plate.sim_params = true_params
     # set_sim_data also sets rr_model with the simulated params.
     plate.set_sim_data(plate_model, noise=False)
+    guesser = Guesser(plate, plate_model,
+                      area_ratio=area_ratio, C_ratio=C_ratio)
+    quick_guess = guesser.quick_fit_log_eq(b_guess)
+    return quick_guess, guesser
 
+
+def sim_a_plate(rows, cols, times, model, params):
+    """Simulate timecourses for and return a Plate."""
+    plate = Plate(rows, cols)
+    plate.times = times
+    plate.sim_params = true_params
+    # set_sim_data also sets rr_model with the simulated params.
+    plate.set_sim_data(plate_model, noise=False)
+    return plate
+
+
+def fit_imag_neigh(plate, plate_model, imag_neigh_params, C_doubt=1e3,
+                   N_doubt=2.0, area_ratio=1.0, C_ratio=1e-5, ):
+    """Simulate a Plate and carry out a quick fit.
+
+    Return a tuple of a parameter guess and a Plate containing the
+    results of fits as Culture estimates. Does this not just change
+    the Plate that we pass to the function anyway?
+
+    plate_model : CANS Model instance to simulate values for the plate.
+
+    See Guesser.quick_fit_log_eq documentation for information on
+    C_doubt and N_doubt and how the
+
+    See Guesser documentation for area_ratio and C_ratio.
+
+    """
     guesser = Guesser(plate, plate_model,
                       area_ratio=area_ratio, C_ratio=C_ratio)
 
@@ -317,12 +341,10 @@ class Guesser(object):
 
         b_guess : guess for b parameter. The same for all cultures.
 
+        This N_0_guess is not used in logistic equivalent fits but
+        is returned in the new_guess; logistic estimated N_0s are not
+        realistic for the competition model.
         """
-        # This N_0_guess is not used in logistic equivalent fits but
-        # is returned in the new_guess; logistic estimated N_0s are not
-        # realistic for the competition model. The number of elements
-        # depends on whether the model has a separate N_0 for edge
-        # cultures.
         first_guess = self.make_first_guess(b_guess)
         C_0_guess = [first_guess[0]]
         # Use final amounts of cells as inital guesses of nutrients
@@ -333,12 +355,10 @@ class Guesser(object):
         C_fs = self.plate.c_meas[self.plate.no_cultures*(tps-1):]
         log_eq_N_0_guesses = C_fs
         log_eq_guesses = [C_0_guess + [N_0, b_guess] for N_0 in log_eq_N_0_guesses]
-
         # For logistic equivalent bound C_0 and allow N_0 and b to
         # vary freely. It would perhaps be better to fit C_0
         # collectively but this would be much slower. [C_0, N_0, b]
         log_eq_bounds = [(C_0_guess[0], C_0_guess[0]), (0.0, None), (0.0, None)]
-
         log_eq_mod = IndeModel()
         for guess, culture in zip(log_eq_guesses, self.plate.cultures):
             culture.log_est = culture.fit_model(log_eq_mod,
@@ -348,15 +368,14 @@ class Guesser(object):
         new_guess = self._process_quick_ests(log_eq_mod,
                                              est_name="log_est",
                                              C_0_handling="first_guess")
-
         # Insert nan at index of kn.
         kn_index = self.model.params.index("kn")
         new_guess = np.insert(new_guess, kn_index, np.nan)
-
         return new_guess
 
 
-    def quick_fit_imag_neighs(self, b_guess, C_doubt=1e3, N_doubt=2.0):
+    def quick_fit_imag_neighs(self, C_doubt=1e3, N_doubt=2.0,
+                              no_neighs=2, imag_neigh_params=imag_neigh_params):
         """Guess b by fitting the imaginary neighbour model.
 
         b_guess : guess for b parameter. The same for all cultures.
@@ -368,18 +387,29 @@ class Guesser(object):
         N_doubt : Factor for Uncertainty in guess of initial nutrient
         amounts. Divides and/or multiplies the initial guess(es) to
         create lower and upper bounds. See code for exact usage.
+
+        no_neighs : The number of each type of imaginary neighbour to
+        include in the model. Ideally this should be great enough so
+        that the final amount of cells in the highest growing cultures
+        is less than the total amount of nutrients available from the
+        culture and the slow growing neighbours.
+
         """
-        C_0_guess = self._guess_init_C()
-        # This N_0_guess is not used in logistic equivalent fits but
-        # is returned in the new_guess; logistic estimated N_0s are not
-        # realistic for the competition model. The number of elements
-        # depends on whether the model has a separate N_0 for edge
-        # cultures.
-        N_0_guess = self._guess_init_N()
-        amount_guess = np.append(C_0_guess, N_0_guess)
-        first_guess = np.append(amount_guess, b_guess)
+        first_guess = self.make_first_guess(b_guess)
+        neigh_bounds = [(C_0_guess[0], C_0_guess[0]), (0.0, None), (0.0, None)]
+        imag_neigh_mod = ImagNeighModel(no_neighs)
+        for guess, culture in zip(log_eq_guesses, self.plate.cultures):
+            culture.log_est = culture.fit_model(log_eq_mod,
+                                                param_guess=guess,
+                                                bounds=log_eq_bounds)
 
-
+        new_guess = self._process_quick_ests(log_eq_mod,
+                                             est_name="log_est",
+                                             C_0_handling="first_guess")
+        # Insert nan at index of kn.
+        kn_index = self.model.params.index("kn")
+        new_guess = np.insert(new_guess, kn_index, np.nan)
+        return new_guess
 
 
 ##########################
