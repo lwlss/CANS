@@ -137,7 +137,7 @@ class Fitter(object):
             # Fit using uniform parameters
             param_guess = self.model.gen_params(plate)
         else:
-            assert(len(param_guess) == self.model.b_index + plate.no_cultures)
+            assert len(param_guess) == self.model.b_index + plate.no_cultures
 
         if bounds is None:
             # All values non-negative.
