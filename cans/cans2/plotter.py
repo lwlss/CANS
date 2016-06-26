@@ -169,7 +169,6 @@ class Plotter(object):
         for i, ax in enumerate(grid):
             culture = zone.cultures[i]
             # Simulate culture amounts from the estimates.
-            print(culture.log_est.x)
             culture_amounts = model.solve(culture, culture.log_est.x, sim_times)
             if model.name == "Neighbour model":
                 # Do not want neighbouring - and + cultures
