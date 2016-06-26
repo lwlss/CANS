@@ -39,19 +39,22 @@ def sim_and_fit(rows, cols, times, plate_model, true_params, fit_model,
     # set_sim_data also sets rr_model with the simulated params.
     plate.set_sim_data(plate_model, noise=False)
 
+    plotter = Plotter(plate_model)
+    plotter.plot_est_rr(plate, plate.sim_params, sim=True)
+
     guesser = Guesser(plate, plate_model,
                       area_ratio=area_ratio, C_ratio=C_ratio)
 
     if fit_model == "log_eq":
-        quick_guess = guesser.quick_fit_log_eq(b_guess, C_doubt=C_doubt,
-                                               N_doubt=N_doubt)
+        quick_guess = guesser.quick_fit_log_eq(b_guess, C_doubt=C_doubt)
+
     elif fit_model == "imag_neighs":
         message = "Imaginary neighbour quick fitting not yet implemented."
         raise ValueError(message)
     return quick_guess, guesser
 
 
-model = CompModel()
+model = CompModelBC()
 rows = 3
 cols = 3
 times = np.linspace(0, 5, 11)
@@ -74,16 +77,13 @@ quick_fit_kwargs = {
     # Guess of edge_area/internal_area. Only required for CompModelBC and
     # ignored for CompModel.
     "area_ratio": 1.0,
-    "C_ratio": 1e-5,    # Guess of init_cells/final_cells.
+    "C_ratio": 1e-6,    # Guess of init_cells/final_cells.
 }
 
 quick_guess, quick_guesser = sim_and_fit(**quick_fit_kwargs)
 # Need to add in a kn guess.
 
-print(true_params)
-print(quick_guess)
 quick_guess = np.delete(quick_guess, model.params.index("kn"))
-print(quick_guess)
 
 inde_model = IndeModel()
 plotter = Plotter(model)

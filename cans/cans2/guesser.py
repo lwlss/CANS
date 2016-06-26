@@ -190,7 +190,7 @@ class Guesser(object):
         return np.array(top_half_ests)
 
 
-    def _process_quick_ests(self, quick_mod, est_name, C_0_handling="median"):
+    def _process_quick_ests(self, quick_mod, est_name, C_0_handling="first_guess"):
         """Process estimates from quick fits.
 
         Take a mean of estimated C_0s, use the N_0 guess(es) made from
@@ -203,16 +203,19 @@ class Guesser(object):
         values are stored. Either "log_est" or "im_neigh_est".
 
         C_0_handling : Specify method for processing C_0 estimates:
-        "median" for median of all cultures; "top_half" for the median
-        of only the cultures with highest final cells. This is because
-        cultures with zero growth can be fit with arbitrary initial
-        amounts.
+        "first_guess" to not use the results of fits; "median" for median of
+        all cultures; "top_half" for the median of only the cultures with
+        highest final cells. This is because cultures with zero growth can be
+        fit with arbitrary initial amounts.
+
         """
         # Allow to raise AttributeError if bad est_name.
         all_ests = np.array([getattr(c, est_name).x for c in self.plate.cultures])
         b_ests = all_ests[:, quick_mod.b_index]
 
-        if C_0_handling == "median":
+        if C_0_handling == "first_guess":
+            C_0_guess = self._guess_init_C()
+        elif C_0_handling == "median":
             C_0_guess = [np.median(all_ests[:, 0])]
         elif C_0_handling == "top_half":
             # Select estimates to use for taking average of init
@@ -240,6 +243,26 @@ class Guesser(object):
         return np.array(new_guess)
 
 
+    def make_first_guess(self, b_guess):
+        """Make a first guess without any fitting.
+
+        Returns guesses for the following parameters:
+
+        C_0_guess : Determined from the Guesser attribute C_ratio; a user
+        defined approximate ratio between initial and final cells.
+
+        N_0_guess : Determined from average final cell measurements.
+
+        b_guess : A single user defined guess used for all cultures.
+
+        """
+        C_0_guess = self._guess_init_C()
+        N_0_guess = self._guess_init_N()
+        amount_guess = np.append(C_0_guess, N_0_guess)
+        first_guess = np.append(amount_guess, b_guess)
+        return first_guess
+
+
     # It would be possible to find specific estimates for b, before
     # any fitting, by scaling an average guess by final cell
     # amounts. Alternatively we could guess a maximum and scale
@@ -247,7 +270,7 @@ class Guesser(object):
     # on kn and the absolute value of the average (and possibly also
     # initial cell amounts?). I hope to find reasonable geusses
     # without the need for this.
-    def quick_fit_log_eq(self, b_guess, C_doubt):
+    def quick_fit_log_eq(self, b_guess)
         """Guess b by fitting the logistic equivalent model.
 
         Returns guesses for all parameters in self.model for a
@@ -262,17 +285,13 @@ class Guesser(object):
 
         b_guess : guess for b parameter. The same for all cultures.
 
-        C_doubt : Factor for Uncertainty in guess of initial cell
-        amounts. Divides and multiplies the initial guess of C_0 to
-        create lower and upper bounds.
-
         """
         # This N_0_guess is not used in logistic equivalent fits but
         # is returned in the new_guess; logistic estimated N_0s are not
         # realistic for the competition model. The number of elements
         # depends on whether the model has a separate N_0 for edge
         # cultures.
-        first_guess = self._make_first_guess(b_guess)
+        first_guess = self.make_first_guess(b_guess)
         C_0_guess = [first_guess[0]]
         # Use final amounts of cells as inital guesses of nutrients
         # because logistic equivalent growth is governed by N + C ->
@@ -286,7 +305,7 @@ class Guesser(object):
         # For logistic equivalent bound C_0 and allow N_0 and b to
         # vary freely. It would perhaps be better to fit C_0
         # collectively but this would be much slower. [C_0, N_0, b]
-        log_eq_bounds = [(C_0_guess[0]/C_doubt, C_0_guess[0]*C_doubt), (0.0, None), (0.0, None)]
+        log_eq_bounds = [(C_0_guess[0], C_0_guess[0]), (0.0, None), (0.0, None)]
 
         log_eq_mod = IndeModel()
         for guess, culture in zip(log_eq_guesses, self.plate.cultures):
@@ -296,7 +315,7 @@ class Guesser(object):
 
         new_guess = self._process_quick_ests(log_eq_mod,
                                              est_name="log_est",
-                                             C_0_handling="median")
+                                             C_0_handling="first_guess")
 
         # Insert nan at index of kn.
         kn_index = self.model.params.index("kn")
@@ -329,24 +348,6 @@ class Guesser(object):
         first_guess = np.append(amount_guess, b_guess)
 
 
-    def _make_first_guess(self, b_guess):
-        """Make a first guess without any fitting.
-
-        Returns guesses for the following parameters:
-
-        C_0_guess : Determined from the Guesser attribute C_ratio; a user
-        defined approximate ratio between initial and final cells.
-
-        N_0_guess : Determined from average final cell measurements.
-
-        b_guess : A single user defined guess used for all cultures.
-
-        """
-        C_0_guess = self._guess_init_C()
-        N_0_guess = self._guess_init_N()
-        amount_guess = np.append(C_0_guess, N_0_guess)
-        first_guess = np.append(amount_guess, b_guess)
-        return first_guess
 
 
 ##########################
