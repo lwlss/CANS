@@ -190,7 +190,7 @@ class Guesser(object):
         return np.array(top_half_ests)
 
 
-    def _process_quick_ests(self, quick_mod, est_name):
+    def _process_quick_ests(self, quick_mod, est_name, C_0_handling="median"):
         """Process estimates from quick fits.
 
         Take a mean of estimated C_0s, use the N_0 guess(es) made from
@@ -202,20 +202,28 @@ class Guesser(object):
         est_name : Name of the Culture attribute where estimated
         values are stored. Either "log_est" or "im_neigh_est".
 
+        C_0_handling : Specify method for processing C_0 estimates:
+        "median" for median of all cultures; "top_half" for the median
+        of only the cultures with highest final cells. This is because
+        cultures with zero growth can be fit with arbitrary initial
+        amounts.
         """
         # Allow to raise AttributeError if bad est_name.
         all_ests = np.array([getattr(c, est_name).x for c in self.plate.cultures])
         b_ests = all_ests[:, quick_mod.b_index]
 
-        # Select estimates to use for taking average of init
-        # C_0. Cultures with a zero b estimate have arbitrary init
-        # amount ests. It is possible that more than half of cultures
-        # have a zero b estimate, in which case we would have to
-        # remove more than just the lowest half. If the issue is due
-        # to the plate having gaps we could use plate.empties to deal
-        # with this.
-        included_ests = self._get_top_half_C_f_ests(all_ests)
-        C_0_mean = [np.mean(included_ests[:, 0])]
+        if C_0_handling == "median":
+            C_0_guess = [np.median(all_ests[:, 0])]
+        elif C_0_handling == "top_half":
+            # Select estimates to use for taking average of init
+            # C_0. Cultures with a zero b estimate have arbitrary init
+            # amount ests. It is possible that more than half of
+            # cultures have a zero b estimate, in which case we would
+            # have to remove more than just the lowest half. If the
+            # issue is due to the plate having gaps we could use
+            # plate.empties to deal with this.
+            included_ests = self._get_top_half_C_f_ests(all_ests)
+            C_0_guess = [np.median(included_ests[:, 0])]
 
         # Use N_0 guess(es) made from average final cell amounts.
         N_0_guess = self._guess_init_N()
@@ -228,7 +236,7 @@ class Guesser(object):
 
         # N_guess may be a single value. We need an iterable to
         # concatenate with other guesses.
-        new_guess = np.concatenate((C_0_mean, N_0_guess, b_ests))
+        new_guess = np.concatenate((C_0_guess, N_0_guess, b_ests))
         return np.array(new_guess)
 
 
@@ -239,7 +247,7 @@ class Guesser(object):
     # on kn and the absolute value of the average (and possibly also
     # initial cell amounts?). I hope to find reasonable geusses
     # without the need for this.
-    def quick_fit_log_eq(self, b_guess, C_doubt=1e3, N_doubt=2.0):
+    def quick_fit_log_eq(self, b_guess, C_doubt):
         """Guess b by fitting the logistic equivalent model.
 
         Returns guesses for all parameters in self.model for a
@@ -253,26 +261,14 @@ class Guesser(object):
         final measurements and not updated after fitting.
 
         b_guess : guess for b parameter. The same for all cultures.
-
-        C_doubt : Factor for Uncertainty in guess of initial cell
-        amounts. Divides and multiplies the initial guess of C_0 to
-        create lower and upper bounds.
-
-        N_doubt : Factor for Uncertainty in guess of initial nutrient
-        amounts. Divides and/or multiplies the initial guess(es) to
-        create lower and upper bounds. See code for exact usage.
-
         """
-        C_0_guess = self._guess_init_C()
         # This N_0_guess is not used in logistic equivalent fits but
         # is returned in the new_guess; logistic estimated N_0s are not
         # realistic for the competition model. The number of elements
         # depends on whether the model has a separate N_0 for edge
         # cultures.
-        N_0_guess = self._guess_init_N()
-        amount_guess = np.append(C_0_guess, N_0_guess)
-        first_guess = np.append(amount_guess, b_guess)
-
+        first_guess = self._make_first_guess(b_guess)
+        C_0_guess = [first_guess[0]]
         # Use final amounts of cells as inital guesses of nutrients
         # because logistic equivalent growth is governed by N + C ->
         # 2C, there is no diffusion, and C_0 is assumed to be
@@ -287,16 +283,17 @@ class Guesser(object):
         # likely get inconsistent estimates. It would perhaps be
         # better to fit C_0 collectively but this would be much
         # slower. [C_0, N_0, b]
-        log_eq_bounds = [(C_0_guess[0], C_0_guess[0]), (0.0, None), (0.0, None)]
+        log_eq_bounds = [(C_0_guess[0]/C_doubt, C_0_guess[0]*C_doubt), (0.0, None), (0.0, None)]
 
         log_eq_mod = IndeModel()
-        print(log_eq_bounds)
         for guess, culture in zip(log_eq_guesses, self.plate.cultures):
             culture.log_est = culture.fit_model(log_eq_mod,
                                                 param_guess=guess,
                                                 bounds=log_eq_bounds)
 
-        new_guess = self._process_quick_ests(log_eq_mod, est_name="log_est")
+        new_guess = self._process_quick_ests(log_eq_mod,
+                                             est_name="log_est",
+                                             C_0_handling="median")
 
         # Insert nan at index of kn.
         kn_index = self.model.params.index("kn")
@@ -305,9 +302,48 @@ class Guesser(object):
         return new_guess
 
 
-    def quick_fit_imag_neighs(self, plate):
-        """Guess b by fitting the imaginary neighbour model."""
-        pass
+    def quick_fit_imag_neighs(self, b_guess, C_doubt=1e3, N_doubt=2.0):
+        """Guess b by fitting the imaginary neighbour model.
+
+        b_guess : guess for b parameter. The same for all cultures.
+
+        C_doubt : Factor for Uncertainty in guess of initial cell
+        amounts. Divides and multiplies the initial guess of C_0 to
+        create lower and upper bounds.
+
+        N_doubt : Factor for Uncertainty in guess of initial nutrient
+        amounts. Divides and/or multiplies the initial guess(es) to
+        create lower and upper bounds. See code for exact usage.
+        """
+        C_0_guess = self._guess_init_C()
+        # This N_0_guess is not used in logistic equivalent fits but
+        # is returned in the new_guess; logistic estimated N_0s are not
+        # realistic for the competition model. The number of elements
+        # depends on whether the model has a separate N_0 for edge
+        # cultures.
+        N_0_guess = self._guess_init_N()
+        amount_guess = np.append(C_0_guess, N_0_guess)
+        first_guess = np.append(amount_guess, b_guess)
+
+
+    def _make_first_guess(self, b_guess):
+        """Make a first guess without any fitting.
+
+        Returns guesses for the following parameters:
+
+        C_0_guess : Determined from the Guesser attribute C_ratio; a user
+        defined approximate ratio between initial and final cells.
+
+        N_0_guess : Determined from average final cell measurements.
+
+        b_guess : A single user defined guess used for all cultures.
+
+        """
+        C_0_guess = self._guess_init_C()
+        N_0_guess = self._guess_init_N()
+        amount_guess = np.append(C_0_guess, N_0_guess)
+        first_guess = np.append(amount_guess, b_guess)
+        return first_guess
 
 
 ##########################
