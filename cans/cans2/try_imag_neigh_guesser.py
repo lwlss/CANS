@@ -8,7 +8,7 @@ from cans2.cans_funcs import gauss_list
 from cans2.plotter import Plotter
 
 
-model = CompModel()
+model = CompModelBC()
 rows = 8
 cols = 8
 times = np.linspace(0, 5, 11)
@@ -57,6 +57,6 @@ print("quick_guess", quick_guess)
 plotter = Plotter(model)
 plotter.plot_est_rr(quick_guesser.plate, quick_guess, sim=True)
 
-full_param_guess = quick_guesser.guess_kn(0, 4, 17, quick_guess)
+full_param_guess = quick_guesser.guess_kn(0, 2, 21, quick_guess)
 print("and kn", full_param_guess)
 plotter.plot_est_rr(quick_guesser.plate, full_param_guess, sim=True)
