@@ -421,19 +421,14 @@ class Guesser(object):
                                             imag_neigh_params))
         imag_neigh_params, neigh_bounds = self._sep_by_N_0(imag_neigh_params,
                                                            neigh_bounds)
-
         N_index = self.model.species.index("N")
         for i, c in enumerate(self.plate.cultures):
             if not self.model.species_bc[N_index]:
-                guess_index = 0
+                N_0_index = 0
             elif self.model.species_bc[N_index] and i in self.plate.internals:
                 N_0_index = 0
             elif self.model.species_bc[N_index] and i in self.plate.edges:
                 N_0_index = 1
-
-            print(imag_neigh_params[N_0_index])
-            print(neigh_bounds[N_0_index])
-
 
             c.im_neigh_est = c.fit_model(imag_neigh_mod,
                                          imag_neigh_params[N_0_index],
