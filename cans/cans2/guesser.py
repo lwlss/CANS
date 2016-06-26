@@ -261,6 +261,11 @@ class Guesser(object):
         final measurements and not updated after fitting.
 
         b_guess : guess for b parameter. The same for all cultures.
+
+        C_doubt : Factor for Uncertainty in guess of initial cell
+        amounts. Divides and multiplies the initial guess of C_0 to
+        create lower and upper bounds.
+
         """
         # This N_0_guess is not used in logistic equivalent fits but
         # is returned in the new_guess; logistic estimated N_0s are not
@@ -278,11 +283,9 @@ class Guesser(object):
         log_eq_N_0_guesses = C_fs
         log_eq_guesses = [C_0_guess + [N_0, b_guess] for N_0 in log_eq_N_0_guesses]
 
-        # For logistic equivalent fit fix C_0 and allow N_0 and b to
-        # vary freely. Could also try varying C_0 freely but would
-        # likely get inconsistent estimates. It would perhaps be
-        # better to fit C_0 collectively but this would be much
-        # slower. [C_0, N_0, b]
+        # For logistic equivalent bound C_0 and allow N_0 and b to
+        # vary freely. It would perhaps be better to fit C_0
+        # collectively but this would be much slower. [C_0, N_0, b]
         log_eq_bounds = [(C_0_guess[0]/C_doubt, C_0_guess[0]*C_doubt), (0.0, None), (0.0, None)]
 
         log_eq_mod = IndeModel()
