@@ -396,18 +396,13 @@ class Guesser(object):
         # Construct a first parameter guess of Guesser.model
         # parameters from final cell amounts and user supplied values.
         first_guess = self.make_first_guess(b_guess)
-        print(first_guess)
-
 
         if no_neighs is None:
             N_0_min = min(self._guess_init_N())
             C_f_max = max(self.plate.c_meas[-self.plate.no_cultures:])
             no_neighs = int(np.ceil(float(C_f_max)/N_0_min))
 
-
         imag_neigh_mod = ImagNeighModel(no_neighs)
-        # Construct imaginary neighbour model parameter guess.
-
 
         # Make bounds.
         amount_bounds = [(amount, amount) for amount in first_guess[:-1]]
@@ -418,30 +413,35 @@ class Guesser(object):
             (0.0,  None)
         ]
         neigh_bounds = np.concatenate((amount_bounds, other_bounds))
-        print("neigh_bounds", neigh_bounds)
 
         # Add user supplied guesses of ['kn1', 'kn2', 'b-', 'b+', 'b']
-        # to first guess.
-        imag_neigh_params = np.concatenate((first_guess, imag_neigh_params))
-        print(imag_neigh_params)
-        # Separate guess and bounds for internal and edge cultures.
+        # to make neighbour model guesses and then separate guess and
+        # bounds for internal and edge cultures.
+        imag_neigh_params = np.concatenate((first_guess[:-1],
+                                            imag_neigh_params))
         imag_neigh_params, neigh_bounds = self._sep_by_N_0(imag_neigh_params,
                                                            neigh_bounds)
 
-        # Make bounds on parameters of neighbourhood model.
-        print(imag_neigh_params)
-        print("neigh_bounds",neigh_bounds)
+        N_index = self.model.species.index("N")
+        for i, c in enumerate(self.plate.cultures):
+            if not self.model.species_bc[N_index]:
+                guess_index = 0
+            elif self.model.species_bc[N_index] and i in self.plate.internals:
+                N_0_index = 0
+            elif self.model.species_bc[N_index] and i in self.plate.edges:
+                N_0_index = 1
 
-        for guess, culture in zip(log_eq_guesses, self.plate.cultures):
-            culture.log_est = culture.fit_model(imag_neigh_mod,
-                                                param_guess=guess,
-                                                bounds=neigh_bounds)
+            print(imag_neigh_params[N_0_index])
+            print(neigh_bounds[N_0_index])
 
 
+            c.im_neigh_est = c.fit_model(imag_neigh_mod,
+                                         imag_neigh_params[N_0_index],
+                                         neigh_bounds[N_0_index],
+                                         minimizer_opts={"disp": True})
 
-
-        new_guess = self._process_quick_ests(log_eq_mod,
-                                             est_name="log_est",
+        new_guess = self._process_quick_ests(imag_neigh_mod,
+                                             est_name="im_neigh_est",
                                              C_0_handling="first_guess")
         # Insert nan at index of kn.
         kn_index = self.model.params.index("kn")
