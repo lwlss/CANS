@@ -43,8 +43,8 @@ neigh_bounds = [(0, None) for i in range(len(neigh_model.params))]
 # Try fixed constraints on C_0 and N_0 first of all
 neigh_bounds[0] = (resim_amount_guess["C_0"], resim_amount_guess["C_0"])
 neigh_bounds[1] = (resim_amount_guess["N_0"], resim_amount_guess["N_0"])
-neigh_bounds[4] = (0.0, 0.0)    # r-
-neigh_bounds[5] = (40.0, 40.0)    # r+
+neigh_bounds[4] = (0.0, 0.0)    # b-
+neigh_bounds[5] = (40.0, 40.0)    # b+
 
 true_rs = copy.deepcopy(resim_zone.sim_params[3:])
 print(true_rs)
