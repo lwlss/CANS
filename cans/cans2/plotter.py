@@ -147,7 +147,7 @@ class Plotter(object):
 
 
     def plot_c_meas(self, plate, title="Measured cell intensity",
-                    ms=6.0, mew=0.5, lw =1.0):
+                    ms=6.0, mew=0.5, lw =1.0, est_name="est"):
         fig, grid = self._make_grid(plate, plate.c_meas, False, title)
 
         for i, ax in enumerate(grid):
@@ -161,7 +161,7 @@ class Plotter(object):
     # is fit to individual cultures
     def plot_culture_fits(self, zone, model, title="Individual fits of cultures",
                           sim=False, ms=6.0, mew=0.5, lw =1.0, legend=False,
-                          filename=None):
+                          filename=None, est_name="est"):
         fig, grid = self._make_grid(zone, zone.c_meas, sim, title)
 
         sim_times = np.linspace(zone.times[0], zone.times[-1], 100)
@@ -169,7 +169,8 @@ class Plotter(object):
         for i, ax in enumerate(grid):
             culture = zone.cultures[i]
             # Simulate culture amounts from the estimates.
-            culture_amounts = model.solve(culture, culture.log_est.x, sim_times)
+            est = getattr(culture, est_name).x
+            culture_amounts = model.solve(culture, est, sim_times)
             if model.name == "Neighbour model":
                 # Do not want neighbouring - and + cultures
                 culture_amounts = culture_amounts[:, [2, 3]]
