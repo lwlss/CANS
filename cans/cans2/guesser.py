@@ -174,7 +174,7 @@ class Guesser(object):
         return [C_0]
 
 
-    def _bound_init_amounts(self, guess, C_doubt=1e3, N_doubt=2):
+    def _bound_init_amounts(self, guess, C_doubt=1e3, N_doubt=2.0):
         """Return list of bounds for init amounts.
 
         guess : List of guesses of init amounts.
@@ -209,6 +209,15 @@ class Guesser(object):
             # guess of the other amount. I choose not to be so strict.
             bounds.append((guess[1]/N_doubt, guess[1]*N_doubt))
             bounds.append((guess[2]/N_doubt, guess[2]*N_doubt))
+        return bounds
+
+
+    def get_bounds(self, params, C_doubt=1e3, N_doubt=2.0, kn_max=10.0):
+        """Return bounds for estimated parameters."""
+        amount_bounds = self._bound_init_amounts(params, C_doubt, N_doubt)
+        kn_bound = [(0, kn_max)]
+        r_bounds = [(0, None) for i in range(self.plate.no_cultures)]
+        bounds = amount_bounds + kn_bound + r_bounds
         return bounds
 
 
@@ -485,6 +494,8 @@ class Guesser(object):
         return params.clip(min=0.0)
 
 
+
+
 ##########################
 
 
@@ -544,33 +555,33 @@ class Guesser(object):
         # guess for each b).
 
 
-    def get_bounds(self, plate, guess, factor=0.5):
+    # def get_bounds(self, plate, guess, factor=0.5):
 
-        """A list of tuples for each parameter in the model.
+    #     """A list of tuples for each parameter in the model.
 
-        Must be suitable for scipy.optimize.minimize.
+    #     Must be suitable for scipy.optimize.minimize.
 
-        """
-        no_params = self.model.b_index + plate.no_cultures
-        # First set all bounds greater than zero
-        bounds = [(0.0, None) for param in range(no_params)]
-        # Then change the bounds for parameters for which there is a
-        # guess.
-        for k, v in guess.items():
-            assert k in self.model.params
-            if k == "C_0":
-                # Bounds on C_0 need to be looser as we don't really
-                # know.
-                index = self.model.params.index(k)
-                bounds[index] = (v/10 , v*10)
-            elif k == "N_0":
-                # N_0 is always underestimated unless all reactions
-                # are finished.
-                index = self.model.params.index(k)
-                bounds[index] = (v, 2*v)
-            elif k == "kn":
-                pass
-        return np.asarray(bounds)
+    #     """
+    #     no_params = self.model.b_index + plate.no_cultures
+    #     # First set all bounds greater than zero
+    #     bounds = [(0.0, None) for param in range(no_params)]
+    #     # Then change the bounds for parameters for which there is a
+    #     # guess.
+    #     for k, v in guess.items():
+    #         assert k in self.model.params
+    #         if k == "C_0":
+    #             # Bounds on C_0 need to be looser as we don't really
+    #             # know.
+    #             index = self.model.params.index(k)
+    #             bounds[index] = (v/10 , v*10)
+    #         elif k == "N_0":
+    #             # N_0 is always underestimated unless all reactions
+    #             # are finished.
+    #             index = self.model.params.index(k)
+    #             bounds[index] = (v, 2*v)
+    #         elif k == "kn":
+    #             pass
+    #     return np.asarray(bounds)
 
 
 def add_b_bound(plate, model, i, j, bounds, bound):
