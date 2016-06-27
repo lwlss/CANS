@@ -9,8 +9,8 @@ from cans2.plotter import Plotter
 
 
 model = CompModelBC()
-rows = 8
-cols = 8
+rows = 3
+cols = 3
 times = np.linspace(0, 5, 11)
 true_params = {"N_0": 0.1, "NE_0": 0.15, "kn": 1.0}
 true_params["C_0"] = true_params["N_0"]/10000
@@ -49,6 +49,8 @@ quick_fit_kwargs = {
 quick_guess, quick_guesser = fit_imag_neigh(**quick_fit_kwargs)
 # Need to add in a kn guess.
 quick_guess[model.params.index("kn")] = true_params[model.params.index("kn")]
+
+print(quick_guesser.get_bounds(quick_guess, C_doubt=1e2, N_doubt=2))
 
 print("true_parms", true_params)
 print("quick_guess", quick_guess)
