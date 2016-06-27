@@ -11,9 +11,9 @@ from cans2.guesser import fit_imag_neigh, fit_log_eq
 
 
 # Process script args
-method_index = int(sys.argv[1])
+method_index = int(sys.argv[1])    # 4 for ('imag_neigh', 0.0001, True)
 # In total 5x2x2 = 20 sets of args.
-cell_ratios = np.logspace(-4, -6, num=5)
+cell_ratios = np.logspace(-3, -5, num=5)
 fit_type = ["imag_neigh", "log_eq"]
 zero_kn = [True, False]
 guess_vars = list(itertools.product(fit_type, cell_ratios, zero_kn))
@@ -62,10 +62,14 @@ elif guess_var[0] == "log_eq":
 if guess_var[2]:
     quick_guess[model.params.index("kn")] = 0.0
 
-
+print("Guesses made")
 # Now fit the model to the plate and save the result and plot as json and pdf.
 
+# Make bounds for normal fitting.
 
+est = full_plate.fit_model(fit_kwargs["model"], param_guess=quick_guess,
+                           bounds=, rr=True, sel=False,
+                           minimizer_opts={"disp": True})
 
 
 # Set out dir/files for data and plots.
