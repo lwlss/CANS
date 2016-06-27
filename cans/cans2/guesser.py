@@ -16,7 +16,8 @@ def sim_a_plate(rows, cols, times, model, params):
 
 
 def fit_log_eq(plate, plate_model, b_guess,
-               area_ratio=1.0, C_ratio=1e-5):
+               area_ratio=1.0, C_ratio=1e-5,
+               kn_start=0, kn_stop=2.0, kn_num=21):
     """Simulate a Plate and carry out a quick fit.
 
     Return a Plate containing the estimates in Cultures.
@@ -30,17 +31,25 @@ def fit_log_eq(plate, plate_model, b_guess,
     b_guess : Guess for parameter b. One guess for all cultures. The
     quick fit aims to improve upon this.
 
+    kn_start, kn_stop, and kn_num define values (using np.linspace) of
+    kn for which the plate_model is simulated using last stage guesses
+    of other parameters. For a given set of other parameters there is
+    a linear relationship between final cell measurement variance and
+    kn.
+
     See Guesser documentation for area_ratio and C_ratio.
 
     """
     guesser = Guesser(plate, plate_model,
                       area_ratio=area_ratio, C_ratio=C_ratio)
     quick_guess = guesser.quick_fit_log_eq(b_guess)
+    quick_guess = guesser.guess_kn(kn_start, kn_stop, kn_num, quick_guess)
     return quick_guess, guesser
 
 
 def fit_imag_neigh(plate, plate_model, area_ratio, C_ratio,
-                   imag_neigh_params, no_neighs=None):# C_doubt=1e3, N_doubt=2.0
+                   imag_neigh_params, no_neighs=None,
+                   kn_start=0.0, kn_stop=2.0, kn_num=21):# C_doubt=1e3, N_doubt=2.0
     """Simulate a Plate and carry out a quick fit.
 
     Return a tuple of a parameter guess and a Plate containing the
@@ -51,6 +60,12 @@ def fit_imag_neigh(plate, plate_model, area_ratio, C_ratio,
 
     See Guesser.quick_fit_log_eq documentation for information on
     C_doubt and N_doubt and how the
+
+    kn_start, kn_stop, and kn_num define values (using np.linspace) of
+    kn for which the plate_model is simulated using last stage guesses
+    of other parameters. For a given set of other parameters there is
+    a linear relationship between final cell measurement variance and
+    kn.
 
     See Guesser documentation for area_ratio and C_ratio.
 
@@ -64,6 +79,7 @@ def fit_imag_neigh(plate, plate_model, area_ratio, C_ratio,
         # "N_doubt": N_doubt,
     }
     quick_guess = guesser.quick_fit_imag_neighs(**kwargs)
+    quick_guess = guesser.guess_kn(kn_start, kn_stop, kn_num, quick_guess)
     return quick_guess, guesser
 
 
