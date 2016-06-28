@@ -2,12 +2,16 @@ import numpy as np
 import json
 import sys
 import itertools
+import time
 
 
 from cans2.parser import get_plate_data
 from cans2.plate import Plate
 from cans2.model import CompModel, CompModelBC
 from cans2.guesser import fit_imag_neigh, fit_log_eq, Guesser
+from cans2.cans_funcs import dict_to_json
+from cans2.plotter import Plotter
+
 
 # Temporarily work with a zone while checking script runs.
 from cans2.zoning import get_plate_zone
@@ -27,64 +31,109 @@ data_path = "../../data/p15/Output_Data/"
 plate_data = get_plate_data(data_path)
 full_plate = Plate(plate_data["rows"], plate_data["cols"],
                    data=plate_data)
-
 zone = get_plate_zone(full_plate, (5,5), 3, 3)
 
 plate_model = CompModelBC()    # Should pass another argument for CompModel()
 
-# User defined/selected parameters pre guessing.
-b_guess = 45.0    # Approximate expected value of b params.
-fit_kwargs = {
-    "plate": zone,
-    "plate_model": plate_model,
-    "C_ratio": guess_var[1],    # Guess of init_cells/final_cells.
-    "kn_start": 0.0,
-    "kn_stop": 2.0,
-    "kn_num": 21,
-}
-imag_neigh_only = {
-    "area_ratio": 1.5,        # Guess of edge_area/internal_area.
-    # Not including amounts which are guesses from final cell amounts
-    # and the C_ratio argument. ['kn1', 'kn2', 'b-', 'b+', 'b'] The
-    # final parameter is the guess of the CompModel parameter b. Other
-    # parameters are uniquie to the imaginary neighbour model.
-    "imag_neigh_params": np.array([1.0, 1.0, 0.0, b_guess*1.5, b_guess]),
-    "no_neighs": None,    # Can specify or allow it to be calculated np.ceil(C_f/N_0)
-}
-log_eq_only = {
-    "b_guess": b_guess,
-}
+for b_guess in [35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 95, 100, 150]: #not so good if one of these crashes
+    # User defined/selected parameters pre guessing.
+    guess_kwargs = {
+        "plate": zone,
+        "plate_model": plate_model,
+        "C_ratio": guess_var[1],    # Guess of init_cells/final_cells.
+        "kn_start": 0.0,
+        "kn_stop": 2.0,
+        "kn_num": 21,
+    }
+    imag_neigh_only = {
+        "area_ratio": 1.5,        # Guess of edge_area/internal_area.
+        # Not including amounts which are guesses from final cell amounts
+        # and the C_ratio argument. ['kn1', 'kn2', 'b-', 'b+', 'b'] The
+        # final parameter is the guess of the CompModel parameter b. Other
+        # parameters are uniquie to the imaginary neighbour model.
+        "imag_neigh_params": np.array([1.0, 1.0, 0.0, b_guess*1.5, b_guess]),
+        "no_neighs": None,    # Can specify or allow it to be calculated np.ceil(C_f/N_0)
+    }
+    log_eq_only = {
+        "b_guess": b_guess,
+    }
 
-# Get parameter guesses for fitting.
-if guess_var[0] == "imag_neigh":
-    fit_kwargs.update(imag_neigh_only)
-    quick_guess, quick_guesser = fit_imag_neigh(**fit_kwargs)
-elif guess_var[0] == "log_eq":
-    fit_kwargs.update(log_eq_only)
-    quick_guess, quick_guesser = fit_log_eq(**fit_kwargs)
-if guess_var[2]:
-    quick_guess[fit_kwargs["plate_model"].params.index("kn")] = 0.0
-zone.set_rr_model(plate_model, quick_guess, outfile="")
-print("Guesses made")
+    # Get parameter guesses for fitting.
+    if guess_var[0] == "imag_neigh":
+        guess_kwargs.update(imag_neigh_only)
+        quick_guess, quick_guesser = fit_imag_neigh(**guess_kwargs)
+    elif guess_var[0] == "log_eq":
+        guess_kwargs.update(log_eq_only)
+        quick_guess, quick_guesser = fit_log_eq(**guess_kwargs)
+    if guess_var[2]:
+        quick_guess[guess_kwargs["plate_model"].params.index("kn")] = 0.0
+
+    zone.set_rr_model(plate_model, quick_guess, outfile="")
+
+    # Make bounds for fitting.
+    if guess_var[0] == "imag_neigh":
+        area_ratio = guess_kwargs["area_ratio"]
+    elif guess_var[0] == "log_eq":
+        area_ratio = 1.0
+
+    plate_guesser = Guesser(zone, guess_kwargs["plate_model"],
+                            area_ratio, guess_kwargs["C_ratio"])
+    bounds = plate_guesser.get_bounds(quick_guess, C_doubt=1e3,
+                                      N_doubt=2.0, kn_max=10.0)    # Could also try kn_max=None.
+
+    t0 = time.time()
+    # Now fit the model to the plate and save the result and plot as json and pdf.
+    zone.est = zone.fit_model(guess_kwargs["plate_model"], param_guess=quick_guess,
+                              bounds=bounds, rr=True, sel=False,
+                              minimizer_opts={"disp": False})
+    t1 = time.time()
+
+    # Set out dir/files for data and plots.
+    outdir =  "results/p15_fits/full_plate/"
+    datafile = (outdir + "argv_{0}_b_guess_{1}.json").format(sys.argv[1], b_guess)
+    sbmlfile = (outdir + "sbml/argv_{0}_b_guess_{1}.xml").format(sys.argv[1], b_guess)
+    plotfile = (outdir + "plots/argv_{0}_b_guess_{1}.pdf").format(sys.argv[1], b_guess)
 
 
-# Make bounds for fitting.
-if guess_var[0] == "imag_neigh":
-    area_ratio = fit_kwargs["area_ratio"]
-elif guess_var[0] == "log_eq":
-    area_ratio = 1.0
-plate_guesser = Guesser(zone, fit_kwargs["plate_model"],
-                        area_ratio, fit_kwargs["C_ratio"])
-bounds = plate_guesser.get_bounds(quick_guess, C_doubt=1e3,
-                                  N_doubt=2.0, kn_max=10.0)    # Could also try kn_max=None.
+    # Cannot serialize Plate and Model objects as json
+    guess_kwargs = dict_to_json(guess_kwargs)
+    json_guess_kwargs = {}
+    for k, v in guess_kwargs.items():
+        try:
+            json.dumps(v)
+        except TypeError:
+            pass
+        else:
+            json_guess_kwargs[k] = v
+    data = {
+        'source_data': 'p15',
+        'rows': zone.rows,
+        'cols': zone.cols,
+        'c_meas': zone.c_meas,
+        'times': zone.times,
+        'argv': int(sys.argv[1]),
+        'guess_method_C_ratio_zero_kn': guess_var,
+        'model': plate_model.name,
+        'model_params': plate_model.params,
+        'model_species': plate_model.species,
+        'bounds': bounds,
+        'init_guess': quick_guess,
+        'comp_est': zone.est.x,
+        'obj_fun': zone.est.fun,
+        'fit_time': t1-t0,
+        'guess_kwargs': json_guess_kwargs,
+    }
+    data = dict_to_json(data)
 
-# Now fit the model to the plate and save the result and plot as json and pdf.
-est = zone.fit_model(fit_kwargs["plate_model"], param_guess=quick_guess,
-                     bounds=bounds, rr=True, sel=False,
-                     minimizer_opts={"disp": True})
-print(est.x)
+    with open(datafile, 'w') as f:
+        json.dump(data, f, indent=4, sort_keys=True)
 
-# Set out dir/files for data and plots.
-outdir =  "results/p15_fits/full_plate/"
-datafile = (outdir + "full_plate_method_{0}.json").format(method_index)
-plotfile = (outdir + "/plots/full_p15_fit_method_{0}.pdf").format(method_index)
+    sbml = zone.rr.getSBML()
+    with open(sbmlfile, 'w') as f:
+        f.write(sbml)
+
+    plotter = Plotter(plate_model)
+    plot_title = "{0} fit of p15 (b_guess {1})".format(plate_model.name,
+                                                       b_guess)
+    plotter.plot_est_rr(zone, zone.est.x, title=plot_title,
+                        filename=plotfile)
