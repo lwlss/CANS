@@ -264,7 +264,8 @@ class Guesser(object):
         return np.array(top_half_ests)
 
 
-    def _process_quick_ests(self, quick_mod, est_name, C_0_handling="first_guess"):
+    def _process_quick_ests(self, quick_mod, est_name, b_guess, clip=False,
+                            C_0_handling="first_guess"):
         """Process estimates from quick fits.
 
         Take a mean of estimated C_0s, use the N_0 guess(es) made from
@@ -282,10 +283,16 @@ class Guesser(object):
         highest final cells. This is because cultures with zero growth can be
         fit with arbitrary initial amounts.
 
+        clip: If True, clip b_ests at 3x b_guess to avoid extreme values.
+
+        b_guess: Original user provided b_guess.
+
         """
         # Allow to raise AttributeError if bad est_name.
         all_ests = np.array([getattr(c, est_name).x for c in self.plate.cultures])
         b_ests = all_ests[:, quick_mod.b_index]
+        if clip:
+            b_ests.clip(max=3*b_guess, out=b_ests)    # out for inplace clipping.
 
         if C_0_handling == "first_guess":
             C_0_guess = self._guess_init_C()
@@ -384,7 +391,8 @@ class Guesser(object):
 
         new_guess = self._process_quick_ests(log_eq_mod,
                                              est_name="log_est",
-                                             C_0_handling="first_guess")
+                                             C_0_handling="first_guess",
+                                             b_guess=b_guess)
         # Insert nan at index of kn.
         kn_index = self.model.params.index("kn")
         new_guess = np.insert(new_guess, kn_index, np.nan)
@@ -458,7 +466,8 @@ class Guesser(object):
 
         new_guess = self._process_quick_ests(imag_neigh_mod,
                                              est_name="im_neigh_est",
-                                             C_0_handling="first_guess")
+                                             C_0_handling="first_guess",
+                                             b_guess=b_guess)
         # Insert nan at index of kn.
         kn_index = self.model.params.index("kn")
         new_guess = np.insert(new_guess, kn_index, np.nan)
