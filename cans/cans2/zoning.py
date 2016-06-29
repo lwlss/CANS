@@ -16,11 +16,11 @@ def resim_zone(plate, model, coords, rows, cols, noise=True):
     """Resimulate a zone from the underlying parameters."""
     zone = Plate(rows, cols)
     zone.times = plate.times
-    r_index = len(plate.sim_params) - plate.no_cultures
-    plate_lvl = plate.sim_params[:r_index]
-    rs = plate.sim_params[r_index:]
-    zone_rs = get_zone_rs(rs, plate.rows, plate.cols, coords, rows, cols)
-    zone_params = np.append(plate_lvl, zone_rs)
+    b_index = len(plate.sim_params) - plate.no_cultures
+    plate_lvl = plate.sim_params[:b_index]
+    bs = plate.sim_params[b_index:]
+    zone_bs = get_zone_bs(bs, plate.rows, plate.cols, coords, rows, cols)
+    zone_params = np.append(plate_lvl, zone_bs)
     zone.sim_params = zone_params
     zone.set_sim_data(model, noise=noise)
     return zone
@@ -50,53 +50,53 @@ def get_plate_zone(plate, coords, rows, cols):
     return zone_plate
 
 
-def get_zone_rs(plate_rs, big_rows, big_cols, coords, rows, cols):
-    """Return rate constants r for a zone"""
-    r_zone = np.array(plate_rs, copy=True)
-    r_zone.shape = (big_rows, big_cols)
-    r_zone = _get_zone(r_zone, coords, rows, cols)
-    r_zone = r_zone.flatten()
-    return r_zone
+def get_zone_bs(plate_bs, big_rows, big_cols, coords, rows, cols):
+    """Return rate constants b for a zone"""
+    b_zone = np.array(plate_bs, copy=True)
+    b_zone.shape = (big_rows, big_cols)
+    b_zone = _get_zone(b_zone, coords, rows, cols)
+    b_zone = b_zone.flatten()
+    return b_zone
 
 
 def get_zone_params(plate_file, coords, rows, cols):
     """Return params for a zone of a plate saved as json.
 
-    Returns plate level parameters and r values in a flattened list.
+    Returns plate level parameters and b values in a flattened list.
 
     """
     # Read in the full plate.
-    with open(plate_file, 'r') as f:
+    with open(plate_file, 'b') as f:
         plate_data = json.load(f)
 
     plate_rows = plate_data['rows']
     plate_cols = plate_data['cols']
     times = plate_data['times']
-    r_index = len(plate_data['model_params']) - 1
+    b_index = len(plate_data['model_params']) - 1
     plate_params = plate_data['sim_params']
-    plate_rs = plate_params[r_index:]
+    plate_bs = plate_params[b_index:]
 
     assert coords[0] + rows <= plate_rows
     assert coords[1] + cols <= plate_cols
-    assert len(plate_rs) == plate_rows*plate_cols
+    assert len(plate_bs) == plate_rows*plate_cols
 
-    # Convert the plate r parameters to an array.
-    plate_array = np.array(plate_rs)
+    # Convert the plate b parameters to an array.
+    plate_array = np.array(plate_bs)
     plate_array.shape = (plate_rows, plate_cols)
     for row in range(plate_rows):
         assert all(plate_array[row, :] ==
-                   plate_rs[row*plate_cols:(row+1)*plate_cols])
+                   plate_bs[row*plate_cols:(row+1)*plate_cols])
 
     # Now slice the plate array to get the required zone.
     zone = _get_zone(plate_array, coords, rows, cols)
-    params = plate_params[:r_index] + zone.flatten().tolist()
+    params = plate_params[:b_index] + zone.flatten().tolist()
     return params
 
 
 def sim_zone(plate_file, model, coords, rows, cols):
     """Resimulate and return a zone of a saved plate."""
     params = get_zone_params(plate_file, coords, rows, cols)
-    with open(plate_file, 'r') as f:
+    with open(plate_file, 'b') as f:
         plate_data = json.load(f)
     times = plate_data['times']
 
@@ -114,7 +114,7 @@ def sim_zone(plate_file, model, coords, rows, cols):
 
 def save_zone_as_json(zone, model, coords, plate_file, outfile):
     """Save data for a zone of a simulated plate read from file."""
-    with open(plate_file, 'r') as f:
+    with open(plate_file, 'b') as f:
         plate_data = json.load(f)
 
     assert plate_data['rows']*plate_data['cols'] > zone.no_cultures
@@ -124,8 +124,8 @@ def save_zone_as_json(zone, model, coords, plate_file, outfile):
         'sim_amounts': zone.sim_amounts,
         'c_meas': zone.c_meas,
         'times': zone.times,
-        'r_mean': plate_data['r_mean'],
-        'r_var': plate_data['r_var'],
+        'b_mean': plate_data['b_mean'],
+        'b_var': plate_data['b_var'],
         'rows': zone.rows,
         'cols': zone.cols,
         'model': model.name,
