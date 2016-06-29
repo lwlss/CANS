@@ -33,10 +33,10 @@ full_plate = Plate(plate_data["rows"], plate_data["cols"],
                    data=plate_data)
 # zone = get_plate_zone(full_plate, (5,5), 3, 3)
 
-plate_model = CompModelBC()    # Should pass another argument for CompModel()
+plate_model = CompModel()    # Should pass another argument for CompModel()
 
 # Errors are captured to file and iteration skipped.
-error_file = "results/p15_fits/full_plate_error_log.txt"
+error_file = "results/p15_fits/full_plate/CompModel_error_log.txt"
 for b_guess in [35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 95, 100, 150]:
     # User defined/selected parameters pre guessing.
     guess_kwargs = {
@@ -114,7 +114,7 @@ for b_guess in [35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 95, 100, 150]:
     t1 = time.time()
 
     # Set out dir/files for data and plots.
-    outdir =  "results/p15_fits/full_plate/"
+    outdir =  "results/p15_fits/full_plate/CompModel/"
     datafile = (outdir + "argv_{0}_b_guess_{1}.json").format(sys.argv[1],
                                                              b_guess)
     sbmlfile = (outdir + "sbml/argv_{0}_b_guess_{1}.xml").format(sys.argv[1],
