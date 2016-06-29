@@ -8,14 +8,14 @@ def write_c_meas(plate, outfile=""):
     This can be imported in COPASI and used in the objective functions
     of parameter estimations.
     """
-    r1 = ["times"] + ["C{0}".format(i) for i in range(plate.no_cultures)]
+    r1 = ["Time"] + ["C{0}".format(i) for i in range(plate.no_cultures)]
     data = []
     data.append(r1)
     c_array = np.reshape(plate.c_meas, (len(plate.times), plate.no_cultures))
     for i, time in enumerate(plate.times):
         data.append([time] + list(c_array[i]))
     with open(outfile, 'wb') as f:
-        writer = csv.writer(f, dialect="excel")
+        writer = csv.writer(f, delimiter="\t")
         for r in data:
             writer.writerow(r)
 
