@@ -2,6 +2,7 @@ import json
 import glob
 import os
 import Bio.Cluster
+import numpy as np
 
 
 from math import log10, floor
@@ -61,3 +62,17 @@ def spearmans_rho(mat):
     spearmans = Bio.Cluster.distancematrix(mat, dist="s")
     distances = [1 - row for row in spearmans]
     return distances
+
+
+def mad_tril(vec):
+    """MADs for all combinations of vectors in an array.
+
+    Returns lower triangle.
+    """
+    mads = []
+    for v1 in vec:
+        row = []
+        for v2 in vec:
+            row.append(np.mean(np.abs(v1 - v2)))    # MAD
+        mads.append(row)
+    return np.tril(mads)
