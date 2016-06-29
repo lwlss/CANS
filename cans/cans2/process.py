@@ -1,6 +1,7 @@
 import json
 import glob
 import os
+import Bio.Cluster
 
 
 from math import log10, floor
@@ -9,6 +10,7 @@ from math import log10, floor
 # http://stackoverflow.com/a/3413529
 def round_sig(x, sig=2):
     return round(x, sig-int(floor(log10(x)))-1)
+
 
 def find_best_fits(path, num=None, key="obj_fun"):
     """Return the best num fits by ranking key.
@@ -46,3 +48,16 @@ def test_bounds(ests, bounds, depth=None):
     for est, bs in zip(ests[:depth], bounds[:depth]):
         bools.append(est in bs)
     return bools
+
+
+def spearmans_rho(mat):
+    """Calculate Spearman's rho elementwise for a matrix.
+
+    Uses r_sb which includes a tie correction.
+
+    Returns the distance d_s = 1 - r_sb.
+
+    """
+    spearmans = Bio.Cluster.distancematrix(mat, dist="s")
+    distances = [1 - row for row in spearmans]
+    return distances
