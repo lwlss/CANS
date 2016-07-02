@@ -8,7 +8,7 @@ from cans2.model import CompModelBC
 from cans2.process import find_best_fits, test_bounds, spearmans_rho, mad_tril
 
 
-best_fits = np.array(find_best_fits("full_plate/*.json", 5, key="obj_fun"))
+best_fits = np.array(find_best_fits("full_plate/*/*.json", 5, key="obj_fun"))
 
 data = []
 for filename in best_fits[:, 0]:
