@@ -5,16 +5,6 @@ from cans2.model import IndeModel, ImagNeighModel
 from cans2.plate import Plate
 
 
-def sim_a_plate(rows, cols, times, model, params):
-    """Simulate timecourses for and return a Plate."""
-    plate = Plate(rows, cols)
-    plate.times = times
-    plate.sim_params = params
-    # set_sim_data also sets rr_model with the simulated params.
-    plate.set_sim_data(model, noise=False)
-    return plate
-
-
 def fit_log_eq(plate, plate_model, b_guess,
                area_ratio=1.0, C_ratio=1e-5,
                kn_start=0, kn_stop=2.0, kn_num=21):
