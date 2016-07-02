@@ -90,7 +90,6 @@ from inspyred import ec
 from inspyred.ec import terminators
 from cans2.fitter import Fitter
 
-
 fitter = Fitter(model)
 
 def generete_params(random, args):
@@ -98,8 +97,56 @@ def generete_params(random, args):
     pass
 
 
-def evaluate_params(candidatas, args):
+# We have bounds from Guesser.get_bounds(guess, C_doubt=1e3,
+# N_doubt=2.0, kn_max=10.0) which are non_changing so we should supply
+# these somewhere. Probably don't need this function but can set
+# somewhere else. This is used in the example where each candidate is
+# a list of tuples. Each of our candidates is a list of parameter
+# values so we are not as "non-standard".
+def bound_params(candidate, args):
+    return [max(min(b[1], c), b[0]) for b, c in zip(bounds, canditate)]
+# "The lower_bound and upper_bound attributes are added to the
+# function so that the mutate_polygon function can make use of them
+# without being hard-coded."
+bound_params.lower_bound = (l for l, h in bounds)
+bound_params.upper_bound = (h for l, h in bounds)
+
+# Can we use the decorator @inspyred.ec.evaluator for this and maybe
+# parallize? Alternatively, we could use each candidate as an initial
+# guess for gradient fitting or generate each candidate from gradient
+# fits.
+def evaluate_fit(candidatas, args):
     # Evaluate the objective function for each set of canditate
     # parameters and return this as the fitness. Here fitter and plate
     # are defined outside the scope of the function.
     return [fitter._rr_obj(plate, cs) for cs in candidates]
+
+# Best to observe fitting by the plot of the best fit. Can use
+# matplotlib.pyplot.show() to show a plot without halting
+# execution. Will have to pass an option for this to Plotter. Must
+# also make sure that we are closing this each time to aviod having
+# huge numbers of plots open.
+def fit_observer(population, num_generations, num_evaluations, args):
+    pass
+
+# Our problem is real-coded. Choose evolution strategy (ES). "The
+# default for an ES is to select the entire population, use each to
+# produce a child via Gaussian mutation, and then use “plus”
+# replacement." - http://pythonhosted.org/inspyred/tutorial.html#id1.
+rand = Random()
+rand.seed(int(time()))
+es = ec.ES(rand)
+es.terminator = terminators.evaluation_termination
+
+evolve_kwargs = {
+    "generator": generate_params,
+    "evaluator": evaluate_fit,
+    "pop_size": 100,
+    "maximize": False,
+    "bounder": ec.bounder(0, None),    # Definately not right for us.
+    "max_evaluations": 20000,
+    "mutation_rate": 0.25,
+}
+final_pop = es.evolve(**evolve_kwargs)
+final_pop.sort(reverse=True)
+print(final_pop[0])
