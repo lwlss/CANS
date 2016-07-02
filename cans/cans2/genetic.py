@@ -79,6 +79,27 @@ plate.set_amounts = data["sim_amounts"]
 plate.grad_est_x = data["grad_est"]
 bounds = data["bounds"]
 guess = data["guess"]
+model = CompModelBC()
+
 
 # Construct a genetic algorithm to fit and compare with the current
 # gradient method.
+from random import Random
+from time import time
+from inspyred import ec
+from inspyred.ec import terminators
+from cans2.fitter import Fitter
+
+
+fitter = Fitter(model)
+
+def generete_params(random, args):
+    # Need to generate parameter solutions. We want to mate things.
+    pass
+
+
+def evaluate_params(candidatas, args):
+    # Evaluate the objective function for each set of canditate
+    # parameters and return this as the fitness. Here fitter and plate
+    # are defined outside the scope of the function.
+    return [fitter._rr_obj(plate, cs) for cs in candidates]
