@@ -42,9 +42,8 @@ def fit_imag_neigh(plate, plate_model, area_ratio, C_ratio,
                    kn_start=0.0, kn_stop=2.0, kn_num=21):# C_doubt=1e3, N_doubt=2.0
     """Simulate a Plate and carry out a quick fit.
 
-    Return a tuple of a parameter guess and a Plate containing the
-    results of fits as Culture estimates. Does this not just change
-    the Plate that we pass to the function anyway?
+    Return a tuple of a parameter guess and the Guesser object used to
+    make the guess.
 
     plate_model : CANS Model instance to simulate values for the plate.
 
@@ -89,7 +88,9 @@ class Guesser(object):
 
         plate : CANS Plate object.
 
-        model : CANS Model object.
+        model : CANS Model object. The plate model for the final fit
+        (e.g. CompModel() or CompModelBC()) rather than the gussesing
+        model.
 
         area_ratio : Ratio of (edge culture area / internal culture
         area). This is not the area of the cultures, which are assumed
@@ -399,20 +400,10 @@ class Guesser(object):
         return new_guess
 
 
-    def quick_fit_imag_neighs(self, imag_neigh_params,# C_doubt=1e3, N_doubt=2.0,
-                              no_neighs=None):
+    def quick_fit_imag_neighs(self, imag_neigh_params, no_neighs=None):
         """Guess b by fitting the imaginary neighbour model.
 
         b_guess : guess for b parameter. The same for all cultures.
-
-        # Don't allow to vary as too many parameters.
-        # C_doubt : Factor for Uncertainty in guess of initial cell
-        # amounts. Divides and multiplies the initial guess of C_0 to
-        # create lower and upper bounds.
-
-        # N_doubt : Factor for Uncertainty in guess of initial nutrient
-        # amounts. Divides and/or multiplies the initial guess(es) to
-        # create lower and upper bounds. See code for exact usage.
 
         no_neighs : The number of each type of imaginary neighbour to
         include in the model. If None an number will be calculated
@@ -459,6 +450,21 @@ class Guesser(object):
             elif self.model.species_bc[N_index] and i in self.plate.edges:
                 N_0_index = 1
 
+            # There is an inacuaracy here for N_0s of neighbours of
+            # cultures at edges or next to an edge. For a full plate,
+            # all edges but the corner cultures have two edge
+            # neighbours and an internal neighbour. Internal cultures
+            # next to an edge have one or two egde neighbours and two
+            # or three internal neighbours. I do not bother to treat
+            # the higher and lower initial nutrients (amounts but not
+            # concentrations) of neighbours any differently in these
+            # cultures. Instead the fit assumes edge cultures have
+            # only edge neighbours, and internals have only internal
+            # neighbours. You could supply a certain number of edge
+            # and internal culture neighbours and adjust rate
+            # equations appropriately but, for an initial guess, this
+            # seems quite complicated. The effect diminishes as plate
+            # size increases.
             c.im_neigh_est = c.fit_model(imag_neigh_mod,
                                          imag_neigh_params[N_0_index],
                                          neigh_bounds[N_0_index],)
