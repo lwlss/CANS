@@ -15,6 +15,16 @@ from cans2.cans_funcs import get_mask
 from cans2.make_sbml import create_sbml
 
 
+def sim_a_plate(rows, cols, times, model, params):
+    """Simulate timecourses for and return a Plate."""
+    plate = Plate(rows, cols)
+    plate.times = times
+    plate.sim_params = params
+    # set_sim_data also sets rr_model with the simulated params.
+    plate.set_sim_data(model, noise=False)
+    return plate
+
+
 class BasePlate(object):
     def __init__(self, rows, cols, data=None):
         """Instantiate BasePlate.
