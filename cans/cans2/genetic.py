@@ -34,12 +34,18 @@ plotter.plot_est_rr(plate, plate.sim_params,
 # Starting guess from fits of the imaginary neighbour model.
 imag_neigh_params = np.array([1.0, 1.0, 0.0, b_guess*1.5, b_guess])
 
-guess, guess_plate = fit_imag_neig(plate, model, area_ratio, C_ratio,
-                                   imag_neigh_params,
-                                   kn_start=0.0, kn_stop=8.0, kn_num=21)
+guess, guesser = fit_imag_neigh(plate, model, area_ratio, C_ratio,
+                                imag_neigh_params,
+                                kn_start=0.0, kn_stop=8.0, kn_num=21)
+plotter.plot_est_rr(plate, guess, title="Imaginary Nieghbour Guess", sim=True)
+bounds = guesser.get_bounds(guess, C_doubt=1e3, N_doubt=2.0, kn_max=10.0)
+print(bounds)
 
+# Fit using gradient method.
+minimizer_opts = {"disp": True}
+plate.grad_est = plate.fit_model(model, guess, bounds=bounds, rr=True,
+                                 minimizer_opts=minimizer_opts)
+plotter.plot_est_rr(plate, plate.grad_est.x, title="Gradient Fit", sim=True)
 
 # Construct a genetic algorithm to fit and compare with the current
 # gradient method.
-
-plate.grad_est = plate.fit_model(model, param_guess, bounds=True, rr=True)
