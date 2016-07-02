@@ -51,6 +51,16 @@ def fit_imag_neigh(plate, plate_model, area_ratio, C_ratio,
     See Guesser.quick_fit_log_eq documentation for information on
     C_doubt and N_doubt and how the
 
+    imag_neigh_params : List or np.array of parameter values for the
+    imaginary neigbour model excluding initial amounts (['kn1', 'kn2',
+    'b-', 'b+', 'b']).
+
+    no_neighs : The number of each type of imaginary neighbour to
+    include in the model. If None, a number will be calculated
+    such that the final amount of cells in the highest growing
+    cultures is less than the total amount of nutrients available
+    from the culture and the slow growing neighbours.
+
     kn_start, kn_stop, and kn_num define values (using np.linspace) of
     kn for which the plate_model is simulated using last stage guesses
     of other parameters. For a given set of other parameters there is
