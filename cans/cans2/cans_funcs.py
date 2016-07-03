@@ -81,6 +81,14 @@ def dict_to_json(dct):
     return dct
 
 
+def dict_to_numpy(dct):
+    """Convert lists in a dict to np.ndarrays."""
+    for k, v in dct.items():
+        if isinstance(v, list):
+            dct[k] = np.array(v)
+    return dct
+
+
 def add_noise(data, var=0.02):
     """Return data with added random noise as np.ndarray.
 
