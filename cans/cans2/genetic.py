@@ -123,8 +123,8 @@ def gen_params_random(random, args):
 
     For the initial concentration of cells, the exponent is sampled
     over a uniform space and it is assumed that the mantissas of the
-    lower and upper bounds are equal. For all other parameters
-    values are sampled from a uniform distribution in linear space.
+    lower and upper bounds are equal. For all other parameters,
+    values are sampled from uniform distributions in linear space.
 
     """
     bounds = args["bounds"]
@@ -135,21 +135,26 @@ def gen_params_random(random, args):
     return params
 
 
+# Define C ranges to sample from.
+C_ratio = 1e-4
+C_doubt = 1e3
+b_guess = 45    # Arbitrary placeholder b_guess for imag_neigh_params[-2:].
+# Create args needed for below function (to be passed in args).
 guess_kwargs = {
     "plate": plate,
     "plate_model": model,
-    "C_ratio": guess_var[1],    # Guess of init_cells/final_cells.
+    "C_ratio": C_ratio,    # Guess of init_cells/final_cells.
     "kn_start": 0.0,
     "kn_stop": 2.0,
     "kn_num": 21,
-    "area_ratio": 1.5,        # Guess of edge_area/internal_area.
-    # Not including amounts which are guesses from final cell amounts
-    # and the C_ratio argument. ['kn1', 'kn2', 'b-', 'b+', 'b'] The
-    # final parameter is the guess of the CompModel parameter b. Other
-    # parameters are uniquie to the imaginary neighbour model.
+    "area_ratio": 1.5,    # Initial dummy val.
+    # ['kn1', 'kn2', 'b-', 'b+', 'b']
     "imag_neigh_params": np.array([1.0, 1.0, 0.0, b_guess*1.5, b_guess]),
-    "no_neighs": None,    # Can specify or allow it to be calculated np.ceil(C_f/N_0)
+    "no_neighs": None,    # If None calculated as np.ceil(C_f_max/N_0_guess).
 }
+area_range = np.array([1.0, 2.0])
+C_range = np.array([C_ratio/C_doubt, C_ratio*C_doubt])
+b_range = np.array([0.0, 200.0])
 def generete_params_from_guesses(random, args):
     """Generate parameters from imaginary neighbour guesses.
 
@@ -162,26 +167,25 @@ def generete_params_from_guesses(random, args):
     case of cell ratios samples are taken from the logspace.
 
     """
-    # Need to generate parameter solutions. We want to mate things
-    # like dragon warrior monsters so hopefully this is done somewhere
-    # else automatically.
-
     # Random area_ratio and C_ratio.
-    area_ratio = random(1.0, 2.0)
-    C_ratio = Random from logspace.
-    # Random b_guess which is the final param in the imag_neighs model.
-    b_guses = 45.0    # random between zero and 100. Or rather than
-                      # using a guess at all we could just take random
-                      # values within some distribution, say U(0, 200)
-                      # or N(50, 50) (clipped above zero). In fact the
-                      # mean and variance could be randomized values.
+    area_range = args["area_range"]
+    C_range = args["C_range"]
+    b_range = args["b_range"]
+    area_ratio = random.uniform(low=area_range[0], high=area_range[1])
+    C_0_mantissa, C_0_exp = frexp_10(C_range)
+    exponent = random.uniform(low=C_0_exp[0], high=C_0_exp[1])
+    C_ratio = C_0_matissa[0]*10.0**exponent
+    # Random uniform. We could use N(50, 50) (clipped above zero) and
+    # could also randomize the mean and variance.
+    b_guess = random.uniform(low=b_range[0], high=b_range[1])
+
     guess_kwargs = args["guess_kwargs"]    # Obviously do not unpack.
+    guess_kwargs["area_ratio"] = area_ratio
+    guess_kwargs["C_ratio"] = C_ratio
+    guess_kwargs["imag_neigh_params"][-2:] = [b_guess*1.5, b_guess]
 
-
-    guess, guesser = fit_imag_neigh(plate, model, area_ratio, C_ratio
-    guesser = Guesser(plate, model)
-
-    pass
+    guess, guesser = fit_imag_neigh(**guess_kwargs)
+    return guess
 
 
 # We have bounds from Guesser.get_bounds(guess, C_doubt=1e3,
