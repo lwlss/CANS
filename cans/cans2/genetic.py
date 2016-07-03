@@ -120,15 +120,29 @@ def evaluate_fit(candidatas, args):
     # are defined outside the scope of the function.
     return [fitter._rr_obj(plate, cs) for cs in candidates]
 
-# Best to observe fitting by the plot of the best fit. Can use
-# matplotlib.pyplot.show() to show a plot without halting
-# execution. Will have to pass an option for this to Plotter. Must
-# also make sure that we are closing this each time to aviod having
-# huge numbers of plots open.
+# Best to observe fitting by the plot of the best fit. Can either plot
+# (time consuming) or just print the value of the objective
+# function. If it takes a long time between iterations it is a good
+# idea to save the plots.
 def fit_observer(population, num_generations, num_evaluations, args):
-    plotter = Plotter(model)
+    """Plot the best fit for the current iteration.
 
-    pass
+    Also print the value of the objective function. May be helpful to
+    write or append the parameter values to file.
+
+    Requires plate and plotter in args. Also plotfile if we wish to
+    save.
+
+    """
+    best = max(population)
+    plotter = args["plotter"]
+    title = "Best fit after {0} generations and {1} evaluations."
+    title = title.format(num_generations, num_evaluations)
+    plotter.plot_est_rr(args["plate"], best.candidate, title=title,)
+                        # filename=args["plotfile"])
+    message = "Best fittness of {0} after {1} generations and {2} evaluations."
+    print(message.format(best.fitness, num_generations, num_evaluations))
+
 
 # Our problem is real-coded. Choose evolution strategy (ES). "The
 # default for an ES is to select the entire population, use each to
