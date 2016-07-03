@@ -85,7 +85,7 @@ def dict_to_numpy(dct):
     """Convert lists in a dict to np.ndarrays."""
     for k, v in dct.items():
         if isinstance(v, list):
-            dct[k] = np.array(v)
+            dct[k] = np.array(v, dtype=np.float64)
     return dct
 
 
@@ -97,6 +97,20 @@ def add_noise(data, var=0.02):
     noise = np.random.normal(0.0, np.sqrt(var), len(data))
     noisey = np.asarray(data, dtype=np.float64) + noise
     return noisey.clip(min=0.0)
+
+
+def frexp_10(x):
+    """Return the mantissa and decimal exponent in base 10.
+
+    Operates on an array and returns a tuple of mantissa and exponent
+    arrays.
+
+    http://www.gossamer-threads.com/lists/python/python/867169#867169
+
+    """
+    exp = np.floor(np.log10(x))
+    return x/10.0**exp, exp
+
 
 
 #####################
