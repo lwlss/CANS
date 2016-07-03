@@ -91,8 +91,68 @@ from cans2.fitter import Fitter
 
 fitter = Fitter(model)
 
-def generete_params(random, args):
-    # Need to generate parameter solutions. We want to mate things.
+
+random = np.RandomState(int(time.time()))
+def gen_params_random(random, args):
+    """Generate random parameters between the bounds.
+
+    random : A numpy RandomState object seeded with current system
+    time upon instatiation.
+
+    bounds : Contained in the args dict. A 2d array of lower and upper
+    bounds for each parameter in the model.
+
+    """
+    bounds = args["bounds"]
+    return random.uniform(low=bounds[:, 0], hi=bounds[:, 1])
+
+
+guess_kwargs = {
+    "plate": plate,
+    "plate_model": model,
+    "C_ratio": guess_var[1],    # Guess of init_cells/final_cells.
+    "kn_start": 0.0,
+    "kn_stop": 2.0,
+    "kn_num": 21,
+    "area_ratio": 1.5,        # Guess of edge_area/internal_area.
+    # Not including amounts which are guesses from final cell amounts
+    # and the C_ratio argument. ['kn1', 'kn2', 'b-', 'b+', 'b'] The
+    # final parameter is the guess of the CompModel parameter b. Other
+    # parameters are uniquie to the imaginary neighbour model.
+    "imag_neigh_params": np.array([1.0, 1.0, 0.0, b_guess*1.5, b_guess]),
+    "no_neighs": None,    # Can specify or allow it to be calculated np.ceil(C_f/N_0)
+}
+def generete_params_from_guesses(random, args):
+    """Generate parameters from imaginary neighbour guesses.
+
+    These guesses are obtained from "quick" fits of a simplified
+    "imaginary neighbour" model. The quick fits also also require
+    starting guesses for the ratio of starting to final cell
+    concentration, the ratio of edge to internal culture area, and an
+    approximate magnitude of growth parameter b. These are sampled
+    randomly from uniform distributions between the bounds. For the
+    case of cell ratios samples are taken from the logspace.
+
+    """
+    # Need to generate parameter solutions. We want to mate things
+    # like dragon warrior monsters so hopefully this is done somewhere
+    # else automatically.
+
+    # Random area_ratio and C_ratio.
+    area_ratio = random(1.0, 2.0)
+    C_ratio = Random from logspace.
+    # Random b_guess which is the final param in the imag_neighs model.
+    b_guses = 45.0    # random between zero and 100. Or rather than
+                      # using a guess at all we could just take random
+                      # values within some distribution, say U(0, 200)
+                      # or N(50, 50) (clipped above zero). In fact the
+                      # mean and variance could be randomized values.
+    guess_kwargs = args["guess_kwargs"]    # Obviously do not unpack.
+
+
+    guess, guesser = fit_imag_neigh(plate, model, area_ratio, C_ratio
+    guesser = Guesser(plate, model)
+
     pass
 
 
