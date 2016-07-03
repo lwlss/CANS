@@ -96,6 +96,7 @@ def gen_random_uniform(random, args):
     """
     bounds = args.get("bounds")
     params = [random.uniform(l, h) for l, h in zip(bounds[:, 0], bounds[:, 1])]
+    print(len(params))
     return params
 
 
@@ -290,5 +291,11 @@ final_pop = es.evolve(generator=gen_random_uniform,
                       plate=plate,
                       cans_fitter=Fitter(CompModelBC()))
 #final_pop = es.evolve(**evolve_kwargs)
-final_pop.sort(reverse=True)
-print("best", final_pop[0])
+# final_pop.sort(reverse=True)
+best = max(final_pop)
+best_params = best.candidate
+print(best_params)
+print(len(best_params))
+print(plate.no_cultures)
+plotter = Plotter(model)
+plotter.plot_est_rr(plate, list(best_params))
