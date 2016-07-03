@@ -6,7 +6,7 @@ from cans2.model import CompModelBC
 from cans2.plate import Plate
 from cans2.guesser import fit_imag_neigh
 from cans2.plotter import Plotter
-from cans2.cans_funcs import dict_to_json, dict_to_numpy
+from cans2.cans_funcs import dict_to_json, dict_to_numpy, frexp_10
 
 
 # # Simulate a small 3x3 plate with noise using CompModelBC or CompModel.
@@ -89,6 +89,7 @@ from inspyred import ec
 from inspyred.ec import terminators
 from cans2.fitter import Fitter
 
+
 fitter = Fitter(model)
 
 
@@ -102,9 +103,38 @@ def gen_params_random(random, args):
     bounds : Contained in the args dict. A 2d array of lower and upper
     bounds for each parameter in the model.
 
+    For all parameters values are sampled from a uniform distribution
+    in linear space.
+
     """
     bounds = args["bounds"]
-    return random.uniform(low=bounds[:, 0], hi=bounds[:, 1])
+    params = random.uniform(low=bounds[:, 0], hi=bounds[:, 1])
+    return params
+
+
+def gen_params_random(random, args):
+    """Generate random parameters between the bounds.
+
+    random : A numpy RandomState object seeded with current system
+    time upon instatiation.
+
+    bounds : Contained in the args dict. A 2d array of lower and upper
+    bounds for each parameter in the model.
+
+    For the initial concentration of cells, the exponent is sampled
+    over a uniform space and it is assumed that the mantissas of the
+    lower and upper bounds are equal. For all other parameters
+    values are sampled from a uniform distribution in linear space.
+
+    """
+    bounds = args["bounds"]
+    params = random.uniform(low=bounds[:, 0], hi=bounds[:, 1])
+    # For cells first sample an exponent over uniform space. Assumes
+    # that mantissas are the same for both upper and lower bounds.
+    mantissa, exp = frexp_10(bounds[0])
+    exponent = random.uniform(low=exp[0], high=exp[1])
+    params[0] = matissa[0]*10.0**exponent
+    return params
 
 
 guess_kwargs = {
