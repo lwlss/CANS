@@ -129,11 +129,9 @@ def gen_params_random(random, args):
     """
     bounds = args["bounds"]
     params = random.uniform(low=bounds[:, 0], hi=bounds[:, 1])
-    # For cells first sample an exponent over uniform space. Assumes
-    # that mantissas are the same for both upper and lower bounds.
-    mantissa, exp = frexp_10(bounds[0])
-    exponent = random.uniform(low=exp[0], high=exp[1])
-    params[0] = matissa[0]*10.0**exponent
+    C_0_mantissa, C_0_exp = frexp_10(bounds[0])
+    exponent = random.uniform(low=C_0_exp[0], high=C_0_exp[1])
+    params[0] = C_0_matissa[0]*10.0**exponent
     return params
 
 
