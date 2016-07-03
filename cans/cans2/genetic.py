@@ -1,6 +1,14 @@
 import numpy as np
 import json
 
+# Inspyred imports
+import time
+import random
+import inspyred
+# from inspyred import ec
+# from inspyred.ec import terminators
+from cans2.fitter import Fitter
+
 
 from cans2.model import CompModelBC
 from cans2.plate import Plate
@@ -67,34 +75,13 @@ from cans2.cans_funcs import dict_to_json, dict_to_numpy, frexp_10
 # with open("temp_sim_and_est_data.json", 'w') as f:
 #      json.dump(dict_to_json(data), f)
 
-with open("temp_sim_and_est_data.json", 'r') as f:
-    data = dict_to_numpy(json.load(f))
-
-# Unpack saved sim and fit data.
-exp_data = {"c_meas": data["c_meas"], "times": data["times"], "empties": []}
-plate = Plate(data["rows"], data["cols"], exp_data)
-plate.sim_params = data["sim_params"]
-plate.sim_amounts = data["sim_amounts"]
-plate.grad_est_x = data["grad_est"]
-bounds = data["bounds"]
-guess = data["guess"]
-model = CompModelBC()
 
 
 # Construct a genetic algorithm to fit and compare with the current
 # gradient method.
-from random import Random
-from time import time
-from inspyred import ec
-from inspyred.ec import terminators
-from cans2.fitter import Fitter
 
 
-fitter = Fitter(model)
-
-
-random = np.RandomState(int(time.time()))
-def gen_params_random(random, args):
+def gen_random_uniform(random, args):
     """Generate random parameters between the bounds.
 
     random : A numpy RandomState object seeded with current system
@@ -107,12 +94,12 @@ def gen_params_random(random, args):
     in linear space.
 
     """
-    bounds = args["bounds"]
-    params = random.uniform(low=bounds[:, 0], hi=bounds[:, 1])
+    bounds = args.get("bounds")
+    params = [random.uniform(l, h) for l, h in zip(bounds[:, 0], bounds[:, 1])]
     return params
 
 
-def gen_params_random(random, args):
+def gen_random_uniform_log_C(random, args):
     """Generate random parameters between the bounds.
 
     random : A numpy RandomState object seeded with current system
@@ -127,8 +114,8 @@ def gen_params_random(random, args):
     values are sampled from uniform distributions in linear space.
 
     """
-    bounds = args["bounds"]
-    params = random.uniform(low=bounds[:, 0], hi=bounds[:, 1])
+    bounds = args.get("bounds")
+    params = random.uniform(low=bounds[:, 0], high=bounds[:, 1])
     C_0_mantissa, C_0_exp = frexp_10(bounds[0])
     exponent = random.uniform(low=C_0_exp[0], high=C_0_exp[1])
     params[0] = C_0_matissa[0]*10.0**exponent
@@ -136,25 +123,25 @@ def gen_params_random(random, args):
 
 
 # Define C ranges to sample from.
-C_ratio = 1e-4
-C_doubt = 1e3
-b_guess = 45    # Arbitrary placeholder b_guess for imag_neigh_params[-2:].
-# Create args needed for below function (to be passed in args).
-guess_kwargs = {
-    "plate": plate,
-    "plate_model": model,
-    "C_ratio": C_ratio,    # Guess of init_cells/final_cells.
-    "kn_start": 0.0,
-    "kn_stop": 2.0,
-    "kn_num": 21,
-    "area_ratio": 1.5,    # Initial dummy val.
-    # ['kn1', 'kn2', 'b-', 'b+', 'b']
-    "imag_neigh_params": np.array([1.0, 1.0, 0.0, b_guess*1.5, b_guess]),
-    "no_neighs": None,    # If None calculated as np.ceil(C_f_max/N_0_guess).
-}
-area_range = np.array([1.0, 2.0])
-C_range = np.array([C_ratio/C_doubt, C_ratio*C_doubt])
-b_range = np.array([0.0, 200.0])
+# C_ratio = 1e-4
+# C_doubt = 1e3
+# b_guess = 45    # Arbitrary placeholder b_guess for imag_neigh_params[-2:].
+# # Create args needed for below function (to be passed in args).
+# guess_kwargs = {
+#     "plate": plate,
+#     "plate_model": model,
+#     "C_ratio": C_ratio,    # Guess of init_cells/final_cells.
+#     "kn_start": 0.0,
+#     "kn_stop": 2.0,
+#     "kn_num": 21,
+#     "area_ratio": 1.5,    # Initial dummy val.
+#     # ['kn1', 'kn2', 'b-', 'b+', 'b']
+#     "imag_neigh_params": np.array([1.0, 1.0, 0.0, b_guess*1.5, b_guess]),
+#     "no_neighs": None,    # If None calculated as np.ceil(C_f_max/N_0_guess).
+# }
+# area_range = np.array([1.0, 2.0])
+# C_range = np.array([C_ratio/C_doubt, C_ratio*C_doubt])
+# b_range = np.array([0.0, 200.0])
 def generete_params_from_guesses(random, args):
     """Generate parameters from imaginary neighbour guesses.
 
@@ -168,9 +155,9 @@ def generete_params_from_guesses(random, args):
 
     """
     # Random area_ratio and C_ratio.
-    area_range = args["area_range"]
-    C_range = args["C_range"]
-    b_range = args["b_range"]
+    area_range = args.get("area_range")
+    C_range = args.get("C_range")
+    b_range = args.get("b_range")
     area_ratio = random.uniform(low=area_range[0], high=area_range[1])
     C_0_mantissa, C_0_exp = frexp_10(C_range)
     exponent = random.uniform(low=C_0_exp[0], high=C_0_exp[1])
@@ -179,7 +166,7 @@ def generete_params_from_guesses(random, args):
     # could also randomize the mean and variance.
     b_guess = random.uniform(low=b_range[0], high=b_range[1])
 
-    guess_kwargs = args["guess_kwargs"]    # Obviously do not unpack.
+    guess_kwargs = args.get("guess_kwargs")    # Obviously do not unpack.
     guess_kwargs["area_ratio"] = area_ratio
     guess_kwargs["C_ratio"] = C_ratio
     guess_kwargs["imag_neigh_params"][-2:] = [b_guess*1.5, b_guess]
@@ -199,17 +186,21 @@ def bound_params(candidate, args):
 # "The lower_bound and upper_bound attributes are added to the
 # function so that the mutate_polygon function can make use of them
 # without being hard-coded."
-bound_params.lower_bound = (l for l, h in bounds)
-bound_params.upper_bound = (h for l, h in bounds)
+# bound_params.lower_bound = (l for l, h in bounds)
+# bound_params.upper_bound = (h for l, h in bounds)
 
 # Can we use the decorator @inspyred.ec.evaluator for this and maybe
 # parallize? Alternatively, we could use each candidate as an initial
 # guess for gradient fitting or generate each candidate from gradient
 # fits.
-def evaluate_fit(candidatas, args):
+def evaluate_fit(candidates, args):
     # Evaluate the objective function for each set of canditate
     # parameters and return this as the fitness. Here fitter and plate
     # are defined outside the scope of the function.
+    fitter = args.get("cans_fitter")
+    print(fitter)
+    plate = args.get("plate")
+    print(plate)
     return [fitter._rr_obj(plate, cs) for cs in candidates]
 
 # Best to observe fitting by the plot of the best fit. Can either plot
@@ -236,24 +227,68 @@ def fit_observer(population, num_generations, num_evaluations, args):
     print(message.format(best.fitness, num_generations, num_evaluations))
 
 
+# Unpack saved sim and fit data.
+with open("temp_sim_and_est_data.json", 'r') as f:
+    data = dict_to_numpy(json.load(f))
+
+exp_data = {"c_meas": data["c_meas"], "times": data["times"], "empties": []}
+plate = Plate(data["rows"], data["cols"], exp_data)
+plate.sim_params = data["sim_params"]
+plate.sim_amounts = data["sim_amounts"]
+plate.grad_est_x = data["grad_est"]
+plate.set_rr_model(CompModelBC(), plate.sim_params)
+bounds = data["bounds"]
+bounds[4:] = np.array([0, 500])    # Need an upper bound for genetic algorithm
+guess = data["guess"]
+model = CompModelBC()
+
+# At the moment we have b bounds as (0, None). We need an upper bound.
+
 # Our problem is real-coded. Choose evolution strategy (ES). "The
 # default for an ES is to select the entire population, use each to
 # produce a child via Gaussian mutation, and then use "plus"
 # replacement." - http://pythonhosted.org/inspyred/tutorial.html#id1.
-rand = Random()
-rand.seed(int(time()))
-es = ec.ES(rand)
-es.terminator = terminators.evaluation_termination
+seed = int(time.time())
+rand = random.Random(seed)
+with open("seeds.txt", 'a') as f:
+    f.write("{0}\n".format(seed))
+es = inspyred.ec.ES(rand)
+es.observer = inspyred.ec.observers.stats_observer
+es.terminator = [inspyred.ec.terminators.evaluation_termination,
+                 inspyred.ec.terminators.diversity_termination]
 
-evolve_kwargs = {
-    "generator": generate_params,
-    "evaluator": evaluate_fit,
-    "pop_size": 100,
-    "maximize": False,
-    "bounder": ec.bounder(0, None),    # Definately not right for us.
-    "max_evaluations": 20000,
-    "mutation_rate": 0.25,
+cans_kwargs = {
+    "bounds": bounds,
+    "plate": plate,
+    "cans_fitter": Fitter(CompModelBC()),
+#    "cans_model": CompModelBC(),
 }
-final_pop = es.evolve(**evolve_kwargs)
+evolve_kwargs = {
+    "generator": gen_random_uniform,
+    "evaluator": inspyred.ec.evaluators.parallel_evaluation_mp,
+    "mp_evaluator": evaluate_fit,
+    "mp_num_cpus": 4,
+    "pop_size": 10,
+    "maximize": False,
+    "bounder": inspyred.ec.Bounder(bounds[:, 0], bounds[:, 1]),
+    "max_evaluations": 1000,
+    "mutation_rate": 0.25,
+    # Need to pack args for other functions inside a dictionary called args.
+}
+# evolve_kwargs.update(cans_kwargs)
+final_pop = es.evolve(generator=gen_random_uniform,
+                      evaluator=evaluate_fit,
+                      # evaluator=inspyred.ec.evaluators.parallel_evaluation_mp,
+                      # mp_evaluator=evaluate_fit,
+                      # mp_num_cpus=4,
+                      pop_size=10,
+                      maximize=False,
+                      bounder=inspyred.ec.Bounder(bounds[:, 0], bounds[:, 1]),
+                      max_evaluations=1000,
+                      mutation_rate=0.25,
+                      bounds=bounds,
+                      plate=plate,
+                      cans_fitter=Fitter(CompModelBC()))
+#final_pop = es.evolve(**evolve_kwargs)
 final_pop.sort(reverse=True)
-print(final_pop[0])
+print("best", final_pop[0])
