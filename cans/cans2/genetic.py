@@ -6,10 +6,10 @@ from cans2.model import CompModelBC
 from cans2.plate import Plate
 from cans2.guesser import fit_imag_neigh
 from cans2.plotter import Plotter
-from cans2.cans_funcs import dict_to_json
+from cans2.cans_funcs import dict_to_json, dict_to_numpy
 
 
-# Simulate a small 3x3 plate with noise using CompModelBC or CompModel.
+# # Simulate a small 3x3 plate with noise using CompModelBC or CompModel.
 # rows = 3
 # cols = 3
 # times = np.linspace(0, 5, 11)
@@ -41,7 +41,7 @@ from cans2.cans_funcs import dict_to_json
 #                                 imag_neigh_params,
 #                                 kn_start=0.0, kn_stop=8.0, kn_num=21)
 # plotter.plot_est_rr(plate, guess, title="Imaginary Nieghbour Guess", sim=True)
-# bounds = guesser.get_bounds(guess, C_doubt=1e3, N_doubt=2.0, kn_max=10.0)
+# bounds = guesser.get_bounds(guess, C_doubt=1e2, N_doubt=2.0, kn_max=10.0)
 # print(bounds)
 
 # # Fit using gradient method.
@@ -64,18 +64,17 @@ from cans2.cans_funcs import dict_to_json
 #     "bounds": bounds,
 #     "grad_est": plate.grad_est.x,
 #     }
-# data = dict_to_json(data)
 # with open("temp_sim_and_est_data.json", 'w') as f:
-#     json.dump(data, f)
+#      json.dump(dict_to_json(data), f)
 
 with open("temp_sim_and_est_data.json", 'r') as f:
-    data = json.load(f)
+    data = dict_to_numpy(json.load(f))
 
 # Unpack saved sim and fit data.
 exp_data = {"c_meas": data["c_meas"], "times": data["times"], "empties": []}
 plate = Plate(data["rows"], data["cols"], exp_data)
 plate.sim_params = data["sim_params"]
-plate.set_amounts = data["sim_amounts"]
+plate.sim_amounts = data["sim_amounts"]
 plate.grad_est_x = data["grad_est"]
 bounds = data["bounds"]
 guess = data["guess"]
@@ -127,11 +126,13 @@ def evaluate_fit(candidatas, args):
 # also make sure that we are closing this each time to aviod having
 # huge numbers of plots open.
 def fit_observer(population, num_generations, num_evaluations, args):
+    plotter = Plotter(model)
+
     pass
 
 # Our problem is real-coded. Choose evolution strategy (ES). "The
 # default for an ES is to select the entire population, use each to
-# produce a child via Gaussian mutation, and then use “plus”
+# produce a child via Gaussian mutation, and then use "plus"
 # replacement." - http://pythonhosted.org/inspyred/tutorial.html#id1.
 rand = Random()
 rand.seed(int(time()))
