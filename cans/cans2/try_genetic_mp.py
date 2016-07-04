@@ -6,7 +6,7 @@ import pickle
 from cans2.genetic2 import mp_evolver, gen_imag_neigh_guesses, evaluate_with_grad_fit
 from cans2.plate import Plate
 from cans2.model import CompModelBC
-from cans2.cans_funcs import dict_to_numpy
+from cans2.cans_funcs import dict_to_numpy, pickleable
 
 
 # load plate data from json.
@@ -27,19 +27,14 @@ plate_kwargs = {
         },
 }
 
-
-
-# b_guess = 45.0    # Dummy value
+model = CompModelBC()
 imag_neigh_kwargs = {
     "plate": Plate(**plate_kwargs),    # Do not set rr or will not pickle.
-    "model": CompModelBC(),
+    "plate_model": model.name,    # Cannot pickle the actual model
     "C_ratio": 1e-4,    # Guess of init_cells/final_cells.
     "kn_start": 0.0,
     "kn_stop": 2.0,
     "kn_num": 21,
-    # "area_ratio": 1.5,    # Initial dummy value.
-    # # ['kn1', 'kn2', 'b-', 'b+', 'b']
-    # "imag_neigh_params": np.array([1.0, 1.0, 0.0, b_guess*1.5, b_guess]),
     "area_ratio": np.nan,
     "imag_neigh_params": np.array([1.0, 1.0, 0.0, np.nan, np.nan]),
     "no_neighs": None,    # If None calculated as np.ceil(C_f_max/N_0_guess).
@@ -56,7 +51,7 @@ gen_kwargs = {
 
 eval_kwargs = {
     "plate_kwargs": plate_kwargs,
-    "model": CompModelBC(),
+    "model": model.name,    # Cannot pickle the actual model.
     "bounds": data["bounds"],
 }
 
@@ -66,5 +61,6 @@ args = {
 }
 
 final_pop = mp_evolver(gen_imag_neigh_guesses, evaluate_with_grad_fit,
-                       data["bounds"], args)
-# What other kwargs do we need?
+                       data["bounds"], args, cpus=4, pop_size=4, max_evals=100,
+                       mut_rate=0.25)
+print(max(final_pop))
