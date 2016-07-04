@@ -2,6 +2,8 @@ import time
 import random
 import inspyred
 
+import numpy as np
+
 
 from cans2.plate import Plate
 
@@ -48,7 +50,9 @@ def gen_random_uniform_log_C(random, args):
     return params
 
 
-def generete_params_from_guesses(random, args):
+# This will be quite slow for a large population. Can we use
+# multiprocessing?
+def gen_imag_neigh_guesses(random, args):
     """Generate parameters from imaginary neighbour guesses.
 
     These guesses are obtained from "quick" fits of a simplified
@@ -61,10 +65,13 @@ def generete_params_from_guesses(random, args):
 
     """
     # Random area_ratio and C_ratio.
-    area_range = args.get("area_range")
-    C_range = args.get("C_range")
-    b_range = args.get("b_range")
-    area_ratio = random.uniform(low=area_range[0], high=area_range[1])
+    gen_kwargs = args.get("gen_kwargs")
+
+    area_range = gen_kwargs("area_range")
+    C_range = gen_kwargs("C_range")
+    b_range = gen_kwargs("b_range")
+
+    area_ratio = random.uniform(area_range[0], area_range[1])
     C_0_mantissa, C_0_exp = frexp_10(C_range)
     exponent = random.uniform(low=C_0_exp[0], high=C_0_exp[1])
     C_ratio = C_0_matissa[0]*10.0**exponent
@@ -72,7 +79,7 @@ def generete_params_from_guesses(random, args):
     # could also randomize the mean and variance.
     b_guess = random.uniform(low=b_range[0], high=b_range[1])
 
-    guess_kwargs = args.get("imag_neigh_kwargs")    # Obviously do not unpack.
+    guess_kwargs = gen_kwargs("imag_neigh_kwargs")    # Obviously do not unpack.
     guess_kwargs["area_ratio"] = area_ratio
     guess_kwargs["C_ratio"] = C_ratio
     guess_kwargs["imag_neigh_params"][-2:] = [b_guess*1.5, b_guess]
@@ -109,23 +116,6 @@ def get_imag_neigh_args(plate, plate_model, C_ratio=1e-4, C_doubt=1e3,
 
 
 # Functions for evaluating the candidates.
-
-# Can we use the decorator @inspyred.ec.evaluator for this and maybe
-# parallize? Alternatively, we could use each candidate as an initial
-# guess for gradient fitting or generate each candidate from gradient
-# fits.
-def evaluate_fit(candidates, args):
-    # Evaluate the objective function for each set of canditate
-    # parameters and return this as the fitness. Here fitter and plate
-    # are defined outside the scope of the function.
-    fitter = args.get("cans_fitter")
-    plate = args.get("plate")
-    return [fitter._rr_obj(plate, cs) for cs in candidates]
-
-# Can we use the decorator @inspyred.ec.evaluator for this and maybe
-# parallize? Alternatively, we could use each candidate as an initial
-# guess for gradient fitting or generate each candidate from gradient
-# fits.
 def evaluate_fit(candidates, args):
     # Evaluate the objective function for each set of canditate
     # parameters and return this as the fitness. Here fitter and plate
@@ -135,35 +125,55 @@ def evaluate_fit(candidates, args):
     return [fitter._rr_obj(plate, cs) for cs in candidates]
 
 
-
-# @inspyred.ec.utilities.memoize(maxlen=100)
+# @inspyred.ec.utilities.memoize(maxlen=100)    # cache up to last 100 return values.
 @inspyred.ec.evaluators.evaluator
 def evaluate_with_grad_fit(candidate, args):
     """Gradient fitting using a candidate initial guess.
 
-    For multiprocessing, args must be pickleable. Numpy arrays and (I
-    assume) Swig/RoadRunner objects are not pickleable so I have to
-    create new Plate objects. This has a low overhead compared to the
-    minimization and is a lot easier than finding ways to pickle the
-    objects/methods.
+    For multiprocessing, args must be
+    pickleable. SwigPyObject/RoadRunner objects are not pickleable so
+    I have to create new Plate objects and set the roadrunner
+    attribute each time (or rewrite Plate so that the RoadRunner
+    object is never an attribute). This has a low overhead compared to
+    the minimization and is a lot easier than finding ways to pickle
+    the objects/methods.
 
     """
-    # plate_kwargs should be a dictionary of "rows", "cols", and the
-    # subdictionary "data". "data" should contain "times", "c_meas",
-    # and "empties" as lists not numpy arrays. We may have to convert
-    # to numpy array in Plate.__init__.
-    plate = Plate(**args.get("plate_kwargs"))
-    model = args.get("model")
+    eval_kwargs = args.get("eval_kwargs")
+    plate = Plate(**eval_kwargs["plate_kwargs"])
+    model = eval_kwargs["model"]
     plate.set_rr_model(model, candidate)
     # Now need to fit using.
-    bounds = args.get("bounds")
+    bounds = eval_kwargs["bounds"]
     est = plate.fit_model(model, param_guess=candidate, bounds=bounds,
                           rr=True, minimizer_opts={"disp": False})
-    candidate.fitted_params = list(est.x)
+    candidate.fitted_params = est.x
     return est.fun
 
 
+def mp_evolver(generator, evaluator, bounds, args,
+               cpus=4, pop_size=2, max_evals=100, mut_rate=0.25):
+    """Multiprocessing using an evolutionary strategy."""
+    seed = int(time.time())
+    rand = random.Random(seed)
+    with open("seeds.txt", 'a') as f:
+        f.write("{0}\n".format(seed))
+    es = inspyred.ec.ES(rand)
+    es.observer = inspyred.ec.observers.stats_observer
+    es.terminator = [inspyred.ec.terminators.evaluation_termination,
+                     inspyred.ec.terminators.diversity_termination]
 
-
+    final_pop = es.evolve(generator=generator,
+                          evaluator=inspyred.ec.evaluators.parallel_evaluation_mp,
+                          mp_evaluator=evaluator,
+                          mp_num_cpus=cpus,
+                          pop_size=pop_size,
+                          maximize=False,
+                          bounder=inspyred.ec.Bounder(bounds[:, 0], bounds[:, 1]),
+                          max_evaluations=max_evals,
+                          mutation_rate=mut_rate,
+                          # Other arguments
+                          **args)
+    return final_pop
 
 # Also want to try a particle swarm
