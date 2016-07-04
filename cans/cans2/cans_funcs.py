@@ -5,6 +5,7 @@ import json
 import os
 import sys
 import contextlib
+import pickle
 
 
 from math import log10, floor
@@ -110,6 +111,25 @@ def frexp_10(x):
     """
     exp = np.floor(np.log10(x))
     return x/10.0**exp, exp
+
+
+def pickleable(dct, k=None):
+    """Recursively try to pickle values in a nested dict.
+
+    Raise TypeError for the first unpickleable value found and print
+    the key. Has no effect if dct is pickleable.
+
+    """
+    try:
+        assert isinstance(dct, dict)
+    except AssertionError:
+        try:
+            pickle.dumps(dct)
+        except TypeError:
+            raise TypeError, "Value for {0} cannot be pickled".format(k)
+    else:
+        for key, val in dct.items():
+            pickleable(val, key)
 
 
 
