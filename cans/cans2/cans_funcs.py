@@ -132,9 +132,10 @@ def pickleable(dct, k=[]):
             pickle.dumps(dct)
         except TypeError:
             if isinstance(k, list):
-                raise TypeError, "{0} object is not pickleable".format(type(dct))
+                raise TypeError, "{0} object cannot be pickled".format(type(dct))
             else:
-                raise TypeError, "Value for {0} cannot be pickled".format(k)
+                raise TypeError, "Value for '{0}' cannot be pickled".format(k)
+
 
 
 
