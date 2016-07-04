@@ -141,9 +141,11 @@ def evaluate_fit(candidates, args):
 def evaluate_with_grad_fit(candidate, args):
     """Gradient fitting using a candidate initial guess.
 
-    For multiprocessing, args must be pickleable. Numpy arrays and
-    probably also the swig objects in the RoadRunner objects are not
-    pickleable so I have to create new Plate objects.
+    For multiprocessing, args must be pickleable. Numpy arrays and (I
+    assume) Swig/RoadRunner objects are not pickleable so I have to
+    create new Plate objects. This has a low overhead compared to the
+    minimization and is a lot easier than finding ways to pickle the
+    objects/methods.
 
     """
     # plate_kwargs should be a dictionary of "rows", "cols", and the
@@ -155,6 +157,13 @@ def evaluate_with_grad_fit(candidate, args):
     plate.set_rr_model(model, candidate)
     # Now need to fit using.
     bounds = args.get("bounds")
-    fitness = plate.fit_model(model, param_guess=candidate, bounds=bounds,
-                              rr=True, minimizer_opts={"disp": False})
-    return fitness
+    est = plate.fit_model(model, param_guess=candidate, bounds=bounds,
+                          rr=True, minimizer_opts={"disp": False})
+    candidate.fitted_params = list(est.x)
+    return est.fun
+
+
+
+
+
+# Also want to try a particle swarm
