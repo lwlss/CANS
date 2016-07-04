@@ -121,16 +121,13 @@ def pickleable(dct, k=None):
 
     """
     try:
-        assert isinstance(dct, dict)
-    except AssertionError:
+        for key, val in dct.items():
+            pickleable(val, key)
+    except AttributeError:
         try:
             pickle.dumps(dct)
         except TypeError:
             raise TypeError, "Value for {0} cannot be pickled".format(k)
-    else:
-        for key, val in dct.items():
-            pickleable(val, key)
-
 
 
 #####################
