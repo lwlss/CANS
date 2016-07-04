@@ -113,11 +113,15 @@ def frexp_10(x):
     return x/10.0**exp, exp
 
 
-def pickleable(dct, k=None):
+def pickleable(dct, k=[]):
     """Recursively try to pickle values in a nested dict.
 
     Raise TypeError for the first unpickleable value found and print
     the key. Has no effect if dct is pickleable.
+
+    k : A dictionary key. An empty list, invalid as a dictionary key,
+    is used as a default argument so that we can still print a useful
+    error message when the supplied object is not a dictionary.
 
     """
     try:
@@ -127,7 +131,12 @@ def pickleable(dct, k=None):
         try:
             pickle.dumps(dct)
         except TypeError:
-            raise TypeError, "Value for {0} cannot be pickled".format(k)
+            if isinstance(k, list):
+                raise TypeError, "{0} object is not pickleable".format(type(dct))
+            else:
+                raise TypeError, "Value for {0} cannot be pickled".format(k)
+
+
 
 
 #####################
