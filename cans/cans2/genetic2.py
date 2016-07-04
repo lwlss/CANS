@@ -1,12 +1,13 @@
+import numpy as np
 import time
 import random
 import inspyred
 
-import numpy as np
-
 
 from cans2.plate import Plate
-
+from cans2.cans_funcs import frexp_10
+from cans2.guesser import fit_imag_neigh
+from cans2.model import CompModel, CompModelBC
 
 # Generator functions for evolutionary strategy.
 def gen_random_uniform(random, args):
@@ -65,27 +66,34 @@ def gen_imag_neigh_guesses(random, args):
 
     """
     # Random area_ratio and C_ratio.
+    print(args)
+
     gen_kwargs = args.get("gen_kwargs")
 
-    area_range = gen_kwargs("area_range")
-    C_range = gen_kwargs("C_range")
-    b_range = gen_kwargs("b_range")
+    area_range = gen_kwargs["area_range"]
+    C_range = gen_kwargs["C_range"]
+    b_range = gen_kwargs["b_range"]
 
     area_ratio = random.uniform(area_range[0], area_range[1])
     C_0_mantissa, C_0_exp = frexp_10(C_range)
-    exponent = random.uniform(low=C_0_exp[0], high=C_0_exp[1])
-    C_ratio = C_0_matissa[0]*10.0**exponent
+    exponent = random.uniform(C_0_exp[0], C_0_exp[1])
+    C_ratio = C_0_mantissa[0]*10.0**exponent
     # Random uniform. We could use N(50, 50) (clipped above zero) and
     # could also randomize the mean and variance.
-    b_guess = random.uniform(low=b_range[0], high=b_range[1])
+    b_guess = random.uniform(b_range[0], b_range[1])
 
-    guess_kwargs = gen_kwargs("imag_neigh_kwargs")    # Obviously do not unpack.
+    potential_models = [CompModel(), CompModelBC()]
+    for model in potential_models:
+        if gen_kwargs["imag_neigh_kwargs"]["plate_model"] == model.name:
+            gen_kwargs["imag_neigh_kwargs"]["plate_model"] = model
+
+    guess_kwargs = gen_kwargs["imag_neigh_kwargs"]    # Obviously do not unpack.
     guess_kwargs["area_ratio"] = area_ratio
     guess_kwargs["C_ratio"] = C_ratio
     guess_kwargs["imag_neigh_params"][-2:] = [b_guess*1.5, b_guess]
 
     guess, guesser = fit_imag_neigh(**guess_kwargs)
-    return guess
+    return list(guess)    # AttributeError: 'numpy.ndarray' object has no attribute 'extend'.
 
 
 # args required for generate_params_from_guesses. Can set all of the
@@ -141,6 +149,13 @@ def evaluate_with_grad_fit(candidate, args):
     """
     eval_kwargs = args.get("eval_kwargs")
     plate = Plate(**eval_kwargs["plate_kwargs"])
+
+    # Necessary for multiprocessing as Models cannot be pickled.
+    potential_models = [CompModel(), CompModelBC()]
+    for model in potential_models:
+        if eval_kwargs["model"] == model.name:
+            eval_kwargs["model"] = model
+
     model = eval_kwargs["model"]
     plate.set_rr_model(model, candidate)
     # Now need to fit using.
