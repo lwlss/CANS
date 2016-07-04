@@ -5,7 +5,7 @@ import inspyred
 
 
 from cans2.plate import Plate
-from cans2.cans_funcs import frexp_10
+from cans2.cans_funcs import frexp_10, pickleable
 from cans2.guesser import fit_imag_neigh
 from cans2.model import CompModel, CompModelBC
 
@@ -24,6 +24,8 @@ def gen_random_uniform(random, args):
 
     """
     bounds = args.get("bounds")
+    # Random uniform. For b we could use N(mean, var) (clipped above zero) and
+    # could even randomize mean and var.
     params = [random.uniform(l, h) for l, h in zip(bounds[:, 0], bounds[:, 1])]
     return params
 
@@ -65,9 +67,6 @@ def gen_imag_neigh_guesses(random, args):
     case of cell ratios samples are taken from the logspace.
 
     """
-    # Random area_ratio and C_ratio.
-    print(args)
-
     gen_kwargs = args.get("gen_kwargs")
 
     area_range = gen_kwargs["area_range"]
@@ -78,10 +77,9 @@ def gen_imag_neigh_guesses(random, args):
     C_0_mantissa, C_0_exp = frexp_10(C_range)
     exponent = random.uniform(C_0_exp[0], C_0_exp[1])
     C_ratio = C_0_mantissa[0]*10.0**exponent
-    # Random uniform. We could use N(50, 50) (clipped above zero) and
-    # could also randomize the mean and variance.
     b_guess = random.uniform(b_range[0], b_range[1])
 
+    # Necessary for multiprocessing as Models cannot be pickled.
     potential_models = [CompModel(), CompModelBC()]
     for model in potential_models:
         if gen_kwargs["imag_neigh_kwargs"]["plate_model"] == model.name:
@@ -162,13 +160,14 @@ def evaluate_with_grad_fit(candidate, args):
     bounds = eval_kwargs["bounds"]
     est = plate.fit_model(model, param_guess=candidate, bounds=bounds,
                           rr=True, minimizer_opts={"disp": False})
-    candidate.fitted_params = est.x
+    # candidate.fitted_params = est.x   # Cannot add attribute to a list.
     return est.fun
 
 
 def mp_evolver(generator, evaluator, bounds, args,
                cpus=4, pop_size=2, max_evals=100, mut_rate=0.25):
     """Multiprocessing using an evolutionary strategy."""
+    pickleable(args)    # Necessary for multiprocessing.
     seed = int(time.time())
     rand = random.Random(seed)
     with open("seeds.txt", 'a') as f:
@@ -187,7 +186,7 @@ def mp_evolver(generator, evaluator, bounds, args,
                           bounder=inspyred.ec.Bounder(bounds[:, 0], bounds[:, 1]),
                           max_evaluations=max_evals,
                           mutation_rate=mut_rate,
-                          # Other arguments
+                          # Other arguments for generator and evaluator.
                           **args)
     return final_pop
 
