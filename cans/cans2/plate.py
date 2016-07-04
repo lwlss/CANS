@@ -146,7 +146,7 @@ class BasePlate(object):
             # experiment. absolute and relative are set to the same
             # values used by Scipy's odeint.
             a[i+1] = self.rr.simulate(t0, t1, 1,
-                                      absolute=1.49012e-8,    # Affects speed.
+                                      absolute=1.49012e-8,    # Affects speed and accuracy.
                                       relative=1.49012e-8,
                                       mininumTimeStep=1.0e-8,
                                       maximumNumSteps=40000)[1][1:]
