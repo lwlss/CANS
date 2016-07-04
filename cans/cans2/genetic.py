@@ -96,7 +96,6 @@ def gen_random_uniform(random, args):
     """
     bounds = args.get("bounds")
     params = [random.uniform(l, h) for l, h in zip(bounds[:, 0], bounds[:, 1])]
-    print(len(params))
     return params
 
 
@@ -116,10 +115,10 @@ def gen_random_uniform_log_C(random, args):
 
     """
     bounds = args.get("bounds")
-    params = random.uniform(low=bounds[:, 0], high=bounds[:, 1])
+    params = [random.uniform(l, h) for l, h in zip(bounds[:, 0], bounds[:, 1])]
     C_0_mantissa, C_0_exp = frexp_10(bounds[0])
-    exponent = random.uniform(low=C_0_exp[0], high=C_0_exp[1])
-    params[0] = C_0_matissa[0]*10.0**exponent
+    exponent = random.uniform(C_0_exp[0], C_0_exp[1])
+    params[0] = C_0_mantissa[0]*10.0**exponent
     return params
 
 
@@ -199,10 +198,9 @@ def evaluate_fit(candidates, args):
     # parameters and return this as the fitness. Here fitter and plate
     # are defined outside the scope of the function.
     fitter = args.get("cans_fitter")
-    print(fitter)
     plate = args.get("plate")
-    print(plate)
     return [fitter._rr_obj(plate, cs) for cs in candidates]
+
 
 # Best to observe fitting by the plot of the best fit. Can either plot
 # (time consuming) or just print the value of the objective
@@ -239,7 +237,7 @@ plate.sim_amounts = data["sim_amounts"]
 plate.grad_est_x = data["grad_est"]
 plate.set_rr_model(CompModelBC(), plate.sim_params)
 bounds = data["bounds"]
-bounds[4:] = np.array([0, 500])    # Need an upper bound for genetic algorithm
+bounds[4:] = np.array([0, 200])    # Need an upper bound for genetic algorithm
 guess = data["guess"]
 model = CompModelBC()
 
@@ -258,34 +256,36 @@ es.observer = inspyred.ec.observers.stats_observer
 es.terminator = [inspyred.ec.terminators.evaluation_termination,
                  inspyred.ec.terminators.diversity_termination]
 
-cans_kwargs = {
-    "bounds": bounds,
-    "plate": plate,
-    "cans_fitter": Fitter(CompModelBC()),
-#    "cans_model": CompModelBC(),
-}
-evolve_kwargs = {
-    "generator": gen_random_uniform,
-    "evaluator": inspyred.ec.evaluators.parallel_evaluation_mp,
-    "mp_evaluator": evaluate_fit,
-    "mp_num_cpus": 4,
-    "pop_size": 10,
-    "maximize": False,
-    "bounder": inspyred.ec.Bounder(bounds[:, 0], bounds[:, 1]),
-    "max_evaluations": 1000,
-    "mutation_rate": 0.25,
-    # Need to pack args for other functions inside a dictionary called args.
-}
+
+print(bounds)
+# cans_kwargs = {
+#     "bounds": bounds,
+#     "plate": plate,
+#     "cans_fitter": Fitter(CompModelBC()),
+# #    "cans_model": CompModelBC(),
+# }
+# evolve_kwargs = {
+#     "generator": gen_random_uniform,
+#     "evaluator": inspyred.ec.evaluators.parallel_evaluation_mp,
+#     "mp_evaluator": evaluate_fit,
+#     "mp_num_cpus": 4,
+#     "pop_size": 100,
+#     "maximize": False,
+#     "bounder": inspyred.ec.Bounder(bounds[:, 0], bounds[:, 1]),
+#     "max_evaluations": 10000,
+#     "mutation_rate": 0.25,
+#     # Need to pack args for other functions inside a dictionary called args.
+# }
 # evolve_kwargs.update(cans_kwargs)
-final_pop = es.evolve(generator=gen_random_uniform,
+final_pop = es.evolve(generator=gen_random_uniform_log_C,
                       evaluator=evaluate_fit,
                       # evaluator=inspyred.ec.evaluators.parallel_evaluation_mp,
                       # mp_evaluator=evaluate_fit,
                       # mp_num_cpus=4,
-                      pop_size=10,
+                      pop_size=100,
                       maximize=False,
                       bounder=inspyred.ec.Bounder(bounds[:, 0], bounds[:, 1]),
-                      max_evaluations=1000,
+                      max_evaluations=100000,
                       mutation_rate=0.25,
                       bounds=bounds,
                       plate=plate,
@@ -297,5 +297,6 @@ best_params = best.candidate
 print(best_params)
 print(len(best_params))
 print(plate.no_cultures)
+print(sum(best_params[13:]))
 plotter = Plotter(model)
-plotter.plot_est_rr(plate, list(best_params))
+plotter.plot_est_rr(plate, list(best_params[:13]))
