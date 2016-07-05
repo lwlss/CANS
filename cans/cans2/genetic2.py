@@ -177,6 +177,8 @@ def evaluate_b_candidate(candidate, args):
     models = [CompModel(), CompModelBC()]    # potential models.
     model = next((m for m in models if m.name == eval_kwargs["model"]))
     plate.set_rr_model(model, params)
+
+    fitter = eval_kwargs["fitter"]
     return fitter._rr_obj(plate, params)
 
 
