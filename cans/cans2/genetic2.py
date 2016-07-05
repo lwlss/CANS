@@ -9,6 +9,35 @@ from cans2.cans_funcs import frexp_10, pickleable
 from cans2.guesser import fit_imag_neigh
 from cans2.model import CompModel, CompModelBC
 
+
+# Packaging as kwargs for multiprocessing.
+def get_plate_kwargs(dct):
+    """Create plate making kwargs from a dict.
+
+    dct : A dictionary containing, possibly amongst other things, key
+    value pairs required for instantiating a Plate object.
+
+    The returned "plate_kwargs" of use in multiprocessing. If the
+    Plate cannot be pickled, it must be created inside each process
+    from some passed arguments.
+
+    """
+    try:
+        dct["empties"]
+    except KeyError:
+        dct["empties"] = []
+    plate_kwargs = {
+        "rows": dct["rows"],
+        "cols": dct["cols"],
+        "data": {
+            "times": dct["times"],
+            "c_meas": dct["c_meas"],
+            "empties": dct["empties"],
+        },
+    }
+    return plate_kwargs
+
+
 # Generator functions for evolutionary strategy.
 def gen_random_uniform(random, args):
     """Generate random parameters between the bounds.
@@ -132,8 +161,8 @@ def evaluate_fit(candidates, args):
 
 
 @inspyred.ec.evaluators.evaluator
-def evaluate_b_candidates(candidate, args):
-    """Evaluate the objective function of candidate b parameters.
+def evaluate_b_candidate(candidate, args):
+    """Evaluate the objective function of a candidate of b parameters.
 
     Plate level parameters should be contained in the dictionary
     "eval_kwargs" and passed in through args. They can be simply a
@@ -143,13 +172,12 @@ def evaluate_b_candidates(candidate, args):
     eval_kwargs = args.get("eval_kwargs")
     plate = Plate(**eval_kwargs["plate_kwargs"])    # Can't I pickle the plate?
 
-    plate_lvl = eval_kwargs["plate_lvl"]
-    params = np.concatenate((plate_lvl, candidate))
+    params = np.concatenate((eval_kwargs["plate_lvl"], candidate))
     # Necessary for multiprocessing as Models cannot be pickled.
     models = [CompModel(), CompModelBC()]    # potential models.
     model = next((m for m in models if m.name == eval_kwargs["model"]))
     plate.set_rr_model(model, params)
-
+    return fitter._rr_obj(plate, params)
 
 
 # @inspyred.ec.utilities.memoize(maxlen=100)    # cache up to last 100 return values.
