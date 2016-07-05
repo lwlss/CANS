@@ -1,6 +1,5 @@
 import json
 import numpy as np
-import pickle
 
 
 from cans2.genetic2 import mp_evolver, gen_imag_neigh_guesses, evaluate_with_grad_fit
