@@ -137,9 +137,6 @@ def pickleable(dct, k=[]):
                 raise TypeError, "Value for '{0}' cannot be pickled".format(k)
 
 
-
-
-
 #####################
 # Hopefully not using. Delete before submission. Just redirect output
 # to devnull when executed with bash as less os dependent.
