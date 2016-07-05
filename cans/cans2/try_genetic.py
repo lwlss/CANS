@@ -87,14 +87,15 @@ class PickleableRoadRunner(roadrunner.RoadRunner,  PickleableSWIG):
         self.args = args
         roadrunner.RoadRunner.__init__(self)
 
-class PickleableRRModel(roadrunner.RoadRunner.,  PickleableSWIG):
+class PickleableRRModel(roadrunner.RoadRunner,  PickleableSWIG):
     # http://stackoverflow.com/a/9325185
     def __init__(self, *args):
         self.args = args
         roadrunner.RoadRunner.__init__(self)
 
 rr = plate.rr
-pickleable_rr = PickleableRoadRunner()
+print(rr)
+pickleable_rr = PickleableRoadRunner()   # Give it some sbml and see if the integrator is not NUll
 rr = pickle.loads(pickle.dumps(pickleable_rr))
 print(rr)
 # pickle.dumps(rr)
