@@ -131,6 +131,27 @@ def evaluate_fit(candidates, args):
     return [fitter._rr_obj(plate, cs) for cs in candidates]
 
 
+@inspyred.ec.evaluators.evaluator
+def evaluate_b_candidates(candidate, args):
+    """Evaluate the objective function of candidate b parameters.
+
+    Plate level parameters should be contained in the dictionary
+    "eval_kwargs" and passed in through args. They can be simply a
+    random guess or generated and evolved at a higher level.
+
+    """
+    eval_kwargs = args.get("eval_kwargs")
+    plate = Plate(**eval_kwargs["plate_kwargs"])    # Can't I pickle the plate?
+
+    plate_lvl = eval_kwargs["plate_lvl"]
+    params = np.concatenate((plate_lvl, candidate))
+    # Necessary for multiprocessing as Models cannot be pickled.
+    models = [CompModel(), CompModelBC()]    # potential models.
+    model = next((m for m in models if m.name == eval_kwargs["model"]))
+    plate.set_rr_model(model, params)
+
+
+
 # @inspyred.ec.utilities.memoize(maxlen=100)    # cache up to last 100 return values.
 @inspyred.ec.evaluators.evaluator
 def evaluate_with_grad_fit(candidate, args):
@@ -149,13 +170,10 @@ def evaluate_with_grad_fit(candidate, args):
     plate = Plate(**eval_kwargs["plate_kwargs"])
 
     # Necessary for multiprocessing as Models cannot be pickled.
-    potential_models = [CompModel(), CompModelBC()]
-    for model in potential_models:
-        if eval_kwargs["model"] == model.name:
-            eval_kwargs["model"] = model
-
-    model = eval_kwargs["model"]
+    models = [CompModel(), CompModelBC()]    # potential models.
+    model = next((m for m in models if m.name == eval_kwargs["model"]))
     plate.set_rr_model(model, candidate)
+
     # Now need to fit using.
     bounds = eval_kwargs["bounds"]
     est = plate.fit_model(model, param_guess=candidate, bounds=bounds,
