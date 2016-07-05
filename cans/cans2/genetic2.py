@@ -8,6 +8,7 @@ from cans2.plate import Plate
 from cans2.cans_funcs import frexp_10, pickleable
 from cans2.guesser import fit_imag_neigh
 from cans2.model import CompModel, CompModelBC
+from cans2.fitter import Fitter
 
 
 # Packaging as kwargs for multiprocessing.
@@ -52,7 +53,7 @@ def gen_random_uniform(random, args):
     in linear space.
 
     """
-    bounds = args.get("bounds")
+    bounds = args.get("gen_kwargs")["bounds"]
     # Random uniform. For b we could use N(mean, var) (clipped above zero) and
     # could even randomize mean and var.
     params = [random.uniform(l, h) for l, h in zip(bounds[:, 0], bounds[:, 1])]
@@ -123,31 +124,31 @@ def gen_imag_neigh_guesses(random, args):
     return list(guess)    # AttributeError: 'numpy.ndarray' object has no attribute 'extend'.
 
 
-# args required for generate_params_from_guesses. Can set all of the
-# below values.
-def get_imag_neigh_args(plate, plate_model, C_ratio=1e-4, C_doubt=1e3,
-                        b_guess=45.0, area_range=np.array([1.0, 2.0]),
-                        b_range=np.array([0.0, 200.0])):
-    # Create args needed for below function (to be passed in args).
-    imag_neigh_kwargs = {
-        "plate": plate,
-        "plate_model": plate_model,
-        "C_ratio": C_ratio,    # Guess of init_cells/final_cells.
-        "kn_start": 0.0,
-        "kn_stop": 2.0,
-        "kn_num": 21,
-        "area_ratio": 1.5,    # Initial dummy val.
-        # ['kn1', 'kn2', 'b-', 'b+', 'b']
-        "imag_neigh_params": np.array([1.0, 1.0, 0.0, b_guess*1.5, b_guess]),
-        "no_neighs": None,    # If None calculated as np.ceil(C_f_max/N_0_guess).
-    }
-    args = {
-        "area_range": area_range,
-        "C_range": np.array([C_ratio/C_doubt, C_ratio*C_doubt]),
-        "b_range": b_range,
-        "imag_neigh_kwargs": imag_neigh_kwargs,
-    }
-    return args
+# # args required for generate_params_from_guesses. Can set all of the
+# # below values.
+# def get_imag_neigh_args(plate, plate_model, C_ratio=1e-4, C_doubt=1e3,
+#                         b_guess=45.0, area_range=np.array([1.0, 2.0]),
+#                         b_range=np.array([0.0, 200.0])):
+#     # Create args needed for below function (to be passed in args).
+#     imag_neigh_kwargs = {
+#         "plate": plate,
+#         "plate_model": plate_model,
+#         "C_ratio": C_ratio,    # Guess of init_cells/final_cells.
+#         "kn_start": 0.0,
+#         "kn_stop": 2.0,
+#         "kn_num": 21,
+#         "area_ratio": 1.5,    # Initial dummy val.
+#         # ['kn1', 'kn2', 'b-', 'b+', 'b']
+#         "imag_neigh_params": np.array([1.0, 1.0, 0.0, b_guess*1.5, b_guess]),
+#         "no_neighs": None,    # If None calculated as np.ceil(C_f_max/N_0_guess).
+#     }
+#     args = {
+#         "area_range": area_range,
+#         "C_range": np.array([C_ratio/C_doubt, C_ratio*C_doubt]),
+#         "b_range": b_range,
+#         "imag_neigh_kwargs": imag_neigh_kwargs,
+#     }
+#     return args
 
 
 # Functions for evaluating the candidates.
@@ -155,7 +156,7 @@ def evaluate_fit(candidates, args):
     # Evaluate the objective function for each set of canditate
     # parameters and return this as the fitness. Here fitter and plate
     # are defined outside the scope of the function.
-    fitter = args.get("cans_fitter")
+    fitter = args.get("fitter")
     plate = args.get("plate")
     return [fitter._rr_obj(plate, cs) for cs in candidates]
 
@@ -171,14 +172,12 @@ def evaluate_b_candidate(candidate, args):
     """
     eval_kwargs = args.get("eval_kwargs")
     plate = Plate(**eval_kwargs["plate_kwargs"])    # Can't I pickle the plate?
-
     params = np.concatenate((eval_kwargs["plate_lvl"], candidate))
     # Necessary for multiprocessing as Models cannot be pickled.
     models = [CompModel(), CompModelBC()]    # potential models.
     model = next((m for m in models if m.name == eval_kwargs["model"]))
     plate.set_rr_model(model, params)
-
-    fitter = eval_kwargs["fitter"]
+    fitter = Fitter(CompModelBC())
     return fitter._rr_obj(plate, params)
 
 
