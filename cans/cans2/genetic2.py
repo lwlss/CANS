@@ -171,14 +171,26 @@ def evaluate_b_candidate(candidate, args):
 
     """
     eval_kwargs = args.get("eval_kwargs")
-    plate = Plate(**eval_kwargs["plate_kwargs"])    # Can't I pickle the plate?
+    plate = eval_kwargs["plate"]
     params = np.concatenate((eval_kwargs["plate_lvl"], candidate))
     # Necessary for multiprocessing as Models cannot be pickled.
     models = [CompModel(), CompModelBC()]    # potential models.
     model = next((m for m in models if m.name == eval_kwargs["model"]))
+
+    t0 = time.time()
     plate.set_rr_model(model, params)
-    fitter = Fitter(CompModelBC())
-    return fitter._rr_obj(plate, params)
+    t1 = time.time()
+    print("set", t1-t0)
+
+    fitter = eval_kwargs["fitter"]
+    fitter.model = model
+
+    t0 = time.time()
+    fitness = fitter._rr_obj(plate, params)
+    t1 = time.time()
+    print("solve", t1-t0)
+
+    return fitness
 
 
 # @inspyred.ec.utilities.memoize(maxlen=100)    # cache up to last 100 return values.
