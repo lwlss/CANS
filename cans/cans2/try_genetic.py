@@ -73,35 +73,108 @@ class PickleablePlate(Plate, PickleableSWIG):
         Plate.__init__(self, **self.args[0])
 
 
-pickleable_model = PickleableCompModelBC()
-pickleable(pickleable_model)
 
-plate = PickleablePlate(get_plate_kwargs(data))    # Must send as an arg not **kwargs.
-plate.set_rr_model(pickleable_model, data["sim_params"])
+
 
 import pickle
-import roadrunner
-class PickleableRoadRunner(roadrunner.RoadRunner,  PickleableSWIG):
+
+class PickleableRoadRunner(roadrunner.RoadRunner, PickleableSWIG):
     # http://stackoverflow.com/a/9325185
     def __init__(self, *args):
         self.args = args
         roadrunner.RoadRunner.__init__(self)
 
-class PickleableRRModel(roadrunner.RoadRunner,  PickleableSWIG):
+class PickleableRRModel(roadrunner.RoadRunner, PickleableSWIG):
     # http://stackoverflow.com/a/9325185
     def __init__(self, *args):
         self.args = args
         roadrunner.RoadRunner.__init__(self)
 
-rr = plate.rr
-print(rr)
-pickleable_rr = PickleableRoadRunner()   # Give it some sbml and see if the integrator is not NUll
-rr = pickle.loads(pickle.dumps(pickleable_rr))
-print(rr)
+
+class PickleableCVODEIntegrator(roadrunner.Integrator, PickleableSWIG):
+    # http://stackoverflow.com/a/9325185
+    def __init__(self, *args):
+        self.args = args
+        roadrunner.Integrator.__init__(self)
+
+
+class PickleableExecutableModel(roadrunner.ExecutableModel, PickleableSWIG):
+    # http://stackoverflow.com/a/9325185
+    def __init__(self, *args):
+        self.args = args
+        roadrunner.ExecutableModel.__init__(self, *args)
+
+
+
+
+pic_model = PickleableCompModelBC()
+pickleable(pic_model)
+sbml = create_sbml(Plate(**get_plate_kwargs(data)), pic_model, data["sim_params"])
+
+
+# Unpickled RR
+pic_plate = PickleablePlate(get_plate_kwargs(data))    # Must send as an arg not **kwargs.
+pic_plate.set_rr_model(pic_model, data["sim_params"])
+
+
+print(pic_plate.rr.isModelLoaded())
+print(pic_plate.rr.model)
+print(pic_plate.rr.getCompiler())
+
+
+exec_model = roadrunner.ExecutableModel()
+print("exec model", exec_model)
+
+# exec_model = PickleableExecutableModel()
+
+exec_model = PickleableExecutableModel()
+print(exec_model)
+assert False
+
+sol1 = pic_plate.rr_solve()
+# print(pic_plate.rr)
+print("sol1", sol1)
+
+# Pickled RR
+pic_rr = PickleableRoadRunner(create_sbml(pic_plate, pic_model, data["sim_params"]))
+print(pic_rr.isModelLoaded())
+# pic_rr.setIntegrator("CVODE")
+# pic_rr.setModel()
+
+#pic_rr = pickle.loads(pickle.dumps(pic_rr))
+print(pic_rr.getCompiler())
+# print(pic_rr)
+# pic_rr.setIntegrator(PickleableCVODEIntegrator())
+# print(pic_rr)
+pic_plate.rr = pic_rr
+print(pic_plate.rr.model)
+
+t0 = time.time()
+pic_plate.rr.load(sbml)
+t1 = time.time()
+print("load", t1-t0)
+
+print(pic_plate.rr.model)
+
+sol2 = pic_plate.rr_solve()
+
+# print(sol1, sol2)
+assert False
+
+
+
+
+
+# roadrunner.CVODEIntegrator()
+
+#pickleable_rr = pickle.loads(pickle.dumps(pickleable_rr))
+
+print(pickleable_rr)
+assert False
 # pickle.dumps(rr)
 plate.rr = rr
 sol = plate.rr_solve()
-print(sol)
+# print(sol)
 
 dump = pickle.dumps(plate)
 # print(dump)
