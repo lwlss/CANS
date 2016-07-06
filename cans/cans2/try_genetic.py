@@ -1,5 +1,7 @@
+import time
 import json
 import numpy as np
+import roadrunner
 
 
 from cans2.genetic2 import get_plate_kwargs, mp_evolver, gen_random_uniform, evaluate_b_candidate
@@ -7,6 +9,7 @@ from cans2.plate import Plate
 from cans2.model import CompModelBC
 from cans2.cans_funcs import dict_to_numpy, pickleable
 from cans2.fitter import Fitter
+from cans2.make_sbml import create_sbml
 
 
 
