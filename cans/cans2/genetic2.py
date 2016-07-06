@@ -165,6 +165,15 @@ def evaluate_fit(candidates, args):
 def evaluate_b_candidate(candidate, args):
     """Evaluate the objective function of a candidate of b parameters.
 
+    Allows multiprocessing, but has a bit of an overhead because SWIG
+    objects produced by roadrunner cannot be pickled. I have been able
+    to wrap the RoadRunner class so that it can be pickled (see
+    http://stackoverflow.com/a/9325185) but not the attribute
+    RoadRunner.ExecutableModel. As a result the ExecutableModel must
+    be set inside the function using roadrunner.RoadRunner.load()
+    which is ~10x slower than solving for a full plate. Therefore more
+    than 10 cores will be needed to see any benefit.
+
     Plate level parameters should be contained in the dictionary
     "eval_kwargs" and passed in through args. They can be simply a
     random guess or generated and evolved at a higher level.
@@ -191,6 +200,19 @@ def evaluate_b_candidate(candidate, args):
     print("solve", t1-t0)
 
     return fitness
+
+
+def evaluate_b_candidates(candidates, args):
+    """Evaluate all b_canditates without multiprocessing."""
+    eval_kwargs = args.get("eval_kwargs")
+    plate = eval_kwargs["plate"]
+    plate_lvl = eval_kwargs["plate_lvl"]
+    params = (np.concatenate((plate_lvl, bs)) for bs in candidates)
+    # # Necessary for multiprocessing as Models cannot be pickled.
+    # models = [CompModel(), CompModelBC()]    # potential models.
+    # model = next((m for m in models if m.name == eval_kwargs["model"]))
+    fitter = eval_kwargs["fitter"]
+    return [fitter._rr_obj(plate, p) for p in params]
 
 
 # @inspyred.ec.utilities.memoize(maxlen=100)    # cache up to last 100 return values.
