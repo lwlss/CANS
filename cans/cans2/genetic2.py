@@ -211,7 +211,7 @@ def evaluate_b_candidates(candidates, args):
     # # Necessary for multiprocessing as Models cannot be pickled.
     # models = [CompModel(), CompModelBC()]    # potential models.
     # model = next((m for m in models if m.name == eval_kwargs["model"]))
-    fitter = eval_kwargs["fitter"]
+    fitter = eval_kwargs["fitter"]    # Should contain a Model attribute
     return [fitter._rr_obj(plate, p) for p in params]
 
 
