@@ -38,6 +38,10 @@ class Fitter(object):
     def _rr_obj(self, plate, params):
         """Return the objective function from RoadRunner simulations.
 
+        The C_0 parameter is scaled to the "true" value for solving. A
+        scaled C_0 is used for the minimizer so that absolute parmeter
+        values are reasonably close.
+
         The solver returns amounts for all species on the plate. There
         is an alternative method which just returns a user defined
         selection. params includes init amounts.
@@ -53,6 +57,25 @@ class Fitter(object):
         c_est = np.split(amount_est, self.model.no_species, axis=1)[0].flatten()
         # Zeros appear in here for empty plates but this shouldn't
         # have any effect.
+        err = np.sqrt(np.sum((plate.c_meas - c_est)**2))
+        return err
+
+
+    def _rr_obj_no_scaling(self, plate, params):
+        """Return the objective function from RoadRunner simulations.
+
+        C_0 parameters are not scaled.
+
+        The solver returns amounts for all species on the plate. There
+        is an alternative method which just returns a user defined
+        selection. params includes init amounts.
+
+        """
+        # There are multiple alternative Model methods for solving
+        # using RoadRunner. The specific method is stored as a
+        # Model attribute rr_solver.
+        amount_est = self.model.rr_solve(plate, params)
+        c_est = np.split(amount_est, self.model.no_species, axis=1)[0].flatten()
         err = np.sqrt(np.sum((plate.c_meas - c_est)**2))
         return err
 
