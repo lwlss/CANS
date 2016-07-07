@@ -70,14 +70,16 @@ def _get_plate_kwargs(dct):
     return plate_kwargs
 
 
-def make_evaluate_b_candidate_kwargs(data, model):
+def make_evaluate_b_candidate_kwargs(data, model, plate_lvl):
     """Make evalaluation kwargs for multiprocessing b_candidate evaluation.
 
     Corresponds to the function genetic.evaluate_b_candidate.
 
     data : A dictionary
 
-    model : A pickleable CANS Model instance
+    model : A pickleable CANS Model instance.
+
+    plate_lvl : An array of plate level parameters.
 
     The returned dictionary should be supplied in the call to evolve
     when using the evaluate_b_candidate evaluator for
@@ -87,12 +89,42 @@ def make_evaluate_b_candidate_kwargs(data, model):
 
     """
     plate = Plate(**_get_plate_kwargs(data))
-    plate.data_shape = np.array([len(plate.times), plate.no_cultures*model.no_species])
+    plate.data_shape = np.array([len(plate.times),
+                                 plate.no_cultures*model.no_species])
     plate.rr = PickleableRoadRunner()
-    mp_eval_kwargs = {
+    eval_kwargs = {
         "plate": plate,
         "fitter": Fitter(model),
-        "SBML": create_sbml(plate, model, data["sim_params"]),
+        "sbml": create_sbml(plate, model, data["sim_params"]),
+        "plate_lvl": plate_lvl,
     }
-    pickleable(mp_eval_kwargs)
-    return mp_eval_kwargs
+    pickleable(eval_kwargs)
+    return eval_kwargs
+
+
+def make_evaluate_b_candidates_kwargs(data, model, plate_lvl):
+    """Make evalaluation kwargs for in serial b_candidate evaluation.
+
+    Corresponds to the function genetic.evaluate_b_candidates. The
+    returned values in the dict eval_kwargs need not be pickleable.
+
+    data : A dictionary
+
+    model : A CANS Model instance.
+
+    plate_lvl : An array of plate level parameters.
+
+    The returned dictionary should be supplied in the call to evolve
+    when using the evaluate_b_candidates evaluator for serial
+    processing.
+
+    """
+    plate = Plate(**_get_plate_kwargs(data))
+    no_params = len(plate_lvl) + len(plate.no_cultures)
+    plate.set_rr_model(model, np.ones(no_params))    # Dummy params
+    eval_kwargs = {
+        "plate": plate,
+        "fitter": Fitter(model),
+        "plate_lvl": plate_lvl,
+    }
+    return eval_kwargs
