@@ -205,9 +205,36 @@ def evaluate_with_grad_fit(candidate, args):
     return est.fun
 
 
+def evolver(generator, evaluator, bounds, args,
+            pop_size=100, max_evals=1000,
+            tau=None, tau_prime=None, epsilon=0.00001):
+    """Run an evolutionary strategy using serial processing."""
+    seed = int(time.time())
+    rand = random.Random(seed)
+    with open("seeds.txt", 'a') as f:
+        f.write("{0}\n".format(seed))
+    es = inspyred.ec.ES(rand)
+    es.observer = inspyred.ec.observers.stats_observer
+    es.terminator = [inspyred.ec.terminators.evaluation_termination,
+                     inspyred.ec.terminators.diversity_termination]
+    final_pop = es.evolve(generator=generator,
+                          evaluator=evaluator,
+                          pop_size=pop_size,
+                          maximize=False,
+                          bounder=inspyred.ec.Bounder(bounds[:, 0], bounds[:, 1]),
+                          max_evaluations=max_evals,
+                          tau=tau,
+                          tau_prime=tau_prime,
+                          epsilon=epsilon,
+                          # Other arguments for generator and evaluator.
+                          **args)
+    return final_pop
+
+
 def mp_evolver(generator, evaluator, bounds, args,
-               cpus=4, pop_size=2, max_evals=100, mut_rate=0.25):
-    """Multiprocessing using an evolutionary strategy."""
+               cpus=4, pop_size=100, max_evals=100,
+               tau=None, tau_prime=None, epsilon=0.00001):
+    """Run an evolutionary strategy using multiprocessing."""
     pickleable(args)    # Necessary for multiprocessing.
     seed = int(time.time())
     rand = random.Random(seed)
@@ -217,7 +244,6 @@ def mp_evolver(generator, evaluator, bounds, args,
     es.observer = inspyred.ec.observers.stats_observer
     es.terminator = [inspyred.ec.terminators.evaluation_termination,
                      inspyred.ec.terminators.diversity_termination]
-
     final_pop = es.evolve(generator=generator,
                           evaluator=inspyred.ec.evaluators.parallel_evaluation_mp,
                           mp_evaluator=evaluator,
@@ -226,7 +252,9 @@ def mp_evolver(generator, evaluator, bounds, args,
                           maximize=False,
                           bounder=inspyred.ec.Bounder(bounds[:, 0], bounds[:, 1]),
                           max_evaluations=max_evals,
-                          mutation_rate=mut_rate,
+                          tau=tau,
+                          tau_prime=tau_prime,
+                          epsilon=epsilon,
                           # Other arguments for generator and evaluator.
                           **args)
     return final_pop
