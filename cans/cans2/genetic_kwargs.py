@@ -84,10 +84,10 @@ def _get_plate_kwargs(dct):
 #     return gen_kwargs
 
 
-def make_evaluate_b_candidate_kwargs(data, model, plate_lvl):
+def make_eval_b_candidate_kwargs(data, model, plate_lvl):
     """Make evalaluation kwargs for multiprocessing b_candidate evaluation.
 
-    Corresponds to the function genetic.evaluate_b_candidate.
+    Corresponds to the function genetic.eval_b_candidate.
 
     data : A dictionary
 
@@ -96,7 +96,7 @@ def make_evaluate_b_candidate_kwargs(data, model, plate_lvl):
     plate_lvl : An array of plate level parameters.
 
     The returned dictionary should be supplied in the call to evolve
-    when using the evaluate_b_candidate evaluator for
+    when using the eval_b_candidate evaluator for
     multiprocessing. Due to the overhead of loading SBML models, a
     large number of cores (>20) may be needed before any performance
     benefit is seen.
@@ -115,10 +115,10 @@ def make_evaluate_b_candidate_kwargs(data, model, plate_lvl):
     return eval_kwargs
 
 
-def make_evaluate_b_candidates_kwargs(data, model, plate_lvl):
+def make_eval_b_candidates_kwargs(data, model, plate_lvl):
     """Make evalaluation kwargs for in serial b_candidate evaluation.
 
-    Corresponds to the function genetic.evaluate_b_candidates. The
+    Corresponds to the function genetic.eval_b_candidates. The
     returned values in the dict eval_kwargs need not be pickleable.
 
     data : A dictionary
@@ -128,7 +128,7 @@ def make_evaluate_b_candidates_kwargs(data, model, plate_lvl):
     plate_lvl : An array of plate level parameters.
 
     The returned dictionary should be supplied in the call to evolve
-    when using the evaluate_b_candidates evaluator for serial
+    when using the eval_b_candidates evaluator for serial
     processing.
 
     """
@@ -139,5 +139,29 @@ def make_evaluate_b_candidates_kwargs(data, model, plate_lvl):
         "plate": plate,
         "fitter": Fitter(model),
         "plate_lvl": plate_lvl,
+    }
+    return eval_kwargs
+
+
+def make_eval_candidates_kwargs(data, model):
+    """Make evalaluation kwargs for in serial parameter candidate evaluation.
+
+    Corresponds to the function genetic.eval_candidates. The returned
+    values in the dict eval_kwargs need not be pickleable.
+
+    data : A dictionary
+
+    model : A CANS Model instance.
+
+    The returned dictionary should be supplied in the call to evolve
+    when using the eval_candidates evaluator for serial processing.
+
+    """
+    plate = Plate(**_get_plate_kwargs(data))
+    no_params = model.b_index + plate.no_cultures
+    plate.set_rr_model(model, np.ones(no_params))    # Dummy params
+    eval_kwargs = {
+        "plate": plate,
+        "fitter": Fitter(model),
     }
     return eval_kwargs
