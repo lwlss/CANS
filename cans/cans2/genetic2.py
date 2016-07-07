@@ -143,46 +143,34 @@ def evaluate_b_candidate(candidate, args):
     http://stackoverflow.com/a/9325185) but not the attribute
     RoadRunner.ExecutableModel. As a result the ExecutableModel must
     be set inside the function using roadrunner.RoadRunner.load()
-    which is ~10x slower than solving for a full plate. Therefore more
-    than 10 cores will be needed to see any benefit.
+    which is more than 10x slower than solving for a full
+    plate. Therefore more than 10 cores will be needed to see any
+    benefit.
 
     Plate level parameters should be contained in the dictionary
     "eval_kwargs" and passed in through args. They can be simply a
-    random guess or generated and evolved at a higher level.
+    random guess or evolved at a higher level.
 
     """
     eval_kwargs = args.get("eval_kwargs")
-    plate = eval_kwargs["plate"]
     params = np.concatenate((eval_kwargs["plate_lvl"], candidate))
-    # Necessary for multiprocessing as Models cannot be pickled.
-    models = [CompModel(), CompModelBC()]    # potential models.
-    model = next((m for m in models if m.name == eval_kwargs["model"]))
-
-    t0 = time.time()
-    plate.set_rr_model(model, params)
-    t1 = time.time()
-    print("set", t1-t0)
-
+    plate = eval_kwargs["plate"]
+    plate.rr.load(eval_kwargs["sbml"])
     fitter = eval_kwargs["fitter"]
-    fitter.model = model
-
-    t0 = time.time()
-    fitness = fitter._rr_obj(plate, params)
-    t1 = time.time()
-    print("solve", t1-t0)
-
-    return fitness
+    return fitter._rr_obj(plate, params)
 
 
 def evaluate_b_candidates(candidates, args):
-    """Evaluate all b_canditates without multiprocessing."""
+    """Evaluate all b_canditates without multiprocessing.
+
+    The roadrunner model should already be loaded on the plate object
+    using dummy parameter values.
+
+    """
     eval_kwargs = args.get("eval_kwargs")
-    plate = eval_kwargs["plate"]
     plate_lvl = eval_kwargs["plate_lvl"]
     params = (np.concatenate((plate_lvl, bs)) for bs in candidates)
-    # # Necessary for multiprocessing as Models cannot be pickled.
-    # models = [CompModel(), CompModelBC()]    # potential models.
-    # model = next((m for m in models if m.name == eval_kwargs["model"]))
+    plate = eval_kwargs["plate"]
     fitter = eval_kwargs["fitter"]    # Should contain a Model attribute
     return [fitter._rr_obj(plate, p) for p in params]
 
