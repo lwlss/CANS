@@ -11,34 +11,6 @@ from cans2.model import CompModel, CompModelBC
 from cans2.fitter import Fitter
 
 
-# Packaging as kwargs for multiprocessing.
-def get_plate_kwargs(dct):
-    """Create plate making kwargs from a dict.
-
-    dct : A dictionary containing, possibly amongst other things, key
-    value pairs required for instantiating a Plate object.
-
-    The returned "plate_kwargs" of use in multiprocessing. If the
-    Plate cannot be pickled, it must be created inside each process
-    from some passed arguments.
-
-    """
-    try:
-        dct["empties"]
-    except KeyError:
-        dct["empties"] = []
-    plate_kwargs = {
-        "rows": dct["rows"],
-        "cols": dct["cols"],
-        "data": {
-            "times": dct["times"],
-            "c_meas": dct["c_meas"],
-            "empties": dct["empties"],
-        },
-    }
-    return plate_kwargs
-
-
 # Generator functions for evolutionary strategy.
 def gen_random_uniform(random, args):
     """Generate random parameters between the bounds.
