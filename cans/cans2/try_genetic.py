@@ -42,12 +42,12 @@ args = {
     "eval_kwargs": make_evaluate_b_candidates_kwargs(data, model, plate_lvl),
 }
 
-final_pop = evolver(gen_random_uniform, evaluate_b_candidates, bounds, args,
-                    pop_size=200, max_evals=10000)# , mut_rate=1.0)
+# final_pop = evolver(gen_random_uniform, evaluate_b_candidates, bounds, args,
+#                     pop_size=100, max_evals=100000)# , mut_rate=1.0)
 
-# final_pop = custom_evolver(gen_random_uniform, evaluate_b_candidates,
-#                            bounds, args, pop_size=50, num_selected=50,
-#                            max_evals=100000, mut_rate=1.0)
+final_pop = custom_evolver(gen_random_uniform, evaluate_b_candidates,
+                           bounds, args, pop_size=20, num_selected=20,
+                           max_evals=10000, mut_rate=1.0)
 
 best = max(final_pop)
 est_params = np.concatenate((plate_lvl, best.candidate[:no_cultures]))
