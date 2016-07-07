@@ -47,7 +47,7 @@ def gen_random_uniform_log_C(random, args):
     values are sampled from uniform distributions in linear space.
 
     """
-    bounds = args.get("bounds")
+    bounds = args.get("gen_kwargs")["bounds"]
     params = [random.uniform(l, h) for l, h in zip(bounds[:, 0], bounds[:, 1])]
     C_0_mantissa, C_0_exp = frexp_10(bounds[0])
     exponent = random.uniform(C_0_exp[0], C_0_exp[1])
@@ -97,18 +97,21 @@ def gen_imag_neigh_guesses(random, args):
 
 
 # Functions for evaluating the candidates.
-def evaluate_fit(candidates, args):
-    # Evaluate the objective function for each set of canditate
-    # parameters and return this as the fitness. Here fitter and plate
-    # are defined outside the scope of the function.
-    fitter = args.get("fitter")
-    plate = args.get("plate")
+def eval_candidates(candidates, args):
+    """Evaluate the objective function for parameter canditates.
+
+    Candidates should have values for all parameters in the model.
+
+    """
+    eval_kwargs = args.get("eval_kwargs")
+    fitter = eval_kwargs["fitter"]
+    plate = eval_kwargs["plate"]
     return [fitter._rr_obj_no_scaling(plate, cs) for cs in candidates]
 
 
 @inspyred.ec.evaluators.evaluator
-def evaluate_b_candidate(candidate, args):
-    """Evaluate the objective function of a candidate of b parameters.
+def eval_b_candidate(candidate, args):
+    """Evaluate the objective function for a candidate of b parameters.
 
     Allows multiprocessing, but has a bit of an overhead because SWIG
     objects produced by roadrunner cannot be pickled. I have been able
@@ -133,7 +136,7 @@ def evaluate_b_candidate(candidate, args):
     return fitter._rr_obj_no_scaling(plate, params)
 
 
-def evaluate_b_candidates(candidates, args):
+def eval_b_candidates(candidates, args):
     """Evaluate all b_canditates without multiprocessing.
 
     The roadrunner model should already be loaded on the plate object
