@@ -4,6 +4,7 @@ Includes wrapping of objects to make them pickleable for
 multiprocessing.
 
 """
+import numpy as np
 import roadrunner
 
 
@@ -16,7 +17,6 @@ from cans2.make_sbml import create_sbml
 class PickleableSWIG(object):
     # http://stackoverflow.com/a/9325185
     def __setstate__(self, state):
-        print(state)
         self.__init__(*state['args'])
 
     def __getstate__(self):
@@ -70,6 +70,20 @@ def _get_plate_kwargs(dct):
     return plate_kwargs
 
 
+# def make_gen_b_candidate_kwargs(b_bound):
+#     """Return kwargs for generating random uniform b candidates.
+
+#     Expected to be used with the function gen_random_uniform.
+
+#     b_bound : [lower_bound, upper_bound].
+
+#     """
+#     gen_kwargs = {
+#         "bounds": [b_bound for i in plate.no_cultures]
+#         }
+#     return gen_kwargs
+
+
 def make_evaluate_b_candidate_kwargs(data, model, plate_lvl):
     """Make evalaluation kwargs for multiprocessing b_candidate evaluation.
 
@@ -98,7 +112,6 @@ def make_evaluate_b_candidate_kwargs(data, model, plate_lvl):
         "sbml": create_sbml(plate, model, data["sim_params"]),
         "plate_lvl": plate_lvl,
     }
-    pickleable(eval_kwargs)
     return eval_kwargs
 
 
@@ -120,7 +133,7 @@ def make_evaluate_b_candidates_kwargs(data, model, plate_lvl):
 
     """
     plate = Plate(**_get_plate_kwargs(data))
-    no_params = len(plate_lvl) + len(plate.no_cultures)
+    no_params = len(plate_lvl) + plate.no_cultures
     plate.set_rr_model(model, np.ones(no_params))    # Dummy params
     eval_kwargs = {
         "plate": plate,
