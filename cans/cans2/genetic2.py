@@ -96,33 +96,6 @@ def gen_imag_neigh_guesses(random, args):
     return list(guess)    # AttributeError: 'numpy.ndarray' object has no attribute 'extend'.
 
 
-# # args required for generate_params_from_guesses. Can set all of the
-# # below values.
-# def get_imag_neigh_args(plate, plate_model, C_ratio=1e-4, C_doubt=1e3,
-#                         b_guess=45.0, area_range=np.array([1.0, 2.0]),
-#                         b_range=np.array([0.0, 200.0])):
-#     # Create args needed for below function (to be passed in args).
-#     imag_neigh_kwargs = {
-#         "plate": plate,
-#         "plate_model": plate_model,
-#         "C_ratio": C_ratio,    # Guess of init_cells/final_cells.
-#         "kn_start": 0.0,
-#         "kn_stop": 2.0,
-#         "kn_num": 21,
-#         "area_ratio": 1.5,    # Initial dummy val.
-#         # ['kn1', 'kn2', 'b-', 'b+', 'b']
-#         "imag_neigh_params": np.array([1.0, 1.0, 0.0, b_guess*1.5, b_guess]),
-#         "no_neighs": None,    # If None calculated as np.ceil(C_f_max/N_0_guess).
-#     }
-#     args = {
-#         "area_range": area_range,
-#         "C_range": np.array([C_ratio/C_doubt, C_ratio*C_doubt]),
-#         "b_range": b_range,
-#         "imag_neigh_kwargs": imag_neigh_kwargs,
-#     }
-#     return args
-
-
 # Functions for evaluating the candidates.
 def evaluate_fit(candidates, args):
     # Evaluate the objective function for each set of canditate
@@ -130,7 +103,7 @@ def evaluate_fit(candidates, args):
     # are defined outside the scope of the function.
     fitter = args.get("fitter")
     plate = args.get("plate")
-    return [fitter._rr_obj(plate, cs) for cs in candidates]
+    return [fitter._rr_obj_no_scaling(plate, cs) for cs in candidates]
 
 
 @inspyred.ec.evaluators.evaluator
@@ -157,7 +130,7 @@ def evaluate_b_candidate(candidate, args):
     plate = eval_kwargs["plate"]
     plate.rr.load(eval_kwargs["sbml"])
     fitter = eval_kwargs["fitter"]
-    return fitter._rr_obj(plate, params)
+    return fitter._rr_obj_no_scaling(plate, params)
 
 
 def evaluate_b_candidates(candidates, args):
@@ -172,7 +145,7 @@ def evaluate_b_candidates(candidates, args):
     params = (np.concatenate((plate_lvl, bs)) for bs in candidates)
     plate = eval_kwargs["plate"]
     fitter = eval_kwargs["fitter"]    # Should contain a Model attribute
-    return [fitter._rr_obj(plate, p) for p in params]
+    return [fitter._rr_obj_no_scaling(plate, p) for p in params]
 
 
 # @inspyred.ec.utilities.memoize(maxlen=100)    # cache up to last 100 return values.
@@ -226,6 +199,7 @@ def evolver(generator, evaluator, bounds, args,
                           tau=tau,
                           tau_prime=tau_prime,
                           epsilon=epsilon,
+#                          mutation_rate=mut_rate,
                           # Other arguments for generator and evaluator.
                           **args)
     return final_pop
@@ -260,3 +234,30 @@ def mp_evolver(generator, evaluator, bounds, args,
     return final_pop
 
 # Also want to try a particle swarm
+
+
+def custom_evolver(generator, evaluator, bounds, args,
+                   pop_size=100, num_selected=100, max_evals=1000,
+                   mut_rate=1.0, crowd_dist=10):
+    seed = int(time.time())
+    rand = random.Random(seed)
+    with open("seeds.txt", 'a') as f:
+        f.write("{0}\n".format(seed))
+    ea = inspyred.ec.EvolutionaryComputation(rand)
+    ea.selector = inspyred.ec.selectors.tournament_selection
+    ea.replacer = inspyred.ec.replacers.crowding_replacement
+    ea.variator = inspyred.ec.variators.gaussian_mutation
+    ea.observer = inspyred.ec.observers.stats_observer
+    ea.terminator = inspyred.ec.terminators.evaluation_termination
+    final_pop = ea.evolve(generator=generator,
+                          evaluator=evaluator,
+                          pop_size=pop_size,
+                          maximize=False,
+                          bounder=inspyred.ec.Bounder(bounds[:, 0], bounds[:, 1]),
+                          max_evaluations=max_evals,
+                          num_selected=num_selected,
+                          mutation_rate=mut_rate,
+                          crowding_distance=crowd_dist,
+                          #distance_function=,
+                          **args)
+    return final_pop
