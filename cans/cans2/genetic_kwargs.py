@@ -196,11 +196,11 @@ def make_eval_plate_lvl_kwargs(data, model, c_evolver):
         "c_lvl_make_kwargs_kwargs": {
             "data": plate_data,
             "model": model,    # Must be pickleable
-            "plate_lvl": None,    # Must be set as candidate inside evaloator.
+            "plate_lvl": None,    # Must be set as candidate inside evaluator.
             },
-        "b_bounds": data["bounds"][-data["rows"]*data["cols"]:],
-        "c_evolver": c_evolver,
+        "c_evolver": c_evolver,    # Also containes b_bounds.
     }
+    return eval_kwargs
 
 
 def package_evolver(evolver, **kwargs):
