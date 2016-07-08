@@ -4,6 +4,9 @@ import random
 import inspyred
 
 
+import cans2.genetic_kwargs as kwargs
+
+
 from cans2.plate import Plate
 from cans2.cans_funcs import frexp_10, pickleable
 from cans2.guesser import fit_imag_neigh
@@ -183,8 +186,9 @@ def eval_plate_lvl(candidate, args):
     evolver_kwargs["args"] = c_args
 
     # Call the culture_level evolver
-    fitness = evolver(**evolver_kwargs)
-    return fitness
+    final_pop = evolver(**evolver_kwargs)
+    fitness = min(final_pop).fitness
+    return fitness    # Can we also return the candidate attribute somehow?
 
 
 # @inspyred.ec.utilities.memoize(maxlen=100)    # cache up to last 100 return values.
@@ -245,7 +249,7 @@ def mp_evolver(generator, evaluator, bounds, args, random,
                tau=None, tau_prime=None, epsilon=0.00001):
     """Run an evolutionary strategy using multiprocessing."""
     pickleable(args)    # Necessary for multiprocessing.
-    es = inspyred.ec.ES(rand)
+    es = inspyred.ec.ES(random)
     es.observer = inspyred.ec.observers.stats_observer
     es.terminator = [inspyred.ec.terminators.evaluation_termination,
                      inspyred.ec.terminators.diversity_termination]
@@ -270,7 +274,7 @@ def mp_evolver(generator, evaluator, bounds, args, random,
 def custom_mp_evolver(generator, evaluator, bounds, args, random, cpus=4,
                       pop_size=100, num_selected=100, max_evals=1000,
                       mut_rate=1.0, crowd_dist=10):
-    ea = inspyred.ec.EvolutionaryComputation(rand)
+    ea = inspyred.ec.EvolutionaryComputation(random)
     ea.selector = inspyred.ec.selectors.tournament_selection
     ea.replacer = inspyred.ec.replacers.crowding_replacement
     ea.variator = inspyred.ec.variators.gaussian_mutation
@@ -292,15 +296,20 @@ def custom_mp_evolver(generator, evaluator, bounds, args, random, cpus=4,
     return final_pop
 
 
-def custom_evolver(generator, evaluator, bounds, args, random,
+def custom_evolver(generator, evaluator, bounds, args, random, observer=None,
                    pop_size=100, num_selected=100, max_evals=1000,
                    mut_rate=1.0, crowd_dist=10):
     ea = inspyred.ec.EvolutionaryComputation(random)
     ea.selector = inspyred.ec.selectors.tournament_selection
     ea.replacer = inspyred.ec.replacers.crowding_replacement
     ea.variator = inspyred.ec.variators.gaussian_mutation
-    ea.observer = [inspyred.ec.observers.stats_observer,
-                   inspyred.ec.observers.best_observer]
+    # Allows us to silence internal observers in hierarchical evolvers
+    # by supplying observer=[].
+    if observer is None:
+        ea.observer = [inspyred.ec.observers.stats_observer,
+                       inspyred.ec.observers.best_observer]
+    else:
+        ea.observer = observer
     ea.terminator = inspyred.ec.terminators.evaluation_termination
     final_pop = ea.evolve(generator=generator,
                           evaluator=evaluator,
