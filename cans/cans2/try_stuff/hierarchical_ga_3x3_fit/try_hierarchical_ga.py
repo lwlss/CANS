@@ -66,32 +66,18 @@ final_pop = genetic.custom_mp_evolver(generator=genetic.gen_random_uniform_log_C
                                       args=args,
                                       random=random,
                                       cpus=4,
-                                      pop_size=20,
-                                      num_selected=20,
-                                      max_evals=100,
+                                      pop_size=10,
+                                      num_selected=10,
+                                      max_evals=20,
                                       mut_rate=1.0,
                                       crowd_dist=10)    # Must be integer.
 
 print(final_pop)
 
-best = min(final_pop)
+best = max(final_pop)    # Always max even if you are minimizing objective function.
 est_plate_lvl = best.candidate[:model.b_index]
 
-print("best", est_plate_lvl)
-print("true", data["sim_params"])
-
-# Concatenate est with true. Should really get the parameters back
-# from the best eval
-est_params = np.concatenate((est_plate_lvl, data["sim_params"][-no_cultures:]))
-
-plotter.plot_est_rr(true_plate, est_params, sim=False,
-                    title="Best Candidate Using Evolution Strategy")
-
-
-best = max(final_pop)
-est_plate_lvl = best.candidate[:model.b_index]
-
-print("best", est_plate_lvl)
+print("best", est_plate_lvl, best.fitness)
 print("true", data["sim_params"])
 
 # Concatenate est with true. Should really get the parameters back
