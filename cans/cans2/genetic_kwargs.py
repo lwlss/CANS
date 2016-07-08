@@ -12,6 +12,7 @@ from cans2.model import CompModel, CompModelBC
 from cans2.plate import Plate
 from cans2.fitter import Fitter
 from cans2.make_sbml import create_sbml
+from cans2.cans_funcs import pickleable
 
 
 class PickleableSWIG(object):
@@ -165,3 +166,44 @@ def make_eval_candidates_kwargs(data, model):
         "fitter": Fitter(model),
     }
     return eval_kwargs
+
+
+def make_eval_plate_lvl_kwargs(data, model, c_lvl):
+    """Make eval kwargs for plate level parallel parameter candidate evaluaton.
+
+    Corresponds to the function genetic.eval_plate_lvl.
+
+    model : A Pickleable CANS model.
+
+    c_lvl : A dictionary containing the culture level evolver and
+    kwargs for this function. The culture level "args" argument must
+    be added to the dictionary inside the genetic.eval_plate_lvl
+    function call rather than here because it will contain the
+    unpickleable objects. Instead, either supply the value None for
+    the key "args" or leave it out.
+
+    """
+    pickleable(model)    # Model must be pickleable for multiprocessing.
+
+    plate_data = {
+        "rows": data["rows"],
+        "cols": data["cols"],
+        "times": data["times"],
+        "c_meas": data["c_meas"],
+        "empties": data["empties"],
+    }
+
+    eval_kwargs = {
+        # To go to the function make_eval_b_candidates_kwargs.
+        "c_lvl_make_kwargs_kwargs": {
+            "data": plate_data,
+            "model": model,    # Must be pickleable
+            "plate_lvl": None,    # Must be set as candidate inside evaloator.
+            },
+        "b_bounds": data["bounds"][-data["rows"]*data["cols"]:],
+        # "plate_lvl_bounds":,
+        "c_lvl": {
+            "evolver": ,    # An evolver function
+            "evolver_kwargs":,    # Must also add args in the p level evaluator.
+            },
+    }
