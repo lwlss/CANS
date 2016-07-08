@@ -11,13 +11,15 @@ import cans2.genetic2 as genetic
 import cans2.genetic_kwargs as kwargs
 
 
-model = kwargs.PickleableCompModelBC()
+model = kwargs.PickleableCompModelBC()    # Pickleable for multiprocessing.
 plotter = Plotter(model)
 
-results_dir = "results/hierarchical_ga_3x3_sim/"
+# Generate and save a random seed.
+seed_file = "data/seeds.txt"
+seed, random = genetic.get_seed_and_prng(seed_file)
 
 # load plate data from json.
-with open(results_dir + "sim_and_est_data_3x3.json", 'r') as f:
+with open("data/sim_and_est_data_3x3.json", 'r') as f:
     # data = dict_to_numpy(json.load(f))
     data = dict_to_numpy(json.load(f))
 
@@ -28,9 +30,30 @@ true_plate.set_rr_model(model, data["sim_params"])
 no_cultures = data["rows"]*data["cols"]
 
 # Check we have the correct parameters for the data.
-plotter.plot_est_rr(true_plate, data["sim_params"], sim=False)
+# plotter.plot_est_rr(true_plate, data["sim_params"], sim=False)
+
+# Prepare args.
+b_bounds = np.array([np.array([0.0, 100]) for i in range(no_cultures)])
+c_evolver_kwargs = {
+    "generator": genetic.gen_random_uniform,
+    "evaluator": genetic.eval_b_candidates,
+    "bounds": b_bounds,
+#    "args": None,    # To be set inside plate_level eval
+    "random": random,
+    "pop_size": 20,
+    "num_selected": 20,
+    "max_evals": 10000,
+    "mut_rate": 1.0,
+    "crowd_dist": 10.0,
+    }
+c_evolver = kwargs.package_evolver(genetic.custom_evolver, c_evolver_kwargs)
+plate_lvl_bounds = data["bounds"][:model.b_index]
+args = {
+    "gen_kwargs": {"bounds": plate_lvl_bounds},
+    "eval_kwargs": make_eval_plate_lvl_kwargs(data, model, c_evolver),
+    }
+
 assert False
-### Just bs ###
 # Just use evolutionary strategy to get bs and supply true C_0, N_0, etc.
 plate_lvl = data["sim_params"][:-no_cultures]
 
