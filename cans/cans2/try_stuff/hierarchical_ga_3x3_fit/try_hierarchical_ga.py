@@ -46,13 +46,14 @@ c_evolver_kwargs = {
     "mut_rate": 1.0,
     "crowd_dist": 10.0,
     }
-c_evolver = kwargs.package_evolver(genetic.custom_evolver, c_evolver_kwargs)
+c_evolver = kwargs.package_evolver(genetic.custom_evolver, **c_evolver_kwargs)
 plate_lvl_bounds = data["bounds"][:model.b_index]
 args = {
     "gen_kwargs": {"bounds": plate_lvl_bounds},
-    "eval_kwargs": make_eval_plate_lvl_kwargs(data, model, c_evolver),
+    "eval_kwargs": kwargs.make_eval_plate_lvl_kwargs(data, model, c_evolver),
     }
 
+print(args)
 assert False
 # Just use evolutionary strategy to get bs and supply true C_0, N_0, etc.
 plate_lvl = data["sim_params"][:-no_cultures]
