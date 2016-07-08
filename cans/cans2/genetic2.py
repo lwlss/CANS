@@ -151,6 +151,45 @@ def eval_b_candidates(candidates, args):
     return [fitter._rr_obj_no_scaling(plate, p) for p in params]
 
 
+@inspyred.ec.evaluators.evaluator
+def eval_plate_lvl(candidate, args):
+    """Evaluate the objective function for a candidate parameters.
+
+    Candidates are plate level parameters (e.g. [C_0, N_0, NE_0,
+    kn]). Evolution is hierarchical with culture level parameters
+    (e.g. bs) evoled at a lower level inside this function. The
+    procedure may be parallelized on the plate level. On the culture
+    level, overheads arrise due to issues with pickleing roadrunner's
+    SWIG objects. Therefore, the culture level is evolved in series.
+
+    """
+    eval_kwargs = args.get("eval_kwargs")
+    # Take the candidate. Package it as plate_lvl and send it to the function eval_b_candidates
+
+    # These kwargs are supplied to make c level eval kwargs (convoluted).
+    c_lvl_make_kwargs_kwargs = eval_kwargs["c_lvl_make_kwargs_kwargs"]
+    c_lvl_make_kwargs_kwargs["plate_lvl"] = candidate
+
+    # Make culture bounds.
+    c_args = {
+        "gen_kwargs": {"bounds": eval_kwargs["b_bounds"]},
+        "eval_kwargs": kwargs.make_eval_b_candidates_kwargs(**c_lvl_make_kwargs_kwargs)
+        }
+
+    # Now call the culture level evolver and get the fitness
+    c_lvl_args = eval_kwargs["c_lvl"]
+    evolver = c_lvl_args["evolver"]
+
+    # Add c_lvl_args to the c_level evolver kwargs
+    evolver_kwargs = c_lvl["evolver_kwargs"]
+
+    # Call the culture_level evolver with
+    evolver(**c_lvl["evolver_kwargs"])
+
+
+
+
+
 # @inspyred.ec.utilities.memoize(maxlen=100)    # cache up to last 100 return values.
 @inspyred.ec.evaluators.evaluator
 def evaluate_with_grad_fit(candidate, args):
