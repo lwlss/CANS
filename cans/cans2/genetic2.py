@@ -221,15 +221,11 @@ def evaluate_with_grad_fit(candidate, args):
     return est.fun
 
 
-def evolver(generator, evaluator, bounds, args,
+def evolver(generator, evaluator, bounds, args, random,
             pop_size=100, max_evals=1000,
             tau=None, tau_prime=None, epsilon=0.00001):
     """Run an evolutionary strategy using serial processing."""
-    seed = int(time.time())
-    rand = random.Random(seed)
-    with open("seeds.txt", 'a') as f:
-        f.write("{0}\n".format(seed))
-    es = inspyred.ec.ES(rand)
+    es = inspyred.ec.ES(random)
     es.observer = inspyred.ec.observers.stats_observer
     es.terminator = [inspyred.ec.terminators.evaluation_termination,
                      inspyred.ec.terminators.diversity_termination]
@@ -248,15 +244,11 @@ def evolver(generator, evaluator, bounds, args,
     return final_pop
 
 
-def mp_evolver(generator, evaluator, bounds, args,
+def mp_evolver(generator, evaluator, bounds, args, random,
                cpus=4, pop_size=100, max_evals=100,
                tau=None, tau_prime=None, epsilon=0.00001):
     """Run an evolutionary strategy using multiprocessing."""
     pickleable(args)    # Necessary for multiprocessing.
-    seed = int(time.time())
-    rand = random.Random(seed)
-    with open("seeds.txt", 'a') as f:
-        f.write("{0}\n".format(seed))
     es = inspyred.ec.ES(rand)
     es.observer = inspyred.ec.observers.stats_observer
     es.terminator = [inspyred.ec.terminators.evaluation_termination,
@@ -279,18 +271,40 @@ def mp_evolver(generator, evaluator, bounds, args,
 # Also want to try a particle swarm
 
 
-def custom_evolver(generator, evaluator, bounds, args,
-                   pop_size=100, num_selected=100, max_evals=1000,
-                   mut_rate=1.0, crowd_dist=10):
-    seed = int(time.time())
-    rand = random.Random(seed)
-    with open("seeds.txt", 'a') as f:
-        f.write("{0}\n".format(seed))
+def custom_mp_evolver(generator, evaluator, bounds, args, random, cpus=4,
+                      pop_size=100, num_selected=100, max_evals=1000,
+                      mut_rate=1.0, crowd_dist=10):
     ea = inspyred.ec.EvolutionaryComputation(rand)
     ea.selector = inspyred.ec.selectors.tournament_selection
     ea.replacer = inspyred.ec.replacers.crowding_replacement
     ea.variator = inspyred.ec.variators.gaussian_mutation
-    ea.observer = inspyred.ec.observers.stats_observer
+    ea.observer = [inspyred.ec.observers.stats_observer]
+    ea.terminator = inspyred.ec.terminators.evaluation_termination
+    final_pop = ea.evolve(generator=generator,
+                          evaluator=inspyred.ec.evaluators.parallel_evaluation_mp,
+                          mp_evaluator=evaluator,
+                          mp_num_cpus=cpus,
+                          pop_size=pop_size,
+                          maximize=False,
+                          bounder=inspyred.ec.Bounder(bounds[:, 0], bounds[:, 1]),
+                          max_evaluations=max_evals,
+                          num_selected=num_selected,
+                          mutation_rate=mut_rate,
+                          crowding_distance=crowd_dist,
+                          #distance_function=,
+                          **args)
+    return final_pop
+
+
+def custom_evolver(generator, evaluator, bounds, args, random,
+                   pop_size=100, num_selected=100, max_evals=1000,
+                   mut_rate=1.0, crowd_dist=10):
+    ea = inspyred.ec.EvolutionaryComputation(random)
+    ea.selector = inspyred.ec.selectors.tournament_selection
+    ea.replacer = inspyred.ec.replacers.crowding_replacement
+    ea.variator = inspyred.ec.variators.gaussian_mutation
+    ea.observer = [inspyred.ec.observers.stats_observer,
+                   inspyred.ec.observers.best_observer]
     ea.terminator = inspyred.ec.terminators.evaluation_termination
     final_pop = ea.evolve(generator=generator,
                           evaluator=evaluator,
@@ -304,3 +318,24 @@ def custom_evolver(generator, evaluator, bounds, args,
                           #distance_function=,
                           **args)
     return final_pop
+
+
+def get_seed_and_prng(seed_file, seed=None):
+    """Return a seed and a pseudo-random number generator.
+
+    seed_file : Path for file to save the seed.
+
+    seed : A seed for the prng. If a seed is not supplied one is
+    generatd from the system time.
+
+    To allow reproducibility, the user should save the seed with any
+    generated results. Obviously, this will not work if the evaluator
+    is non-deterministic.
+
+    """
+    if seed is None:
+        seed = int(time.time())
+    rand = random.Random(seed)
+    with open(seed_file, 'a') as f:
+        f.write("{0}\n".format(seed))
+    return seed, rand
