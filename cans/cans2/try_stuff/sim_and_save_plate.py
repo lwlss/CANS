@@ -13,7 +13,7 @@ from cans2.model import CompModelBC
 from cans2.guesser import fit_imag_neigh
 
 
-outfile = "saved_sim_plates/16x24_sim_plate.json"
+outfile = "saved_sim_plates/16x24_sim_plate_no_fit.json"
 
 # Simulate a small 3x3 plate with noise using CompModelBC or CompModel.
 rows = 16
@@ -50,11 +50,11 @@ plotter.plot_est_rr(plate, guess, title="Imaginary Nieghbour Guess", sim=True)
 bounds = guesser.get_bounds(guess, C_doubt=1e2, N_doubt=2.0, kn_max=10.0)
 print(bounds)
 
-# Fit using gradient method.
-minimizer_opts = {"disp": True}
-plate.grad_est = plate.fit_model(model, guess, bounds=bounds, rr=True,
-                                 minimizer_opts=minimizer_opts)
-plotter.plot_est_rr(plate, plate.grad_est.x, title="Gradient Fit", sim=True)
+# # Fit using gradient method.
+# minimizer_opts = {"disp": True}
+# plate.grad_est = plate.fit_model(model, guess, bounds=bounds, rr=True,
+#                                  minimizer_opts=minimizer_opts)
+# plotter.plot_est_rr(plate, plate.grad_est.x, title="Gradient Fit", sim=True)
 
 
 # Save data so that we do not have to run the above code every time
@@ -68,7 +68,7 @@ data = {
     "sim_amounts": plate.sim_amounts,
     "guess": guess,
     "bounds": bounds,
-    "grad_est": plate.grad_est.x,
+#    "grad_est": plate.grad_est.x,
     "empties": plate.empties,
     }
 with open(outfile, 'w') as f:
