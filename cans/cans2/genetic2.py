@@ -189,8 +189,6 @@ def eval_plate_lvl(candidate, args):
     return fitness
 
 
-
-
 # @inspyred.ec.utilities.memoize(maxlen=100)    # cache up to last 100 return values.
 @inspyred.ec.evaluators.evaluator
 def evaluate_with_grad_fit(candidate, args):
