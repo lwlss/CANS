@@ -175,16 +175,15 @@ def make_eval_plate_lvl_kwargs(data, model, c_evolver):
 
     model : A Pickleable CANS model.
 
-    c_lvl : A dictionary containing the culture level evolver and
-    kwargs for this function. The culture level "args" argument must
-    be added to the dictionary inside the genetic.eval_plate_lvl
-    function call rather than here because it will contain the
-    unpickleable objects. Instead, either supply the value None for
-    the key "args" or leave it out.
+    c_evolver : A dictionary containing the culture level evolver
+    function (key "evolver") and kwargs for this function as a nested
+    dictionary (key "evolver_kwargs"). The culture level "args"
+    argument must be created inside the genetic.eval_plate_lvl
+    function call because it will contain the unpickleable
+    objects. Instead, just leave it out or supply None.
 
     """
     pickleable(model)    # Model must be pickleable for multiprocessing.
-
     plate_data = {
         "rows": data["rows"],
         "cols": data["cols"],
@@ -192,7 +191,6 @@ def make_eval_plate_lvl_kwargs(data, model, c_evolver):
         "c_meas": data["c_meas"],
         "empties": data["empties"],
     }
-
     eval_kwargs = {
         # To go to the function make_eval_b_candidates_kwargs.
         "c_lvl_make_kwargs_kwargs": {
@@ -202,10 +200,6 @@ def make_eval_plate_lvl_kwargs(data, model, c_evolver):
             },
         "b_bounds": data["bounds"][-data["rows"]*data["cols"]:],
         "c_evolver": c_evolver,
-        # "c_evolver": {
-        #     "evolver": ,    # An evolver function
-        #     "evolver_kwargs":,    # Must also add args in the p level evaluator.
-        #     },
     }
 
 
@@ -221,8 +215,8 @@ def package_evolver(evolver, **kwargs):
     kwargs : key word arguments for the evolver function.
 
     """
-     evolver_dct = {
-         "evolver": evolver,    # An evolver function
-         "evolver_kwargs": kwargs,    # Must also add args in the p level evaluator.
-     }
-     return evolver_dct
+    evolver_dct = {
+        "evolver": evolver,    # An evolver function
+        "evolver_kwargs": kwargs,    # Must also add args in the p level evaluator.
+    }
+    return evolver_dct
