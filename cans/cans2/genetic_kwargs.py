@@ -168,7 +168,7 @@ def make_eval_candidates_kwargs(data, model):
     return eval_kwargs
 
 
-def make_eval_plate_lvl_kwargs(data, model, c_lvl):
+def make_eval_plate_lvl_kwargs(data, model, c_evolver):
     """Make eval kwargs for plate level parallel parameter candidate evaluaton.
 
     Corresponds to the function genetic.eval_plate_lvl.
@@ -201,9 +201,28 @@ def make_eval_plate_lvl_kwargs(data, model, c_lvl):
             "plate_lvl": None,    # Must be set as candidate inside evaloator.
             },
         "b_bounds": data["bounds"][-data["rows"]*data["cols"]:],
-        # "plate_lvl_bounds":,
-        "c_lvl": {
-            "evolver": ,    # An evolver function
-            "evolver_kwargs":,    # Must also add args in the p level evaluator.
-            },
+        "c_evolver": c_evolver,
+        # "c_evolver": {
+        #     "evolver": ,    # An evolver function
+        #     "evolver_kwargs":,    # Must also add args in the p level evaluator.
+        #     },
     }
+
+
+def package_evolver(evolver, **kwargs):
+    """Package an evolver function and kwargs in a dictinoary.
+
+    Of use in heirarchical evolution. When multiprocessing is used,
+    unpickleable kwargs must be added later inside evaluators
+    (useually in "args").
+
+    evolver : An evolver function.
+
+    kwargs : key word arguments for the evolver function.
+
+    """
+     evolver_dct = {
+         "evolver": evolver,    # An evolver function
+         "evolver_kwargs": kwargs,    # Must also add args in the p level evaluator.
+     }
+     return evolver_dct
