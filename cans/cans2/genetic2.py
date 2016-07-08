@@ -168,16 +168,17 @@ def eval_plate_lvl(candidate, args):
     # kwargs supplied to make c level eval kwargs (convoluted).
     c_eval_kwargs_kwargs = eval_kwargs["c_lvl_make_kwargs_kwargs"]
     c_eval_kwargs_kwargs["plate_lvl"] = candidate
-    # Make culture level evolver args.
-    c_args = {
-        "gen_kwargs": {"bounds": eval_kwargs["b_bounds"]},
-        "eval_kwargs": kwargs.make_eval_b_candidates_kwargs(**c_eval_kwargs_kwargs)
-        }
 
     # Retrieve the culture level evolver and evolver_kwargs.
     c_evolver = eval_kwargs["c_evolver"]
     evolver = c_evolver["evolver"]
     evolver_kwargs = c_evolver["evolver_kwargs"]
+
+    # Make culture level evolver args.
+    c_args = {
+        "gen_kwargs": {"bounds": evolver_kwargs["bounds"]},
+        "eval_kwargs": kwargs.make_eval_b_candidates_kwargs(**c_eval_kwargs_kwargs)
+        }
     # Add args, which includes the unpickleable objects, to the evolver kwargs.
     evolver_kwargs["args"] = c_args
 
