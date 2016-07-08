@@ -11,6 +11,7 @@ from cans2.plate import Plate
 from cans2.plotter import Plotter
 from cans2.model import CompModelBC
 from cans2.guesser import fit_imag_neigh
+from cans2.cans_funcs import dict_to_json
 
 
 outfile = "saved_sim_plates/16x24_sim_plate_no_fit.json"
