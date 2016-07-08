@@ -15,7 +15,7 @@ model = kwargs.PickleableCompModelBC()
 plotter = Plotter(model)
 
 # load plate data from json.
-with open("saved_sim_plates/temp_sim_and_est_data.json", 'r') as f:
+with open("saved_sim_plates/16x24_sim_plate_no_fit.json", 'r') as f:
     # data = dict_to_numpy(json.load(f))
     data = dict_to_numpy(json.load(f))
 
@@ -32,7 +32,7 @@ no_cultures = data["rows"]*data["cols"]
 # Just use evolutionary strategy to get bs and supply true C_0, N_0, etc.
 plate_lvl = data["sim_params"][:-no_cultures]
 
-bounds = np.array([[0.0, 200.0] for i in range(no_cultures)])
+bounds = np.array([[0.0, 100.0] for i in range(no_cultures)])
 
 args = {
     "gen_kwargs": {"bounds": bounds},
@@ -44,8 +44,8 @@ args = {
 # Custom strategy with tournement selection and crowding replacement.
 final_pop = genetic.custom_evolver(genetic.gen_random_uniform,
                                    genetic.eval_b_candidates,
-                                   bounds, args, pop_size=20, num_selected=20,
-                                   max_evals=10000, mut_rate=1.0)
+                                   bounds, args, pop_size=50, num_selected=50,
+                                   max_evals=100000000, mut_rate=1.0)
 best = max(final_pop)
 est_params = np.concatenate((plate_lvl, best.candidate[:no_cultures]))
 
