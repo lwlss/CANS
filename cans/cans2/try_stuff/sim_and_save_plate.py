@@ -3,13 +3,21 @@
 Can be timesaving when developing/debugging code to recover parameters.
 
 """
+import numpy as np
+import json
 
 
-outfile = "sim_plate.json"
+from cans2.plate import Plate
+from cans2.plotter import Plotter
+from cans2.model import CompModelBC
+from cans2.guesser import fit_imag_neigh
+
+
+outfile = "saved_sim_plates/16x24_sim_plate.json"
 
 # Simulate a small 3x3 plate with noise using CompModelBC or CompModel.
-rows = 3
-cols = 3
+rows = 16
+cols = 24
 times = np.linspace(0, 5, 11)
 model = CompModelBC()
 plate = Plate(rows, cols)
@@ -29,8 +37,8 @@ plate.set_sim_data(model, b_mean=50.0, b_var=30.0,
                    custom_params=custom_params, noise=True)
 
 plotter = Plotter(model)
-plotter.plot_est_rr(plate, plate.sim_params,
-                    title="Sim timecourse", sim=False)
+# plotter.plot_est_rr(plate, plate.sim_params,
+#                     title="Sim timecourse", sim=False)
 
 # Starting guess from fits of the imaginary neighbour model.
 imag_neigh_params = np.array([1.0, 1.0, 0.0, b_guess*1.5, b_guess])
@@ -61,6 +69,7 @@ data = {
     "guess": guess,
     "bounds": bounds,
     "grad_est": plate.grad_est.x,
+    "empties": plate.empties,
     }
 with open(outfile, 'w') as f:
      json.dump(dict_to_json(data), f)
