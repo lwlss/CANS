@@ -177,15 +177,16 @@ def eval_plate_lvl(candidate, args):
         }
 
     # Now call the culture level evolver and get the fitness
-    c_lvl_args = eval_kwargs["c_lvl"]
+    c_evolver = eval_kwargs["c_evolver"]
     evolver = c_lvl_args["evolver"]
 
-    # Add c_lvl_args to the c_level evolver kwargs
-    evolver_kwargs = c_lvl["evolver_kwargs"]
+    # Add args (which includes some unpickleable objects) to the evolver kwargs.
+    evolver_kwargs = c_evolver["evolver_kwargs"]
+    evolver_kwargs["args"] = c_args
 
-    # Call the culture_level evolver with
-    evolver(**c_lvl["evolver_kwargs"])
-
+    # Call the culture_level evolver
+    fitness = evolver(**evolver_kwargs)
+    return fitness
 
 
 
