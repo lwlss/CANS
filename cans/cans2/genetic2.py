@@ -234,7 +234,7 @@ def evolver(generator, evaluator, bounds, args, random,
                           tau=tau,
                           tau_prime=tau_prime,
                           epsilon=epsilon,
-#                          mutation_rate=mut_rate,
+                          # mutation_rate=mut_rate,
                           # Other arguments for generator and evaluator.
                           **args)
     return final_pop
@@ -287,7 +287,7 @@ def custom_mp_evolver(generator, evaluator, bounds, args, random, cpus=4,
                           num_selected=num_selected,
                           mutation_rate=mut_rate,
                           crowding_distance=crowd_dist,
-                          #distance_function=,
+                          # distance_function=,
                           **args)
     return final_pop
 
@@ -311,7 +311,7 @@ def custom_evolver(generator, evaluator, bounds, args, random,
                           num_selected=num_selected,
                           mutation_rate=mut_rate,
                           crowding_distance=crowd_dist,
-                          #distance_function=,
+                          # distance_function=,
                           **args)
     return final_pop
 
