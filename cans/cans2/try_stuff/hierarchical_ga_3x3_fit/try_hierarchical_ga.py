@@ -1,14 +1,16 @@
 import time
 import json
 import numpy as np
+import inspyred
+
+import cans2.genetic2 as genetic
+import cans2.genetic_kwargs as kwargs
 
 
 from cans2.cans_funcs import dict_to_numpy
 from cans2.model import CompModelBC
 from cans2.plate import Plate
 from cans2.plotter import Plotter
-import cans2.genetic2 as genetic
-import cans2.genetic_kwargs as kwargs
 
 
 model = kwargs.PickleableCompModelBC()    # Pickleable for multiprocessing.
@@ -37,14 +39,17 @@ b_bounds = np.array([np.array([0.0, 100]) for i in range(no_cultures)])
 c_evolver_kwargs = {
     "generator": genetic.gen_random_uniform,
     "evaluator": genetic.eval_b_candidates,
+    "observer": [],    # Internal observer.
+    # "observer": [inspyred.ec.observers.stats_observer,
+    #              inspyred.ec.observers.best_observer],
     "bounds": b_bounds,
-#    "args": None,    # To be set inside plate_level eval
+    # "args": None,    # To be set inside plate_level eval
     "random": random,
     "pop_size": 20,
     "num_selected": 20,
     "max_evals": 10000,
     "mut_rate": 1.0,
-    "crowd_dist": 10.0,
+    "crowd_dist": 10,    # Must be integer.
     }
 c_evolver = kwargs.package_evolver(genetic.custom_evolver, **c_evolver_kwargs)
 plate_lvl_bounds = data["bounds"][:model.b_index]
@@ -53,49 +58,45 @@ args = {
     "eval_kwargs": kwargs.make_eval_plate_lvl_kwargs(data, model, c_evolver),
     }
 
-print(args)
-assert False
-# Just use evolutionary strategy to get bs and supply true C_0, N_0, etc.
-plate_lvl = data["sim_params"][:-no_cultures]
 
-bounds = np.array([[0.0, 100.0] for i in range(no_cultures)])
+# Now call plate lvl parallel evolver.
+final_pop = genetic.custom_mp_evolver(generator=genetic.gen_random_uniform_log_C,
+                                      evaluator=genetic.eval_plate_lvl,
+                                      bounds=plate_lvl_bounds,
+                                      args=args,
+                                      random=random,
+                                      cpus=4,
+                                      pop_size=20,
+                                      num_selected=20,
+                                      max_evals=100,
+                                      mut_rate=1.0,
+                                      crowd_dist=10)    # Must be integer.
 
-args = {
-    "gen_kwargs": {"bounds": bounds},
-    "eval_kwargs": kwargs.make_eval_b_candidates_kwargs(data, model, plate_lvl),
-}
-# # Standard genetic strategy.
-# final_pop = genetic.evolver(genetic.gen_random_uniform, genetic.evaluate_b_candidates, bounds, args,
-#                     pop_size=100, max_evals=100000)# , mut_rate=1.0)
-# Custom strategy with tournement selection and crowding replacement.
-final_pop = genetic.custom_evolver(genetic.gen_random_uniform,
-                                   genetic.eval_b_candidates,
-                                   bounds, args, pop_size=50, num_selected=50,
-                                   max_evals=100000000, mut_rate=1.0)
-best = max(final_pop)
-est_params = np.concatenate((plate_lvl, best.candidate[:no_cultures]))
+print(final_pop)
 
-# ### All params ###
-# bounds = data["bounds"]
-# bounds[-no_cultures:] = np.array([0.0, 300.0])
+best = min(final_pop)
+est_plate_lvl = best.candidate[:model.b_index]
 
-# args = {
-#     "gen_kwargs": {"bounds": bounds},
-#     "eval_kwargs": kwargs.make_eval_candidates_kwargs(data, model),
-# }
-
-# # Can also try gen_random_uniform_log_C.
-# final_pop = genetic.custom_evolver(genetic.gen_random_uniform_log_C, genetic.eval_candidates,
-#                            bounds, args, pop_size=100, num_selected=100,
-#                            max_evals=100000, mut_rate=1.0)
-# best = max(final_pop)
-# est_params = best.candidate
-# ###################
-
-print("best", est_params)
+print("best", est_plate_lvl)
 print("true", data["sim_params"])
+
+# Concatenate est with true. Should really get the parameters back
+# from the best eval
+est_params = np.concatenate((est_plate_lvl, data["sim_params"][-no_cultures:]))
 
 plotter.plot_est_rr(true_plate, est_params, sim=False,
                     title="Best Candidate Using Evolution Strategy")
-# plotter.plot_est_rr(true_plate, est_params, sim=True,
-#                     title="Best Candidate Using Evolution Strategy")
+
+
+best = max(final_pop)
+est_plate_lvl = best.candidate[:model.b_index]
+
+print("best", est_plate_lvl)
+print("true", data["sim_params"])
+
+# Concatenate est with true. Should really get the parameters back
+# from the best eval
+est_params = np.concatenate((est_plate_lvl, data["sim_params"][-no_cultures:]))
+
+plotter.plot_est_rr(true_plate, est_params, sim=False,
+                    title="Best Candidate Using Evolution Strategy")
