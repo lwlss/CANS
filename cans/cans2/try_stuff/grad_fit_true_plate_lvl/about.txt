@@ -1,0 +1,58 @@
+Can gradient fitting find the global minimum if given the true plate
+level parameters?
+
+This is of importance for the heirarchical genetic algorithm. If we
+can use a gradient method in the plate-level evaluator rather than a
+second culture-level genetic algorithm, then this may be faster and we
+need not worry about developing a lower level genitic algorithm.
+
+Two approaches:
+
+1) Do not use a model for guessing, instead guess uniform b. Great if
+   this works.
+
+2) Use the imaginary nieghbour model to guess b parameters. In this
+   case, we would need to decide on a b parameter to use for the
+   faster growing neighbour and whether to keep the plate level
+   parameters of the genetic algorithm or use those output by the
+   guesser. Using the latter we would essentially be evolving
+   parameters for the guesser. There is a limit to how close the
+   output of the guesser can be to the true values. For instance, N_0
+   is always guessed as the same value. Therefore I prefer the former
+   method, taking the guessed bs but keeping the plate level candidate
+   of the genetic algorithm. **A BETTER APPORACH MIGHT BE TO FEED THE
+   PLATE LEVEL CANDIDATE VALUES TO A REWRITTEN VERSION OF THE GUESSER
+   WHERE WE ONLY NEED PROVIDE A B_GUESS**. The genetic algorithm can
+   either evolve both N_0 and NE_0 or just N_0, reducing the parameter
+   space. The second approach is justifiable because we through away
+   the data from edge cultures anyway and we can also measure the
+   areas. **We could also take a value from previous fits if they are
+   consitent**. It might have been better to model empty cultures
+   outside of the edge cultures rather than using a different N_0 but
+   I might not have time to implement this now.
+
+   - N_0 and kn are not provided to the guesser, but inferred.
+   - The ratio between N_0 and NE_0 must be provided.
+   - The ratio between C_f and C_0 must provided.
+   - An apporximate b_guess value for the plate and a value b_faster
+     for the faster growing imaginary neighbour must be
+     provided. Currently I determine the b_faster neighbour as
+     1.5*b_guess. I could use a different ratio instead, but it is
+     unlikely to be important; to aquire good guesses, it only matters
+     that we have a b_faster value which is of around the plate
+     average or higher so that we can approximate the diffusion of
+     nutreints out of slow growers (could try to demonstrate this with
+     simulations).
+
+- If we have to provide multiple guesses for the gradient fitter then
+  we would have to have a second level of parallelization within the
+  evaluator. This is not unreasonable if it is the best method but
+  would require more than the ~70 cores that our machine has. Instead,
+  we could use cloud computing.
+
+
+
+The imaginary neighbour model provides fairly good guesses. We are
+evolving the plate level parameters that the guesser takes. We also need a parameter
+
+Initial guesses using the imaginary neighbour model.

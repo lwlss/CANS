@@ -1,0 +1,13 @@
+QUALITATIVE validation with a 2nd plate.
+
+I want to fit a 2nd plate as validation. Previously I fit p15 and,
+although it did not find a global minimum, it did at least fit the
+data qualitatively. Rank order of b was also highly correlated between
+the best fits (different local minima) and we could compare this with
+a 2nd plate provided it contains repeats.
+
+
+How?  The code for doing so already exists as a python script and a
+bash script to run it. This starts multiple processes that use
+different initial guesses. I just need to pass a the file path of the
+data to the python script.
