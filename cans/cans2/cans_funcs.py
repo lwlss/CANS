@@ -36,7 +36,7 @@ def cans_to_json(plate, model, sim=False):
     return dict_to_json(data)
 
 
-def est_to_json(plate, model, est_params, obj_fun, bounds,
+def est_to_json(plate, model, est_params, obj_fun, time, bounds,
                 param_guess, sim=False):
     """Return standardised data for a fit.
 
@@ -50,6 +50,7 @@ def est_to_json(plate, model, est_params, obj_fun, bounds,
     est_data = {
         "est_params": est_params,
         "obj_fun": obj_fun,
+        "fit_time": time,
         "bounds": bounds,
         "param_guess": param_guess,
         }
