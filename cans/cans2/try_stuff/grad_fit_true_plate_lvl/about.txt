@@ -51,3 +51,17 @@ Two approaches:
   evaluator. This is not unreasonable if it is the best method but
   would require more than the ~70 cores that our machine has. Instead,
   we could use cloud computing.
+
+
+Full plate uniform b results.
+
+We get the global minimum using a uniform b guess and constraining the
+plate level parameters with the true values. Note that the simulation
+includes added noise. I am now timing this.
+
+We could also try using a higher accuracy in the rr solver.
+
+We should also see whether guessing bs rather than using uniform is
+any faster or more reliable. We could repeat the fitting with
+different random parameters and see how often the global minimum is
+found.
