@@ -1,5 +1,6 @@
 import json
 import numpy as np
+import time
 
 
 from cans2.cans_funcs import dict_to_numpy, est_to_json
@@ -17,6 +18,8 @@ plotter = Plotter(model)
 # rows, cols = (3, 3)
 rows, cols = (16, 24)
 exp_name = "full_plate_known_plate_lvl_uniform_b"
+run = "_run_2"
+exp_name = exp_name + run
 
 data_path = "data/sim_plate_with_fit_{0}x{1}.json".format(rows, cols)
 results_dir = "results/sim_{0}x{1}/".format(rows, cols)
@@ -41,11 +44,13 @@ bounds = np.concatenate((plate_lvl_bounds, b_bounds))
 param_guess = np.concatenate((plate_lvl,
                               np.repeat(50.0, plate.no_cultures)))
 
+t0 = time.time()
 plate.est = plate.fit_model(model, param_guess, bounds,
                             rr=True, minimizer_opts={"disp": True})
+t1 = time.time()
 
 est_data = est_to_json(plate, model, plate.est.x, plate.est.fun,
-                       bounds, param_guess, sim=True)
+                       t1-t0, bounds, param_guess, sim=True)
 
 with open(outfile, "w") as f:
     json.dump(est_data, f, indent=4, sort_keys=True)
