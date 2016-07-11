@@ -6563,8 +6563,11 @@
     ], 
     "model": "Competition Model BC", 
     "params": [
-        "C", 
-        "N"
+        "C_0", 
+        "N_0", 
+        "NE_0", 
+        "kn", 
+        "b"
     ], 
     "rows": 16, 
     "sim_amounts": [
