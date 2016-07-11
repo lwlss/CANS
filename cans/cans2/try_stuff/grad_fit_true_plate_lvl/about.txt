@@ -65,3 +65,9 @@ We should also see whether guessing bs rather than using uniform is
 any faster or more reliable. We could repeat the fitting with
 different random parameters and see how often the global minimum is
 found.
+
+Now see if guessing is faster and whether it allows me to be less
+accurate with the b_guess/b_uniform.
+
+It took ~12 minutes to fit and find the global minimum (or at least
+very close) using uniform b_guesses.
