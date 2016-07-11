@@ -1,3 +1,12 @@
+"""Parameter guessing classes and functions.
+
+Not yet able to provide plate_lvl parameters, e.g. from a genetic
+algortihm candidate, for logistic equvalent guessing (instead
+inferred). I haven't needed to yet because I have been using the
+imaginary neighbour model instead.
+
+"""
+
 import numpy as np
 
 
@@ -8,7 +17,8 @@ from cans2.plate import Plate
 def fit_log_eq(plate, plate_model, b_guess,
                area_ratio=1.0, C_ratio=1e-5,
                kn_start=0, kn_stop=2.0, kn_num=21):
-    """Simulate a Plate and carry out a quick fit.
+
+"""Simulate a Plate and carry out a quick fit.
 
     Return a Plate containing the estimates in Cultures.
 
@@ -62,8 +72,8 @@ def fit_imag_neigh(plate, plate_model, area_ratio, C_ratio,
 
     plate_lvl : Plate level parameters to use, rather than inferring
     from the data. If provided then these are returned with the b
-    estimates and the user need not provide kn_* arguments as they
-    will not be used.
+    estimates (rather than inferred values) and the user need not
+    provide kn_* arguments as they will not be used.
 
     kn_start, kn_stop, and kn_num define values (using np.linspace) of
     kn for which the plate_model is simulated using last stage guesses
@@ -88,7 +98,7 @@ def fit_imag_neigh(plate, plate_model, area_ratio, C_ratio,
 
 
 class Guesser(object):
-    def __init__(self, plate, model, area_ratio=1.0, C_ratio=1e-5):
+    def __init__(self, plate, model, area_ratio=1.0, C_ratio=1e-4):
         """Instantiate Guesser with a Plate and Model.
 
         plate : CANS Plate object.
@@ -108,13 +118,20 @@ class Guesser(object):
         the experiment. The data does not have resolution enough to
         determine starting cell amounts and, unlike for nutrient
         amounts, there is no easy way to infer a guess without
-        fitting.
+        fitting. If C_0 is not to be inferred from the data, e.g. if
+        using a genetic algorithm candidate of plate level parameters
+        with imaginary neighbour guessing, then the user can supply
+        the value None. It shouldn't matter becuase in this case the
+        value should not be accessed anyway.
 
         """
         self.plate = plate
         self.model = model
         self.area_ratio = float(area_ratio)
-        self.C_ratio = float(C_ratio)
+        if C_ratio is None:
+            self.C_ratio = None
+        else:
+            self.C_ratio = float(C_ratio)
 
 
     def _guess_init_N(self):
@@ -271,7 +288,7 @@ class Guesser(object):
 
 
     def _process_quick_ests(self, quick_mod, est_name, b_guess, clip=False,
-                            C_0_handling="first_guess"):
+                            C_0_handling="first_guess", plate_lvl=None):
         """Process estimates from quick fits.
 
         Take a mean of estimated C_0s, use the N_0 guess(es) made from
@@ -289,9 +306,11 @@ class Guesser(object):
         highest final cells. This is because cultures with zero growth can be
         fit with arbitrary initial amounts.
 
-        clip: If True, clip b_ests at 3x b_guess to avoid extreme values.
+        clip : If True, clip b_ests at 3x b_guess to avoid extreme values.
 
-        b_guess: Original user provided b_guess.
+        b_guess : Original user provided b_guess.
+
+        plate_lvl : Optional plate level parameters to use instead of inferring.
 
         """
         # Allow to raise AttributeError if bad est_name.
@@ -299,6 +318,11 @@ class Guesser(object):
         b_ests = all_ests[:, quick_mod.b_index]
         if clip:
             b_ests.clip(max=3*b_guess, out=b_ests)    # out for inplace clipping.
+
+        if plate_lvl is not None:
+            # Don't bother to infer plate level parameters and return
+            # early.
+            return np.concatenate((plate_lvl, b_ests))
 
         if C_0_handling == "first_guess":
             C_0_guess = self._guess_init_C()
@@ -327,7 +351,10 @@ class Guesser(object):
         # N_guess may be a single value. We need an iterable to
         # concatenate with other guesses.
         new_guess = np.concatenate((C_0_guess, N_0_guess, b_ests))
-        return np.array(new_guess)
+        # Insert nan at index of kn.
+        kn_index = self.model.params.index("kn")
+        new_guess = np.insert(new_guess, kn_index, np.nan)
+        return new_guess
 
 
     def make_first_guess(self, b_guess):
@@ -399,9 +426,6 @@ class Guesser(object):
                                              est_name="log_est",
                                              C_0_handling="first_guess",
                                              b_guess=b_guess)
-        # Insert nan at index of kn.
-        kn_index = self.model.params.index("kn")
-        new_guess = np.insert(new_guess, kn_index, np.nan)
         return new_guess
 
 
@@ -498,16 +522,7 @@ class Guesser(object):
                                              est_name="im_neigh_est",
                                              C_0_handling="first_guess",
                                              b_guess=b_guess)
-        if plate_lvl is not None:
-            # Just return the plate level parameters provided and the
-            # b_guesses discarding the amounts estimated in
-            # _process_quick_ests.
-            return np.concatenate((plate_lvl, new_guess[-self.plate.no_cultures:]))
-        else:
-            # Insert nan at index of kn.
-            kn_index = self.model.params.index("kn")
-            new_guess = np.insert(new_guess, kn_index, np.nan)
-            return new_guess
+        return new_guess
 
 
     def guess_kn(self, start, stop, num, params):
