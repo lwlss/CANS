@@ -12,7 +12,11 @@ from math import log10, floor
 
 
 def cans_to_json(plate, model, sim=False):
-    """Convert Plate and Model to standardised json."""
+    """Return standardised data for Plate and Model instances.
+
+    Returns a dictionary suitable for saving as json.
+
+    """
     data = {
         "rows": plate.rows,
         "cols": plate.cols,
@@ -30,6 +34,24 @@ def cans_to_json(plate, model, sim=False):
             }
         data.update(sim_data)
     return dict_to_json(data)
+
+
+def est_to_json(plate, model, est_params, obj_fun, bounds,
+                param_guess):
+    """Return standardised data for a fit.
+
+    Returns a dictionary suitable for saving as json.
+
+    """
+    data = cans_to_json(plate, model)
+    est_data = {
+        "est_params": est_params,
+        "obj_fun": obj_fun,
+        "bounds": bounds,
+        "param_guess": param_guess,
+        }
+    data.update(dict_to_json(est_data))
+    return data
 
 
 def round_sig(x, sig=2):
