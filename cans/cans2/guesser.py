@@ -38,8 +38,8 @@ def fit_log_eq(plate, plate_model, b_guess,
 
 
 def fit_imag_neigh(plate, plate_model, area_ratio, C_ratio,
-                   imag_neigh_params, no_neighs=None,
-                   kn_start=0.0, kn_stop=2.0, kn_num=21):# C_doubt=1e3, N_doubt=2.0
+                   imag_neigh_params, no_neighs=None, kn_start=0.0,
+                   kn_stop=2.0, kn_num=21, plate_lvl=None):
     """Simulate a Plate and carry out a quick fit.
 
     Return a tuple of a parameter guess and the Guesser object used to
@@ -60,6 +60,11 @@ def fit_imag_neigh(plate, plate_model, area_ratio, C_ratio,
     cultures is less than the total amount of nutrients available
     from the culture and the slow growing neighbours.
 
+    plate_lvl : Plate level parameters to use, rather than inferring
+    from the data. If provided then these are returned with the b
+    estimates and the user need not provide kn_* arguments as they
+    will not be used.
+
     kn_start, kn_stop, and kn_num define values (using np.linspace) of
     kn for which the plate_model is simulated using last stage guesses
     of other parameters. For a given set of other parameters there is
@@ -74,11 +79,11 @@ def fit_imag_neigh(plate, plate_model, area_ratio, C_ratio,
     kwargs = {
         "imag_neigh_params": imag_neigh_params,
         "no_neighs": no_neighs,
-        # "C_doubt": C_doubt,
-        # "N_doubt": N_doubt,
+        "plate_lvl": plate_lvl,
     }
     quick_guess = guesser.quick_fit_imag_neighs(**kwargs)
-    quick_guess = guesser.guess_kn(kn_start, kn_stop, kn_num, quick_guess)
+    if plate_lvl is None:
+        quick_guess = guesser.guess_kn(kn_start, kn_stop, kn_num, quick_guess)
     return quick_guess, guesser
 
 
@@ -339,7 +344,7 @@ class Guesser(object):
 
         """
         C_0_guess = self._guess_init_C()
-        N_0_guess = self._guess_init_N()
+        N_0_guess = self._guess_init_N()    # May be length 2.
         amount_guess = np.append(C_0_guess, N_0_guess)
         first_guess = np.append(amount_guess, b_guess)
         return first_guess
@@ -400,25 +405,43 @@ class Guesser(object):
         return new_guess
 
 
-    def quick_fit_imag_neighs(self, imag_neigh_params, no_neighs=None):
+    def quick_fit_imag_neighs(self, imag_neigh_params,
+                              no_neighs=None, plate_lvl=None):
         """Guess b by fitting the imaginary neighbour model.
 
         b_guess : guess for b parameter. The same for all cultures.
 
+        plate_lvl : Plate level parameters to use rather than
+        inferring from data. Usually candidates of plate-level
+        parameters from a genetic algorithm. If plate_lvl is provided
+        then only then these are returned in from of the b_estimates.
+
         no_neighs : The number of each type of imaginary neighbour to
         include in the model. If None an number will be calculated
-        such that the final amount of cells in the highest growing
-        cultures is less than the total amount of nutrients available
-        from the culture and the slow growing neighbours.
+        such that the the total amount of nutrients available from the
+        culture and the slow growing neighbours is greater than the
+        final amount of cells in the highest growing culture.
 
         """
+        N_index = self.model.species.index("N")
+        N_bc = bool(self.model.species_bc[N_index])    # N boundary condition.
         b_guess = imag_neigh_params[-1]
-        # Construct a first parameter guess of Guesser.model
-        # parameters from final cell amounts and user supplied values.
-        first_guess = self.make_first_guess(b_guess)
+        if plate_lvl is None:
+            # Construct a first parameter guess of Guesser.model
+            # parameters from final cell amounts and user supplied values.
+            first_guess = self.make_first_guess(b_guess)
+        elif plate_lvl and N_bc:
+            first_guess = np.concatenate((plate_lvl[:N_index+1], [b_guess]))
+        elif plate_lvl and not N_bc:
+            first_guess = np.concatenate((plate_lvl[:N_index], [b_guess]))
+        else:
+            raise ValueError, "plate_lvl should evaluate True if provided."
 
         if no_neighs is None:
-            N_0_min = min(self._guess_init_N())
+            if plate_lvl is None:
+                N_0_min = min(self._guess_init_N())
+            else:
+                N_0_min = plate_lvl[N_index]
             C_f_max = max(self.plate.c_meas[-self.plate.no_cultures:])
             no_neighs = int(np.ceil(float(C_f_max)/N_0_min))
 
@@ -436,18 +459,19 @@ class Guesser(object):
 
         # Add user supplied guesses of ['kn1', 'kn2', 'b-', 'b+', 'b']
         # to make neighbour model guesses and then separate guess and
-        # bounds for internal and edge cultures.
+        # bounds for internal and edge cultures if they have different
+        # N_0s (compares inside _sep_by_N_0).
         imag_neigh_params = np.concatenate((first_guess[:-1],
                                             imag_neigh_params))
         imag_neigh_params, neigh_bounds = self._sep_by_N_0(imag_neigh_params,
                                                            neigh_bounds)
-        N_index = self.model.species.index("N")
+
         for i, c in enumerate(self.plate.cultures):
-            if not self.model.species_bc[N_index]:
+            if not N_bc:
                 N_0_index = 0
-            elif self.model.species_bc[N_index] and i in self.plate.internals:
+            elif N_bc and i in self.plate.internals:
                 N_0_index = 0
-            elif self.model.species_bc[N_index] and i in self.plate.edges:
+            elif N_bc and i in self.plate.edges:
                 N_0_index = 1
 
             # There is an inacuaracy here for N_0s of neighbours of
@@ -474,10 +498,16 @@ class Guesser(object):
                                              est_name="im_neigh_est",
                                              C_0_handling="first_guess",
                                              b_guess=b_guess)
-        # Insert nan at index of kn.
-        kn_index = self.model.params.index("kn")
-        new_guess = np.insert(new_guess, kn_index, np.nan)
-        return new_guess
+        if plate_lvl is not None:
+            # Just return the plate level parameters provided and the
+            # b_guesses discarding the amounts estimated in
+            # _process_quick_ests.
+            return np.concatenate((plate_lvl, new_guess[-self.plate.no_cultures:]))
+        else:
+            # Insert nan at index of kn.
+            kn_index = self.model.params.index("kn")
+            new_guess = np.insert(new_guess, kn_index, np.nan)
+            return new_guess
 
 
     def guess_kn(self, start, stop, num, params):
