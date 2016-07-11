@@ -11,3 +11,6 @@ How?  The code for doing so already exists as a python script and a
 bash script to run it. This starts multiple processes that use
 different initial guesses. I just need to pass a the file path of the
 data to the python script.
+
+REMEMBER to save the correct SBML, with the estimated parameters, not
+the guess.
