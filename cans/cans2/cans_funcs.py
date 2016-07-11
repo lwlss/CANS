@@ -11,6 +11,27 @@ import pickle
 from math import log10, floor
 
 
+def cans_to_json(plate, model, sim=False):
+    """Convert Plate and Model to standardised json."""
+    data = {
+        "rows": plate.rows,
+        "cols": plate.cols,
+        "times": plate.times,
+        "c_meas": plate.c_meas,
+        "empties": plate.empties,
+        "model": model.name,
+        "species": model.species,
+        "params": model.params,
+        }
+    if sim:
+        sim_data = {
+            "sim_params": plate.sim_params,
+            "sim_amounts": plate.sim_amounts,
+            }
+        data.update(sim_data)
+    return dict_to_json(data)
+
+
 def round_sig(x, sig=2):
     if x != 0:
         """http://stackoverflow.com/a/3413529"""
