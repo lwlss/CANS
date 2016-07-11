@@ -37,13 +37,16 @@ def cans_to_json(plate, model, sim=False):
 
 
 def est_to_json(plate, model, est_params, obj_fun, bounds,
-                param_guess):
+                param_guess, sim=False):
     """Return standardised data for a fit.
 
     Returns a dictionary suitable for saving as json.
 
+    sim : Also save simulation data plate.sim_params and
+    plate.sim_amounts.
+
     """
-    data = cans_to_json(plate, model)
+    data = cans_to_json(plate, model, sim)
     est_data = {
         "est_params": est_params,
         "obj_fun": obj_fun,
