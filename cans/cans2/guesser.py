@@ -73,7 +73,8 @@ def fit_imag_neigh(plate, plate_model, area_ratio, C_ratio,
     plate_lvl : Plate level parameters to use, rather than inferring
     from the data. If provided then these are returned with the b
     estimates (rather than inferred values) and the user need not
-    provide kn_* arguments as they will not be used.
+    provide kn_* arguments as they will not be used. The user can
+    provide a C_ratio of None if plate level parameters are provided.
 
     kn_start, kn_stop, and kn_num define values (using np.linspace) of
     kn for which the plate_model is simulated using last stage guesses
