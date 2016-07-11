@@ -4,7 +4,9 @@ level parameters?
 This is of importance for the heirarchical genetic algorithm. If we
 can use a gradient method in the plate-level evaluator rather than a
 second culture-level genetic algorithm, this we already have this
-working and it may be faster anyway.
+working and it may be faster anyway. I will provide the true plate
+level parameters of a simulated full plate and check whether the
+gradient method finds the true b parameters.
 
 Two approaches:
 
