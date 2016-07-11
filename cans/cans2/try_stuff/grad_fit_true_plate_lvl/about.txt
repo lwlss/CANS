@@ -3,8 +3,8 @@ level parameters?
 
 This is of importance for the heirarchical genetic algorithm. If we
 can use a gradient method in the plate-level evaluator rather than a
-second culture-level genetic algorithm, then this may be faster and we
-need not worry about developing a lower level genitic algorithm.
+second culture-level genetic algorithm, this we already have this
+working and it may be faster anyway.
 
 Two approaches:
 
@@ -49,10 +49,3 @@ Two approaches:
   evaluator. This is not unreasonable if it is the best method but
   would require more than the ~70 cores that our machine has. Instead,
   we could use cloud computing.
-
-
-
-The imaginary neighbour model provides fairly good guesses. We are
-evolving the plate level parameters that the guesser takes. We also need a parameter
-
-Initial guesses using the imaginary neighbour model.
