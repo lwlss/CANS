@@ -126,10 +126,18 @@ def dict_to_json(dct):
 
 
 def dict_to_numpy(dct):
-    """Convert lists in a dict to np.ndarrays."""
+    """Convert lists of numbers to np.ndarrays of dtype np.float64.
+
+    Return the dictionary with other items untouched.
+
+    """
     for k, v in dct.items():
         if isinstance(v, list):
-            dct[k] = np.array(v, dtype=np.float64)
+            try:
+                dct[k] = np.array(v, dtype=np.float64)
+            except ValueError:
+                # e.g. For lists of strings.
+                continue
     return dct
 
 
