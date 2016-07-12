@@ -103,3 +103,9 @@ might only run into trouble when this is not happening if it causes
 the objective function to be more homogenous over parameter space and
 we do not travel towards solution. Try with at first because it is
 possible to get farily extreme values.
+
+It may be better and quicker to not find the global minimum, for a
+given plate level candidate if we are far from the true values as
+these values will be discarded. However, this could potentially create
+more local minima in the plate level parameter space or make the
+direction of the search more difficulut to determine (I don't know).
