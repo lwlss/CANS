@@ -17,8 +17,7 @@ from cans2.plate import Plate
 def fit_log_eq(plate, plate_model, b_guess,
                area_ratio=1.0, C_ratio=1e-5,
                kn_start=0, kn_stop=2.0, kn_num=21):
-
-"""Simulate a Plate and carry out a quick fit.
+    """Simulate a Plate and carry out a quick fit.
 
     Return a Plate containing the estimates in Cultures.
 
@@ -115,7 +114,9 @@ class Guesser(object):
         area). This is not the area of the cultures, which are assumed
         equal, but the area of agar that is closest to, and could be
         said to belong to, a culture. (Assumed equal to Ne/Ni.) Used
-        if model is CompModelBC but ignored if model is CompModel.
+        if model is CompModelBC but ignored if model is CompModel. Can
+        set to None if supplying plate level parameters. In such a
+        case the value is not accessed anyway.
 
         C_ratio : (Init cell amounts / final cell amounts). The user
         must provide a guess for the ratio based on knowledge about
@@ -131,7 +132,10 @@ class Guesser(object):
         """
         self.plate = plate
         self.model = model
-        self.area_ratio = float(area_ratio)
+        if area_ration is None:
+            self.area_ration = None
+        else:
+            self.area_ratio = float(area_ratio)
         if C_ratio is None:
             self.C_ratio = None
         else:
