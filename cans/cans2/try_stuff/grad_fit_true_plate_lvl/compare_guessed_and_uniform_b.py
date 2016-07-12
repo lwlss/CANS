@@ -68,7 +68,7 @@ for b_index, b_guess in enumerate(B_GUESSES):
                                               imag_neigh_params=imag_neigh_params,
                                               plate_lvl=plate_lvl)
         t1 = time.time()
-        print("MAD guess", t1-t0, mad(plate.sim_params, param_guess))
+        # print("MAD guess", t1-t0, mad(plate.sim_params, param_guess))
 
     t2 = time.time()
     plate.est = plate.fit_model(model, param_guess, bounds,
