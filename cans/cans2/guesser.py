@@ -525,7 +525,6 @@ class Guesser(object):
                                          imag_neigh_params[N_0_index],
                                          neigh_bounds[N_0_index])
                                          # minimizer_opts={"disp": True})
-            print(c.im_neigh_est.x)
 
         new_guess = self._process_quick_ests(imag_neigh_mod,
                                              est_name="im_neigh_est",
