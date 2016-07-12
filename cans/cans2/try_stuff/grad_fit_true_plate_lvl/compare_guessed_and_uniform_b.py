@@ -4,7 +4,7 @@ import time
 import sys
 
 
-from cans2.cans_funcs import dict_to_numpy, est_to_json, mad
+from cans2.cans_funcs import dict_to_numpy, dict_to_json, est_to_json, mad
 from cans2.model import CompModelBC
 from cans2.plate import Plate
 from cans2.plotter import Plotter
@@ -72,10 +72,10 @@ for b_index, b_guess in enumerate(B_GUESSES):
 
     t2 = time.time()
     plate.est = plate.fit_model(model, param_guess, bounds,
-                                rr=True, minimizer_opts={"disp": True})
+                                rr=True, minimizer_opts={"disp": False})
     t3 = time.time()
 
-    print("MAD est", t3-t2, t3-t0, mad(plate.est.x, plate.sim_params))
+    print("MAD est", t3-t2, mad(plate.est.x, plate.sim_params))
 
     est_data = est_to_json(plate, model, plate.est.x, plate.est.fun,
                            t3-t2, bounds, param_guess, sim=True)
@@ -90,7 +90,7 @@ for b_index, b_guess in enumerate(B_GUESSES):
         est_data["imag_neigh_params"] = imag_neigh_params
 
     with open(outfile, "w") as f:
-        json.dump(est_data, f, indent=4, sort_keys=True)
+        json.dump(dict_to_json(est_data), f, indent=4, sort_keys=True)
 
     title = "Fix true plate level params and grad fit (sim {0}; b_index {1}; {2})."
     title.format(sim, b_index, guessing)
