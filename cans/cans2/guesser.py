@@ -325,7 +325,7 @@ class Guesser(object):
         all_ests = np.array([getattr(c, est_name).x for c in self.plate.cultures])
         b_ests = all_ests[:, quick_mod.b_index]
         if clip:
-            b_ests.clip(max=3*b_guess, out=b_ests)    # out for inplace clipping.
+            b_ests.clip(max=3.0*b_guess, out=b_ests)    # "out" for inplace clipping.
 
         if plate_lvl is not None:
             # Don't bother to infer plate level parameters and return
@@ -462,10 +462,10 @@ class Guesser(object):
             # Construct a first parameter guess of Guesser.model
             # parameters from final cell amounts and user supplied values.
             first_guess = self.make_first_guess(b_guess)
-        elif plate_lvl and N_bc:
+        elif list(plate_lvl) and N_bc:
+            first_guess = np.concatenate((plate_lvl[:N_index+2], [b_guess]))
+        elif list(plate_lvl) and not N_bc:
             first_guess = np.concatenate((plate_lvl[:N_index+1], [b_guess]))
-        elif plate_lvl and not N_bc:
-            first_guess = np.concatenate((plate_lvl[:N_index], [b_guess]))
         else:
             raise ValueError, "plate_lvl should evaluate True if provided."
 
@@ -523,13 +523,16 @@ class Guesser(object):
             # size increases.
             c.im_neigh_est = c.fit_model(imag_neigh_mod,
                                          imag_neigh_params[N_0_index],
-                                         neigh_bounds[N_0_index],)
-                                         #minimizer_opts={"disp": True})
+                                         neigh_bounds[N_0_index],
+                                         minimizer_opts={"disp": True})
+            print(c.im_neigh_est.x)
 
         new_guess = self._process_quick_ests(imag_neigh_mod,
                                              est_name="im_neigh_est",
+                                             b_guess=b_guess,
+                                             clip=True,    # Cap b at 3*b_guess.
                                              C_0_handling="first_guess",
-                                             b_guess=b_guess)
+                                             plate_lvl=plate_lvl)
         return new_guess
 
 
