@@ -60,9 +60,12 @@ def fit_imag_neigh(plate, plate_model, area_ratio, C_ratio,
     See Guesser.quick_fit_log_eq documentation for information on
     C_doubt and N_doubt and how the
 
-    imag_neigh_params : List or np.array of parameter values for the
-    imaginary neigbour model excluding initial amounts (['kn1', 'kn2',
-    'b-', 'b+', 'b']).
+    imag_neigh_params : List or np.array of parameter guesses/settings
+    for the imaginary neigbour model excluding initial amounts
+    (['kn1', 'kn2', 'b-', 'b+', 'b']). kn1 and kn2 are guesses; b- and
+    b+ are fixed growth constants (settings) for the slow and fast
+    growing neighbours; b is a guess for the parameter of interest
+    used for all cultures. (It is recomended to set 'b+'=1.5*'b'.)
 
     no_neighs : The number of each type of imaginary neighbour to
     include in the model. If None, a number will be calculated
