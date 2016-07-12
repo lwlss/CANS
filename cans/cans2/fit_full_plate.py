@@ -156,6 +156,8 @@ for b_guess in [35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 95, 100, 150]:
     with open(datafile, 'w') as f:
         json.dump(data, f, indent=4, sort_keys=True)
 
+    # Need to correct. At the moment this returns the guess not the
+    # est.
     sbml = full_plate.rr.getSBML()
     with open(sbmlfile, 'w') as f:
         f.write(sbml)
@@ -168,7 +170,7 @@ for b_guess in [35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 95, 100, 150]:
         plotter.plot_est_rr(full_plate, full_plate.est.x, title=plot_title,
                             filename=plotfile)
     except Exception as e:
-        error_log = "Full est: arg_v {0}, b_guess {1},\n".format(sys.argv[1],
+        error_log = "Plotting: arg_v {0}, b_guess {1},\n".format(sys.argv[1],
                                                                  b_guess)
         with open(error_file, 'a') as f:
             f.write(error_log)
