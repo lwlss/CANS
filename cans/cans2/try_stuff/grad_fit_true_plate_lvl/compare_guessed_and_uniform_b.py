@@ -43,10 +43,10 @@ bounds = np.concatenate((plate_lvl_bounds, b_bounds))
 
 # Make b_guesses to loop through for each sim and guess type.
 b_mean = np.mean(plate.sim_params[-plate.no_cultures:])
-b_guesses = b_mean*B_FACTRS
+B_GUESSES = B_FACTRS*b_mean
 
-for b_guess in b_guesses[0:2]:
-    exp_name = "sim_{0}_b_guess_{1}_{2}".format(sim, b_guess, guessing)
+for b_index, b_guess in enumerate(B_GUESSES):
+    exp_name = "sim_{0}_b_index_{1}_{2}".format(sim, b_index, guessing)
     outfile = results_dir + exp_name + ".json"
     plot_file = results_dir + "plots/" + exp_name + ".pdf"
 
@@ -58,7 +58,7 @@ for b_guess in b_guesses[0:2]:
         t0 = time.time()
         param_guess, guesser = fit_imag_neigh(plate, model,
                                               area_ratio=None,
-                                              C_ration=None,
+                                              C_ratio=None,
                                               imag_neigh_params=imag_neigh_params,
                                               plate_lvl=plate_lvl)
         t1 = time.time()
@@ -73,6 +73,8 @@ for b_guess in b_guesses[0:2]:
                            t3-t2, bounds, param_guess, sim=True)
     est_data["guess_method"] = guessing
     est_data["b_guess"] = b_guess
+    est_data["b_index"] = b_index
+    est_data["B_GUESSES"] = B_GUESSES
     est_data["data_path"] = data_path
     if guessing == "imag_neigh":
         est_data["guess_time"] = t1 - t0
@@ -82,7 +84,7 @@ for b_guess in b_guesses[0:2]:
     with open(outfile, "w") as f:
         json.dump(est_data, f, indent=4, sort_keys=True)
 
-    title = "Fix true plate level params and grad fit (sim {0}; b_guess {1}; {2})."
-    title.format(sim, b_guess, guessing)
+    title = "Fix true plate level params and grad fit (sim {0}; b_index {1}; {2})."
+    title.format(sim, b_index, guessing)
     plotter.plot_est_rr(plate, plate.est.x, title, sim=True,
                         filename=plot_file)
