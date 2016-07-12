@@ -22,6 +22,7 @@ guessing = GUESSING[int(sys.argv[2])]
 
 data_path = "data/local_min_sims/sim_{0}.json".format(sim)
 results_dir = "results/local_min_sims/"
+error_file = results_dir + "error_log.txt"
 
 # Read in sim data and make plate.
 with open(data_path, 'r') as f:
@@ -61,21 +62,32 @@ for b_index, b_guess in enumerate(B_GUESSES):
         # kn. Trying both shows that we produce the same estimates in
         # the same time anyway.
         imag_neigh_params = [1.0, 1.0, 0.0, b_guess*1.5, b_guess]
-        t0 = time.time()
-        param_guess, guesser = fit_imag_neigh(plate, model,
-                                              area_ratio=None,
-                                              C_ratio=None,
-                                              imag_neigh_params=imag_neigh_params,
-                                              plate_lvl=plate_lvl)
-        t1 = time.time()
-        # print("MAD guess", t1-t0, mad(plate.sim_params, param_guess))
+        try:
+            t0 = time.time()
+            param_guess, guesser = fit_imag_neigh(plate, model,
+                                                  area_ratio=None,
+                                                  C_ratio=None,
+                                                  imag_neigh_params=imag_neigh_params,
+                                                  plate_lvl=plate_lvl)
+            t1 = time.time()
+        except Exception as e:
+            error_log = "Imag guess: arg_vs {0}, {1}, b_index {2},\n"
+            error_log = error_log.format(sys.argv[1], sys.argv[2], b_index)
+            with open(error_file, 'a') as f:
+                f.write(error_log)
+            continue
 
-    t2 = time.time()
-    plate.est = plate.fit_model(model, param_guess, bounds,
-                                rr=True, minimizer_opts={"disp": False})
-    t3 = time.time()
-
-    # print("MAD est", t3-t2, mad(plate.est.x, plate.sim_params))
+    try:
+        t2 = time.time()
+        plate.est = plate.fit_model(model, param_guess, bounds,
+                                    rr=True, minimizer_opts={"disp": False})
+        t3 = time.time()
+    except Exception as e:
+        error_log = "Full est: arg_vs {0}, {1}, b_index {2},\n"
+        error_log = error_log.format(sys.argv[1], sys.argv[2], b_index)
+        with open(error_file, 'a') as f:
+            f.write(error_log)
+        continue
 
     est_data = est_to_json(plate, model, plate.est.x, plate.est.fun,
                            t3-t2, bounds, param_guess, sim=True)
@@ -93,7 +105,14 @@ for b_index, b_guess in enumerate(B_GUESSES):
     with open(outfile, "w") as f:
         json.dump(dict_to_json(est_data), f, indent=4, sort_keys=True)
 
-    title = "Fix true plate level params and grad fit (sim {0}; b_index {1}; {2})."
-    title.format(sim, b_index, guessing)
-    plotter.plot_est_rr(plate, plate.est.x, title, sim=True,
-                        filename=plot_file)
+    try:
+        title = "Fix true plate level params and grad fit (sim {0}; b_index {1}; {2})."
+        title.format(sim, b_index, guessing)
+        plotter.plot_est_rr(plate, plate.est.x, title, sim=True,
+                            filename=plot_file)
+    except Exception as e:
+        error_log = "Plotting: arg_vs {0}, {1}, b_index {2},\n"
+        error_log = error_log.format(sys.argv[1], sys.argv[2], b_index)
+        with open(error_file, 'a') as f:
+            f.write(error_log)
+        continue
