@@ -71,7 +71,7 @@ for b_index, b_guess in enumerate(B_GUESSES):
                                               imag_neigh_params=imag_neigh_params,
                                               plate_lvl=plate_lvl)
         t1 = time.time()
-        print("MAD", t1-t0, mad(plate.sim_params, param_guess))
+        print("MAD guess", t1-t0, mad(plate.sim_params, param_guess))
         plotter.plot_est_rr(plate, param_guess,
                             sim=True, title="Imag Neigh Guess")
 
@@ -80,7 +80,8 @@ for b_index, b_guess in enumerate(B_GUESSES):
                                 rr=True, minimizer_opts={"disp": True})
     t3 = time.time()
 
-    # Get data
+    print("MAD est", t3-t2, t3-t0, mad(plate.est.x, plate.sim_params))
+
     est_data = est_to_json(plate, model, plate.est.x, plate.est.fun,
                            t3-t2, bounds, param_guess, sim=True)
     est_data["guess_method"] = guessing
