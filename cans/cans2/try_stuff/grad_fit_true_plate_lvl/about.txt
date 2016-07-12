@@ -71,3 +71,22 @@ accurate with the b_guess/b_uniform.
 
 It took ~12 minutes to fit and find the global minimum (or at least
 very close) using uniform b_guesses.
+
+I will simulate using parameters from the top five previous best fits
+of p15 (local minima) and try and time both types of b guessing. I
+made these estimates using a grid of "parameters" (C_ratio, b_guess,
+and whether to zero kn) which were fed to the imaginary neighbour
+guesser. (I did the same for the logistic equivalent guesser but all?
+of these guesses were worse.)
+
+I will also vary the range of b_guess(==b_uniform) in both cases to
+test whether the imaginary neighbour guesser is more tollerent to
+uncertaity in b_guess.
+
+I am also interested in the range of fit timings because I plan to use
+the fitting in parallel evaluations of a genetic algorithm for finding
+plate level parameters. These will be limited by the slowest
+fit. Although each generation will take longer to evaluate, we could
+use a population size greater than the number of available cores to
+minimize wasted cpu time. This is a trade off between population
+size/generation-generation improvement and generation evaluation time.
