@@ -1,7 +1,6 @@
 import numpy as np
 import json
 import Bio.Cluster
-import itertools
 
 
 from cans2.model import CompModelBC
