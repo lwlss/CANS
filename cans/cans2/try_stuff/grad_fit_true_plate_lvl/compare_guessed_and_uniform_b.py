@@ -12,6 +12,9 @@ from cans2.genetic_kwargs import _get_plate_kwargs
 from cans2.guesser import fit_imag_neigh
 
 
+from cans2.cans_funcs import mad
+
+
 # Factors to multiply b_avg to give b_guess. The best fits have b_avg
 # in range (44.4, 56.4).
 B_FACTRS = np.linspace(0.5, 1.5, 11)
@@ -37,7 +40,9 @@ plotter = Plotter(model)
 # Put strict bounds on the plate level parameters then fit.
 plate_lvl = plate.sim_params[:model.b_index]
 plate_lvl_bounds = np.array([[p, p] for p in plate_lvl])
+
 kn = plate_lvl[model.params.index("kn")]
+
 b_bounds = np.array([[0.0, 200.0] for i in range(plate.no_cultures)])    # Could adjust upper by b_guess
 bounds = np.concatenate((plate_lvl_bounds, b_bounds))
 
@@ -54,7 +59,11 @@ for b_index, b_guess in enumerate(B_GUESSES):
         param_guess = np.concatenate((plate_lvl,
                                       np.repeat(50.0, plate.no_cultures)))
     elif guessing == "imag_neigh":
-        imag_neigh_params = [kn, kn, 0.0, b_guess*1.5, b_guess]
+        # Using 1.0 rather than the candidate plate_lvl kn. "kn1" and
+        # "kn2" may take completely different values to the comp model
+        # kn. Trying both shows that we produce the same estimates in
+        # the same time anyway.
+        imag_neigh_params = [1.0, 1.0, 0.0, b_guess*1.5, b_guess]
         t0 = time.time()
         param_guess, guesser = fit_imag_neigh(plate, model,
                                               area_ratio=None,
@@ -62,6 +71,9 @@ for b_index, b_guess in enumerate(B_GUESSES):
                                               imag_neigh_params=imag_neigh_params,
                                               plate_lvl=plate_lvl)
         t1 = time.time()
+        print("MAD", t1-t0, mad(plate.sim_params, param_guess))
+        plotter.plot_est_rr(plate, param_guess,
+                            sim=True, title="Imag Neigh Guess")
 
     t2 = time.time()
     plate.est = plate.fit_model(model, param_guess, bounds,
