@@ -133,7 +133,7 @@ class Guesser(object):
         self.plate = plate
         self.model = model
         if area_ration is None:
-            self.area_ration = None
+            self.area_ratio = None
         else:
             self.area_ratio = float(area_ratio)
         if C_ratio is None:
