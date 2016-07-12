@@ -109,3 +109,9 @@ given plate level candidate if we are far from the true values as
 these values will be discarded. However, this could potentially create
 more local minima in the plate level parameter space or make the
 direction of the search more difficulut to determine (I don't know).
+
+
+Preliminary data.
+
+It took 285s (4.75min) to find imaginary neighbour guesses for a full
+plate. The fit then took a further 483s (8.05min).
