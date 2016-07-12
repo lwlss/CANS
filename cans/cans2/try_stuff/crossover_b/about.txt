@@ -1,0 +1,2 @@
+For the lower culture level genetic algorithm with fixed plate level
+parameters crossover mutation sounds promising.
