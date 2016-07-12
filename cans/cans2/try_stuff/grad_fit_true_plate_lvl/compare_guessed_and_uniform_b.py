@@ -4,15 +4,12 @@ import time
 import sys
 
 
-from cans2.cans_funcs import dict_to_numpy, est_to_json
+from cans2.cans_funcs import dict_to_numpy, est_to_json, mad
 from cans2.model import CompModelBC
 from cans2.plate import Plate
 from cans2.plotter import Plotter
 from cans2.genetic_kwargs import _get_plate_kwargs
 from cans2.guesser import fit_imag_neigh
-
-
-from cans2.cans_funcs import mad
 
 
 # Factors to multiply b_avg to give b_guess. The best fits have b_avg
@@ -72,8 +69,6 @@ for b_index, b_guess in enumerate(B_GUESSES):
                                               plate_lvl=plate_lvl)
         t1 = time.time()
         print("MAD guess", t1-t0, mad(plate.sim_params, param_guess))
-        plotter.plot_est_rr(plate, param_guess,
-                            sim=True, title="Imag Neigh Guess")
 
     t2 = time.time()
     plate.est = plate.fit_model(model, param_guess, bounds,
