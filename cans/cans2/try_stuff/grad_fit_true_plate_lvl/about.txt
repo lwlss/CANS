@@ -90,3 +90,16 @@ fit. Although each generation will take longer to evaluate, we could
 use a population size greater than the number of available cores to
 minimize wasted cpu time. This is a trade off between population
 size/generation-generation improvement and generation evaluation time.
+
+I am comparing the timing and mad of parameters for imaginary
+neighbour guessing when using either the candidate plate level kn or
+simply using the value 1.0. The same time was taken and the same
+values found using for both methods so I will just suppy 1.0.
+
+Should we allow clipping of extreme b values based on b_guess? We want
+to always be finding the global minimum for a given set of plate level
+parameters so if it helps us achieve this I don't see why not. We
+might only run into trouble when this is not happening if it causes
+the objective function to be more homogenous over parameter space and
+we do not travel towards solution. Try with at first because it is
+possible to get farily extreme values.
