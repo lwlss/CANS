@@ -75,7 +75,7 @@ for b_index, b_guess in enumerate(B_GUESSES):
                                 rr=True, minimizer_opts={"disp": False})
     t3 = time.time()
 
-    print("MAD est", t3-t2, mad(plate.est.x, plate.sim_params))
+    # print("MAD est", t3-t2, mad(plate.est.x, plate.sim_params))
 
     est_data = est_to_json(plate, model, plate.est.x, plate.est.fun,
                            t3-t2, bounds, param_guess, sim=True)
@@ -84,6 +84,7 @@ for b_index, b_guess in enumerate(B_GUESSES):
     est_data["b_index"] = b_index
     est_data["B_GUESSES"] = B_GUESSES
     est_data["data_path"] = data_path
+    est_data["MAD"] = mad(plate.est.x, plate.sim_params)
     if guessing == "imag_neigh":
         est_data["guess_time"] = t1 - t0
         est_data["total_time"] = t3 - t0
