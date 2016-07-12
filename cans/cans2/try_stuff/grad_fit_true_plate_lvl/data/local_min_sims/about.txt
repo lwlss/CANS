@@ -1,0 +1,6 @@
+Full plate simulations using parameters from the top 5
+fits to p15 which were local minima. 
+
+Found previously using bounded but not fixed plate_lvl
+parameters and a grid of (C_ratio, b_guess, zero_kn)
+fed to the imaginary neighbour guesser.
