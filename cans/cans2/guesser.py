@@ -523,8 +523,8 @@ class Guesser(object):
             # size increases.
             c.im_neigh_est = c.fit_model(imag_neigh_mod,
                                          imag_neigh_params[N_0_index],
-                                         neigh_bounds[N_0_index],
-                                         minimizer_opts={"disp": True})
+                                         neigh_bounds[N_0_index])
+                                         # minimizer_opts={"disp": True})
             print(c.im_neigh_est.x)
 
         new_guess = self._process_quick_ests(imag_neigh_mod,
