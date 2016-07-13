@@ -123,7 +123,11 @@ Now that the fits have run (all but one) I am interested to see the following:
 - Is uniform or imaginary neighbour b guessing better at the above?
 - How do both methods depend on the accuracy of b_guess?
 
-Conclusion
+Discussion
+
+Note: There is an error in the json files because I included plate
+level parameters in the MAD. I have corrected for this in the results
+below using a factor C = (384+4)/384.0.
 
 Uniform Guessing
 
@@ -142,16 +146,25 @@ minimum.
 
 Imaginary Neighbour Guessing
 
-
 For imaginary neighbour guessing we were able to arrive at fairly low
-MADs (lowest 0.67, highest 1.41) for all simulations if the b_guess
-was well chosen. I need to check how well the parameters correspond to
-true for the worst of these.
+MADs (lowest 0.68, highest 1.43) for all simulations if the b_guess
+was well chosen. All data was simulated with noise. For the level of
+noise added, low parameter MAD correlates fairly well with low
+objective function. For each simulation the best fit, determined by
+ojective function value, corresponds to the lowest b MAD.
+With mean b values of about 50 an MAD of ~1 seems resonable.
 
-All data was simulated with noise. For the level of noise added, low
-parameter MAD correlates fairly well with low objective function and
-the best fit for each sim, determined by ojective function value,
-corresponded to the lowest parameter MAD.
+MADs (0.83, 1.43, 0.68, 0.82, 0.74)
+objf (0.36, 0.39, 0.36, 0.34, 0.36)
+
+However, I inspected parameters for the worst MAD (sim 2) and noticed
+a potential problem. For a very slow grower with a true value of
+b=0.005 we get an estimated value of 28. In QFA, the extreme growers
+are useually of greatest biological interest as these are interpereted
+as being mutants with strongly interacting mutations (depending on the
+fitness of the single mutant strains). It would be nice to be able to
+determine them accurately. I will plot est vs true bs for the best fit
+of each simulation.
 
 There is a potential bias in simulation parameters which means that
 this may not work for real data. I took parameters from the previous
