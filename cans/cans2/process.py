@@ -8,6 +8,15 @@ import numpy as np
 from math import log10, floor
 
 
+from cans2.cans_funcs import dict_to_numpy
+
+
+def read_in_json(path):
+    """Read in json and return a dict with list converted to numpy arrays."""
+    with open(path, "r") as f:
+        data = dict_to_numpy(json.load(f))
+    return data
+
 
 def round_sig(x, sig=2):
     # http://stackoverflow.com/a/3413529
