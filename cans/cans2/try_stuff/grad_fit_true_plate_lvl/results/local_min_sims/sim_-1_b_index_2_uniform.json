@@ -188,7 +188,7 @@
         52.1992204412484, 
         56.535810605464114
     ], 
-    "fit_time": 0.8465919494628906, 
+    "fit_time": 1.0868771076202393, 
     "guess_method": "uniform", 
     "model": "Competition Model BC", 
     "obj_fun": 0.038966264034426303, 
