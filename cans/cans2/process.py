@@ -73,6 +73,6 @@ def mad_tril(vec):
     for v1 in vec:
         row = []
         for v2 in vec:
-            row.append(np.mean(np.abs(v1 - v2)))    # MAD
+            row.append(np.mean(np.abs(v1 - v2)))
         mads.append(row)
     return np.tril(mads)
