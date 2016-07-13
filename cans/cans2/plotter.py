@@ -147,7 +147,7 @@ class Plotter(object):
 
 
     def plot_c_meas(self, plate, title="Measured cell intensity",
-                    ms=6.0, mew=0.5, lw=1.0):
+                    ms=6.0, mew=0.5):
         fig, grid = self._make_grid(plate, plate.c_meas, False, title)
 
         for i, ax in enumerate(grid):
