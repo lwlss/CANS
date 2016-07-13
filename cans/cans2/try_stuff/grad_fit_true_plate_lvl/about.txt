@@ -157,20 +157,33 @@ With mean b values of about 50 an MAD of ~1 seems resonable.
 MADs (0.83, 1.43, 0.68, 0.82, 0.74)
 objf (0.36, 0.39, 0.36, 0.34, 0.36)
 
-However, I inspected parameters for the worst MAD (sim 2) and noticed
-a potential problem. For a very slow grower with a true value of
-b=0.005 we get an estimated value of 28. In QFA, the extreme growers
-are useually of greatest biological interest as these are interpereted
-as being mutants with strongly interacting mutations (depending on the
-fitness of the single mutant strains). It would be nice to be able to
-determine them accurately. I will plot est vs true bs for the best fit
-of each simulation.
+I plotted true b vs est b for the best fit of each simulation. Very
+slow growers (could be considered anomylous), which were only present
+in sims 0 and 1, were overestimated. Accuracy of the estimates
+increases with the size of b for all simulations. There is a lack of
+parameter values between 0 and 20 in all simulations. Simulation
+parameters came from previous fits (local minima) so it may be that
+this is because the same thing happened in the first round of
+fitting. There is another issue with potential bias in simulation
+parameters which means that this may not work for real data. Because I
+took parameters from the previous best gradient fits they may be
+inherently easier to discover than the "real" sets.
 
-There is a potential bias in simulation parameters which means that
-this may not work for real data. I took parameters from the previous
-best gradient fits which were different local minima of p15. These may
-be (qualitatively?) different from the true and undetected parameter
-values and inherently easier to discover.
+Noise is likely to have a greater effect on cultures with lower b and
+smaller cell measurement. Differences in b at small values is also
+likely to cause less effect on the objective function. There may also
+be a bias from the initial guess; the imaginary neighbour model finds
+it hard to discern between small b and fast diffusion of nutrients to
+faster growing cultures. (Would removing the fast growing neighbour
+help us here or would it make other estimates worse? Easy enough to
+check; set b+ to zero and 1.5*b_guess and plot b guessed vs b true for
+both.)
+
+In QFA, the extreme growers are (useually) of greatest biological
+interest as these are interpereted as being mutants with strongly
+interacting mutations (depending on the realtive fitness of the single
+mutant strains).
+
 
 It looks like it is necessary to evolve a b_guess, with the plate
 level parameters, to feed to the imaginary neighbour guesser. This is
