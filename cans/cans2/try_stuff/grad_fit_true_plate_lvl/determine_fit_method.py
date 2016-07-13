@@ -31,7 +31,7 @@ print("uniform")
 # MAD in the saved files mistakenly includes the fixed plate level
 # parameters which have zero deviation so I create a correction factor
 # C below.
-C = (348+4)/384.0
+C = (384+4)/384.0
 
 for i, sim in enumerate(uniform):
     print("sim", i)
