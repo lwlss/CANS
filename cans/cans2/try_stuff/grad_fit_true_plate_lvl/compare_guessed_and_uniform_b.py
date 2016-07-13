@@ -96,7 +96,7 @@ for b_index, b_guess in enumerate(B_GUESSES):
     est_data["b_index"] = b_index
     est_data["B_GUESSES"] = B_GUESSES
     est_data["data_path"] = data_path
-    est_data["MAD"] = mad(plate.est.x, plate.sim_params)
+    est_data["b_MAD"] = mad(plate.est.x[-plate.no_cultures:], plate.sim_params[-plate.no_cultures:])
     if guessing == "imag_neigh":
         est_data["guess_time"] = t1 - t0
         est_data["total_time"] = t3 - t0
