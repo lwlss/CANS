@@ -8,8 +8,9 @@ import numpy as np
 from math import log10, floor
 
 
-# http://stackoverflow.com/a/3413529
+
 def round_sig(x, sig=2):
+    # http://stackoverflow.com/a/3413529
     return round(x, sig-int(floor(log10(x)))-1)
 
 

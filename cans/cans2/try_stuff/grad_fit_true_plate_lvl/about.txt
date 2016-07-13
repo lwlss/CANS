@@ -115,3 +115,76 @@ Preliminary data.
 
 It took 285s (4.75min) to find imaginary neighbour guesses for a full
 plate. The fit then took a further 483s (8.05min).
+
+Now that the fits have run (all but one) I am interested to see the following:
+
+- Do we find the global minimum?
+- In what time?
+- Is uniform or imaginary neighbour b guessing better at the above?
+- How do both methods depend on the accuracy of b_guess?
+
+Conclusion
+
+Uniform Guessing
+
+For uniform guessing, it does not matter what b_guess we use, we still
+end up at the same minimum for each simulation. This is apparent
+because all MADs between estimated and true parameter values are equal
+and all objective function values are equal. This is not always the
+global minumum because for imag_neigh guessing we find lower values of
+objective function. It is also not the optimal solution because these
+correspond to lower MADs.
+
+Although it works well for certian parameter sets we should rule out
+using the uniform guess because it will not work for all sets. We
+could never be very confident that we had arrived at the global
+minimum.
+
+Imaginary Neighbour Guessing
+
+
+For imaginary neighbour guessing we were able to arrive at fairly low
+MADs (lowest 0.67, highest 1.41) for all simulations if the b_guess
+was well chosen. I need to check how well the parameters correspond to
+true for the worst of these.
+
+All data was simulated with noise. For the level of noise added, low
+parameter MAD correlates fairly well with low objective function and
+the best fit for each sim, determined by ojective function value,
+corresponded to the lowest parameter MAD.
+
+There is a potential bias in simulation parameters which means that
+this may not work for real data. I took parameters from the previous
+best gradient fits which were different local minima of p15. These may
+be (qualitatively?) different from the true and undetected parameter
+values and inherently easier to discover.
+
+It looks like it is necessary to evolve a b_guess, with the plate
+level parameters, to feed to the imaginary neighbour guesser. This is
+essentailly evolving the guesser. Interestingly, the best b_guess for
+the minimizer is not necessarily the average b_value for the
+plate. Perhaps we could evolve a vector of b_guesses to give to the
+guesser for each culture, however, this would be computationally slow
+and we might as well discard gradient fitting all together in such
+circumstances and just evolve b_guesses (True of not).
+
+
+How long does it take?
+
+Mean time for all simulations was ~43 mins
+
+The range for all simulations was (511s, 7463s) or (8.5 mins, 124
+mins). Individual simulations tended also to have smaller wide
+ranges. Sometimes the best fit took the longest time but time was less
+dependent on the final value of the objective function than I
+expected.
+
+This means that average generation time would be of he order 1-2 hours
+if we have the same population size as number of cores.
+
+Ranges for each fit in seconds
+(682, 7462)
+(522, 2516)
+(1040, 6522)
+(686, 5316)
+(510, 5181)
