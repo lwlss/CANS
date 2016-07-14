@@ -220,3 +220,28 @@ def package_evolver(evolver, **kwargs):
         "evolver_kwargs": kwargs,    # Must also add args in the p level evaluator.
     }
     return evolver_dct
+
+
+def make_eval_plate_lvl_im_neigh_grad_kwargs(data, model, b_bound):
+    """Make eval kwargs for plate level parallel parameter candidate evaluaton.
+
+    Corresponds to the function genetic.eval_plate_lvl_im_neigh_grad.
+
+    data : dictionary
+
+    model : A Pickleable CANS model.
+
+    b_bound : bound for gradient fitting of b parameters. e.g. [0.0, 100.0].
+
+    """
+    pickleable(model)    # Model must be pickleable for multiprocessing.
+    plate = Plate(**_get_plate_kwargs(data))
+    eval_kwargs = {
+        "plate": plate,
+        "model": model,
+        # Not including amounts. Last two are place holders for
+        # b_guess*1.5 and b_guess.
+        "imag_neigh_params": np.array([1.0, 1.0, 0.0, 0.0, 0.0]),
+        "b_bounds": np.array([b_bound for c in range(plate.no_cultures)]),
+    }
+    return eval_kwargs
