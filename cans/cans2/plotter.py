@@ -9,6 +9,21 @@ from mpl_toolkits.axes_grid1 import AxesGrid
 from cans2.plate import Plate
 
 
+def plot_scatter(x, y, title="", xlab="", ylab="", outfile=""):
+    fig = plt.figure()
+    fig.suptitle(title)
+    plt.xlabel(xlab)
+    plt.ylabel(ylab)
+    plt.plot(x, y, "x", ms=6.0, mew=1.0, color="k")
+    max_val = np.ceil(np.max([x, y])/10.0)*10
+    plt.plot([0, max_val], [0, max_val], color="k")
+    if outfile:
+        plt.savefig(outfile)
+    else:
+        plt.show()
+    plt.close()
+
+
 class Plotter(object):
 
     def __init__(self, model):
