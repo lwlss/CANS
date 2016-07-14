@@ -31,26 +31,16 @@ true_plate.sim_amounts = data["sim_amounts"]
 true_plate.sim_params = data["sim_params"]
 true_plate.set_rr_model(model, data["sim_params"])
 no_cultures = data["rows"]*data["cols"]
-
 # # Check we have the correct parameters for the data.
 # plotter.plot_est_rr(true_plate, data["sim_params"], sim=False)
 
-gen_kwargs = {
-    # plate level and b_guess bounds
+gen_kwargs =  {
     "bounds": np.concatenate((data["bounds"][:model.b_index], [[0.0, 100.0]]))
 }
-
-plate = Plate(**kwargs._get_plate_kwargs(data))
-
-eval_kwargs = {
-    "plate": plate,
-    "model": model,
-    "imag_neigh_params": np.array([1.0, 1.0, 0.0, 0.0, 0.0]),    # Last two are place holders for b_guess*1.5 and b_guess.
-    "b_bounds": np.array([[0.0, 200.0] for i in range(no_cultures)]),
-}
 args = {
-    "gen_kwargs": gen_kwargs,
-    "eval_kwargs": eval_kwargs,
+    "gen_kwargs": gen_kwargs
+    "eval_kwargs": kwargs.make_eval_plate_lvl_im_neigh_grad_kwargs(data, model,
+                                                                   [0.0, 100.0])
 }
 
 
@@ -61,8 +51,8 @@ final_pop = genetic.mp_evolver(generator=genetic.gen_random_uniform,
                                args=args,
                                random=random,
                                cpus=6,
-                               pop_size=6,
-                               max_evals=6*10)
+                               pop_size=20,
+                               max_evals=10*20)
 print(final_pop)
 
 best = max(final_pop)    # Always max even if you are minimizing objective function.
