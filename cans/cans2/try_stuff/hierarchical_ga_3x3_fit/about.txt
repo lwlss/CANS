@@ -1,20 +1,2 @@
-It seems possible that we can use a gradient method in the plate level
-candidate evaluator, provided we use imaginary neighbour guessing and
-evolve b guess. I need to check the previous best fits and see if they
-have a consistent N_0/NE_0 which I can use. I will try to get the
-plate level genetic algorithm working for a 3x3 plate. It only
-probably requires imag neigh guessing for larger plates but I should
-get this working anyway. Could comment it out.
-
-
-There is some agreement between the five best fits (local mins). For
-sim 3 N_0 is unexpectedly larger than NE_0. I am not sure how much the
-other estimates have depended on our intial guess for NE_0 of
-1.5*N_0. It is not obvious what value to use if we wish to fix NE_0
-rather than have it as a candidate. I will try letting both N_0 and
-NE_0 vary and see how it works.
-
-['sim_0', 'sim_1', 'sim_2', 'sim_3', 'sim_4']
-('N_0', array([ 0.06413872,  0.06175851,  0.06490353,  0.07171137,  0.06081451]))
-('NE_0', array([ 0.0895032 ,  0.09738116,  0.08134379,  0.05890236,  0.09466582]))
-('NE_0/N_0', array([ 1.39546285,  1.57680559,  1.2533029 ,  0.82138096,  1.55663217]))
+Hierarchical genetic algorithm where it is possible to specify both
+the plate level and culture level genetic algorithm methods.
