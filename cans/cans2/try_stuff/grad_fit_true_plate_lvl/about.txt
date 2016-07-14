@@ -174,10 +174,11 @@ smaller cell measurement. Differences in b at small values is also
 likely to cause less effect on the objective function. There may also
 be a bias from the initial guess; the imaginary neighbour model finds
 it hard to discern between small b and fast diffusion of nutrients to
-faster growing cultures. (Would removing the fast growing neighbour
-help us here or would it make other estimates worse? Easy enough to
-check; set b+ to zero and 1.5*b_guess and plot b guessed vs b true for
-both.)
+faster growing cultures. However, I checked the correlation from the
+uniform guess (sim 0) and this displayed the same behaviour. (Would
+removing the fast growing neighbour help us here or would it make
+other estimates worse?  Easy enough to check; set b+ to zero and
+1.5*b_guess and plot b guessed vs b true for both.)
 
 In QFA, the extreme growers are (useually) of greatest biological
 interest as these are interpereted as being mutants with strongly
