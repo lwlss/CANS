@@ -1,5 +1,4 @@
 import numpy as np
-import json
 import matplotlib.pyplot as plt
 
 
@@ -70,13 +69,13 @@ def plot_scatter(sim, filename=""):
     title = "Estimated b from gradient fit of simulated data (sim {0})"
     fig.suptitle(title.format(sim))
     plt.xlabel("True b")
-    plt.ylabel("Etimated b")
+    plt.ylabel("Estimated b")
     plt.plot(imag_neigh[sim][0]["sim_params"][-384:],
              imag_neigh[sim][0]["est_params"][-384:],
-             "x", label="label", ms=6.0, mew=1.0, color="k")
+             "x", ms=6.0, mew=1.0, color="k")
     max_val = np.max([imag_neigh[sim][0]["sim_params"][-384:],
                       imag_neigh[sim][0]["est_params"][-384:]])
-    max_val = np.ceil(max_val/10)*10
+    max_val = np.ceil(max_val/10.0)*10
     plt.plot([0, max_val], [0, max_val], color="k") # plot y=x
 
     if not filename:
