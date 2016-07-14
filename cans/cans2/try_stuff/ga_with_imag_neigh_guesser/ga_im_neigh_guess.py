@@ -35,26 +35,37 @@ no_cultures = data["rows"]*data["cols"]
 # plotter.plot_est_rr(true_plate, data["sim_params"], sim=False)
 
 gen_kwargs =  {
-    "bounds": np.concatenate((data["bounds"][:model.b_index], [[0.0, 100.0]]))
+    "bounds": np.concatenate((data["bounds"][:model.b_index], [[0.0, 100.0]])),
 }
 args = {
-    "gen_kwargs": gen_kwargs
+    "gen_kwargs": gen_kwargs,
     "eval_kwargs": kwargs.make_eval_plate_lvl_im_neigh_grad_kwargs(data, model,
-                                                                   [0.0, 100.0])
+                                                                   [0.0, 100.0]),
 }
 
 
-# Now call plate lvl parallel evolver.
-final_pop = genetic.mp_evolver(generator=genetic.gen_random_uniform,
-                               evaluator=genetic.eval_plate_lvl_im_neigh_grad,
-                               bounds=args["gen_kwargs"]["bounds"],
-                               args=args,
-                               random=random,
-                               cpus=6,
-                               pop_size=20,
-                               max_evals=10*20)
-print(final_pop)
+# # Evolutionary strategy
+# final_pop = genetic.es_mp_evolver(generator=genetic.gen_random_uniform,
+#                                   evaluator=genetic.eval_plate_lvl_im_neigh_grad,
+#                                   bounds=args["gen_kwargs"]["bounds"],
+#                                   args=args,
+#                                   random=random,
+#                                   cpus=6,
+#                                   pop_size=20,
+#                                   max_evals=10*20)
 
+
+# Differential Evolutionary Algorithm
+final_pop = genetic.dea_mp_evolver(generator=genetic.gen_random_uniform,
+                                   evaluator=genetic.eval_plate_lvl_im_neigh_grad,
+                                   bounds=args["gen_kwargs"]["bounds"],
+                                   args=args,
+                                   random=random,
+                                   cpus=6,
+                                   pop_size=6,
+                                   max_evals=12)
+
+print(final_pop)
 best = max(final_pop)    # Always max even if you are minimizing objective function.
 est_plate_lvl = best.candidate[:model.b_index+1]
 

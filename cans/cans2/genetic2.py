@@ -288,9 +288,9 @@ def evolver(generator, evaluator, bounds, args, random,
     return final_pop
 
 
-def mp_evolver(generator, evaluator, bounds, args, random,
-               cpus=4, pop_size=100, max_evals=100,
-               tau=None, tau_prime=None, epsilon=0.00001):
+def es_mp_evolver(generator, evaluator, bounds, args, random,
+                  cpus=4, pop_size=100, max_evals=100,
+                  tau=None, tau_prime=None, epsilon=0.00001):
     """Run an evolutionary strategy using multiprocessing."""
     pickleable(args)    # Necessary for multiprocessing.
     es = inspyred.ec.ES(random)
@@ -313,7 +313,39 @@ def mp_evolver(generator, evaluator, bounds, args, random,
                           **args)
     return final_pop
 
-# Also want to try a particle swarm
+
+def dea_mp_evolver(generator, evaluator, bounds, args, random, cpus=4,
+                   pop_size=50, max_evals=100, num_selected=2,
+                   tournament_size=2, crossover_rate=1.0,
+                   mutation_rate=0.1, gaussian_mean=0,
+                   gaussian_stdev=1):
+    """Run an differential evolutionary algorithm using multiprocessing."""
+    pickleable(args)    # Necessary for multiprocessing.
+    es = inspyred.ec.DEA(random)
+    es.observer = [inspyred.ec.observers.stats_observer,
+                   inspyred.ec.observers.best_observer]
+    es.terminator = [inspyred.ec.terminators.evaluation_termination,
+                     inspyred.ec.terminators.diversity_termination]
+    final_pop = es.evolve(generator=generator,
+                          evaluator=inspyred.ec.evaluators.parallel_evaluation_mp,
+                          mp_evaluator=evaluator,
+                          mp_num_cpus=cpus,
+                          pop_size=pop_size,
+                          maximize=False,
+                          bounder=inspyred.ec.Bounder(bounds[:, 0], bounds[:, 1]),
+                          max_evaluations=max_evals,
+                          num_selected=num_selected,
+                          tournament_size=tournament_size,
+                          crossover_rate=crossover_rate,
+                          mutation_rate=mutation_rate,
+                          guassian_mean=gaussian_mean,
+                          gaussian_stdev=gaussian_stdev,
+                          # Other arguments for generator and evaluator.
+                          **args)
+    return final_pop
+
+
+
 
 
 def custom_mp_evolver(generator, evaluator, bounds, args, random, cpus=4,
