@@ -294,7 +294,8 @@ def mp_evolver(generator, evaluator, bounds, args, random,
     """Run an evolutionary strategy using multiprocessing."""
     pickleable(args)    # Necessary for multiprocessing.
     es = inspyred.ec.ES(random)
-    es.observer = inspyred.ec.observers.stats_observer
+    es.observer = [inspyred.ec.observers.stats_observer,
+                   inspyred.ec.observers.best_observer]
     es.terminator = [inspyred.ec.terminators.evaluation_termination,
                      inspyred.ec.terminators.diversity_termination]
     final_pop = es.evolve(generator=generator,
