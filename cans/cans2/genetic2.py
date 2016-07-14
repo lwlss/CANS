@@ -321,12 +321,13 @@ def dea_mp_evolver(generator, evaluator, bounds, args, random, cpus=4,
                    gaussian_stdev=1):
     """Run an differential evolutionary algorithm using multiprocessing."""
     pickleable(args)    # Necessary for multiprocessing.
-    es = inspyred.ec.DEA(random)
-    es.observer = [inspyred.ec.observers.stats_observer,
+    dea = inspyred.ec.DEA(random)
+    dea.observer = [inspyred.ec.observers.stats_observer,
                    inspyred.ec.observers.best_observer]
-    es.terminator = [inspyred.ec.terminators.evaluation_termination,
+    dea.terminator = [inspyred.ec.terminators.evaluation_termination,
                      inspyred.ec.terminators.diversity_termination]
-    final_pop = es.evolve(generator=generator,
+    dea.replacer = inspyred.ec.replacers.plus_replacement
+    final_pop = dea.evolve(generator=generator,
                           evaluator=inspyred.ec.evaluators.parallel_evaluation_mp,
                           mp_evaluator=evaluator,
                           mp_num_cpus=cpus,

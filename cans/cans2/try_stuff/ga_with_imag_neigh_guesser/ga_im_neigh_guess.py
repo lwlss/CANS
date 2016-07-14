@@ -54,7 +54,7 @@ args = {
 #                                   pop_size=20,
 #                                   max_evals=10*20)
 
-
+print(gen_kwargs["bounds"])
 # Differential Evolutionary Algorithm
 final_pop = genetic.dea_mp_evolver(generator=genetic.gen_random_uniform,
                                    evaluator=genetic.eval_plate_lvl_im_neigh_grad,
@@ -62,8 +62,14 @@ final_pop = genetic.dea_mp_evolver(generator=genetic.gen_random_uniform,
                                    args=args,
                                    random=random,
                                    cpus=6,
-                                   pop_size=6,
-                                   max_evals=12)
+                                   pop_size=20,
+                                   max_evals=40,
+                                   num_selected=10,
+                                   tournament_size=3,
+                                   crossover_rate=1.0,
+                                   mutation_rate=0.1,
+                                   gaussian_mean=0,
+                                   gaussian_stdev=1)    # Might this have to be different for each of the params unless we scale?
 
 print(final_pop)
 best = max(final_pop)    # Always max even if you are minimizing objective function.
