@@ -191,34 +191,78 @@ def eval_plate_lvl(candidate, args):
     return fitness    # Can we also return the candidate attribute somehow?
 
 
-# @inspyred.ec.utilities.memoize(maxlen=100)    # cache up to last 100 return values.
 @inspyred.ec.evaluators.evaluator
-def evaluate_with_grad_fit(candidate, args):
-    """Gradient fitting using a candidate initial guess.
+def eval_plate_lvl_im_neigh_grad(candidate, args):
+    """Evaluate a candidate of plate level parameters and b_guess.
 
-    For multiprocessing, args must be
-    pickleable. SwigPyObject/RoadRunner objects are not pickleable so
-    I have to create new Plate objects and set the roadrunner
-    attribute each time (or rewrite Plate so that the RoadRunner
-    object is never an attribute). This has a low overhead compared to
-    the minimization and is a lot easier than finding ways to pickle
-    the objects/methods.
+    Uses imaginary neighbour model guessing and gradient fitting
+    (parallelizeable). In the gradient fit, the candidate plate level
+    parameters are fixed and culture level b values are estimated. The
+    initial guess of b parameters for the gradient fit come from
+    imaginary neighbour guessing.
+
+    candidate : Plate level parameters and b_guess. b_guess is for the
+    imaginary neighbour guesser and is essentially evolving the
+    initial guesser. The supplied candidiate plate level parameters
+    and the guessed bs are returned by the imaginiary neighbour guesser.
 
     """
     eval_kwargs = args.get("eval_kwargs")
-    plate = Plate(**eval_kwargs["plate_kwargs"])
+    plate_lvl = candidate[:-1]
+    b_guess = candidate[-1]
 
-    # Necessary for multiprocessing as Models cannot be pickled.
-    models = [CompModel(), CompModelBC()]    # potential models.
-    model = next((m for m in models if m.name == eval_kwargs["model"]))
-    plate.set_rr_model(model, candidate)
+    plate = eval_kwargs["plate"]
+    model = eval_kwargs["model"]
+    imag_neigh_params = eval_kwargs["imag_neigh_params"]
 
-    # Now need to fit using.
-    bounds = eval_kwargs["bounds"]
-    est = plate.fit_model(model, param_guess=candidate, bounds=bounds,
+    # Use candidate b_guess and plate level parameters in imaginary
+    # neighbour guess.
+    imag_neigh_params[-2:] = np.array([b_guess*1.5, b_guess])
+    params, guesser = fit_imag_neigh(plate, model,
+                                     area_ratio=None,
+                                     C_ratio=None,
+                                     imag_neigh_params=imag_neigh_params,
+                                     plate_lvl=plate_lvl)
+
+    # Now fit with grad method starting with guessed parameters.
+    plate.set_rr_model(model, params)
+    plate_lvl_bounds = np.array([[param]*2 for param in plate_lvl])
+    b_bounds = eval_kwargs["b_bounds"]
+    bounds = np.concatenate((plate_lvl_bounds, b_bounds))
+    est = plate.fit_model(model, param_guess=params, bounds=bounds,
                           rr=True, minimizer_opts={"disp": False})
     # candidate.fitted_params = est.x   # Cannot add attribute to a list.
     return est.fun
+
+
+# # @inspyred.ec.utilities.memoize(maxlen=100)    # cache up to last 100 return values.
+# @inspyred.ec.evaluators.evaluator
+# def evaluate_with_grad_fit(candidate, args):
+#     """Gradient fitting using a candidate initial guess.
+
+#     For multiprocessing, args must be
+#     pickleable. SwigPyObject/RoadRunner objects are not pickleable so
+#     I have to create new Plate objects and set the roadrunner
+#     attribute each time (or rewrite Plate so that the RoadRunner
+#     object is never an attribute). This has a low overhead compared to
+#     the minimization and is a lot easier than finding ways to pickle
+#     the objects/methods.
+
+#     """
+#     eval_kwargs = args.get("eval_kwargs")
+#     plate = Plate(**eval_kwargs["plate_kwargs"])
+
+#     # Necessary for multiprocessing as Models cannot be pickled.
+#     models = [CompModel(), CompModelBC()]    # potential models.
+#     model = next((m for m in models if m.name == eval_kwargs["model"]))
+#     plate.set_rr_model(model, candidate)
+
+#     # Now need to fit using.
+#     bounds = eval_kwargs["bounds"]
+#     est = plate.fit_model(model, param_guess=candidate, bounds=bounds,
+#                           rr=True, minimizer_opts={"disp": False})
+#     # candidate.fitted_params = est.x   # Cannot add attribute to a list.
+#     return est.fun
 
 
 def evolver(generator, evaluator, bounds, args, random,
