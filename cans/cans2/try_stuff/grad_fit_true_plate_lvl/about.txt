@@ -215,3 +215,13 @@ Ranges for each fit in seconds
 (1040, 6522)
 (686, 5316)
 (510, 5181)
+
+Next
+
+It seems possible that we can use a gradient method in the plate level
+candidate evaluator, provided we use imaginary neighbour guessing and
+evolve b guess. I need to check the previous best fits and see if they
+have a consistent N_0/NE_0 which I can use. I will try to get the
+plate level genetic algorithm working for a 3x3 plate. It only
+probably requires imag neigh guessing for larger plates but I should
+get this working anyway. Could comment it out.
