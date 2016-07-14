@@ -29,40 +29,40 @@ print(imag_neigh[0][0].keys())
 
 print("uniform")
 
-# # MAD in the saved files mistakenly includes the fixed plate level
-# # parameters which have zero deviation so I create a correction factor
-# # C below.
-# C = (384+4)/384.0
+# MAD in the saved files mistakenly includes the fixed plate level
+# parameters which have zero deviation so I create a correction factor
+# C below.
+C = (384+4)/384.0
 
-# for i, sim in enumerate(uniform):
-#     print("sim", i)
-#     for b_guess in sim:
-#         print("b_index", b_guess["b_index"], "MAD", b_guess["MAD"]*C, "fun", b_guess["obj_fun"])
+for i, sim in enumerate(uniform):
+    print("sim", i)
+    for b_guess in sim:
+        print("b_index", b_guess["b_index"], "MAD", b_guess["MAD"]*C, "fun", b_guess["obj_fun"])
 
-# print("")
-# print("imag_neigh")
+print("")
+print("imag_neigh")
 
-# mean_times = []
-# total_times = []
-# for i, sim in enumerate(imag_neigh):
-#     print("sim", i)
-#     times = []
-#     obj_funs = []
-#     for b_guess in sim:
-#         print("b_index", b_guess["b_index"], "MAD", b_guess["MAD"]*C, "fun", b_guess["obj_fun"])
-#         times.append([b_guess["guess_time"], b_guess["fit_time"], b_guess["total_time"]])
-#         obj_funs.append(b_guess["obj_fun"])
-#     print("Lowest obj fun and MAD corresponds: {}".format(obj_funs.index(min(obj_funs)) == 0))
-#     times = np.array(times)
-#     total_times.append(times[:, 2])
-#     mean_times.append(np.mean(times[:, 2]))
-#     print("mean time", mean_times[-1])
-#     # print(times)
+mean_times = []
+total_times = []
+for i, sim in enumerate(imag_neigh):
+    print("sim", i)
+    times = []
+    obj_funs = []
+    for b_guess in sim:
+        print("b_index", b_guess["b_index"], "MAD", b_guess["MAD"]*C, "fun", b_guess["obj_fun"])
+        times.append([b_guess["guess_time"], b_guess["fit_time"], b_guess["total_time"]])
+        obj_funs.append(b_guess["obj_fun"])
+    print("Lowest obj fun and MAD corresponds: {}".format(obj_funs.index(min(obj_funs)) == 0))
+    times = np.array(times)
+    total_times.append(times[:, 2])
+    mean_times.append(np.mean(times[:, 2]))
+    print("mean time", mean_times[-1])
+    # print(times)
 
-# print(mean_times)
-# print(np.mean(mean_times))
-# print("max", np.max(total_times), "min", np.min(total_times))
-# print("")
+print(mean_times)
+print(np.mean(mean_times))
+print("max", np.max(total_times), "min", np.min(total_times))
+print("")
 
 def plot_scatter(sim, filename=""):
     plot_dir = "results/local_min_sims/plots/est_v_true/"
