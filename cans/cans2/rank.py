@@ -24,9 +24,21 @@ def correlate_ests(genes, *ests):
 
     ranked = np.array([rankdata(est[1]) for est in ests])
     ranks = np.array([ranked[:, i] for i in range(len(genes))])
-
+    print(ranks)
 
     fig = plt.figure(facecolor="white")
     ax = plt.axes(frameon=False)
     ax.get_xaxis().tick_bottom()
     cols = coolwarm(np.linspace(0, 1, len(genes)))
+
+    for gene_ranks, col in zip(ranks, cols):
+        plt.plot(gene_ranks, color=col)
+
+    for gene, col, rh_rank, in zip(genes, cols, ranks[:, -1]):
+        plt.text(len(labels)-1, rh_rank, gene, color=col)
+
+    plt.xticks(range(len(ests)), labels)
+    ax.yaxis.set_visible(False)
+    plt.ylabel("Rank")
+
+    plt.show()
