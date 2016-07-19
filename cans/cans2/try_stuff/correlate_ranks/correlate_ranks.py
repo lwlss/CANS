@@ -1,4 +1,5 @@
 import numpy as np
+import json
 
 
 from cans2.rank import correlate_ests
@@ -14,9 +15,14 @@ best_bc = np.array(find_best_fits("../../results/p15_fits/full_plate/CompModelBC
                                   num=2, key="obj_fun"))
 print(best_bc)
 
-genes = get_genes("data/p15/ColonyzerOutput.txt")
-print(genes)
+genes = get_genes("data/p15/ColonyzerOutput.txt")[:384]
 
 
-correlate_ests(genes, ("CompModelBC_1", best_bc[0]),
-               ("CompModelBC_2", best_bc[1]))
+ests = []
+for est in best_bc:
+    with open(est[0], "r") as f:
+        ests.append(json.load(f)["comp_est"][4:])
+
+
+correlate_ests(genes, ("CompModelBC_1", ests[0]),
+               ("CompModelBC_2", ests[1]))
