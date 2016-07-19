@@ -34,8 +34,11 @@ def correlate_ests(genes, *ests):
     for gene_ranks, col in zip(ranks, cols):
         plt.plot(gene_ranks, color=col)
 
+
+#
     for gene, col, rh_rank, in zip(genes, cols, ranks[:, -1]):
-        plt.text(len(labels)-1, rh_rank, gene, color=col)
+        plt.text(len(labels)-1, rh_rank, gene.lower()+"$\Delta$",
+                 color=col, style="italic")
 
     plt.xticks(range(len(ests)), labels)
     ax.yaxis.set_visible(False)
