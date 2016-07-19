@@ -10,13 +10,12 @@ from cans2.process import find_best_fits
 
 
 best_no_bc = np.array(find_best_fits("../../results/p15_fits/full_plate/CompModel/*.json",
-                                     num=2, key="obj_fun"))
+                                     num=3, key="obj_fun"))
 best_bc = np.array(find_best_fits("../../results/p15_fits/full_plate/CompModelBC/*.json",
-                                  num=2, key="obj_fun"))
+                                  num=3, key="obj_fun"))
 print(best_bc)
 
 genes = get_genes("data/p15/ColonyzerOutput.txt")[:384]
-
 
 ests = []
 for est in best_bc:
@@ -24,5 +23,5 @@ for est in best_bc:
         ests.append(json.load(f)["comp_est"][4:])
 
 
-correlate_ests(genes, ("CompModelBC_1", ests[0]),
-               ("CompModelBC_2", ests[1]))
+correlate_ests(genes,
+               *[("CompModelBC_{0}".format(i), est) for i, est in enumerate(ests)])
