@@ -50,7 +50,6 @@ def correlate_avgs(genes, *ests):
     of estimated values.
 
     """
-    print(ests[0][0])
     gene_stats = get_repeat_stats(genes, *[est[1] for est in ests])
     averages = [np.array(est.values())[:, 0] for est in gene_stats]
     labels = [est[0] for est in ests]
@@ -70,11 +69,8 @@ def correlate_ests(genes, *ests):
 
     """
     labels = [est[0] for est in ests]
-    print(ests)
-    print(genes)
     ranked = np.array([rankdata(est[1]) for est in ests])
     ranks = np.array([ranked[:, i] for i in range(len(genes))])
-    print(ranks)
 
     fig = plt.figure(facecolor="white")
     ax = plt.axes(frameon=False)
