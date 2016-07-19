@@ -12,9 +12,9 @@ from cans2.process import find_best_fits
 genes = get_genes("data/p15/ColonyzerOutput.txt")[:384]
 
 best_no_bc = np.array(find_best_fits("../../results/p15_fits/full_plate/CompModel/*.json",
-                                     num=2, key="obj_fun"))
+                                     num=0, key="obj_fun"))
 best_bc = np.array(find_best_fits("../../results/p15_fits/full_plate/CompModelBC/*.json",
-                                  num=5, key="obj_fun"))
+                                  num=1, key="obj_fun"))
 
 log_path = "data/Logistic/argv_10_b_guess_40.json"
 with open(log_path, "r") as f:
@@ -36,6 +36,6 @@ for est in best_no_bc:
 bc_ests = [("CompModelBC_{0}".format(i), est) for i, est in enumerate(bc_ests)]
 no_bc_ests = [("CompModel_{0}".format(i), est) for i, est in enumerate(no_bc_ests)]
 log_ests = [("Logistic_{0}".format(i), est) for i, est in enumerate(log_ests)]
-ests = bc_ests + log_ests
+ests = bc_ests + no_bc_ests + log_ests
 
 correlate_avgs(genes, *ests)
