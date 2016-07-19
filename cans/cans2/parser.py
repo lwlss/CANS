@@ -5,16 +5,9 @@ from datetime import datetime
 import pandas as pd
 import numpy as np
 
-# Ideally want to specify two coordinates on plate and find the data
-# for that grid. Can just read in whole plate and do this with
-# zoning.py. Actually I prefer top left coordinate and then rows and
-# columns.
-
-# Consider package_resources and how data will actually be read
-# in. Will we be invoking a packaged script instead?
 
 def datetime_to_days(datetimes):
-    """Return time in days starting from zero."""
+    """Return time in days with zero at first timepoint."""
     t0 = datetimes[0]
     days = [(dt - t0).total_seconds()/(60*60*24) for dt in datetimes]
     return(days)
@@ -31,31 +24,30 @@ def get_data_files(path, ext="*.out"):
 
 
 def name_to_datetime(filename):
-    """Returns a datatime from a Colonyzer datafile name."""
+    """Return a datatime from a Colonyzer datafile name."""
     froot = os.path.basename(filename).split(".")[0]
     dt_obj = datetime.strptime(froot[-19:], "%Y-%m-%d_%H-%M-%S")
     return dt_obj
 
 
+# Should use splitting and remove -20 and -19.
 def parseColonyzer(fname):
-    """Read in Colonyzer csv file and parse some info from filename.
-
-    From Conor's parseColonyzer.py"""
-    froot=os.path.basename(fname).split(".")[0]
-    barc=froot[0:-20]
-    dt=froot[-19:]
-    data=pd.read_csv(fname,sep="\t",header=0)
-    data["Barcode"]=barc
-    data["DateTime"]=datetime.strptime(dt, "%Y-%m-%d_%H-%M-%S")
-    data["FileName"]=froot
+    """Read in Colonyzer csv file and parse some info from filename."""
+    # From Conor's parseColonyzer.py.
+    froot = os.path.basename(fname).split(".")[0]
+    barc = froot[0:-20]
+    dt = froot[-19:]
+    data = pd.read_csv(fname, sep="\t", header=0)
+    data["Barcode"] = barc
+    data["DateTime"] = datetime.strptime(dt, "%Y-%m-%d_%H-%M-%S")
+    data["FileName"] = froot
     return(data)
 
 
 def get_plate_data(path):
     """Return data necessary to make a Plate object.
 
-    path is the directory containing Colonyzer output files for one
-    plate.
+    path : directory containing Colonyzer output files for one plate.
 
     """
     files = get_data_files(path)
@@ -78,6 +70,21 @@ def get_plate_data(path):
         "empties": []
     }
     return plate_data
+
+
+def get_genes(filename):
+    """Return plate gene names by row.
+
+    Requires a csv file with a column genes listing genes by row. I am
+    using the file ColonyzerOutput.txt which seems to have been
+    automatically generated in the same directory as the raw images.
+
+    """
+    data = pd.read_csv(filename, sep="\t", header=0)
+    genes = data["Gene"]
+    # orfs = data["ORF"]
+    return genes
+
 
 if __name__ == "__main__":
     import json
