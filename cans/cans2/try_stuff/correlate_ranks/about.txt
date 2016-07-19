@@ -1,0 +1,3 @@
+Plot rank correlations between different estimates.
+
+Use the two best CompModel and CompModelBC estimates and the logistic model guess. The logistic model guess will have used a fixed rather than fitted C_0. Check that the b estimates are either all the same or simulate and find the smallest objective function. I don't think that I have been storing the objective functions of guesses up to now. The fits are indiviudal so we will have to sum. I don't know whether I have saved the estimated N_0 (individually) either so will probably have to rerun these guesses.
