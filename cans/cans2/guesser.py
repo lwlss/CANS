@@ -401,15 +401,17 @@ class Guesser(object):
         Fits to individual cultures. For speed, there is no collective
         fitting of plate level parameters, e.g. initial
         amounts. Instead, an average can be taken after the individual
-        fits. Guesses for C_0 and individual b parameters result from
-        fitting, whereas guesses for N_0 are infered from average
-        final measurements and not updated after fitting.
+        fits. Individual b parameters result from fitting. Guesses for
+        N_0 are infered from average final measurements and not
+        updated after fitting. C_0 is guessed using C_ratio (see
+        make_first_guess) and then fixed for fitting.
 
         b_guess : guess for b parameter. The same for all cultures.
 
         This N_0_guess is not used in logistic equivalent fits but
         is returned in the new_guess; logistic estimated N_0s are not
         realistic for the competition model.
+
         """
         first_guess = self.make_first_guess(b_guess)
         C_0_guess = [first_guess[0]]
