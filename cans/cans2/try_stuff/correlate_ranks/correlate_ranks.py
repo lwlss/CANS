@@ -2,7 +2,7 @@ import numpy as np
 import json
 
 
-from cans2.rank import correlate_ests
+from cans2.rank import correlate_ests, correlate_avgs
 
 
 from cans2.parser import get_genes
@@ -28,8 +28,8 @@ for est in best_no_bc:
         no_bc_ests.append(json.load(f)["comp_est"][3:])
 
 
+ests1 = [("CompModelBC_{0}".format(i), est) for i, est in enumerate(bc_ests)]
+ests2 = [("CompModel_{0}".format(i), est) for i, est in enumerate(no_bc_ests)]
+ests = ests1 + ests2
 
-
-correlate_ests(genes,
-               *([("CompModelBC_{0}".format(i), est) for i, est in enumerate(bc_ests)] +
-                 [("CompModel_{0}".format(i), est) for i, est in enumerate(no_bc_ests)]))
+correlate_avgs(genes, *ests)
