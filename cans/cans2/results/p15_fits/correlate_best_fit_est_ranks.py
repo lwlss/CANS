@@ -27,8 +27,6 @@ models = [d["model"] for d in data]
 print(models)
 
 
-
-
 # Make a matrix of correlations of rank orders.
 no_cultures = 16*24
 b_ests = np.array([d["comp_est"][-no_cultures:] for d in data])
