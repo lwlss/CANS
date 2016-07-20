@@ -89,9 +89,10 @@ def correlate_ests(genes, *ests):
         plt.plot(gene_ranks, color=col)
 
     # Add gene names to right most estimate.
-    for gene, col, rh_rank, in zip(genes, cols, ranks[:, -1]):
-        plt.text(len(labels)-1, rh_rank, gene.lower()+"$\Delta$",
-                 color=col, style="italic")
+    for est_no in range(len(ests)):
+        for gene, col, rank, in zip(genes, cols, ranks[:, est_no]):
+            plt.text(est_no, rank, gene.lower()+"$\Delta$",
+                     color=col, style="italic")
 
     # if coef_of_vars:
     #     for est_no, c_of_vs in zip(range(len(ests)), coef_of_vars):
