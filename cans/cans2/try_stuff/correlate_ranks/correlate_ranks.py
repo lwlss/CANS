@@ -2,7 +2,7 @@ import numpy as np
 import json
 
 
-from cans2.rank import correlate_ests, correlate_avgs
+from cans2.rank import correlate_ests, correlate_avgs, write_stats
 
 
 from cans2.parser import get_genes
@@ -39,3 +39,5 @@ log_ests = [("Logistic_{0}".format(i), est) for i, est in enumerate(log_ests)]
 ests = bc_ests + no_bc_ests + log_ests
 
 correlate_avgs(genes, *ests)
+
+write_stats(genes, "results/top_fit_stats_all_models.csv", *ests)
