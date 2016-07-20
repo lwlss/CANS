@@ -12,7 +12,7 @@ from cans2.process import find_best_fits
 genes = get_genes("data/p15/ColonyzerOutput.txt")[:384]
 
 best_no_bc = np.array(find_best_fits("../../results/p15_fits/full_plate/CompModel/*.json",
-                                     num=0, key="obj_fun"))
+                                     num=1, key="obj_fun"))
 best_bc = np.array(find_best_fits("../../results/p15_fits/full_plate/CompModelBC/*.json",
                                   num=1, key="obj_fun"))
 
