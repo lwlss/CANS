@@ -60,13 +60,13 @@ def correlate_avgs(genes, *ests):
     gene_stats = get_repeat_stats(genes, *[est[1] for est in ests])
     gene_set = gene_stats[0].keys()
     averages = [np.array(est.values())[:, 0] for est in gene_stats]
-    c_of_vs = [np.array(est.values())[:, 2] for est in gene_stats]
+#    c_of_vs = [np.array(est.values())[:, 2] for est in gene_stats]
     labels = [est[0] for est in ests]    # est name (x label).
     labelled_avgs = [(lab, avgs) for lab, avgs in zip(labels, averages)]
-    correlate_ests(gene_set, c_of_vs, *labelled_avgs)
+    correlate_ests(gene_set, *labelled_avgs)
 
 
-def correlate_ests(genes, coef_of_vars=False, *ests):
+def correlate_ests(genes, *ests):
     """Plot correlations in rank of parameter values.
 
     genes : A list of gene names.
@@ -93,10 +93,10 @@ def correlate_ests(genes, coef_of_vars=False, *ests):
         plt.text(len(labels)-1, rh_rank, gene.lower()+"$\Delta$",
                  color=col, style="italic")
 
-    if coef_of_vars:
-        for est_no, c_of_vs in zip(range(len(ests)), coef_of_vars):
-            for c_of_v, rank, col in zip(c_of_vs, ranks[:, est_no], cols):
-                plt.text(est_no, rank, "{0:.3f}".format(c_of_v), color=col)
+    # if coef_of_vars:
+    #     for est_no, c_of_vs in zip(range(len(ests)), coef_of_vars):
+    #         for c_of_v, rank, col in zip(c_of_vs, ranks[:, est_no], cols):
+    #             plt.text(est_no, rank, "{0:.3f}".format(c_of_v), color=col)
 
 
     plt.xticks(range(len(ests)), labels)
