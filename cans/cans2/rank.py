@@ -2,6 +2,8 @@
 # Coefficient of variation.
 import numpy as np
 import matplotlib.pyplot as plt
+import csv
+
 
 from scipy.stats import rankdata, variation
 from matplotlib.cm import coolwarm
@@ -106,16 +108,34 @@ def correlate_ests(genes, *ests):
     plt.show()
 
 
-def write_stats(genes, *ests):
+def write_stats(genes, filename, *ests):
     """Save gene ranks and stats for each estimate as csv file."""
-    stats = get_repeat_stats(genes, *ests)
-    # Use order of genes in first est.
-    genes = stats[0].keys()
-    # ranks =
-    rows = []
-    for stat_dict in stats:
-        pass # rows.append([
+    no_ests = len(ests)
+    est_names = [est[0] for est in ests]
+    stats = get_repeat_stats(genes, *[est[1] for est in ests])
+    # Use ranking of first estimate for gene order.
+    first_avgs = [(gene, stat[0]) for gene, stat in stats[0].items()]
+    sorted_by_avg = sorted(first_avgs, key=lambda tup: tup[1], reverse=True)
+    genes = np.array(sorted_by_avg)[:, 0]    # order to use.
 
+    # get rankings for each estimate.
+    avg_ranks = np.array([rankdata([est_stats[gene][0] for gene in genes])
+                          for est_stats in stats]).T
+
+    ordered_stats = np.array([[est_stats[gene] for est_stats in stats]
+                              for gene in genes])
+
+    rank_and_stats = np.dstack((avg_ranks, ordered_stats))
+
+    stat_labs = ["rank", "mean", "std", "coef_var"]
+    est_labels = [est + " " + lab for est in est_names for lab in stat_labs]
+    first_row = ["gene"] + est_labels
+    with open(filename, "wb") as f:
+        writer = csv.writer(f, delimiter="\t")
+        writer.writerow(first_row)
+        for gene, gene_stats in zip(genes, rank_and_stats):
+            row = [gene] + list(gene_stats.flatten())
+            writer.writerow(row)
 
 
 if __name__ == "__main__":
@@ -128,6 +148,8 @@ if __name__ == "__main__":
     shuffle(genes)
     # Generate random ests with different scales.
     ests = np.array([np.random.uniform(0, i+1, len(genes)) for i in range(3)])
+
+    write_stats(genes, "temp.csv", *[("est_{0}".format(i), est) for i, est in enumerate(ests)])
 
     averages = get_repeat_stats(genes, *ests)
     correlate_ests(averages[0].keys(),
