@@ -109,22 +109,35 @@ def correlate_ests(genes, *ests):
 
 
 def write_stats(genes, filename, *ests):
-    """Save gene ranks and stats for each estimate as csv file."""
-    no_ests = len(ests)
+    """Save gene ranks and stats for each estimate as csv file.
+
+    genes : A list of gene names.
+
+    filename : path for file.
+
+    *ests : Estimated parameter values corresponding to the genes in
+    genes. Each a tuple containing a label for the estimate and list
+    of estimated values.
+
+    """
     est_names = [est[0] for est in ests]
+    # List of dicts with genes as keys.
     stats = get_repeat_stats(genes, *[est[1] for est in ests])
-    # Use ranking of first estimate for gene order.
+
+    # Use gene rankings of first estimate as order for all.
     first_avgs = [(gene, stat[0]) for gene, stat in stats[0].items()]
     sorted_by_avg = sorted(first_avgs, key=lambda tup: tup[1], reverse=True)
     genes = np.array(sorted_by_avg)[:, 0]    # order to use.
 
-    # get rankings for each estimate.
+    # Array of rankings for each estimate.
     avg_ranks = np.array([rankdata([est_stats[gene][0] for gene in genes])
                           for est_stats in stats]).T
-
+    # An array (each index a different gene) with subarrays of [mean,
+    # std, and coef_var] for each estimate.
     ordered_stats = np.array([[est_stats[gene] for est_stats in stats]
                               for gene in genes])
 
+    # Place the ranks at the front of each set of stats.
     rank_and_stats = np.dstack((avg_ranks, ordered_stats))
 
     stat_labs = ["rank", "mean", "std", "coef_var"]
