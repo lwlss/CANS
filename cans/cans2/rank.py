@@ -21,7 +21,7 @@ def _get_repeats(genes):
 
 
 def get_repeat_stats(genes, *ests):
-    """Return mean and standard diviation for each gene.
+    """Return mean, std, and coeffieint of variation for each gene.
 
     Args
     ----
@@ -35,14 +35,14 @@ def get_repeat_stats(genes, *ests):
     -------
     list
         A list of dictionaries; one for each estimate. Keys are gene names
-        and values are tuples of mean and standard deviation.
+        and values are tuples of mean, standard deviation, and coefficient
+        of vairation.
 
     """
     repeats = _get_repeats(genes)
     ests = np.array(ests)
     return [{gene: [np.mean(est[reps]), np.std(est[reps]), variation(est[reps])]
              for gene, reps in repeats.items()} for est in ests]
-
 
 
 def correlate_avgs(genes, *ests):
@@ -77,8 +77,7 @@ def correlate_ests(genes, *ests):
 
     """
     labels, ests = zip(*ests)
-    ranked = np.array([rankdata(est) for est in ests])
-    ranks = np.array([ranked[:, i] for i in range(len(genes))])
+    ranks = np.array([rankdata(est) for est in ests]).T
 
     fig = plt.figure(facecolor="white")
     ax = plt.axes(frameon=False)
@@ -105,6 +104,18 @@ def correlate_ests(genes, *ests):
     plt.ylabel("Rank")
 
     plt.show()
+
+
+def write_stats(genes, *ests):
+    """Save gene ranks and stats for each estimate as csv file."""
+    stats = get_repeat_stats(genes, *ests)
+    # Use order of genes in first est.
+    genes = stats[0].keys()
+    # ranks =
+    rows = []
+    for stat_dict in stats:
+        pass # rows.append([
+
 
 
 if __name__ == "__main__":
