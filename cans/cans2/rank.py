@@ -3,7 +3,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from scipy.stats import rankdata
+from scipy.stats import rankdata, variation
 from matplotlib.cm import coolwarm
 
 
@@ -21,7 +21,7 @@ def _get_repeats(genes):
 
 
 def get_repeat_stats(genes, *ests):
-    """Return a list of mean and standard diviation for each gene.
+    """Return mean and standard diviation for each gene.
 
     Args
     ----
@@ -31,11 +31,18 @@ def get_repeat_stats(genes, *ests):
     *ests : :obj:`list` of :obj:`float`
         Set of parameter estimates for each gene.
 
+    Returns
+    -------
+    list
+        A list of dictionaries; one for each estimate. Keys are gene names
+        and values are tuples of mean and standard deviation.
+
     """
     repeats = _get_repeats(genes)
     ests = np.array(ests)
-    return [{gene: [np.mean(est[reps]), np.std(est[reps])]
+    return [{gene: [np.mean(est[reps]), np.std(est[reps]), variation(est[reps])]
              for gene, reps in repeats.items()} for est in ests]
+
 
 
 def correlate_avgs(genes, *ests):
@@ -51,14 +58,15 @@ def correlate_avgs(genes, *ests):
 
     """
     gene_stats = get_repeat_stats(genes, *[est[1] for est in ests])
-    averages = [np.array(est.values())[:, 0] for est in gene_stats]
-    labels = [est[0] for est in ests]
     gene_set = gene_stats[0].keys()
+    averages = [np.array(est.values())[:, 0] for est in gene_stats]
+    c_of_vs = [np.array(est.values())[:, 2] for est in gene_stats]
+    labels = [est[0] for est in ests]    # est name (x label).
     labelled_avgs = [(lab, avgs) for lab, avgs in zip(labels, averages)]
-    correlate_ests(gene_set, *labelled_avgs)
+    correlate_ests(gene_set, c_of_vs, *labelled_avgs)
 
 
-def correlate_ests(genes, *ests):
+def correlate_ests(genes, coef_of_vars=False, *ests):
     """Plot correlations in rank of parameter values.
 
     genes : A list of gene names.
@@ -68,8 +76,8 @@ def correlate_ests(genes, *ests):
     of estimated values.
 
     """
-    labels = [est[0] for est in ests]
-    ranked = np.array([rankdata(est[1]) for est in ests])
+    labels, ests = zip(*ests)
+    ranked = np.array([rankdata(est) for est in ests])
     ranks = np.array([ranked[:, i] for i in range(len(genes))])
 
     fig = plt.figure(facecolor="white")
@@ -80,9 +88,16 @@ def correlate_ests(genes, *ests):
     for gene_ranks, col in zip(ranks, cols):
         plt.plot(gene_ranks, color=col)
 
+    # Add gene names to right most estimate.
     for gene, col, rh_rank, in zip(genes, cols, ranks[:, -1]):
         plt.text(len(labels)-1, rh_rank, gene.lower()+"$\Delta$",
                  color=col, style="italic")
+
+    # if coef_of_vars:
+    #     for est_no, c_of_vs in zip(range(len(ests)), coef_of_vars):
+    #         for c_of_v, rank, col in zip(c_of_vs, ranks[:, est_no], cols):
+    #             plt.text(est_no, rank, c_of_v, color=col)
+
 
     plt.xticks(range(len(ests)), labels)
     ax.yaxis.set_visible(False)
