@@ -1,0 +1,41 @@
+We know that the logistic equivalent model is no good for p15 as it
+requires different starting nutrients for each culture, whereas we
+expect that nutrients are distributed evenly in the agar at time zero.
+Another explanation for the different final cell amounts could be that
+growth is arresting. We do not currently have a model for this.
+
+Current fitness estimates do not come from a mechanistic model but
+they might still be better. Presumably they are calibrated against
+prior knowledge. Could there be bias in comparison of these fitness
+estimates with b as we are also validating competition model b rank
+using the same prior knowlege.
+
+We could validate the independent model using liquid cultures. We can
+vary C_0 and N_0, fit, and see whether we get the same b values.
+
+
+** We can convert competition model b to logistic model r and K.
+
+When we fit the competition model, we estimate a plate level N_0, C_0
+and kn and culture level bs. If we now take the values N_0, C_0 and bs
+and resimulate with kn to zero we get symmetric logistic model
+curves. By the definition of the competition model we interpret these
+as the growth curves that would result if there was no competition
+e.g. in liquid cultures. We can clearly convert to the r and K of
+these curves using N_0, C_0 and b for each culture. Let's call these
+r_c and K_c for competition (or corrected).
+
+We can also fit the logistic model straight to our data giving us r_i
+and K_i (independent). Or, we can get there via fits of the logistic
+equivalent model and a parameter conversion.
+
+By comparing the differences in variance in r and K between the two
+types of fit we can test the validity of the competition model.
+
+We could also directly compare (from the same fitted parameters) b and
+MDR*MDP as fitness estimates based on prior knowledge. There is an
+issue with the proposal of comparing K_i and K_c. Variance in K_c will
+be zero. If variation in r_c is less than variation in r_i then that
+is support for the competition model. If it is not then we do not know
+because there is also variance in K_i which we are not taking into
+account.
