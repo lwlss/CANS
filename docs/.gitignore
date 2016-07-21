@@ -25,11 +25,11 @@
 auto/
 *~
 *#
-# *.pdf
-/images/
-_region_.tex
-*.html
-proposal.ps
-/presentation/*.png
-/presentation/*.odp
-/presentation/*.jpg
+# # *.pdf
+# /images/
+# _region_.tex
+# *.html
+# proposal.ps
+# /presentation/*.png
+# /presentation/*.odp
+# /presentation/*.jpg
