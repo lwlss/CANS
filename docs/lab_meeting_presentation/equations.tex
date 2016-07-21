@@ -27,10 +27,25 @@ x(t) = \frac{KPe^{rt}}{K + P(e^{rt}-1)},
 \end{equation}
 
 \begin{subequations}
+	\begin{align}
+	&C{i} - Cells\\
+	&N{i} - Nutrients
+	\end{align}
+\end{subequations}
+
+\begin{subequations}
 	\label{eq:9}
 	\begin{align}
-		&N_{i} + C_{i} \xrightarrow[]{b_{i}} 2C_{i},\\
-		&\frac{dC_{i}}{dt} = b_{i}[N_{i}][C_{i}]
+		&N + C \xrightarrow[]{b_{i}} 2C,\\
+		&rate = b_{i}[N][C]
+	\end{align}
+\end{subequations}
+
+\begin{subequations}
+	\label{eq:5}
+	\begin{align}
+	\frac{dC_{i}}{dt}& = b_{i}N_{i}C_{i},\\
+	\frac{dN_{i}}{dt}& = - b_{i}N_{i}C_{i} - k_{n}\sum_{j \epsilon \delta_i}(N_{i} - N_{j})\\
 	\end{align}
 \end{subequations}
 
