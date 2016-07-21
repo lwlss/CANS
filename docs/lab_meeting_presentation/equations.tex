@@ -1,0 +1,37 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{amssymb,amsmath}
+
+\begin{document}
+
+\title{Introduction to \LaTeX{}}
+\author{Author's Name}
+
+\maketitle
+
+\begin{abstract}
+The abstract text goes here.
+\end{abstract}
+
+\section{Introduction}
+
+
+\begin{equation}
+\label{eq:1}
+\dot{x} = rx\left(1 - \frac{x}{K}\right)
+\end{equation}
+
+\begin{equation}
+\label{eq:2}
+x(t) = \frac{KPe^{rt}}{K + P(e^{rt}-1)},
+\end{equation}
+
+\begin{subequations}
+	\label{eq:9}
+	\begin{align}
+		&N_{i} + C_{i} \xrightarrow[]{b_{i}} 2C_{i},\\
+		&\frac{dC_{i}}{dt} = b_{i}[N_{i}][C_{i}]
+	\end{align}
+\end{subequations}
+
+\end{document}
