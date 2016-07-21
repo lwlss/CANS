@@ -6,7 +6,7 @@ import csv
 
 
 from scipy.stats import rankdata, variation
-from matplotlib.cm import coolwarm
+from matplotlib.cm import coolwarm, cool, rainbow, brg, hsv
 
 
 def _get_repeats(genes):
@@ -47,7 +47,7 @@ def get_repeat_stats(genes, *ests):
              for gene, reps in repeats.items()} for est in ests]
 
 
-def correlate_avgs(genes, *ests):
+def correlate_avgs(genes, filename="", *ests):
     """Plot correlations in rank of averaged parameter values.
 
     Averages are taken for repeats on the same plate.
@@ -65,10 +65,10 @@ def correlate_avgs(genes, *ests):
 #    c_of_vs = [np.array(est.values())[:, 2] for est in gene_stats]
     labels = [est[0] for est in ests]    # est name (x label).
     labelled_avgs = [(lab, avgs) for lab, avgs in zip(labels, averages)]
-    correlate_ests(gene_set, *labelled_avgs)
+    correlate_ests(gene_set, filename, *labelled_avgs)
 
 
-def correlate_ests(genes, *ests):
+def correlate_ests(genes, filename, *ests):
     """Plot correlations in rank of parameter values.
 
     genes : A list of gene names.
@@ -81,10 +81,13 @@ def correlate_ests(genes, *ests):
     labels, ests = zip(*ests)
     ranks = np.array([rankdata(est) for est in ests]).T
 
-    fig = plt.figure(facecolor="white")
+    #fig = plt.figure(facecolor="0.6")
+    fig = plt.figure(figsize=(len(ests)*2, 20), dpi=100, facecolor='0.6', edgecolor='k')
+
     ax = plt.axes(frameon=False)
     ax.get_xaxis().tick_bottom()
     cols = coolwarm(np.linspace(0, 1, len(genes)))
+    cols = rainbow(np.linspace(0, 1, len(genes)))
 
     for gene_ranks, col in zip(ranks, cols):
         plt.plot(gene_ranks, color=col)
@@ -92,8 +95,8 @@ def correlate_ests(genes, *ests):
     # Add gene names to right most estimate.
     for est_no in range(len(ests)):
         for gene, col, rank, in zip(genes, cols, ranks[:, est_no]):
-            plt.text(est_no, rank, gene.lower()+"$\Delta$",
-                     color=col, style="italic")
+            plt.text(est_no-0.4, rank+0.1, gene.lower()+"$\Delta$",
+                     color=col, style="italic", fontsize=20)
 
     # if coef_of_vars:
     #     for est_no, c_of_vs in zip(range(len(ests)), coef_of_vars):
@@ -101,11 +104,15 @@ def correlate_ests(genes, *ests):
     #             plt.text(est_no, rank, "{0:.3f}".format(c_of_v), color=col)
 
 
-    plt.xticks(range(len(ests)), labels)
+    plt.xticks(range(len(ests)), labels, rotation="vertical", fontsize=15)
     ax.yaxis.set_visible(False)
     plt.ylabel("Rank")
 
-    plt.show()
+    if filename:
+        plt.savefig(filename)
+    else:
+        plt.show()
+    plt.close()
 
 
 def write_stats(genes, filename, *ests):
