@@ -41,9 +41,12 @@ log_ests = [("Logistic_{0}".format(i), est) for i, est in enumerate(log_ests)]
 ests = bc_ests + no_bc_ests + log_ests
 
 gene_set = set(genes)
-for gene in list(genes):
+for gene in list(gene_set):
+    # correlate_ests(genes, gene,
+    #                "results/variances/tops_and_log/top_ests_and_log_eq_b_{0}_var.png".format(gene),
+    #                *ests)
     correlate_ests(genes, gene,
-                   "results/variances/tops_and_log/top_ests_and_log_eq_b_{0}_var.png".format(gene),
+                   "".format(gene),
                    *ests)
 
 

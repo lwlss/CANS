@@ -82,7 +82,7 @@ def correlate_ests(genes, query_gene, filename="", *ests):
     ranks = np.array([rankdata(est) for est in ests]).T
 
     #fig = plt.figure(facecolor="0.6")
-    fig = plt.figure(figsize=(len(ests)*2, 20), dpi=100,
+    fig = plt.figure(figsize=(len(ests)*2.5, 20), dpi=100,
                      facecolor='0.6', edgecolor='k')
 
     ax = plt.axes(frameon=False)
@@ -93,13 +93,11 @@ def correlate_ests(genes, query_gene, filename="", *ests):
     for gene_ranks, col in zip(ranks, cols):
         plt.plot(gene_ranks, color=col)
 
-
-
     # Add gene names to right most estimate.
     for est_no in range(len(ests)):
         for gene, col, rank, in zip(genes, cols, ranks[:, est_no]):
             if gene == query_gene:
-                plt.text(est_no-0.4, rank+0.1,
+                plt.text(est_no-0.1, rank+0.1,
                          gene.lower()+"$\Delta$", color="black",
                          style="italic", fontsize=20,
                          fontweight="bold")
