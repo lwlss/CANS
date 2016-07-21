@@ -68,7 +68,7 @@ def correlate_avgs(genes, filename="", *ests):
     correlate_ests(gene_set, filename, *labelled_avgs)
 
 
-def correlate_ests(genes, filename="", *ests):
+def correlate_ests(genes, query_gene, filename="", *ests):
     """Plot correlations in rank of parameter values.
 
     genes : A list of gene names.
@@ -82,7 +82,8 @@ def correlate_ests(genes, filename="", *ests):
     ranks = np.array([rankdata(est) for est in ests]).T
 
     #fig = plt.figure(facecolor="0.6")
-    fig = plt.figure(figsize=(len(ests)*2, 20), dpi=100, facecolor='0.6', edgecolor='k')
+    fig = plt.figure(figsize=(len(ests)*2, 20), dpi=100,
+                     facecolor='0.6', edgecolor='k')
 
     ax = plt.axes(frameon=False)
     ax.get_xaxis().tick_bottom()
@@ -97,7 +98,7 @@ def correlate_ests(genes, filename="", *ests):
     # Add gene names to right most estimate.
     for est_no in range(len(ests)):
         for gene, col, rank, in zip(genes, cols, ranks[:, est_no]):
-            if gene == "EXO1":
+            if gene == query_gene:
                 plt.text(est_no-0.4, rank+0.1,
                          gene.lower()+"$\Delta$", color="black",
                          style="italic", fontsize=20,
