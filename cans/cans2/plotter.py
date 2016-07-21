@@ -38,7 +38,7 @@ class Plotter(object):
         return ymax
 
 
-    def _make_grid(self, plate, amounts, sim, title):
+    def _make_grid(self, plate, amounts, sim, title, vis_ticks):
         rows = plate.rows
         cols = plate.cols
         if sim:
@@ -46,35 +46,44 @@ class Plotter(object):
         else:
             ymax = self._find_ymax(np.append(amounts, plate.c_meas))
         fig = plt.figure()
-        fig.suptitle(title, fontsize=20)
+        fig.suptitle(title, fontsize=40)
         # http://stackoverflow.com/a/36542971
         # Add big axes and hide frame.
         fig.add_subplot(111, frameon=False)
         # Hide tick and tick label of the big axes.
         plt.tick_params(labelcolor='none', top='off',
                         bottom='off', left='off', right='off')
-        plt.xlabel('Time', fontsize=18)
-        plt.ylabel('Amount', fontsize=18)
+        plt.xlabel('Time', fontsize=38)
+        plt.ylabel('Amount', fontsize=38)
         grid = AxesGrid(fig, 111, nrows_ncols=(rows, cols),
                         axes_pad=0.1, aspect=False, share_all=True)
         for i, ax in enumerate(grid):
             ax.set_ylim(0.0, ymax)
             ax.grid()
+
+            if not vis_ticks:
+                plt.setp(ax.get_xticklabels(which="both"), visible=False)
+                plt.setp(ax.get_yticklabels(which="both"), visible=False)
+
+        return fig, grid
+
+
+    def _hide_last_ticks(self, grid, rows, cols):
+        for i, ax in enumerate(grid):
             # Remove last tick values.
             if i + 1 > (rows - 1)*cols:
                 # Then in last row.
-                plt.setp(ax.get_xticklabels()[-1], visible=False)
+                plt.setp(ax.get_xticklabels(which="both")[-1], visible=False)
             if not i % cols:
                 # Then in first column.
-                plt.setp(ax.get_yticklabels()[-1], visible=False)
-        return fig, grid
+                plt.setp(ax.get_yticklabels(which="both")[-1], visible=False)
 
 
     # Plate may have plate.inde_est and plate.comp_est so need to pass
     # one of these.
     def plot_est_rr(self, plate, est_params, title='Estimated Growth',
                     sim=False, filename=None, legend=False, ms=6.0,
-                    mew=0.5, lw =1.0):
+                    mew=0.5, lw=1.0, vis_ticks=True):
         # Smooth times for sims.
         sim_times = np.linspace(plate.times[0], plate.times[-1], 100)
         # Cannot deepcopy swig objects belonging to plate so define
@@ -90,7 +99,7 @@ class Plotter(object):
             sim_amounts = np.split(plate.sim_amounts, self.model.no_species,
                                    axis=1)
 
-        fig, grid = self._make_grid(plate, est_amounts, sim, title)
+        fig, grid = self._make_grid(plate, est_amounts, sim, title, vis_ticks)
 
         for i, ax in enumerate(grid):
             if not sim and i not in plate.empties:
@@ -111,6 +120,9 @@ class Plotter(object):
                             label="True"+species, ms=ms, mew=mew)
                 else:
                     continue
+
+        self._hide_last_ticks(grid, plate.rows, plate.cols)
+
         if legend:
             grid[-1].legend(loc='best')
         if filename is None:
@@ -123,7 +135,7 @@ class Plotter(object):
     # Old plotter using odeint solver brought back for debugging.
     def plot_est(self, plate, est_params, title='Estimated Growth',
                  sim=False, filename=None, legend=False, ms=6.0,
-                 mew=0.5, lw =1.0):
+                 mew=0.5, lw=1.0):
         # Smooth times for sims.
         sim_times = np.linspace(plate.times[0], plate.times[-1], 100)
         amounts = self.model.solve(plate, est_params, sim_times)
@@ -175,7 +187,7 @@ class Plotter(object):
     # Need to plot simulations when the independent (or another model)
     # is fit to individual cultures
     def plot_culture_fits(self, zone, model, title="Individual fits of cultures",
-                          sim=False, ms=6.0, mew=0.5, lw =1.0, legend=False,
+                          sim=False, ms=6.0, mew=0.5, lw=1.0, legend=False,
                           filename=None, est_name="est"):
         fig, grid = self._make_grid(zone, zone.c_meas, sim, title)
 
