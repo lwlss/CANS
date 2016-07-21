@@ -13,8 +13,11 @@
    height="1052.3622047"
    id="svg2"
    version="1.1"
-   inkscape:version="0.48.4 r9939"
-   sodipodi:docname="square_array.svg">
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="square_array.svg"
+   inkscape:export-filename="/home/b5060236/projects/CANS/docs/lab_meeting_presentation/images/diffusion_model.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
   <sodipodi:namedview
      id="base"
      pagecolor="#ffffff"
@@ -23,16 +26,16 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.86610927"
-     inkscape:cx="175.29809"
-     inkscape:cy="3.7070807"
+     inkscape:cx="-19.250111"
+     inkscape:cy="419.35902"
      inkscape:document-units="px"
      inkscape:current-layer="svg2"
      showgrid="false"
-     inkscape:window-width="1247"
-     inkscape:window-height="1388"
+     inkscape:window-width="2495"
+     inkscape:window-height="1416"
      inkscape:window-x="65"
      inkscape:window-y="24"
-     inkscape:window-maximized="0" />
+     inkscape:window-maximized="1" />
   <defs
      id="defs4">
     <marker
@@ -487,20 +490,18 @@
      inkscape:connector-curvature="0" />
   <text
      xml:space="preserve"
-     style="font-size:40.00001144px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
-     x="225.936"
-     y="767.23419"
+     style="font-style:normal;font-weight:normal;font-size:40.00001144px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+     x="247.936"
+     y="765.23419"
      id="text10517"
      sodipodi:linespacing="125%"><tspan
        sodipodi:role="line"
        id="tspan10519"
-       x="225.936"
-       y="767.23419"
-       style="font-size:48px;font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:FreeSerif;-inkscape-font-specification:FreeSerif Italic">C<tspan
-   style="font-size:48px;font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;baseline-shift:sub;font-family:FreeSerif;-inkscape-font-specification:FreeSerif Italic"
+       x="247.936"
+       y="765.23419"
+       style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:48px;font-family:FreeSerif;-inkscape-font-specification:'FreeSerif Italic'">C<tspan
+   style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:48px;font-family:FreeSerif;-inkscape-font-specification:'FreeSerif Italic';baseline-shift:sub"
    id="tspan10521">i</tspan> N<tspan
-   style="font-size:48px;font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;baseline-shift:sub;font-family:FreeSerif;-inkscape-font-specification:FreeSerif Italic"
-   id="tspan10523">i</tspan> S<tspan
-   style="font-size:48px;font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;baseline-shift:sub;font-family:FreeSerif;-inkscape-font-specification:FreeSerif Italic"
-   id="tspan10525">i</tspan></tspan></text>
+   style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:48px;font-family:FreeSerif;-inkscape-font-specification:'FreeSerif Italic';baseline-shift:sub"
+   id="tspan10523">i</tspan></tspan></text>
 </svg>
