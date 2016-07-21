@@ -43,10 +43,10 @@ ests = bc_ests + no_bc_ests + log_ests
 gene_set = set(genes)
 for gene in list(genes):
     correlate_ests(genes, gene,
-                   "results/variances/comp_est_{0}_var.png".format(gene),
+                   "results/variances/tops_and_log/top_ests_and_log_eq_b_{0}_var.png".format(gene),
                    *ests)
 
-assert False
-correlate_avgs(genes, "top_two_comp_p15_correlations.png", *ests)
+
+# correlate_avgs(genes, "top_two_comp_p15_correlations.png", *ests)
 
 # write_stats(genes, "results/top_two_comp_model_bc_comp_model.csv", *ests)
