@@ -68,7 +68,7 @@ def correlate_avgs(genes, filename="", *ests):
     correlate_ests(gene_set, filename, *labelled_avgs)
 
 
-def correlate_ests(genes, filename, *ests):
+def correlate_ests(genes, filename="", *ests):
     """Plot correlations in rank of parameter values.
 
     genes : A list of gene names.
@@ -92,11 +92,20 @@ def correlate_ests(genes, filename, *ests):
     for gene_ranks, col in zip(ranks, cols):
         plt.plot(gene_ranks, color=col)
 
+
+
     # Add gene names to right most estimate.
     for est_no in range(len(ests)):
         for gene, col, rank, in zip(genes, cols, ranks[:, est_no]):
-            plt.text(est_no-0.4, rank+0.1, gene.lower()+"$\Delta$",
-                     color=col, style="italic", fontsize=20)
+            if gene == "EXO1":
+                plt.text(est_no-0.4, rank+0.1,
+                         gene.lower()+"$\Delta$", color="black",
+                         style="italic", fontsize=20,
+                         fontweight="bold")
+            else:
+                pass
+                # plt.text(est_no-0.4, rank+0.1, gene.lower()+"$\Delta$",
+                #          color=col, style="italic", fontsize=20)
 
     # if coef_of_vars:
     #     for est_no, c_of_vs in zip(range(len(ests)), coef_of_vars):
@@ -104,7 +113,8 @@ def correlate_ests(genes, filename, *ests):
     #             plt.text(est_no, rank, "{0:.3f}".format(c_of_v), color=col)
 
 
-    plt.xticks(range(len(ests)), labels, rotation="vertical", fontsize=15)
+    # plt.xticks(range(len(ests)), labels, rotation="vertical", fontsize=15)
+    plt.xticks(range(len(ests)), labels, rotation="horizontal", fontsize=15)
     ax.yaxis.set_visible(False)
     plt.ylabel("Rank")
 
