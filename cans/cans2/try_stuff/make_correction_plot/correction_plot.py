@@ -14,19 +14,34 @@ best_fit = "data/argv_5_b_guess_35.json"
 data = read_in_json(best_fit)
 est_params = data["comp_est"]
 bounds = data["bounds"]
+comp_modelbc = CompModelBC()
 
-# make plate from data
+coords = (9, 2)    # Culture of interest.
+culture_i = coords[0]*data["rows"] + coords[1] + 1
+
+# make plate from data and simulate amounts from est params
 plate = Plate(**_get_plate_kwargs(data))
+plate.est_params = est_params
+plate.set_rr_model(comp_modelbc, plate.est_params)
+plate.est_amounts = comp_modelbc.rr_solve(plate, plate.est_params)
+
+# Now get est C and N for culture
+c_i = plate.est_amounts[:, culture_i]
+n_i = plate.est_amounts[:, plate.no_cultures + culture_i]
 
 
+
+# Get the params for simulating the correction
+correction_params = np.concatenate((plate.est_params[:2],
+                                    [plate.est_params[culture_i - plate.no_cultures]]))
 
 assert False
 
 # Take cell measurements for culture (9, 2).
-culture = get_plate_zone(plate, (9, 2), 1, 1)
+culture = get_plate_zone(plate, coords, 1, 1)
 final_cells = culture.c_meas[-1]
 
-c_meas = cult
+c_meas = culture.c_meas
 
 inde_model = IndeModel()
 culture_guess = np.array([est_params[0], final_cells, 0.0])
