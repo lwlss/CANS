@@ -62,7 +62,15 @@ x(t) = \frac{KPe^{rt}}{K + P(e^{rt}-1)},
 	\begin{align}
 	\frac{dC_{i}}{dt} =&~b_{i}N_{i}C_{i},\\
 	\frac{dN_{i}}{dt} =& - b_{i}N_{i}C_{i}\\
-	 & - k_{n}\sum_{j \epsilon \delta_i}(N_{i} - N_{j})\\
+	 & - k\sum_{j \epsilon \delta_i}(N_{i} - N_{j})\\
+	\end{align}
+\end{subequations}
+
+\begin{subequations}
+	\label{eq:5}
+	\begin{align}
+	\frac{dC_{i}}{dt} =&~b_{i}N_{i}C_{i},\\
+	\frac{dN_{i}}{dt} =& - b_{i}N_{i}C_{i} - k\sum_{j \epsilon \delta_i}(N_{i} - N_{j})\\
 	\end{align}
 \end{subequations}
 
