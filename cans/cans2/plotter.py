@@ -145,7 +145,7 @@ class Plotter(object):
             sim_amounts = np.split(plate.sim_amounts, self.model.no_species,
                                    axis=1)
 
-        fig, grid = self._make_grid(plate, amounts, sim, title)
+        fig, grid = self._make_grid(plate, amounts, sim, title, vis_ticks=True)
 
         for i, ax in enumerate(grid):
             if not sim and i not in plate.empties:
