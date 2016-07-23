@@ -46,15 +46,15 @@ class Plotter(object):
         else:
             ymax = self._find_ymax(np.append(amounts, plate.c_meas))
         fig = plt.figure()
-        fig.suptitle(title, fontsize=40)
+        fig.suptitle(title, fontsize=26)
         # http://stackoverflow.com/a/36542971
         # Add big axes and hide frame.
         fig.add_subplot(111, frameon=False)
         # Hide tick and tick label of the big axes.
         plt.tick_params(labelcolor='none', top='off',
                         bottom='off', left='off', right='off')
-        plt.xlabel('Time', fontsize=38)
-        plt.ylabel('Amount', fontsize=38)
+        plt.xlabel('Time [days]', fontsize=20)
+        plt.ylabel('Amount [arb. unit]', fontsize=20)
         grid = AxesGrid(fig, 111, nrows_ncols=(rows, cols),
                         axes_pad=0.1, aspect=False, share_all=True)
         for i, ax in enumerate(grid):
@@ -151,10 +151,11 @@ class Plotter(object):
             if not sim and i not in plate.empties:
                 # Plot c_meas.
                 ax.plot(plate.times, plate.c_meas[i::plate.no_cultures],
-                        'x', label='Observed Cells', ms=ms, mew=mew)
+                        'x', color="black", label='Observed Cells',
+                        ms=ms, mew=mew)
             for j, species in enumerate(self.model.species):
                 ax.plot(sim_times, amounts[j][:, i], self.colours[j],
-                        label="Est "+species, lw=lw)
+                        label="Logistic "+species, lw=lw)
                 if j == 0 and i in plate.empties:
                     continue
                 if sim:
@@ -165,7 +166,7 @@ class Plotter(object):
                 else:
                     continue
         if legend:
-            grid[-1].legend(loc='best')
+            grid[-1].legend(loc=2)
         if filename is None:
             plt.show()
         else:
@@ -190,17 +191,19 @@ class Plotter(object):
             # plot c_meas
             if i not in plate.empties:
                 ax.plot(plate.times, plate.c_meas[i::plate.no_cultures],
-                    'x', label='Observed Cells', ms=ms, mew=mew)
+                        'x', color="black", label='Observed Cells', ms=ms,
+                        mew=mew)
                 for j, species in enumerate(self.model.species):
                     # plot comp_est_amounts
-                    ax.plot(plate.times, comp_amounts[j][:, i], self.colours[j],
+                    ax.plot(sim_times, comp_amounts[j][:, i], self.colours[j],
                             label="Comp "+species, lw=lw)
                     # plot correction
-                    ax.plot(sim_times, corrected_amounts[j][:, i], self.colours[j],
-                            label="Corrected "+species, lw=lw)
+                    ax.plot(sim_times, corrected_amounts[j][:, i],
+                            self.colours[j] + "--", label="Corrected "
+                            + species, lw=lw)
 
         if legend:
-            grid[-1].legend(loc='best')
+            grid[-1].legend(loc=2)
         if filename is None:
             plt.show()
         else:
