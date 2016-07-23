@@ -19,7 +19,7 @@ def fit_log_eq(plate, C_0, b_guess):
 
     log_eq_mod = IndeModel()
     for guess, bounds, culture in zip(guesses, all_bounds, plate.cultures):
-        culture.log_est = culture.fit_model(log_eq_mod, guess, bounds)
+        culture.log_est = culture.fit_model(log_eq_mod, guess, bounds, )
 
     obj_funs = []
     params = []
@@ -27,7 +27,7 @@ def fit_log_eq(plate, C_0, b_guess):
         obj_funs.append(culture.log_est.fun)
         params.append(culture.log_est.x)
 
-    return obj_funs, params
+    return params, obj_funs
 
 
 C_0s_index = int(sys.argv[1])
@@ -35,7 +35,7 @@ C_0s_index = int(sys.argv[1])
 all_C_0s = np.logspace(-6, -3, 1000)
 C_0s = all_C_0s[C_0s_index:C_0s_index+20]
 
-outpath = "results/log_eq_fit_fixed_argv_{0}_C_0_index{1}"
+outpath = "results/log_eq_fit_fixed_argv_{0}_C_0_index{1}.json"
 error_file = "error_log.txt"
 
 # read in plate 15 data and make a plate.
@@ -58,7 +58,9 @@ for C_0_index, C_0 in enumerate([C_0s[0], C_0s[-1]]):
             f.write(err_msg)
         continue
 
-    Ks = [(N_0 + C_0) for N_0 in np.array(params)[:, 1]]
+    print(np.array(params))
+
+    Ks = [N_0 + C_0 for N_0 in np.array(params)[:, 1]]
     rs = [b*K for b, K in zip(np.array(params)[:, 2], Ks)]
 
     data = cans_to_json(plate, IndeModel())
