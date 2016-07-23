@@ -197,7 +197,7 @@ class Plotter(object):
                             label="Comp "+species, lw=lw)
                     # plot correction
                     ax.plot(sim_times, corrected_amounts[j][:, i], self.colours[j],
-                            label="Est "+species, lw=lw)
+                            label="Corrected "+species, lw=lw)
 
         if legend:
             grid[-1].legend(loc='best')
