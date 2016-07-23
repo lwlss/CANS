@@ -157,13 +157,48 @@ class Plotter(object):
                         label="Est "+species, lw=lw)
                 if j == 0 and i in plate.empties:
                     continue
-                elif sim:
+                if sim:
                     # Plot all true. These do not have noise added.
                     ax.plot(plate.times, sim_amounts[j][:, i],
                             'x' + self.colours[j],
                             label="True"+species, ms=ms, mew=mew)
                 else:
                     continue
+        if legend:
+            grid[-1].legend(loc='best')
+        if filename is None:
+            plt.show()
+        else:
+            plt.savefig(filename)
+        plt.close()
+
+
+    def plot_correction(self, plate, est_params, comp_amounts,
+                        title="Corrected Growth",
+                        legend=False, filename=None, ms=6.0, mew=0.5, lw=1.0):
+        sim_times = np.linspace(plate.times[0], plate.times[-1], 100)
+        corrected_amounts = self.model.solve(plate, est_params, sim_times)
+        corrected_amounts = np.split(corrected_amounts,
+                                     self.model.no_species, axis=1)
+        comp_amounts = np.split(comp_amounts, self.model.no_species,
+                                axis=1)
+
+        fig, grid = self._make_grid(plate, corrected_amounts,
+                                    False, title, vis_ticks=True)
+
+        for i, ax in enumerate(grid):
+            # plot c_meas
+            if i not in plate.empties:
+                ax.plot(plate.times, plate.c_meas[i::plate.no_cultures],
+                    'x', label='Observed Cells', ms=ms, mew=mew)
+                for j, species in enumerate(self.model.species):
+                    # plot comp_est_amounts
+                    ax.plot(plate.times, comp_amounts[j][:, i], self.colours[j],
+                            label="Comp "+species, lw=lw)
+                    # plot correction
+                    ax.plot(sim_times, corrected_amounts[j][:, i], self.colours[j],
+                            label="Est "+species, lw=lw)
+
         if legend:
             grid[-1].legend(loc='best')
         if filename is None:
