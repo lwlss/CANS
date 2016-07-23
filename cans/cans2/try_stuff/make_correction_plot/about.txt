@@ -1,0 +1,13 @@
+1) Find the best fit to p15 X
+
+2) Simulate cell/nutrient amounts and save these for one culture (9, 2).
+
+3) Save the cell measurements
+
+4) Take and save comp model estimated b, N_0 and C_0
+
+5) Simulate corrected cell amounts using these parameters with kn = 0 / for 1x1.
+
+6) Put on the same plot (maybe include nutrients/maybe not)
+
+5) Fit the logistic model to the cell measurements in a different plot. X
