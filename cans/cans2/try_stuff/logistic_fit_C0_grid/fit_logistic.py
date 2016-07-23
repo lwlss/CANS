@@ -47,16 +47,16 @@ plate = Plate(plate_data["rows"], plate_data["cols"],
 
 b_guess = 10.0
 
-for C_0_index, C_0 in enumerate(C_0s):
+for C_0_index, C_0 in enumerate([C_0s[0], C_0s[-1]]):
 
     try:
         params, obj_funs = fit_log_eq(plate, C_0, b_guess)
-        except Exception as e:
-            err_msg = "Fitting: arg_v {0}, C_0_index {1},\n".format(sys.argv[1],
-                                                                    C_0_index)
-            with open(error_file, 'a') as f:
-                f.write(err_msg)
-            continue
+    except Exception as e:
+        err_msg = "Fitting: arg_v {0}, C_0_index {1},\n".format(sys.argv[1],
+                                                                C_0_index)
+        with open(error_file, 'a') as f:
+            f.write(err_msg)
+        continue
 
     Ks = [(N_0 + C_0) for N_0 in np.array(params)[:, 1]]
     rs = [b*K for b, K in zip(np.array(params)[:, 2], Ks)]
@@ -66,7 +66,7 @@ for C_0_index, C_0 in enumerate(C_0s):
         "plate_lvl_C_0": C_0,
         "culture_est_params": params,
         "obj_fun": np.sum(obj_funs),
-        "culture_obj_funs":, obj_funs,
+        "culture_obj_funs": obj_funs,
         "arg_v": sys.argv[1],
         "data": "p15",
         "b_guess": b_guess,
@@ -79,8 +79,8 @@ for C_0_index, C_0 in enumerate(C_0s):
     try:
         with open(outpath.format(sys.argv, C_0_index), "w") as f:
             json.dump(dict_to_json(data), f, indent=4, sort_keys=True)
-        except Exception as e:
-            err_msg = "Saving: arg_v {0}, C_0_index {1},\n".format(sys.argv[1], C_0_index)
-            with open(error_file, 'a') as f:
-                f.write(error_msg)
-            continue
+    except Exception as e:
+        err_msg = "Saving: arg_v {0}, C_0_index {1},\n".format(sys.argv[1], C_0_index)
+        with open(error_file, 'a') as f:
+            f.write(error_msg)
+        continue
