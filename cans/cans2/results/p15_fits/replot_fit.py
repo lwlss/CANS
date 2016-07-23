@@ -61,14 +61,14 @@ plate.sim_params = fit_data["comp_est"]
 zone = resim_zone(plate, CompModelBC(), coords=(5, 5), rows=3, cols=3)
 zone.set_rr_model(model, zone.sim_params)
 plotter.plot_est_rr(zone, zone.sim_params, ms=10.0, mew=1.5, lw=2.5, vis_ticks=True)
-assert False
+
 
 
 plot_title = 'Best Competition Model BC Fit to p15' # (argv {0}; b_guess {1})'
 plot_title = plot_title.format(argv, b_guess)
 plotter.plot_est_rr(plate, fit_data["comp_est"], title=plot_title,
                     sim=False, legend=False, ms=10.0, mew=1.5, lw=2.5,
-                    vis_ticks=False)
+                    vis_ticks=True)
 
 plot_title = 'Competition Model BC init guess for p15 (argv {0}; b_guess {1})'
 plot_title = plot_title.format(argv, b_guess)
