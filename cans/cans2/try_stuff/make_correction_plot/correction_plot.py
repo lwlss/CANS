@@ -28,14 +28,13 @@ plate.est_amounts = comp_modelbc.rr_solve(plate, plate.est_params)
 # Now get est C and N for culture
 c_i = plate.est_amounts[:, culture_i]
 n_i = plate.est_amounts[:, plate.no_cultures + culture_i]
-
-
+culture_est_amounts = np.dstack((c_i, n_i))[0]
 
 # Get the params for simulating the correction
 correction_params = np.concatenate((plate.est_params[:2],
                                     [plate.est_params[culture_i - plate.no_cultures]]))
 
-assert False
+
 
 # Take cell measurements for culture (9, 2).
 culture = get_plate_zone(plate, coords, 1, 1)
@@ -58,3 +57,13 @@ print(culture.inde_est.x)
 
 inde_plotter = Plotter(IndeModel())
 inde_plotter.plot_est(culture, culture.inde_est.x, sim=False)
+
+
+culture_c = Plate(1, 1)
+culture_c.times = plate.times
+culture_c.c_meas = culture.c_meas
+culture_c.sim_params = correction_params
+culture_c.sim_amounts = culture_est_amounts
+
+
+inde_plotter.plot_est(culture_c, culture_c.sim_params, sim=True)
