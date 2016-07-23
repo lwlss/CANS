@@ -1,10 +1,10 @@
 1) Find the best fit to p15 X
 
-2) Simulate cell/nutrient amounts and save these for one culture (9, 2).
+2) Simulate cell/nutrient amounts and save these for one culture (9, 2). X
 
-3) Save the cell measurements
+3) Save the cell measurements X
 
-4) Take and save comp model estimated b, N_0 and C_0
+4) Take and save comp model estimated b, N_0 and C_0 X
 
 5) Simulate corrected cell amounts using these parameters with kn = 0 / for 1x1.
 
