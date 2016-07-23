@@ -63,7 +63,9 @@ culture_c = Plate(1, 1)
 culture_c.times = plate.times
 culture_c.c_meas = culture.c_meas
 culture_c.sim_params = correction_params
-culture_c.sim_amounts = culture_est_amounts
+culture_c.comp_amounts = culture_est_amounts
+print(culture_c.sim_params)
+print(culture.sim_params)
 
-
-inde_plotter.plot_est(culture_c, culture_c.sim_params, sim=True)
+inde_plotter.plot_correction(culture_c, culture_c.sim_params,
+                             culture_c.comp_amounts, legend=True)
