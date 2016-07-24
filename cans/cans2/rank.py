@@ -37,6 +37,14 @@ def _get_repeats(genes):
     return {u: [i for i, g in enumerate(genes) if g == u] for u in uniques}
 
 
+def get_c_of_v(genes, *ests):
+    repeats = _get_repeats(genes)
+    ests = np.array(ests)
+    c_of_v =  [{gene: variation(est[reps]) for gene, reps in repeats.items()}
+               for est in ests]
+    return c_of_v
+
+
 def get_repeat_stats(genes, *ests):
     """Return mean, std, and coeffieint of variation for each gene.
 
@@ -117,9 +125,11 @@ def correlate_ests(genes, query_gene, filename="", *ests):
                          style="italic", fontsize=20,
                          fontweight="bold")
             else:
-                plt.text(est_no-0.4, rank+0.1, gene.lower()+"$\Delta$",
-                         color=col, style="italic", fontsize=20)
+                continue
+                # plt.text(est_no-0.4, rank+0.1, gene.lower()+"$\Delta$",
+                #          color=col, style="italic", fontsize=20)
 
+    # # Add coef of variation label
     # if coef_of_vars:
     #     for est_no, c_of_vs in zip(range(len(ests)), coef_of_vars):
     #         for c_of_v, rank, col in zip(c_of_vs, ranks[:, est_no], cols):
@@ -130,8 +140,6 @@ def correlate_ests(genes, query_gene, filename="", *ests):
     plt.xticks(range(len(ests)), labels, rotation="horizontal", fontsize=15)
     ax.yaxis.set_visible(False)
     plt.ylabel("Rank")
-
-    print("filename", filename)
 
     if filename:
         plt.savefig(filename)
