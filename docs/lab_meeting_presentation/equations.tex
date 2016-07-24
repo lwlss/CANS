@@ -26,6 +26,14 @@ The abstract text goes here.
 x(t) = \frac{KPe^{rt}}{K + P(e^{rt}-1)},
 \end{equation}
 
+\begin{equation}
+\dot{C} = rC\left(1 - \frac{C}{K}\right)
+\end{equation}
+
+\begin{equation}
+C(t) = \frac{KC_{0}e^{rt}}{K + C_{0}(e^{rt}-1)},
+\end{equation}
+
 \begin{subequations}
 	\begin{align}
 	&C{i} - Cells\\
@@ -42,7 +50,11 @@ x(t) = \frac{KPe^{rt}}{K + P(e^{rt}-1)},
 \end{subequations}
 
 \begin{equation}
-	C + N \xrightarrow[]{b_{i}[C][N]} 2C
+	C_{i} + N_{i} \xrightarrow[]{b_{i}[C_{i}][N_{i}]} 2C_{i}
+\end{equation}
+
+\begin{equation}
+C + N \xrightarrow[]{b[C][N]} 2C
 \end{equation}
 
 \begin{equation}
@@ -60,10 +72,19 @@ x(t) = \frac{KPe^{rt}}{K + P(e^{rt}-1)},
 \begin{subequations}
 	\label{eq:9}
 	\begin{align}
-	&r = b_{i}(N_0 + C_0)\\
+	&r_{i} = b_{i}(N_0 + C_0)\\
+	&K_{i} = (N_0 + C_0)
+	\end{align}
+\end{subequations}
+
+\begin{subequations}
+	\label{eq:9}
+	\begin{align}
+	&r = b(N_0 + C_0)\\
 	&K = (N_0 + C_0)
 	\end{align}
 \end{subequations}
+
 
 \begin{subequations}
 	\label{eq:5}
