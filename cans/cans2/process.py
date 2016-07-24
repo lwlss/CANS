@@ -86,3 +86,13 @@ def mad_tril(vec):
             row.append(np.mean(np.abs(v1 - v2)))
         mads.append(row)
     return np.tril(mads)
+
+
+def remove_edges(array, rows, cols):
+    """Remove values at edge indices from a flat array."""
+    array = np.array(array)
+    array.shape = (rows, cols)
+    # Trim top and bottom row.
+    trimmed = array[1:-1,1:-1]
+    # Trim left and right column.
+    return trimmed.flatten()
