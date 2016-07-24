@@ -40,8 +40,8 @@ def _get_repeats(genes):
 def get_c_of_v(genes, *ests):
     repeats = _get_repeats(genes)
     ests = np.array(ests)
-    c_of_v =  [{gene: variation(est[reps]) for gene, reps in repeats.items()}
-               for est in ests]
+    c_of_v = [{gene: variation(est[reps]) for gene, reps in repeats.items()}
+              for est in ests]
     return c_of_v
 
 
@@ -189,6 +189,27 @@ def write_stats(genes, filename, *ests):
         for gene, gene_stats in zip(genes, rank_and_stats):
             row = [gene] + list(gene_stats.flatten())
             writer.writerow(row)
+
+
+def plot_c_of_v(genes, *ests):
+    """Plot coefficient of variation.
+
+    Currently only works for len(ests) == 2.
+
+    """
+    est_names = [est[0] for est in ests]
+    # List of dicts with genes as keys.
+    stats = get_repeat_stats(genes, *[est[1] for est in ests])
+
+    # Use gene rankings of first estimate as order for all.
+    first_avgs = [(gene, stat[0]) for gene, stat in stats[0].items()]
+    sorted_by_avg = sorted(first_avgs, key=lambda tup: tup[1], reverse=True)
+    ordered_genes = np.array(sorted_by_avg)[:, 0]    # order to use.
+
+    c_of_vs = get_c_of_v(genes, *[est[1] for est in ests])
+    ordered_c_of_vs = [[cvs[gene] for gene in ordered_genes] for cvs in c_of_vs]
+
+
 
 
 if __name__ == "__main__":
