@@ -15,7 +15,7 @@ best_no_bc = np.array(find_best_fits("../../results/p15_fits/full_plate/CompMode
 best_bc = np.array(find_best_fits("../../results/p15_fits/full_plate/CompModelBC/*.json",
                                   num=1, key="obj_fun"))
 log_path = "../logistic_fit_C0_grid/results/log_eq_fit_fixed_argv_*.json"
-best_logs = np.array(find_best_fits(log_path, num=10, key="obj_fun_internals"))[:]
+best_logs = np.array(find_best_fits(log_path, num=10, key="obj_fun_internals"))[:2]
 
 # Was originally using logistic guessing fit without N_0 recorded.
 # log_path = "data/Logistic/argv_10_b_guess_40.json"
@@ -35,6 +35,7 @@ for est in best_logs:
         log_rs.append(data["logistic_rs"])
         log_Ks.append(data["logistic_Ks"])
         C_0 = data["plate_lvl_C_0"]
+        print(C_0)
         log_mdrmdps.append([mdrmdp(r, K, C_0) for r, K in zip(log_rs[-1], log_Ks[-1])])
 log_ests = log_mdrmdps
 
