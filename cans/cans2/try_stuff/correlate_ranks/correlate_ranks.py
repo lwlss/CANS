@@ -2,7 +2,7 @@ import numpy as np
 import json
 
 
-from cans2.rank import correlate_ests, correlate_avgs, write_stats, mdr, mdp, mdrmdp, get_repeat_stats, get_c_of_v
+from cans2.rank import correlate_ests, correlate_avgs, write_stats, mdr, mdp, mdrmdp, get_repeat_stats, get_c_of_v, plot_c_of_v
 from cans2.cans_funcs import dict_to_numpy
 from cans2.parser import get_genes
 from cans2.process import find_best_fits, remove_edges
@@ -51,9 +51,9 @@ log_eq_ests = [remove_edges(np.array(est), rows, cols) for est in log_eq_ests]
 bc_ests = [remove_edges(np.array(est), rows, cols) for est in bc_ests]
 no_bc_ests = [remove_edges(np.array(est), rows, cols) for est in no_bc_ests]
 
-bc_ests = [("CompModelBC_{0}".format(i), est) for i, est in enumerate(bc_ests)]
-no_bc_ests = [("CompModel_{0}".format(i), est) for i, est in enumerate(no_bc_ests)]
-log_eq_ests = [("Logistic_{0}".format(i), est) for i, est in enumerate(log_eq_ests)]
+bc_ests = [["CompModelBC_{0}".format(i), est] for i, est in enumerate(bc_ests)]
+no_bc_ests = [["CompModel_{0}".format(i), est] for i, est in enumerate(no_bc_ests)]
+log_eq_ests = [["Logistic_{0}".format(i), est] for i, est in enumerate(log_eq_ests)]
 ests = bc_ests + no_bc_ests + log_eq_ests
 
 # # Plot all genes
@@ -72,5 +72,7 @@ ests = bc_ests + no_bc_ests + log_eq_ests
 
 
 # Now get the coefficient of variation for best bc_est and log_eq_est
-unlabelled_ests = [ests[0][1], ests[1][1]]
-print(get_c_of_v(genes, *unlabelled_ests))
+plot_c_of_v(genes, *ests)
+
+# unlabelled_ests = [ests[0][1], ests[1][1]]
+# print(get_c_of_v(genes, *unlabelled_ests))
