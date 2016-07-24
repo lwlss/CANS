@@ -35,7 +35,7 @@ def fit_log_eq(plate, C_0, b_guess):
 # Plate level C_0 to use as fixed param.
 C_0s_index = int(sys.argv[1])
 
-all_C_0s = np.logspace(-6, -3, 1000)
+all_C_0s = np.logspace(-7, -3, 1000)
 C_0s = all_C_0s[C_0s_index:C_0s_index+20]
 
 outpath = "results/log_eq_fit_fixed_argv_{0}_C_0_index{1}_b_guess_{2}.json"
@@ -83,10 +83,10 @@ for C_0, b_guess in zipped_params:
     data.update(extra_data)
 
     try:
-        with open(outpath.format(sys.argv[1], C_0_index, b_guess), "w") as f:
+        with open(outpath.format(sys.argv[1], C_0_index, int(b_guess)), "w") as f:
             json.dump(dict_to_json(data), f, indent=4, sort_keys=True)
     except Exception as e:
-        err_msg = "Saving: arg_v {0}, C_0_index {1}, b_guess{2}\n".format(sys.argv[1], C_0_index, b_guess)
+        err_msg = "Saving: arg_v {0}, C_0_index {1}, b_guess{2}\n".format(sys.argv[1], C_0_index, int(b_guess))
         with open(error_file, 'a') as f:
             f.write(err_msg)
         continue
@@ -99,4 +99,4 @@ for C_0, b_guess in zipped_params:
     plotter.plot_culture_fits(plate, IndeModel(),
                               title="Logistic Equivalent Fit (C_0 = {0:.2e})".format(C_0),
                               est_name="log_est",
-                              finame=plotpath.format(sys.argv[1], C_0_index, b_guess))
+                              finame=plotpath.format(sys.argv[1], C_0_index, int(b_guess)))
