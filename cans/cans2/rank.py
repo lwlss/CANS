@@ -148,6 +148,57 @@ def correlate_ests(genes, query_gene, filename="", *ests):
     plt.close()
 
 
+def plot_c_of_v(genes, *ests):
+    """Plot coefficient of variation.
+
+    Currently only works for len(ests) == 2
+    http://matplotlib.org/examples/pylab_examples/barchart_demo.html
+
+    """
+    est_names = [est[0] for est in ests]
+    # List of dicts with genes as keys.
+    stats = get_repeat_stats(genes, *[est[1] for est in ests])
+
+    # Use gene rankings of first estimate as order for all.
+    first_avgs = [(gene, stat[0]) for gene, stat in stats[0].items()]
+    sorted_by_avg = sorted(first_avgs, key=lambda tup: tup[1], reverse=True)
+    ordered_genes = np.array(sorted_by_avg)[:, 0]    # order to use.
+
+    c_of_vs = get_c_of_v(genes, *[est[1] for est in ests])
+    ordered_c_of_vs = [[cvs[gene] for gene in ordered_genes] for cvs in c_of_vs]
+
+    fig, ax = plt.subplots()
+    bar_width = 0.4
+    opacity = 0.6
+    index = np.arange(len(ordered_genes))
+
+    rects1 = plt.bar(index,
+                     ordered_c_of_vs[1],
+                     bar_width,
+                     alpha=opacity,
+                     color='r',
+                     label='Logistic Equivalent Fit')
+
+    rects2 = plt.bar(index + bar_width,
+                     ordered_c_of_vs[0],
+                     bar_width,
+                     alpha=opacity,
+                     color='b',
+                     label='Competition Fit')
+
+    italic_genes = [gene.lower()+"$\Delta$" for gene in ordered_genes]
+
+    plt.xlabel('Deletion (ordered by competition b rank)', fontsize=26)
+    plt.ylabel('Coefficient of Variation', fontsize=26)
+    plt.title('Variation in Fitness Estimates by Model', fontsize=28)
+    plt.xticks(index + bar_width, italic_genes, rotation="vertical",
+               style="italic", fontsize=20)
+    plt.legend(loc=2, fontsize=26)
+
+    plt.tight_layout()
+    plt.show()
+
+
 def write_stats(genes, filename, *ests):
     """Save gene ranks and stats for each estimate as csv file.
 
@@ -189,53 +240,6 @@ def write_stats(genes, filename, *ests):
         for gene, gene_stats in zip(genes, rank_and_stats):
             row = [gene] + list(gene_stats.flatten())
             writer.writerow(row)
-
-
-def plot_c_of_v(genes, *ests):
-    """Plot coefficient of variation.
-
-    Currently only works for len(ests) == 2.
-
-    """
-    est_names = [est[0] for est in ests]
-    # List of dicts with genes as keys.
-    stats = get_repeat_stats(genes, *[est[1] for est in ests])
-
-    # Use gene rankings of first estimate as order for all.
-    first_avgs = [(gene, stat[0]) for gene, stat in stats[0].items()]
-    sorted_by_avg = sorted(first_avgs, key=lambda tup: tup[1], reverse=True)
-    ordered_genes = np.array(sorted_by_avg)[:, 0]    # order to use.
-
-    c_of_vs = get_c_of_v(genes, *[est[1] for est in ests])
-    ordered_c_of_vs = [[cvs[gene] for gene in ordered_genes] for cvs in c_of_vs]
-
-    fig, ax = plt.subplots()
-    bar_width = 0.35
-    opacity = 0.4
-    index = np.arange(len(ordered_genes))
-
-    rects1 = plt.bar(index,
-                     ordered_c_of_vs[0],
-                     bar_width,
-                     alpha=opacity,
-                     color='b',
-                     label='Competition')
-
-    rects2 = plt.bar(index + bar_width,
-                     ordered_c_of_vs[1],
-                     bar_width,
-                     alpha=opacity,
-                     color='r',
-                     label='Logistic')
-
-    plt.xlabel('Deletion')
-    plt.ylabel('Coeffieint of Variation')
-    plt.title('Coefficient of variation by deletion and model')
-    plt.xticks(index + bar_width, ordered_genes)
-    plt.legend()
-
-    plt.tight_layout()
-    plt.show()
 
 
 if __name__ == "__main__":
