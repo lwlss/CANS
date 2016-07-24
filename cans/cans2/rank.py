@@ -9,6 +9,21 @@ from scipy.stats import rankdata, variation
 from matplotlib.cm import coolwarm, cool, rainbow, brg, hsv
 
 
+def mdr(r, K, C_0, v=1.0):
+    """Return maximum doubling rate."""
+    return (r*v)/np.log(1.0 - (2.0**v-1)/((2.0**v)*(C_0/K)*v - 1.0))
+
+
+def mdp(K, C_0):
+    """Return maximum doubling potential."""
+    return log(K/C_0)/np.log(2.0)
+
+
+def mdrmdp(r, K, C_0, v=1.0):
+    """Return maximum doubling rate times maximum doubling potential."""
+    return mdr(r, K, C_0, v)*mdp(K, C_0)
+
+
 def _get_repeats(genes):
     """Return a dictionary of gene name and list of indices for each gene.
 
@@ -65,7 +80,7 @@ def correlate_avgs(genes, filename="", *ests):
 #    c_of_vs = [np.array(est.values())[:, 2] for est in gene_stats]
     labels = [est[0] for est in ests]    # est name (x label).
     labelled_avgs = [(lab, avgs) for lab, avgs in zip(labels, averages)]
-    correlate_ests(gene_set, filename, *labelled_avgs)
+    correlate_ests(gene_set, None, filename, *labelled_avgs)
 
 
 def correlate_ests(genes, query_gene, filename="", *ests):
@@ -102,9 +117,8 @@ def correlate_ests(genes, query_gene, filename="", *ests):
                          style="italic", fontsize=20,
                          fontweight="bold")
             else:
-                pass
-                # plt.text(est_no-0.4, rank+0.1, gene.lower()+"$\Delta$",
-                #          color=col, style="italic", fontsize=20)
+                plt.text(est_no-0.4, rank+0.1, gene.lower()+"$\Delta$",
+                         color=col, style="italic", fontsize=20)
 
     # if coef_of_vars:
     #     for est_no, c_of_vs in zip(range(len(ests)), coef_of_vars):
@@ -116,6 +130,8 @@ def correlate_ests(genes, query_gene, filename="", *ests):
     plt.xticks(range(len(ests)), labels, rotation="horizontal", fontsize=15)
     ax.yaxis.set_visible(False)
     plt.ylabel("Rank")
+
+    print("filename", filename)
 
     if filename:
         plt.savefig(filename)
