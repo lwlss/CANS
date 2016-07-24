@@ -16,7 +16,7 @@ def mdr(r, K, C_0, v=1.0):
 
 def mdp(K, C_0):
     """Return maximum doubling potential."""
-    return log(K/C_0)/np.log(2.0)
+    return np.log(K/C_0)/np.log(2.0)
 
 
 def mdrmdp(r, K, C_0, v=1.0):
