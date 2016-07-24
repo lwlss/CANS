@@ -11,10 +11,10 @@ from cans2.process import find_best_fits, remove_edges
 genes = np.array(get_genes("data/p15/ColonyzerOutput.txt")[:384])
 
 best_no_bc = np.array(find_best_fits("../../results/p15_fits/full_plate/CompModel/*.json",
-                                     num=1, key="obj_fun"))
+                                     num=0, key="obj_fun"))
 best_bc = np.array(find_best_fits("../../results/p15_fits/full_plate/CompModelBC/*.json",
-                                  num=0, key="obj_fun"))
-log_path = "../logistic_fit_C0_grid/results2/log_eq_fit_fixed_argv_*.json"
+                                  num=1, key="obj_fun"))
+log_path = "../logistic_fit_C0_grid/results2/log_eq*.json"
 best_logs = np.array(find_best_fits(log_path, num=1, key="obj_funs_internals"))
 
 
@@ -32,8 +32,11 @@ for est in best_logs:
         C_0 = data["plate_lvl_C_0"]
         rows = data["rows"]
         cols = data["cols"]
+        print(data.keys())
+        print(data["plate_lvl_C_0"])
         log_eq_mdrmdps.append([mdrmdp(r, K, C_0) for r, K in zip(log_eq_rs[-1], log_eq_Ks[-1])])
 log_eq_ests = log_eq_mdrmdps
+# log_eq_ests = log_eq_rs
 
 bc_ests = []
 for est in best_bc:
@@ -51,9 +54,9 @@ log_eq_ests = [remove_edges(np.array(est), rows, cols) for est in log_eq_ests]
 bc_ests = [remove_edges(np.array(est), rows, cols) for est in bc_ests]
 no_bc_ests = [remove_edges(np.array(est), rows, cols) for est in no_bc_ests]
 
-bc_ests = [["CompModelBC_{0}".format(i), est] for i, est in enumerate(bc_ests)]
+bc_ests = [["Compe Model".format(i), est] for i, est in enumerate(bc_ests)]
 no_bc_ests = [["CompModel_{0}".format(i), est] for i, est in enumerate(no_bc_ests)]
-log_eq_ests = [["Logistic_{0}".format(i), est] for i, est in enumerate(log_eq_ests)]
+log_eq_ests = [["Logistic Eq. Model".format(i), est] for i, est in enumerate(log_eq_ests)]
 ests = bc_ests + no_bc_ests + log_eq_ests
 
 # # Plot all genes
@@ -65,7 +68,8 @@ ests = bc_ests + no_bc_ests + log_eq_ests
 #     correlate_ests(genes, gene, "", *ests)
 
 # # Plot avgs
-# correlate_avgs(genes, "", *ests)
+correlate_avgs(genes, "best_comp_bc_and_log_eq_cor.pdf", *ests)
+assert False
 # correlate_avgs(genes, "plots/top_two_comp_and_top_three_log_eq_p15_correlations.png", *ests)
 
 # write_stats(genes, "results/top_two_comp_model_bc_comp_model.csv", *ests)
