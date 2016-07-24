@@ -17,7 +17,7 @@ def fit_log_eq(plate, C_0, b_guess):
     # Use final amounts of cells as inital guesses of nutrients
     C_fs = plate.c_meas[-plate.no_cultures:]
     guesses = [[C_0] + [N_0_guess, b_guess] for N_0_guess in C_fs]
-    all_bounds = [[(C_0, C_0), (C_f*0.7, C_f*1.3), (0.0, 500.0)] for C_f in C_fs]
+    all_bounds = [[(C_0, C_0), (C_f*0.7, C_f*1.3), (0.0, 5000.0)] for C_f in C_fs]
 
     log_eq_mod = IndeModel()
     for guess, bounds, culture in zip(guesses, all_bounds, plate.cultures):
