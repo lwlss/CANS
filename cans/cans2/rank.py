@@ -105,8 +105,9 @@ def correlate_ests(genes, query_gene, filename="", *ests):
     ranks = np.array([rankdata(est) for est in ests]).T
 
     #fig = plt.figure(facecolor="0.6")
-    fig = plt.figure(figsize=(len(ests)*2.5, 20), dpi=100,
+    fig = plt.figure(figsize=(len(ests)*4, 20), dpi=100,
                      facecolor='0.6', edgecolor='k')
+
 
     ax = plt.axes(frameon=False)
     ax.get_xaxis().tick_bottom()
@@ -120,15 +121,16 @@ def correlate_ests(genes, query_gene, filename="", *ests):
     for est_no in range(len(ests)):
         for gene, col, rank, in zip(genes, cols, ranks[:, est_no]):
             if gene == query_gene:
-                plt.text(est_no-0.1, rank+0.1,
+                plt.text(est_no-0.1, rank,
                          gene.lower()+"$\Delta$", color="black",
                          style="italic", fontsize=20,
                          fontweight="bold")
             else:
-                continue
-                # plt.text(est_no-0.4, rank+0.1, gene.lower()+"$\Delta$",
-                #          color=col, style="italic", fontsize=20)
+                # continue
+                plt.text(est_no-0.1, rank + 0.1, gene.lower()+"$\Delta$",
+                         color=col, style="italic", fontsize=18)
 
+                
     # # Add coef of variation label
     # if coef_of_vars:
     #     for est_no, c_of_vs in zip(range(len(ests)), coef_of_vars):
@@ -136,8 +138,8 @@ def correlate_ests(genes, query_gene, filename="", *ests):
     #             plt.text(est_no, rank, "{0:.3f}".format(c_of_v), color=col)
 
 
-    # plt.xticks(range(len(ests)), labels, rotation="vertical", fontsize=15)
-    plt.xticks(range(len(ests)), labels, rotation="horizontal", fontsize=15)
+    plt.xticks(range(len(ests)), labels, rotation="vertical", fontsize=26)
+#     plt.xticks(range(len(ests)), labels, rotation="horizontal", fontsize=26)
     ax.yaxis.set_visible(False)
     plt.ylabel("Rank")
 
@@ -190,7 +192,7 @@ def plot_c_of_v(genes, *ests):
 
     plt.xlabel('Deletion (ordered by competition b rank)', fontsize=26)
     plt.ylabel('Coefficient of Variation', fontsize=26)
-    plt.title('Variation in Fitness Estimates by Model', fontsize=28)
+    plt.title('Variation in Fitness Estimates by Model', fontsize=34)
     plt.xticks(index + bar_width, italic_genes, rotation="vertical",
                style="italic", fontsize=20)
     plt.legend(loc=2, fontsize=26)
