@@ -8,6 +8,7 @@ import numpy as np
 from math import log10, floor
 
 
+from cans2.plate import Plate
 from cans2.cans_funcs import dict_to_numpy
 
 
@@ -38,7 +39,7 @@ def find_best_fits(path, num=None, key="obj_fun"):
     for filename in glob.glob(path):
         with open(filename, 'r') as f:
             data = json.load(f)
-        obj_funs.append((filename, data[key]))
+        obj_funs.append((filename, np.sum(data[key])))
 
     obj_funs = sorted(obj_funs, key=lambda tup: tup[0])
     obj_funs = sorted(obj_funs, key=lambda tup: tup[1])
@@ -90,9 +91,10 @@ def mad_tril(vec):
 
 def remove_edges(array, rows, cols):
     """Remove values at edge indices from a flat array."""
-    array = np.array(array)
-    array.shape = (rows, cols)
-    # Trim top and bottom row.
-    trimmed = array[1:-1,1:-1]
-    # Trim left and right column.
-    return trimmed.flatten()
+    empty_plate = Plate(rows, cols)
+    return np.array(array)[list(empty_plate.internals)]
+    # print(array)
+    # # Trim top and bottom row.
+    # trimmed = array[1:-1,1:-1]
+    # # Trim left and right column.
+    # return trimmed.flatten()
