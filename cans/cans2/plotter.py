@@ -234,7 +234,11 @@ class Plotter(object):
         for i, ax in enumerate(grid):
             culture = zone.cultures[i]
             # Simulate culture amounts from the estimates.
-            est = getattr(culture, est_name).x
+            try:
+                # For SciPy OptimizeResult objects.
+                est = getattr(culture, est_name).x
+            except AttributeError:
+                est = getattr(culture, est_name)
             culture_amounts = model.solve(culture, est, sim_times)
             if model.name == "Neighbour model":
                 # Do not want neighbouring - and + cultures
