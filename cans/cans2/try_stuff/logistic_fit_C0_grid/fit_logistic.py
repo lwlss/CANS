@@ -10,7 +10,7 @@ from cans2.plate import Plate
 from cans2.guesser import fit_log_eq
 from cans2.model import IndeModel
 from cans2.process import remove_edges
-from cans2.plotter import Plotter
+# from cans2.plotter import Plotter
 
 
 def fit_log_eq(plate, C_0):
@@ -20,7 +20,7 @@ def fit_log_eq(plate, C_0):
     all_bounds = [[(C_0, C_0), (C_f*0.7, C_f*1.3), (0.0, 1000.0)] for C_f in C_fs]
     guesses = [[C_0] + [N_0_guess, None] for N_0_guess in C_fs]
     # Cover a range of b_guesses for each culture.
-    b_guesses = np.linspace(10, 100, 19)
+    b_guesses = np.linspace(10, 100, 9)
     log_eq_mod = IndeModel()
     obj_funs = []
     params = []
@@ -77,7 +77,7 @@ for C_0_index, C_0 in enumerate(C_0s):
         "culture_est_params": params,
         "obj_fun": np.sum(obj_funs),
         "obj_funs": obj_funs,
-        "obj_funs_internals": remove_edges(obj_funs),
+        "obj_funs_internals": remove_edges(obj_funs, plate.rows, plate.cols),
         "arg_v": sys.argv[1],
         "data": "p15",
         "b_guesses": b_guessed,
@@ -96,10 +96,10 @@ for C_0_index, C_0 in enumerate(C_0s):
             f.write(err_msg)
         continue
 
-    plotter = Plotter(IndeModel())
-    plotter.plot_culture_fits(plate, IndeModel(),
-                              title="Logistic Equivalent Fit (C_0 = {0:.2e})".format(C_0),
-                              est_name="log_est")
+    # plotter = Plotter(IndeModel())
+    # plotter.plot_culture_fits(plate, IndeModel(),
+    #                           title="Logistic Equivalent Fit (C_0 = {0:.2e})".format(C_0),
+    #                           est_name="log_est")
 
     # plotter.plot_culture_fits(plate, IndeModel(),
     #                           title="Logistic Equivalent Fit (C_0 = {0:.2e})".format(C_0),
