@@ -59,14 +59,14 @@ for C_0_index, C_0 in enumerate(C_0s):
 
     plate = Plate(plate_data["rows"], plate_data["cols"],
                   data=plate_data)
-   # try:
-    params, obj_funs, b_guessed = fit_log_eq(plate, C_0)
-    # #except Exception as e:
-    #     err_msg = "Fitting: arg_v {0}, C_0_index {1},\n".format(sys.argv[1],
-    #                                                             C_0_index)
-    #     with open(error_file, 'a') as f:
-    #         f.write(err_msg)
-    #     continue
+    try:
+        params, obj_funs, b_guessed = fit_log_eq(plate, C_0)
+    except Exception as e:
+        err_msg = "Fitting: arg_v {0}, C_0_index {1},\n".format(sys.argv[1],
+                                                                C_0_index)
+        with open(error_file, 'a') as f:
+            f.write(err_msg)
+        continue
 
     Ks = [N_0 + C_0 for N_0 in params[:, 1]]
     rs = [b*K for b, K in zip(params[:, 2], Ks)]
