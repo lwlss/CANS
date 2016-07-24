@@ -227,7 +227,7 @@ class Plotter(object):
     def plot_culture_fits(self, zone, model, title="Individual fits of cultures",
                           sim=False, ms=6.0, mew=0.5, lw=1.0, legend=False,
                           filename=None, est_name="est"):
-        fig, grid = self._make_grid(zone, zone.c_meas, sim, title)
+        fig, grid = self._make_grid(zone, zone.c_meas, sim, title, vis_ticks=True)
 
         sim_times = np.linspace(zone.times[0], zone.times[-1], 100)
 
