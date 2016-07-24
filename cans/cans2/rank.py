@@ -209,7 +209,33 @@ def plot_c_of_v(genes, *ests):
     c_of_vs = get_c_of_v(genes, *[est[1] for est in ests])
     ordered_c_of_vs = [[cvs[gene] for gene in ordered_genes] for cvs in c_of_vs]
 
+    fig, ax = plt.subplots()
+    bar_width = 0.35
+    opacity = 0.4
+    index = np.arange(len(ordered_genes))
 
+    rects1 = plt.bar(index,
+                     ordered_c_of_vs[0],
+                     bar_width,
+                     alpha=opacity,
+                     color='b',
+                     label='Competition')
+
+    rects2 = plt.bar(index + bar_width,
+                     ordered_c_of_vs[1],
+                     bar_width,
+                     alpha=opacity,
+                     color='r',
+                     label='Logistic')
+
+    plt.xlabel('Deletion')
+    plt.ylabel('Coeffieint of Variation')
+    plt.title('Coefficient of variation by deletion and model')
+    plt.xticks(index + bar_width, ordered_genes)
+    plt.legend()
+
+    plt.tight_layout()
+    plt.show()
 
 
 if __name__ == "__main__":
