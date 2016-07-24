@@ -46,7 +46,7 @@ error_file = "error_log.txt"
 data_path = "../../../../data/p15/Output_Data/"
 plate_data = get_plate_data(data_path)
 
-b_guesses = np.linspace(10, 100, 20)
+b_guesses = np.linspace(10, 100, 19)
 
 param_prod = np.array(list(itertools.product(C_0s, b_guesses)))
 zipped_params = zip(param_prod[:, 0], param_prod[:, 1])
