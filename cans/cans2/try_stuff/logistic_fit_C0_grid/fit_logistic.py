@@ -9,7 +9,7 @@ from cans2.parser import get_plate_data
 from cans2.plate import Plate
 from cans2.guesser import fit_log_eq
 from cans2.model import IndeModel
-from cans2.plotter import Plotter
+# from cans2.plotter import Plotter
 
 
 def fit_log_eq(plate, C_0, b_guess):
@@ -91,12 +91,12 @@ for C_0, b_guess in zipped_params:
             f.write(err_msg)
         continue
 
-    plotter = Plotter(IndeModel())
-    plotter.plot_culture_fits(plate, IndeModel(),
-                              title="Logistic Equivalent Fit (C_0 = {0:.2e})".format(C_0),
-                              est_name="log_est")
+    # plotter = Plotter(IndeModel())
+    # plotter.plot_culture_fits(plate, IndeModel(),
+    #                           title="Logistic Equivalent Fit (C_0 = {0:.2e})".format(C_0),
+    #                           est_name="log_est")
 
-    plotter.plot_culture_fits(plate, IndeModel(),
-                              title="Logistic Equivalent Fit (C_0 = {0:.2e})".format(C_0),
-                              est_name="log_est",
-                              finame=plotpath.format(sys.argv[1], C_0_index, int(b_guess)))
+    # plotter.plot_culture_fits(plate, IndeModel(),
+    #                           title="Logistic Equivalent Fit (C_0 = {0:.2e})".format(C_0),
+    #                           est_name="log_est",
+    #                           filename=plotpath.format(sys.argv[1], C_0_index, int(b_guess)))
