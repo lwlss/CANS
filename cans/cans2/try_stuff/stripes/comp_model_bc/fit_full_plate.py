@@ -24,7 +24,7 @@ from cans2.zoning import get_plate_zone
 
 plate_model = CompModelBC()
 
-cell_ratios = np.logspace(-2, -7, num=10)
+cell_ratios = np.logspace(-1, -5, num=10)
 C_ratio = cell_ratios[int(sys.argv[1])]
 
 # Read in real data and make a plate.
@@ -62,7 +62,6 @@ for b_guess in [35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 95, 100, 150]:
         t0 = time.time()
         quick_guess, quick_guesser = fit_imag_neigh(**guess_kwargs)
         t1 = time.time()
-        print(t1-t0)
     except Exception as e:
         error_log = "imag guess: C_ratio index {0}, b_guess {1},\n".format(sys.argv[1],
                                                                             b_guess)
@@ -105,8 +104,6 @@ for b_guess in [35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 95, 100, 150]:
                                                              b_guess)
     # plotfile = (outdir + "plots/argv_{0}_b_guess_{1}.pdf").format(sys.argv[1],
     #                                                               b_guess)
-
-    print("here")
 
     # Cannot serialize Plate and Model objects as json
     guess_kwargs = dict_to_json(guess_kwargs)
