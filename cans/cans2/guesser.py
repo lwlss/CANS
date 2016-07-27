@@ -156,8 +156,9 @@ class Guesser(object):
         """
         # Assuming complete reactions and relatively small starting
         # amounts of cells, total nutrient amount is equal to the
-        # total final cell amount.
-        N_tot = np.sum(self.plate.c_meas[-self.plate.no_cultures:])
+        # total final cell amount. Do not include empty cultures in
+        # the sum.
+        N_tot = np.sum(self.plate.c_meas_obj[-len(self.plate.growers):])
         N_index = self.model.species.index("N")
         if self.model.species_bc[N_index]:
             # Number of internal and edge cultures.
@@ -190,7 +191,7 @@ class Guesser(object):
         guess.
 
         """
-        # Just take ratio of average of final cells without special
+        # Just take ratio of maximum of final cells without special
         # treatment of edge and internal cultures because, for typical
         # dilution methods, the ratio is likely to be a fairly rough
         # guess anyway. We will revise the guess anyway after fitting
@@ -200,8 +201,8 @@ class Guesser(object):
         # I carried out many fits using a grid of initial guesses and
         # these were not very dependent on the accuracy of the initial
         # guess of C_0.
-        final_Cs = self.plate.c_meas[-self.plate.no_cultures:]
-        C_0 = np.mean(final_Cs)*self.C_ratio
+        # Take the maximum times the C_ratio.
+        C_0 = max(self.plate.c_meas[-self.plate.no_cultures:])*self.C_ratio
         return [C_0]
 
 
@@ -256,7 +257,7 @@ class Guesser(object):
         """Separate parameter guesses and bounds by N_0 guess.
 
         This way guesses and bounds can be used to fit single
-        cultures.
+        cultures when making quick initial guesses.
 
         param_guess and bounds should be numpy arrays with N_0 indices
         starting at one.
