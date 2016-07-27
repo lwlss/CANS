@@ -24,7 +24,7 @@ from cans2.zoning import get_plate_zone
 
 plate_model = CompModelBC()
 
-cell_ratios = np.logspace(-1, -5, num=10)
+cell_ratios = np.logspace(-1, -7, num=10)
 C_ratio = cell_ratios[int(sys.argv[1])]
 
 # Read in real data and make a plate.
