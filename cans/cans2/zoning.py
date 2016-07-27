@@ -67,8 +67,6 @@ def get_plate_zone(plate, coords, rows, cols):
         "genes": plate.genes[zone_indices],
         }
     zone_plate = Plate(rows, cols, data=zone_data)
-    zone_plate.growers = np.array([i for i in range(zone_plate.no_cultures)
-                                   if i not in zone_plate.empties])
     return zone_plate
 
 
