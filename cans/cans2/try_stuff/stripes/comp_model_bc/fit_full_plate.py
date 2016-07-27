@@ -10,26 +10,26 @@ from cans2.plate import Plate
 from cans2.model import CompModelBC
 from cans2.guesser import fit_imag_neigh, fit_log_eq, Guesser
 from cans2.cans_funcs import dict_to_json
-# from cans2.plotter import Plotter
+from cans2.plotter import Plotter
+
+
+barcodes = np.array([
+    {"barcode": "K000343_027_001", "ignore_empty": False},
+    {"barcode": "K000347_027_022", "ignore_empty": True},    # Filled stripes do not have correct gene names.
+])
 
 # # Temporarily work with a zone while checking script runs.
 # from cans2.zoning import get_plate_zone
 
 plate_model = CompModelBC()
 
-# Process script args
-method_index = int(sys.argv[1])
-# In total 5x2x2 = 20 sets of args.
 cell_ratios = np.logspace(-3, -7, num=10)
-C_ratio = cell_rations[sys.argv[1]]
+C_ratio = cell_ratios[int(sys.argv[1])]
 
 # Read in real data and make a plate.
-data_path = "../../../../data/stripes/Stripes.txt"
-plate_data = get_plate_data2(data_path)
-full_plate = Plate(plate_data["rows"], plate_data["cols"],
-                   data=plate_data)
+data_path = "../../../../../data/stripes/Stripes.txt"
+full_plate = Plate(**get_plate_data2(data_path, **barcodes[0]))
 # zone = get_plate_zone(full_plate, (5,5), 3, 3)
-
 
 # Errors are captured to file and iteration skipped.
 error_file = "error_logs/CompModelBC_error_log.txt"
@@ -55,14 +55,21 @@ for b_guess in [35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 95, 100, 150]:
     # Parameter guesses for fitting.
     guess_kwargs.update(imag_neigh_only)
 
-    try:
-        quick_guess, quick_guesser = fit_imag_neigh(**guess_kwargs)
-    except Exception as e:
-        error_log = "imag guess: C_ratio index {0}, b_guess {1},\n".format(sys.argv[1],
-                                                                           b_guess)
-        with open(error_file, 'a') as f:
-            f.write(error_log)
-        continue
+    quick_guess, quick_guesser = fit_imag_neigh(**guess_kwargs)
+
+    # plot initial guess
+    plotter = Plotter(plate_model)
+    plotter.plot_est_rr(plate, quick_guess, title="Guess growth")
+    print(quick_guess)
+    assert False
+    # try:
+    #     quick_guess, quick_guesser = fit_imag_neigh(**guess_kwargs)
+    # except Exception as e:
+    #     error_log = "imag guess: C_ratio index {0}, b_guess {1},\n".format(sys.argv[1],
+    #                                                                        b_guess)
+    #     with open(error_file, 'a') as f:
+    #         f.write(error_log)
+    #     continue
 
     # Removed kn setting zero here as did not provide the best fits for p15.
 
@@ -134,9 +141,9 @@ for b_guess in [35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 95, 100, 150]:
     with open(datafile, 'w') as f:
         json.dump(data, f, indent=4, sort_keys=True)
 
-    sbml = create_sbml(plate, plate_model, full_plate.est.x, outfile=sbmlfile)
+    create_sbml(plate, plate_model, full_plate.est.x, outfile=sbmlfile)
 
-    # # No point to do this for a full plate.
+    # # No point to plot for a full plate. Slow and not producing good plots.
     # plotter = Plotter(plate_model)
     # plot_title = "{0} fit of p15 (b_guess {1})".format(plate_model.name,
     #                                                    b_guess)
