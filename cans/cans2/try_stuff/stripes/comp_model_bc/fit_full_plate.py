@@ -11,6 +11,7 @@ from cans2.model import CompModelBC
 from cans2.guesser import fit_imag_neigh, fit_log_eq, Guesser
 from cans2.cans_funcs import dict_to_json
 from cans2.plotter import Plotter
+from cans2.make_sbml import create_sbml
 
 
 barcodes = np.array([
@@ -83,17 +84,17 @@ for b_guess in [35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 95, 100, 150]:
     t0 = time.time()
     # Now fit the model to the plate and save the result and plot as
     # json and pdf.
-    #try:
-    full_plate.est = full_plate.fit_model(guess_kwargs["plate_model"],
-                                          param_guess=quick_guess,
-                                          bounds=bounds, rr=True, sel=False,
-                                          minimizer_opts={"disp": False})
-    # except Exception as e:
-    #     error_log = "Full est: C_ratio index {0}, b_guess {1},\n".format(sys.argv[1],
-    #                                                                      b_guess)
-    #     with open(error_file, 'a') as f:
-    #         f.write(error_log)
-    #     continue
+    try:
+        full_plate.est = full_plate.fit_model(guess_kwargs["plate_model"],
+                                              param_guess=quick_guess,
+                                              bounds=bounds, rr=True, sel=False,
+                                              minimizer_opts={"disp": False})
+    except Exception as e:
+        error_log = "Full est: C_ratio index {0}, b_guess {1},\n".format(sys.argv[1],
+                                                                         b_guess)
+        with open(error_file, 'a') as f:
+            f.write(error_log)
+        continue
     t1 = time.time()
 
     # Set out dir/files for data and plots.
@@ -105,6 +106,7 @@ for b_guess in [35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 95, 100, 150]:
     # plotfile = (outdir + "plots/argv_{0}_b_guess_{1}.pdf").format(sys.argv[1],
     #                                                               b_guess)
 
+    print("here")
 
     # Cannot serialize Plate and Model objects as json
     guess_kwargs = dict_to_json(guess_kwargs)
@@ -139,14 +141,14 @@ for b_guess in [35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 95, 100, 150]:
     with open(datafile, 'w') as f:
         json.dump(data, f, indent=4, sort_keys=True)
 
-    create_sbml(plate, plate_model, full_plate.est.x, outfile=sbmlfile)
+    create_sbml(full_plate, plate_model, full_plate.est.x, outfile=sbmlfile)
 
     # # No point to plot for a full plate. Slow and not producing good plots.
     # plotter = Plotter(plate_model)
     # plot_title = "{0} fit of p15 (b_guess {1})".format(plate_model.name,
     #                                                    b_guess)
     # try:
-    plotter.plot_est_rr(full_plate, full_plate.est.x, title=plot_title)#,
+    # plotter.plot_est_rr(full_plate, full_plate.est.x, title=plot_title)#,
                         # filename=plotfile)
     # except Exception as e:
     #     error_log = "Plotting: arg_v {0}, b_guess {1},\n".format(sys.argv[1],
