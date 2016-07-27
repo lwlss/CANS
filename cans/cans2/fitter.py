@@ -170,7 +170,6 @@ class Fitter(object):
         # Add b (0, 0) bounds for empty sites according to plate.empties.
         if len(plate.empties) != 0:
             bounds[list(np.array(plate.empties) + self.model.b_index)] = np.array([0.0, 0.0])
-            # bounds[self.model.b_index + index] = np.array([0.0, 0.0])
 
         options = {
             # 'disp': True,
