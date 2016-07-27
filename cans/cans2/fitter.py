@@ -54,10 +54,11 @@ class Fitter(object):
         amount_est = self.model.rr_solve(plate, params)
         # Mutable so must scale C_0 back
         params[0] = params[0]*10000
-        c_est = np.split(amount_est, self.model.no_species, axis=1)[0].flatten()
+        c_est = np.split(amount_est, self.model.no_species, axis=1)[0]
+        growers_c_est = c_est[list(plate.growers)].flatten()
         # Zeros appear in here for empty plates but this shouldn't
         # have any effect.
-        err = np.sqrt(np.sum((plate.c_meas - c_est)**2))
+        err = np.sqrt(np.sum((plate.c_meas_obj - growers_c_est)**2))
         return err
 
 
@@ -166,9 +167,15 @@ class Fitter(object):
             # All values non-negative.
             bounds = [(0.0, None) for param in param_guess]
 
+        print(type(plate.empties))
+
         # Add b (0, 0) bounds for empty sites according to plate.empties.
-        for index in plate.empties:
-            bounds[self.model.b_index + index] = (0.0, 0.0)
+        if len(plate.empties) != 0:
+            bounds[list(plate.empties + self.model.b_index)] = np.array([0.0, 0.0])
+            # bounds[self.model.b_index + index] = np.array([0.0, 0.0])
+
+        print(bounds)
+        assert False
 
         options = {
             # 'disp': True,
