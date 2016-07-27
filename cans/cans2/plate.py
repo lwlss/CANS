@@ -61,14 +61,23 @@ class BasePlate(object):
             self.c_meas = data['c_meas']
             self.times = data['times']
             self.empties = data['empties']    # List of indices of empty sites
+            self.growers = np.array([i for i in range(self.no_cultures)
+                                     if i not in self.empties])
             try:
                 self.genes = data['genes']
-            except AttributeError:
+            except KeyError:
                 self.genes = []
         else:
             self.c_meas = None
             self.times = None
             self.empties = []
+        # create c_meas_obj
+        if len(self.empties) != 0:
+            c_meas_a = np.array(self.c_meas)
+            c_meas_a.shape = (len(self.times), self.no_cultures)
+            self.c_meas_obj = c_meas_a[:, list(self.growers)].flatten()
+        else:
+            self.c_meas_obj = self.c_meas
         # Attributes for simulated data.
         self.sim_amounts = None
         self.sim_params = None
