@@ -18,9 +18,10 @@ barcodes = np.array([
     {"barcode": "K000343_027_001", "ignore_empty": False},
     {"barcode": "K000347_027_022", "ignore_empty": True},    # Filled stripes do not have correct gene names.
 ])
+barcode = barcodes[int(sys.argv[2])]
 
 # # Temporarily work with a zone while checking script runs.
-# from cans2.zoning import get_plate_zone
+from cans2.zoning import get_plate_zone
 
 plate_model = CompModelBC()
 
@@ -29,13 +30,14 @@ C_ratio = cell_ratios[int(sys.argv[1])]
 
 # Read in real data and make a plate.
 data_path = "../../../../../data/stripes/Stripes.txt"
-full_plate = Plate(**get_plate_data2(data_path, **barcodes[1]))
+full_plate = Plate(**get_plate_data2(data_path, **barcode))
+barcode = barcode["barcode"]
 
 # # Work with a zone for getting it to work.
-# full_plate = get_plate_zone(full_plate, (5,5), 3, 3)    ###### ZONE ######
+full_plate = get_plate_zone(full_plate, (5,5), 3, 3)    ###### ZONE ######
 
 # Errors are captured to file and iteration skipped.
-error_file = "error_logs/CompModelBC_error_log.txt"
+error_file = "error_logs/" + barcode + "_CompModelBC_error_log.txt"
 for b_guess in [35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 95, 100, 150]:
     # User defined/selected parameters pre guessing.
     guess_kwargs = {
@@ -97,13 +99,12 @@ for b_guess in [35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 95, 100, 150]:
     t1 = time.time()
 
     # Set out dir/files for data and plots.
-    outdir =  "results/"
-    datafile = ("results/C_ratio_i_{0}_b_guess_{1}.json").format(sys.argv[1],
-                                                                  b_guess)
-    sbmlfile = ("sbml/C_ratio_i_{0}_b_guess_{1}.xml").format(sys.argv[1],
-                                                             b_guess)
-    # plotfile = (outdir + "plots/argv_{0}_b_guess_{1}.pdf").format(sys.argv[1],
-    #                                                               b_guess)
+    datafile = (barcode + "/results/C_ratio_i_{0}_b_guess_{1}.json").format(sys.argv[1],
+                                                                            b_guess)
+    sbmlfile = (barcode + "/sbml/C_ratio_i_{0}_b_guess_{1}.xml").format(sys.argv[1],
+                                                                        b_guess)
+    # plotfile = (barcode + "/plots/argv_{0}_b_guess_{1}.pdf").format(sys.argv[1],
+    #                                                                    b_guess)
 
     # Cannot serialize Plate and Model objects as json
     guess_kwargs = dict_to_json(guess_kwargs)
@@ -117,6 +118,7 @@ for b_guess in [35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 95, 100, 150]:
             json_guess_kwargs[k] = v
     data = {
         'source_data': data_path,
+        'barcode': barcode,
         'rows': full_plate.rows,
         'cols': full_plate.cols,
         'c_meas': full_plate.c_meas,
