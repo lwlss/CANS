@@ -250,7 +250,7 @@ class Guesser(object):
         kn_bound = [(0, kn_max)]
         r_bounds = [(0, None) for i in range(self.plate.no_cultures)]
         bounds = amount_bounds + kn_bound + r_bounds
-        return bounds
+        return np.array(bounds)
 
 
     def _sep_by_N_0(self, param_guess, bounds):
@@ -325,15 +325,16 @@ class Guesser(object):
 
 
         # Allow to raise AttributeError if bad est_name.
-        all_ests = np.array([getattr(c, est_name).x for c in self.plate.cultures])
+        all_ests = np.array([getattr(c, est_name).x for i, c in enumerate(self.plate.cultures)
+                             if i in self.plate.growers])
         b_ests = all_ests[:, quick_mod.b_index]
         if clip:
             b_ests.clip(max=3.0*b_guess, out=b_ests)    # "out" for inplace clipping.
 
         # Insert b_ests leaving empties as zero
         b_est_holder = np.zeros(self.plate.no_cultures)
-        b_ests_holder[self.plate.growers] = b_ests
-        b_ests = b_ests_holder
+        b_est_holder[self.plate.growers] = b_ests
+        b_ests = b_est_holder
 
         if plate_lvl is not None:
             # Don't bother to infer plate level parameters and return
