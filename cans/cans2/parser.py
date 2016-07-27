@@ -87,17 +87,28 @@ def get_genes(filename):
 
 
 # Start using ColonyzerOutput.txt files for all parsing.
-def get_plate_data2(path):
+def get_plate_data2(path, barcode=None, ignore_empty=False):
     """Return data necessary to make a Plate object.
 
     path : path to ColonyzerOutput.txt file.
 
+    barcode : Data may be from different plates with differing
+    barcodes. Choose which to return.
+
+    ignore_empty : (bool) I have some data (stripes) where cultures
+    are mistakenly listed with the gene name "EMPTY". In this case
+
     """
     data = pd.read_csv(path, sep="\t", header=0)
+    print("Barcodes", set(data["Barcode"]))
+    assert barcode in set(data["Barcode"])
+    data = data.loc[data["Barcode"] == barcode]
     rows = max(data["Row"])
     cols = max(data["Column"])
     c_meas = np.array(data["Intensity"])
     times = np.array(data["Expt.Time"][::rows*cols])
+    # Correct times to set t=0 for first observation.
+    times = times - times[0]
     genes = np.array(data["Gene"][:rows*cols])
     empties = np.array([i for i, gene in enumerate(genes) if gene == "EMPTY"])
     plate_data = {
@@ -118,8 +129,11 @@ if __name__ == "__main__":
 
 
     stripes_path = "../../data/stripes/Stripes.txt"
-    plate = Plate(**get_plate_data2(stripes_path))
+    plate1 = Plate(**get_plate_data2(stripes_path, 'K000347_027_022'))
+    plate = Plate(**get_plate_data2(stripes_path, 'K000343_027_001'))
     print(plate.genes)
     print(plate.empties)
     print(plate.times)
     assert plate.rows*plate.cols*len(plate.times) == len(plate.c_meas)
+
+    assert all(plate1.genes == plate.genes)
