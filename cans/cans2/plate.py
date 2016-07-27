@@ -61,6 +61,10 @@ class BasePlate(object):
             self.c_meas = data['c_meas']
             self.times = data['times']
             self.empties = data['empties']    # List of indices of empty sites
+            try:
+                self.genes = data['genes']
+            except AttributeError:
+                self.genes = []
         else:
             self.c_meas = None
             self.times = None
