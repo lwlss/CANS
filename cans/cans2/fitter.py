@@ -55,9 +55,7 @@ class Fitter(object):
         # Mutable so must scale C_0 back
         params[0] = params[0]*10000
         c_est = np.split(amount_est, self.model.no_species, axis=1)[0]
-        growers_c_est = c_est[list(plate.growers)].flatten()
-        # Zeros appear in here for empty plates but this shouldn't
-        # have any effect.
+        growers_c_est = c_est[:, list(plate.growers)].flatten()
         err = np.sqrt(np.sum((plate.c_meas_obj - growers_c_est)**2))
         return err
 
