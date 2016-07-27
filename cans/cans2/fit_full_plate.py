@@ -33,7 +33,7 @@ full_plate = Plate(plate_data["rows"], plate_data["cols"],
                    data=plate_data)
 # zone = get_plate_zone(full_plate, (5,5), 3, 3)
 
-plate_model = CompModel()    # Should pass another argument for CompModel()
+plate_model = CompModelBC()    # Should pass another argument for CompModel()
 
 # Errors are captured to file and iteration skipped.
 error_file = "results/p15_fits/full_plate/CompModel_error_log.txt"
@@ -114,7 +114,7 @@ for b_guess in [35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 95, 100, 150]:
     t1 = time.time()
 
     # Set out dir/files for data and plots.
-    outdir =  "results/p15_fits/full_plate/CompModel/"
+    outdir =  "results/p15_fits/full_plate/CompModelBC/"
     datafile = (outdir + "argv_{0}_b_guess_{1}.json").format(sys.argv[1],
                                                              b_guess)
     sbmlfile = (outdir + "sbml/argv_{0}_b_guess_{1}.xml").format(sys.argv[1],
@@ -162,16 +162,16 @@ for b_guess in [35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 95, 100, 150]:
     with open(sbmlfile, 'w') as f:
         f.write(sbml)
 
-    plotter = Plotter(plate_model)
-    plot_title = "{0} fit of p15 (b_guess {1})".format(plate_model.name,
-                                                       b_guess)
-
-    try:
-        plotter.plot_est_rr(full_plate, full_plate.est.x, title=plot_title,
-                            filename=plotfile)
-    except Exception as e:
-        error_log = "Plotting: arg_v {0}, b_guess {1},\n".format(sys.argv[1],
-                                                                 b_guess)
-        with open(error_file, 'a') as f:
-            f.write(error_log)
-        continue
+    # # No point to do this for a full plate.
+    # plotter = Plotter(plate_model)
+    # plot_title = "{0} fit of p15 (b_guess {1})".format(plate_model.name,
+    #                                                    b_guess)
+    # try:
+    #     plotter.plot_est_rr(full_plate, full_plate.est.x, title=plot_title,
+    #                         filename=plotfile)
+    # except Exception as e:
+    #     error_log = "Plotting: arg_v {0}, b_guess {1},\n".format(sys.argv[1],
+    #                                                              b_guess)
+    #     with open(error_file, 'a') as f:
+    #         f.write(error_log)
+    #     continue
