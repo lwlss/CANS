@@ -26,6 +26,23 @@ def resim_zone(plate, model, coords, rows, cols, noise=True):
     return zone
 
 
+def _get_zone_indices(plate, coords, rows, cols):
+    """Return the indices of the zone on the plate.
+
+    Probably an easier way of doing things.
+
+    coords : (r, c) of top left culture in plate (from zero)
+
+    row, cols : rows and columns of zone
+
+    """
+    plate_indices = np.arange(plate.no_cultures)
+    plate_indices.shape = (plate.rows, plate.cols)
+    zone_indices = plate_indices[coords[0]:coords[0]+rows,
+                                 coords[1]:coords[1]+cols]
+    return zone_indices.flatten()
+
+
 def get_plate_zone(plate, coords, rows, cols):
     """Return a plate from a zone of a larger plate.
 
@@ -41,12 +58,17 @@ def get_plate_zone(plate, coords, rows, cols):
     c_meas = [zone[:, :, i] for i in range(len(plate.times))]
     c_meas = np.array(c_meas).flatten()
     assert len(c_meas) == rows*cols*len(plate.times)
+    zone_indices = list(_get_zone_indices(plate, coords, rows, cols))
     zone_data = {
         "c_meas": c_meas,
         "times": plate.times,
-        "empties": plate.empties
+        "empties": np.array([z_i for z_i, p_i in enumerate(zone_indices)
+                             if p_i in plate.empties]),
+        "genes": plate.genes[zone_indices],
         }
     zone_plate = Plate(rows, cols, data=zone_data)
+    zone_plate.growers = np.array([i for i in range(zone_plate.no_cultures)
+                                   if i not in zone_plate.empties])
     return zone_plate
 
 
