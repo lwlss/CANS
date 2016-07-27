@@ -1,16 +1,15 @@
 import numpy as np
 import json
 import sys
-import itertools
 import time
 
 
 from cans2.parser import get_plate_data2
 from cans2.plate import Plate
 from cans2.model import CompModelBC
-from cans2.guesser import fit_imag_neigh, fit_log_eq, Guesser
+from cans2.guesser import fit_imag_neigh, Guesser
 from cans2.cans_funcs import dict_to_json
-from cans2.plotter import Plotter
+# from cans2.plotter import Plotter
 from cans2.make_sbml import create_sbml
 
 
@@ -20,8 +19,8 @@ barcodes = np.array([
 ])
 barcode = barcodes[int(sys.argv[2])]
 
-# # Temporarily work with a zone while checking script runs.
-from cans2.zoning import get_plate_zone
+# # # Temporarily work with a zone while checking script runs.
+# from cans2.zoning import get_plate_zone
 
 plate_model = CompModelBC()
 
@@ -33,10 +32,10 @@ data_path = "../../../../../data/stripes/Stripes.txt"
 full_plate = Plate(**get_plate_data2(data_path, **barcode))
 barcode = barcode["barcode"]
 
-# # Work with a zone for getting it to work.
-full_plate = get_plate_zone(full_plate, (5,5), 3, 3)    ###### ZONE ######
+# # # Work with a zone for getting it to work.
+# full_plate = get_plate_zone(full_plate, (5,5), 3, 3)    ###### ZONE ######
 
-# Errors are captured to file and iteration skipped.
+# Errors are captured to file and iteartion skipped.
 error_file = "error_logs/" + barcode + "_CompModelBC_error_log.txt"
 for b_guess in [35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 95, 100, 150]:
     # User defined/selected parameters pre guessing.
