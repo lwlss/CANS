@@ -321,11 +321,18 @@ class Guesser(object):
         plate_lvl : Optional plate level parameters to use instead of inferring.
 
         """
+
+
         # Allow to raise AttributeError if bad est_name.
         all_ests = np.array([getattr(c, est_name).x for c in self.plate.cultures])
         b_ests = all_ests[:, quick_mod.b_index]
         if clip:
             b_ests.clip(max=3.0*b_guess, out=b_ests)    # "out" for inplace clipping.
+
+        # Insert b_ests leaving empties as zero
+        b_est_holder = np.zeros(self.plate.no_cultures)
+        b_ests_holder[self.plate.growers] = b_ests
+        b_ests = b_ests_holder
 
         if plate_lvl is not None:
             # Don't bother to infer plate level parameters and return
@@ -501,6 +508,7 @@ class Guesser(object):
                                                            neigh_bounds)
 
         for i, c in enumerate(self.plate.cultures):
+
             if not N_bc:
                 N_0_index = 0
             elif N_bc and i in self.plate.internals:
@@ -523,10 +531,15 @@ class Guesser(object):
             # equations appropriately but, for an initial guess, this
             # seems quite complicated. The effect diminishes as plate
             # size increases.
-            c.im_neigh_est = c.fit_model(imag_neigh_mod,
-                                         imag_neigh_params[N_0_index],
-                                         neigh_bounds[N_0_index])
-                                         # minimizer_opts={"disp": True})
+            if i in self.plate.empties:
+                # b=0 is inserted in _process_quick_ests before
+                # returning.
+                continue
+            else:
+                c.im_neigh_est = c.fit_model(imag_neigh_mod,
+                                             imag_neigh_params[N_0_index],
+                                             neigh_bounds[N_0_index])
+                                             # minimizer_opts={"disp": True})
 
         new_guess = self._process_quick_ests(imag_neigh_mod,
                                              est_name="im_neigh_est",
