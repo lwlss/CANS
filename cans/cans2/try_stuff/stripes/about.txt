@@ -1,0 +1,21 @@
+Empty cultures on the plate are identifieable by the gene name
+"EMPTY".
+
+If we do not remove cell observations for these cultures from the
+objective function it will bias our estimate of C_0 (a plate level
+parameter), due to background noise. It is not enough to just set b=0.
+
+How to do this?
+
+For the guesser we can just skip empty cultures and set b=0. The guess
+of N_0 isn't as important but should probably be based on only the
+final cell amounts of the growing cultures.
+
+No changes are required for the sbml. We still need to solve cells for
+empty cultures and we can bound b to be zero.
+
+We must remove cell measurements from the objective function
+evaluation. To do this make a c_meas_obj to use in objective function
+evaluations and use c_meas for plots etc. Then slice the result of the
+solver to remove the empties in the objective function. Did the mask
+do this before?
