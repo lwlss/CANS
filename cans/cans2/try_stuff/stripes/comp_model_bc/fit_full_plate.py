@@ -32,7 +32,6 @@ full_plate = Plate(**get_plate_data2(data_path, **barcodes[0]))
 
 # Work with a zone for getting it to work.
 full_plate = get_plate_zone(full_plate, (5,5), 3, 3)    ###### ZONE ######
-print(full_plate.empties)
 
 # Errors are captured to file and iteration skipped.
 error_file = "error_logs/CompModelBC_error_log.txt"
