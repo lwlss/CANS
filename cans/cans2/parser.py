@@ -72,6 +72,20 @@ def get_plate_data(path):
     return plate_data
 
 
+def get_genes(filename):
+    """Return plate gene names by row.
+
+    Requires a csv file with a column genes listing genes by row. I am
+    using the file ColonyzerOutput.txt which seems to have been
+    automatically generated in the same directory as the raw images.
+
+    """
+    data = pd.read_csv(filename, sep="\t", header=0)
+    genes = data["Gene"]
+    # orfs = data["ORF"]
+    return genes
+
+
 # Start using ColonyzerOutput.txt files for all parsing.
 def get_plate_data2(path):
     """Return data necessary to make a Plate object.
@@ -97,20 +111,6 @@ def get_plate_data2(path):
             }
         }
     return plate_data
-
-
-def get_genes(filename):
-    """Return plate gene names by row.
-
-    Requires a csv file with a column genes listing genes by row. I am
-    using the file ColonyzerOutput.txt which seems to have been
-    automatically generated in the same directory as the raw images.
-
-    """
-    data = pd.read_csv(filename, sep="\t", header=0)
-    genes = data["Gene"]
-    # orfs = data["ORF"]
-    return genes
 
 
 if __name__ == "__main__":
