@@ -167,15 +167,10 @@ class Fitter(object):
             # All values non-negative.
             bounds = [(0.0, None) for param in param_guess]
 
-        print(type(plate.empties))
-
         # Add b (0, 0) bounds for empty sites according to plate.empties.
         if len(plate.empties) != 0:
-            bounds[list(plate.empties + self.model.b_index)] = np.array([0.0, 0.0])
+            bounds[list(np.array(plate.empties) + self.model.b_index)] = np.array([0.0, 0.0])
             # bounds[self.model.b_index + index] = np.array([0.0, 0.0])
-
-        print(bounds)
-        assert False
 
         options = {
             # 'disp': True,
