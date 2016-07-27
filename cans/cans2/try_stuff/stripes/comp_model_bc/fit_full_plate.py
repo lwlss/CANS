@@ -24,12 +24,12 @@ from cans2.zoning import get_plate_zone
 
 plate_model = CompModelBC()
 
-cell_ratios = np.logspace(-3, -7, num=10)
+cell_ratios = np.logspace(-2, -7, num=10)
 C_ratio = cell_ratios[int(sys.argv[1])]
 
 # Read in real data and make a plate.
 data_path = "../../../../../data/stripes/Stripes.txt"
-full_plate = Plate(**get_plate_data2(data_path, **barcodes[0]))
+full_plate = Plate(**get_plate_data2(data_path, **barcodes[1]))
 
 # Work with a zone for getting it to work.
 full_plate = get_plate_zone(full_plate, (5,5), 3, 3)    ###### ZONE ######
