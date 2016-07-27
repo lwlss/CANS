@@ -19,8 +19,8 @@ barcodes = np.array([
     {"barcode": "K000347_027_022", "ignore_empty": True},    # Filled stripes do not have correct gene names.
 ])
 
-# Temporarily work with a zone while checking script runs.
-from cans2.zoning import get_plate_zone
+# # Temporarily work with a zone while checking script runs.
+# from cans2.zoning import get_plate_zone
 
 plate_model = CompModelBC()
 
@@ -31,8 +31,8 @@ C_ratio = cell_ratios[int(sys.argv[1])]
 data_path = "../../../../../data/stripes/Stripes.txt"
 full_plate = Plate(**get_plate_data2(data_path, **barcodes[1]))
 
-# Work with a zone for getting it to work.
-full_plate = get_plate_zone(full_plate, (5,5), 3, 3)    ###### ZONE ######
+# # Work with a zone for getting it to work.
+# full_plate = get_plate_zone(full_plate, (5,5), 3, 3)    ###### ZONE ######
 
 # Errors are captured to file and iteration skipped.
 error_file = "error_logs/CompModelBC_error_log.txt"
