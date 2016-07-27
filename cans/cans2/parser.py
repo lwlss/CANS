@@ -99,7 +99,7 @@ def get_plate_data2(path):
     c_meas = np.array(data["Intensity"])
     times = np.array(data["Expt.Time"][::rows*cols])
     genes = np.array(data["Gene"][:rows*cols])
-    empties = [i for i, gene in enumerate(genes) if gene == "EMPTY"]
+    empties = np.array([i for i, gene in enumerate(genes) if gene == "EMPTY"])
     plate_data = {
         "rows": rows,
         "cols": cols,
