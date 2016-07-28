@@ -9,7 +9,6 @@ from cans2.plate import Plate
 from cans2.model import CompModelBC
 from cans2.guesser import fit_imag_neigh, Guesser
 from cans2.cans_funcs import dict_to_json
-# from cans2.plotter import Plotter
 from cans2.make_sbml import create_sbml
 
 
@@ -18,9 +17,6 @@ barcodes = np.array([
     {"barcode": "K000347_027_022", "ignore_empty": True},    # Filled stripes do not have correct gene names.
 ])
 barcode = barcodes[int(sys.argv[2])]
-
-# # # Temporarily work with a zone while checking script runs.
-# from cans2.zoning import get_plate_zone
 
 plate_model = CompModelBC()
 
@@ -32,12 +28,23 @@ data_path = "../../../../../data/stripes/Stripes.txt"
 full_plate = Plate(**get_plate_data2(data_path, **barcode))
 barcode = barcode["barcode"]
 
-# # # Work with a zone for getting it to work.
-# full_plate = get_plate_zone(full_plate, (5,5), 3, 3)    ###### ZONE ######
+# # Temporarily work with a zone while checking script runs.
+# from cans2.zoning import get_plate_zone
+# full_plate = get_plate_zone(full_plate, (5,5), 5, 5)    ###### ZONE ######
+
+# Make a spline of c_meas with 15 time_points.
+full_plate.make_spline(time_points=15)
+
+# Plot spline
+# from cans2.plotter import Plotter
+# plotter = Plotter(plate_model)
+# plotter.plot_spline(full_plate)
 
 # Errors are captured to file and iteartion skipped.
 error_file = "error_logs/" + barcode + "_CompModelBC_error_log.txt"
 for b_guess in [35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 95, 100, 150]:
+
+
     # User defined/selected parameters pre guessing.
     guess_kwargs = {
         "plate": full_plate,
@@ -70,8 +77,6 @@ for b_guess in [35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 95, 100, 150]:
             f.write(error_log)
         continue
 
-    # Make a spline of c_meas with 15 time_points. Also
-    full_plate.make_spline(time_points=15)
 
     # Removed kn setting zero here as did not provide the best fits for p15.
     full_plate.set_rr_model(plate_model, quick_guess, outfile="")
@@ -89,7 +94,7 @@ for b_guess in [35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 95, 100, 150]:
     try:
         full_plate.est = full_plate.fit_spline(guess_kwargs["plate_model"],
                                                param_guess=quick_guess,
-                                               bounds=bounds, rr=True, sel=False,
+                                               bounds=bounds,
                                                minimizer_opts={"disp": False})
     except Exception as e:
         error_log = "Full est: C_ratio index {0}, b_guess {1},\n".format(sys.argv[1],
@@ -147,7 +152,7 @@ for b_guess in [35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 95, 100, 150]:
     create_sbml(full_plate, plate_model, full_plate.est.x, outfile=sbmlfile)
 
     # # No point to plot for a full plate. Slow and not producing good plots.
-    # plotter = Plotter(plate_model)
+
     # plot_title = "{0} fit of p15 (b_guess {1})".format(plate_model.name,
     #                                                    b_guess)
     # try:
