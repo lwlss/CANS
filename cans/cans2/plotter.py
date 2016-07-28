@@ -213,7 +213,7 @@ class Plotter(object):
 
     def plot_c_meas(self, plate, title="Measured cell intensity",
                     ms=6.0, mew=0.5):
-        fig, grid = self._make_grid(plate, plate.c_meas, False, title)
+        fig, grid = self._make_grid(plate, plate.c_meas, False, title, vis_ticks=True)
 
         for i, ax in enumerate(grid):
             ax.plot(plate.times, plate.c_meas[i::plate.no_cultures],
