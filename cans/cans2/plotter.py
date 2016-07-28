@@ -102,14 +102,14 @@ class Plotter(object):
         fig, grid = self._make_grid(plate, est_amounts, sim, title, vis_ticks)
 
         for i, ax in enumerate(grid):
-            if not sim and i not in plate.empties:
+            if not sim: # and i not in plate.empties:
                 # Plot c_meas.
                 ax.plot(plate.times, plate.c_meas[i::plate.no_cultures],
                         'x', label='Observed Cells', ms=ms, mew=mew)
             for j, species in enumerate(self.model.species):
                 ax.plot(sim_times, est_amounts[j][:, i], self.colours[j],
                         label="Est " + species, lw=lw)
-                if j == 0 and i in plate.empties:
+                if j == 0: # and i in plate.empties:
                     # Do not plot c_meas for empty cultures.
                     continue
                 elif sim:
