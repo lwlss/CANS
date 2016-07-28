@@ -144,7 +144,7 @@ class Fitter(object):
         return err
 
 
-    def fit_spline(self, plate, params_guess, bounds, minimizer_opts):
+    def fit_spline(self, plate, param_guess, bounds, minimizer_opts):
         """Fit a spline using the RoadRunner solver."""
         param_guess = copy.deepcopy(param_guess)
         bounds = copy.deepcopy(bounds)
