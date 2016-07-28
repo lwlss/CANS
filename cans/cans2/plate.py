@@ -122,21 +122,28 @@ class BasePlate(object):
                                                     params, outfile))
 
 
-    def set_rr_model_spline(self, model, params, time_steps=15, outfile=""):
-        """Set RoadRunner object using spline.
-
-        Quicker to solve if many timepoints. Especially owing to
-        ability to use even timepoints in calls to rr.simulate.
-
-        """
-
-        pass
+    # Does not require a 2nd set_rr method, just a solve.
+    def spline_points(self, times_steps=15):
+        """Spline the data in even timesteps."""
+        spline_c = []
+        for culture in self.cultures:
+            c = culture.c_meas
+            tck = interpolate.splrep(self.times, c, k=5, s=1.0)
+            t_new = np.linspace(0, t[-1], time_steps)
+            c_new = np.maximum(0.0, interpolate.splev(t_new, tck, der=0))
+            spline_c.append(c_new)
+        self.t_spline = t_new
+        self.c_meas_spline = np.array(spline_c)
 
 
     def solve_rr_spline(self):
         """Simulate for splined times with even timesteps."""
         return self.rr.simulate(self.spline_t[0], self.spline_t[-1],
                                 len(self.spline_t), reset=True)
+                                # absolute=1.49012e-8, # Affects speed
+                                # and accuracy.  relative=1.49012e-8,
+                                # mininumTimeStep=1.0e-8,
+                                # maximumNumSteps=40000)
 
 
     # This, and more importantly fitting, could be made even faster if
