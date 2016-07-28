@@ -131,7 +131,7 @@ class BasePlate(object):
 
         timepoints : (int) Number of timepoints to use for spline.
 
-        Sets self.t_spline, self.c_spline, and self.c_meas_obj.
+        Sets self.t_spline, self.c_spline, and self.c_meas_obj_spline.
         """
         c_spline = []
         for culture in self.cultures:
