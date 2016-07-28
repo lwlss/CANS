@@ -159,6 +159,18 @@ class Model(object):
         return sol
 
 
+    def rr_solve_spline(self, plate, params):
+        """Set SBML parameters and solve spline using RoadRunner.
+
+        Return amounts of all species on the Plate.
+        """
+        # Initial amounts are assigned to all species using the
+        # expressions in the InitialAssignments of the SBML model.
+        plate.rr.model.setGlobalParameterValues(params)
+        sol = plate.rr_solve_spline()
+        return sol
+
+
     def rr_solve_selections(self, plate, params):
         """Set SBML parameters and solve using RoadRunner.
 

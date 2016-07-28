@@ -124,19 +124,28 @@ class BasePlate(object):
 
     # Does not require a 2nd set_rr method, just a solve.
     def spline_points(self, times_steps=15):
-        """Spline the data in even timesteps."""
-        spline_c = []
+        """Spline the data in even timesteps.
+
+        Sets self.t_spline, self.c_spline, and self.c_meas_obj.
+
+        """
+        c_spline = []
         for culture in self.cultures:
             c = culture.c_meas
             tck = interpolate.splrep(self.times, c, k=5, s=1.0)
             t_new = np.linspace(0, t[-1], time_steps)
             c_new = np.maximum(0.0, interpolate.splev(t_new, tck, der=0))
-            spline_c.append(c_new)
+            c_spline.append(c_new)
         self.t_spline = t_new
-        self.c_meas_spline = np.array(spline_c)
+        c_spline = np.array(c_spline)
+        self.c_spline = c_spline
+        # Set c_meas_obj for only the growers (i.e. remove empties)
+        c_array = np.array(c_spline)
+        c_array.shape = (len(t_new), self.no_cultures)
+        self.c_meas_obj = c_array[:, list(self.growers)].flatten()
 
 
-    def solve_rr_spline(self):
+    def rr_solve_spline(self):
         """Simulate for splined times with even timesteps."""
         return self.rr.simulate(self.spline_t[0], self.spline_t[-1],
                                 len(self.spline_t), reset=True)
@@ -188,6 +197,12 @@ class BasePlate(object):
                                       mininumTimeStep=1.0e-8,
                                       maximumNumSteps=40000)[1][1:]
         return a
+
+
+    def fit_spline(self, model, param_guess, bounds, minimizer_opts=None):
+        fitter = Fitter(model)
+        est = fitter.fit_spline(self, param_guess, bounds, minimizer_opts)
+        return est
 
 
     def fit_model(self, model, param_guess=None, bounds=None,

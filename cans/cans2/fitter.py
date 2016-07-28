@@ -60,6 +60,34 @@ class Fitter(object):
         return err
 
 
+    def _rr_obj_spline(self, plate, params):
+        """Return the objective function from RoadRunner simulations.
+
+        Solves using splines values at even timespteps. Quicker for
+        data with many timepoints.
+
+        The C_0 parameter is scaled to the "true" value for solving. A
+        scaled C_0 is used for the minimizer so that absolute parmeter
+        values are reasonably close.
+
+        The solver returns amounts for all species on the plate. There
+        is an alternative method which just returns a user defined
+        selection. params includes init amounts.
+
+        """
+        params[0] = params[0]/10000
+        # There are multiple alternative Model methods for solving
+        # using RoadRunner. The specific method is stored as a
+        # Model attribute rr_solver.
+        amount_est = self.model.rr_solve_spline(plate, params)
+        # Mutable so must scale C_0 back
+        params[0] = params[0]*10000
+        c_est = np.split(amount_est, self.model.no_species, axis=1)[0]
+        growers_c_est = c_est[:, list(plate.growers)].flatten()
+        err = np.sqrt(np.sum((plate.c_meas_obj - growers_c_est)**2))
+        return err
+
+
     def _rr_obj_no_scaling(self, plate, params):
         """Return the objective function from RoadRunner simulations.
 
@@ -114,6 +142,52 @@ class Fitter(object):
         c_est = c_est[1::3]    # Only the middle culture
         err = np.sqrt(np.sum((plate.c_meas - c_est)**2))
         return err
+
+
+    def fit_spline(self, plate, params_guess, bounds, minimizer_opts):
+        """Fit a spline using the RoadRunner solver."""
+        param_guess = copy.deepcopy(param_guess)
+        bounds = copy.deepcopy(bounds)
+
+        obj_f = partial(self._rr_obj_spline, plate)
+
+        # Add b (0, 0) bounds for empty sites according to plate.empties.
+        if len(plate.empties) != 0:
+            bounds[list(np.array(plate.empties) + self.model.b_index)] = np.array([0.0, 0.0])
+
+        options = {
+            # 'disp': True,
+            'maxfun': np.inf,
+            # 'maxcor': 20,
+            # 'eps': 1e-06,
+            'maxls': 20,    # max line searches per iter.
+            #'ftol': 10.0*np.finfo(float).eps
+        }
+
+        if minimizer_opts is not None:
+            options.update(minimizer_opts)
+
+        # Scale C_0 for the minmizer. Also have to scale upper and
+        # lower C bounds.
+        param_guess[0] = param_guess[0]*10000
+        bounds[0] = np.array([bounds[0][i]*10000 if bounds[0][i] is not None
+                              else bounds[0][i] for i in range(2)])
+
+        est_params = minimize(obj_f, param_guess, method='L-BFGS-B',
+                              bounds=bounds, options=options)
+
+        # Scale C_0 to true amount in result.
+        est_params.x[0] = est_params.x[0]/10000
+
+        # Add extra attributes to scipy.optimize.OptimizeResult
+        # object. Can access with keys() as this is just a subclass of
+        # dict.
+        est_params.init_guess = param_guess
+        est_params.fit_options = dict_to_json(options)    # including ftol
+        est_params.model = self.model
+        est_params.bounds = bounds
+        est_params.method = 'L-BFGS-B'
+        return est_params
 
 
     def fit_model(self, plate, param_guess=None, bounds=None,
