@@ -9,6 +9,9 @@ if sys.version_info[0] == 2:
 # import time
 
 
+from scipy import interpolate
+
+
 from cans2.model import IndeModel
 from cans2.fitter import Fitter
 from cans2.cans_funcs import get_mask
@@ -123,7 +126,7 @@ class BasePlate(object):
 
 
     # Does not require a 2nd set_rr method, just a solve.
-    def spline_points(self, times_steps=15):
+    def make_spline(self, time_steps=15):
         """Spline the data in even timesteps.
 
         Sets self.t_spline, self.c_spline, and self.c_meas_obj.
@@ -133,7 +136,7 @@ class BasePlate(object):
         for culture in self.cultures:
             c = culture.c_meas
             tck = interpolate.splrep(self.times, c, k=5, s=1.0)
-            t_new = np.linspace(0, t[-1], time_steps)
+            t_new = np.linspace(0, self.times[-1], time_steps)
             c_new = np.maximum(0.0, interpolate.splev(t_new, tck, der=0))
             c_spline.append(c_new)
         self.t_spline = t_new
@@ -147,8 +150,9 @@ class BasePlate(object):
 
     def rr_solve_spline(self):
         """Simulate for splined times with even timesteps."""
-        return self.rr.simulate(self.spline_t[0], self.spline_t[-1],
-                                len(self.spline_t), reset=True)
+        sol = self.rr.simulate(self.t_spline[0], self.t_spline[-1],
+                               len(self.t_spline), reset=True)
+        return sol[:, 1:]
                                 # absolute=1.49012e-8, # Affects speed
                                 # and accuracy.  relative=1.49012e-8,
                                 # mininumTimeStep=1.0e-8,
