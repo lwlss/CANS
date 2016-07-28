@@ -149,7 +149,7 @@ class BasePlate(object):
         # Set c_meas_obj_spline for only the growers (i.e. remove empties)
         c_array = np.array(c_spline)
         c_array.shape = (len(self.t_spline), self.no_cultures)
-        self.c_meas_obj = c_array[:, list(self.growers)].flatten()
+        self.c_meas_obj_spline = c_array[:, list(self.growers)].flatten()
 
 
     def rr_solve_spline(self):
