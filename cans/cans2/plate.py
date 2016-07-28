@@ -9,6 +9,9 @@ if sys.version_info[0] == 2:
 # import time
 
 
+from scipy import interpolate
+
+
 from cans2.model import IndeModel
 from cans2.fitter import Fitter
 from cans2.cans_funcs import get_mask
@@ -122,6 +125,40 @@ class BasePlate(object):
                                                     params, outfile))
 
 
+    # Does not require a 2nd set_rr method, just a solve.
+    def make_spline(self, time_steps=15):
+        """Spline the data in even timesteps.
+
+        Sets self.t_spline, self.c_spline, and self.c_meas_obj.
+
+        """
+        c_spline = []
+        for culture in self.cultures:
+            c = culture.c_meas
+            tck = interpolate.splrep(self.times, c, k=5, s=1.0)
+            t_new = np.linspace(0, self.times[-1], time_steps)
+            c_new = np.maximum(0.0, interpolate.splev(t_new, tck, der=0))
+            c_spline.append(c_new)
+        self.t_spline = t_new
+        c_spline = np.array(c_spline).flatten(order="F")
+        self.c_spline = c_spline
+        # Set c_meas_obj for only the growers (i.e. remove empties)
+        c_array = np.array(c_spline)
+        c_array.shape = (len(self.t_spline), self.no_cultures)
+        self.c_meas_obj = c_array[:, list(self.growers)].flatten()
+
+
+    def rr_solve_spline(self):
+        """Simulate for splined times with even timesteps."""
+        sol = self.rr.simulate(self.t_spline[0], self.t_spline[-1],
+                               len(self.t_spline)-1, reset=True,
+                               absolute=1.49012e-8,
+                               relative=1.49012e-8,
+                               mininumTimeStep=1.0e-8,
+                               maximumNumSteps=40000)
+        return sol[:, 1:]
+
+
     # This, and more importantly fitting, could be made even faster if
     # we return only c_meas in a flattened array. We could just use
     # the slower odeint solver when we want nutrients or a 2nd version
@@ -164,6 +201,12 @@ class BasePlate(object):
                                       mininumTimeStep=1.0e-8,
                                       maximumNumSteps=40000)[1][1:]
         return a
+
+
+    def fit_spline(self, model, param_guess, bounds, minimizer_opts=None):
+        fitter = Fitter(model)
+        est = fitter.fit_spline(self, param_guess, bounds, minimizer_opts)
+        return est
 
 
     def fit_model(self, model, param_guess=None, bounds=None,
