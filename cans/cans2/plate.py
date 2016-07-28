@@ -140,23 +140,23 @@ class BasePlate(object):
             c_new = np.maximum(0.0, interpolate.splev(t_new, tck, der=0))
             c_spline.append(c_new)
         self.t_spline = t_new
-        c_spline = np.array(c_spline)
+        c_spline = np.array(c_spline).flatten(order="F")
         self.c_spline = c_spline
         # Set c_meas_obj for only the growers (i.e. remove empties)
         c_array = np.array(c_spline)
-        c_array.shape = (len(t_new), self.no_cultures)
+        c_array.shape = (len(self.t_spline), self.no_cultures)
         self.c_meas_obj = c_array[:, list(self.growers)].flatten()
 
 
     def rr_solve_spline(self):
         """Simulate for splined times with even timesteps."""
         sol = self.rr.simulate(self.t_spline[0], self.t_spline[-1],
-                               len(self.t_spline), reset=True)
+                               len(self.t_spline)-1, reset=True,
+                               absolute=1.49012e-8,
+                               relative=1.49012e-8,
+                               mininumTimeStep=1.0e-8,
+                               maximumNumSteps=40000)
         return sol[:, 1:]
-                                # absolute=1.49012e-8, # Affects speed
-                                # and accuracy.  relative=1.49012e-8,
-                                # mininumTimeStep=1.0e-8,
-                                # maximumNumSteps=40000)
 
 
     # This, and more importantly fitting, could be made even faster if
