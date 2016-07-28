@@ -222,6 +222,20 @@ class Plotter(object):
         plt.close()
 
 
+    def plot_spline(self, plate, title="Spline of cell data", ms=6.0, mew=0.5, lw=1.0):
+        """Plot the true c_meas and the spline."""
+        fig, grid = self._make_grid(plate, plate.c_meas, False, title, vis_ticks=True)
+
+        for i, ax in enumerate(grid):
+            ax.plot(plate.times, plate.c_meas[i::plate.no_cultures],
+                    'x', label='Observed Cells', ms=ms, mew=mew)
+            ax.plot(plate.t_spline, plate.c_spline[i::plate.no_cultures],
+                    label="Spline", ms=ms, mew=mew, lw=lw)
+        plt.show()
+        plt.close()
+
+
+
     # Need to plot simulations when the independent (or another model)
     # is fit to individual cultures
     def plot_culture_fits(self, zone, model, title="Individual fits of cultures",
