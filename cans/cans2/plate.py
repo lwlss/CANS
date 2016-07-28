@@ -132,6 +132,9 @@ class BasePlate(object):
         timepoints : (int) Number of timepoints to use for spline.
 
         Sets self.t_spline, self.c_spline, and self.c_meas_obj_spline.
+        self.c_meas_obj_spline is c_spline with empty cultures
+        removed.
+
         """
         c_spline = []
         for culture in self.cultures:
@@ -143,7 +146,7 @@ class BasePlate(object):
         self.t_spline = t_new
         c_spline = np.array(c_spline).flatten(order="F")
         self.c_spline = c_spline
-        # Set c_meas_obj for only the growers (i.e. remove empties)
+        # Set c_meas_obj_spline for only the growers (i.e. remove empties)
         c_array = np.array(c_spline)
         c_array.shape = (len(self.t_spline), self.no_cultures)
         self.c_meas_obj = c_array[:, list(self.growers)].flatten()
