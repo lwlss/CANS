@@ -17,5 +17,16 @@ empty cultures and we can bound b to be zero.
 We must remove cell measurements from the objective function
 evaluation. To do this make a c_meas_obj to use in objective function
 evaluations and use c_meas for plots etc. Then slice the result of the
-solver to remove the empties in the objective function. Did the mask
-do this before?
+solver to remove the empties in the objective function.
+
+There are 49 timepoints in the stripes data. There were only 10 for
+p15. As a result, simulating between timepoints is much slower. We are
+also having to slice simulated amounts for only the growers (i.e. to
+remove the empties). This is already likely to be slower, but with
+many timepoints the arrays become much larger. Fits were taking a long
+time, especially for the plate with empties; supporting the idea that
+for growers is slower. To speed things up I am using a 5th power
+spline of c_meas to get c_spline, evenly spaced cell measurements. I
+am doing this for 15 timepoints. Having even steps now allows us to
+call rr.simulate once, rather for every timestep, and is also likely
+to be quicker.
