@@ -122,6 +122,23 @@ class BasePlate(object):
                                                     params, outfile))
 
 
+    def set_rr_model_spline(self, model, params, time_steps=15, outfile=""):
+        """Set RoadRunner object using spline.
+
+        Quicker to solve if many timepoints. Especially owing to
+        ability to use even timepoints in calls to rr.simulate.
+
+        """
+
+        pass
+
+
+    def solve_rr_spline(self):
+        """Simulate for splined times with even timesteps."""
+        return self.rr.simulate(self.spline_t[0], self.spline_t[-1],
+                                len(self.spline_t), reset=True)
+
+
     # This, and more importantly fitting, could be made even faster if
     # we return only c_meas in a flattened array. We could just use
     # the slower odeint solver when we want nutrients or a 2nd version
