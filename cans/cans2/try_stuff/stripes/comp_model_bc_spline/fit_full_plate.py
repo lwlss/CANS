@@ -42,9 +42,8 @@ full_plate.make_spline(time_points=15)
 
 # Errors are captured to file and iteartion skipped.
 error_file = "error_logs/" + barcode + "_CompModelBC_error_log.txt"
-for b_guess in [35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 95, 100, 150]:
-
-
+b_guesses = [35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 95, 100, 150]
+for b_guess in b_guesses[int(sys.argv[3])::2]:
     # User defined/selected parameters pre guessing.
     guess_kwargs = {
         "plate": full_plate,
