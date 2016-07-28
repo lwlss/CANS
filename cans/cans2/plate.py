@@ -126,17 +126,18 @@ class BasePlate(object):
 
 
     # Does not require a 2nd set_rr method, just a solve.
-    def make_spline(self, time_steps=15):
+    def make_spline(self, time_points=15):
         """Spline the data in even timesteps.
 
-        Sets self.t_spline, self.c_spline, and self.c_meas_obj.
+        timepoints : (int) Number of timepoints to use for spline.
 
+        Sets self.t_spline, self.c_spline, and self.c_meas_obj.
         """
         c_spline = []
         for culture in self.cultures:
             c = culture.c_meas
             tck = interpolate.splrep(self.times, c, k=5, s=1.0)
-            t_new = np.linspace(0, self.times[-1], time_steps)
+            t_new = np.linspace(0, self.times[-1], time_points)
             c_new = np.maximum(0.0, interpolate.splev(t_new, tck, der=0))
             c_spline.append(c_new)
         self.t_spline = t_new
