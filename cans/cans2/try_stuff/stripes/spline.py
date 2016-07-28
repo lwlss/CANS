@@ -30,7 +30,7 @@ barcodes = np.array([
 ])
 barcode = barcodes[int(sys.argv[2])]
 
-plate_model = CompModel()
+plate_model = CompModelBC()
 plotter = Plotter(plate_model)
 
 # Read in real data and make a plate.
@@ -53,11 +53,11 @@ print(zone)
 custom_params = {
     "C_0": 1e-4,
     "N_0": 0.1,
-#    "NE_0": 0.15,
+    "NE_0": 0.15,
     "kn": 2.0,
-    }
+}
 
-sim_3x3 = Plate(3, 3)
+sim_3x3 = Plate(10, 10)
 sim_3x3.times = zone.times
 sim_3x3.growers = np.arange(sim_3x3.no_cultures)
 sim_3x3.empties = []
@@ -66,25 +66,19 @@ sim_3x3.set_sim_data(plate_model, b_mean=35.0, b_var=15.0,
 # plotter.plot_c_meas(sim_3x3)    # Plot Spline would be nice.
 
 bounds = [
-    [1e-4, 1e-4],
-    [0.1, 0.1],
-#    [0.085, 0.2],
-    [2.0, 2.0],
+    [1e-5, 1e-3],
+    [0.085, 0.15],
+    [0.085, 0.2],
+    [0.0, 8.0],
     ]
 bounds += [[0.0, 100.0] for i in range(sim_3x3.no_cultures)]
 bounds = np.array(bounds)
 
-param_guess = np.concatenate((np.array([1e-4, 0.1, 2.0]),
+param_guess = np.concatenate((np.array([1.3e-4, 0.12, 0.15, 3.0]),
                               np.array([35.0 for i in range(sim_3x3.no_cultures)])))
-
-
-print(bounds)
-print(param_guess)
 
 sim_3x3.make_spline(time_steps=15)
 sim_3x3.set_rr_model(plate_model, param_guess)
-
-assert len(sim_3x3.c_spline) == len(sim_3x3.t_spline)*sim_3x3.no_cultures
 
 plotter.plot_spline(sim_3x3)
 
