@@ -70,8 +70,10 @@ for b_guess in [35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 95, 100, 150]:
             f.write(error_log)
         continue
 
-    # Removed kn setting zero here as did not provide the best fits for p15.
+    # Make a spline of c_meas with 15 time_points. Also
+    full_plate.make_spline(time_points=15)
 
+    # Removed kn setting zero here as did not provide the best fits for p15.
     full_plate.set_rr_model(plate_model, quick_guess, outfile="")
 
     # Make bounds for fitting.
@@ -85,10 +87,10 @@ for b_guess in [35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 95, 100, 150]:
     # Now fit the model to the plate and save the result and plot as
     # json and pdf.
     try:
-        full_plate.est = full_plate.fit_model(guess_kwargs["plate_model"],
-                                              param_guess=quick_guess,
-                                              bounds=bounds, rr=True, sel=False,
-                                              minimizer_opts={"disp": False})
+        full_plate.est = full_plate.fit_spline(guess_kwargs["plate_model"],
+                                               param_guess=quick_guess,
+                                               bounds=bounds, rr=True, sel=False,
+                                               minimizer_opts={"disp": False})
     except Exception as e:
         error_log = "Full est: C_ratio index {0}, b_guess {1},\n".format(sys.argv[1],
                                                                          b_guess)
@@ -116,6 +118,9 @@ for b_guess in [35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 95, 100, 150]:
         else:
             json_guess_kwargs[k] = v
     data = {
+        'c_meas_spline': full_plate.c_spline,
+        't_spline': full_plate.t_spline,
+        'c_meas_obj_spline': full_plate.c_meas_obj_spline,
         'source_data': data_path,
         'barcode': barcode,
         'rows': full_plate.rows,
