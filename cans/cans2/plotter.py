@@ -176,13 +176,12 @@ class Plotter(object):
         plt.close()
 
 
+    # Should make without roadrunnner to plot logistic eq. and
+    # competition model or just handle the models differently.
     def plot_zone_est(self, plate, est_params, models, coords, rows,
                       cols, title="Zone Estimates", legend=False,
                       filename=None, ms=6.0, mew=0.5, lw=1.0):
         """Plot estimates for a zone.
-
-        Should make without roadrunnner to plot logistic eq. and
-        competition model or just handle the models differently.
 
         Plotting a zone from a full plate estimate requires simulating
         for the full plate and then taking the amounts from the zone
@@ -192,6 +191,11 @@ class Plotter(object):
         models.
 
         models : list of models corresponding to est_params.
+
+        coords : tuple of coordinates of top left culture in zone
+        (indices start from zero).
+
+        row, cols : rows and columns for zone.
 
         """
         smooth_times = np.linspace(plate.times[0], plate.times[-1], 100)
