@@ -7,7 +7,7 @@ from mpl_toolkits.axes_grid1 import AxesGrid
 
 
 from cans2.plate import Plate
-from cans2.zoning import get_plate_zone, get_zone_amounts
+from cans2.zoning import get_plate_zone, sim_and_get_zone_amounts, get_zone_amounts
 
 
 def plot_scatter(x, y, title="", xlab="", ylab="", outfile=""):
@@ -176,31 +176,74 @@ class Plotter(object):
         plt.close()
 
 
-
-    def plot_zone_est(self, plate, est_params, coords, rows, cols,
-                      title="Corrected Growth", legend=False,
+    def plot_zone_est(self, plate, est_params, models, coords, rows,
+                      cols, title="Zone Estimates", legend=False,
                       filename=None, ms=6.0, mew=0.5, lw=1.0):
-        """Plot an estimate for a zone.
+        """Plot estimates for a zone.
+
+        Should make without roadrunnner to plot logistic eq. and
+        competition model or just handle the models differently.
 
         Plotting a zone from a full plate estimate requires simulating
         for the full plate and then taking the amounts from the zone
         rather than just simulating from the zone params.
 
+        est_params : list of parameter estimate from fits of different
+        models.
+
+        models : list of models corresponding to est_params.
+
         """
-        # Smooth times for sims.
-        sim_times = np.linspace(plate.times[0], plate.times[-1], 100)
+        smooth_times = np.linspace(plate.times[0], plate.times[-1], 100)
 
-        est_plate = Plate(plate.rows, plate.cols)
-        est_plate.times = sim_times
-        est_plate.set_rr_model(self.model, est_params)
-        est_amounts = self.model.rr_solve(est_plate, est_params)
-        est_amounts = np.split(est_amounts, self.model.no_species, axis=1)
-
+        smooth_plate = Plate(plate.rows, plate.cols)
+        smooth_plate.times = sim_times
+        smooth_plate.smooth_amounts = []
+        for params, model in zip(est_params, models):
+            smooth_plate.set_rr_model(model, params)
+            smooth_amounts = smooth_plate.rr_solve()
+            # smooth_amounts = np.split(smooth_amounts, self.model.no_species,
+            #                           axis=1)
+            smooth_plate.smooth_amounts.append(smooth_amounts)
 
         zone = get_plate_zone(plate, coords, rows, cols)
-        zone.est_amounts = get_zone_amounts(est_plate, self.model,
-                                            est_params, coords, rows,
-                                            cols)
+        zone.times = plate.times
+        zone.smooth_amounts = []
+
+        for model, smooth_amounts in zip(models, smooth_plate.smooth_amounts):
+            smooth_zone_amounts = get_zone_amounts(smooth_amounts, plate,
+                                                   model, coords, rows, cols)
+            smooth_zone_amounts = np.split(smooth_zone_amounts,
+                                           self.model.no_species,
+                                           axis=1)
+            zone.smooth_amounts.append(smooth_zone_amounts)
+
+        fig, grid = self._make_grid(zone,
+                                    np.array(zone.smooth_amounts).flatten(),
+                                    False, title, vis_ticks=True)
+
+        for i, ax in enumerate(grid):
+            # Plot c_meas.
+            ax.plot(zone.times, zone.c_meas[i::zone.no_cultures],
+                    'x', color="black", label='Observed Cells',
+                    ms=ms, mew=mew)
+            # Plot smooth amounts for each estimate.
+            for e, (smooth_amounts, model) in enumerate(zip(zone.smooth_amounts, models)):
+                for j, (amounts, species) in enumerate(zip(smooth_amounts, model.species)):
+                    ax.plot(smooth_times, amounts[:, i], self.colours[j],
+                            label="Est {0} ".format(e) + species, lw=lw)
+                            # label="Est {0} ".format(model.name) + species, lw=lw)
+
+        self._hide_last_ticks(grid, plate.rows, plate.cols)
+
+        if legend:
+            grid[-1].legend(loc='best')
+        if filename is None:
+            plt.show()
+        else:
+            plt.savefig(filename)
+        plt.close()
+
 
 
 
