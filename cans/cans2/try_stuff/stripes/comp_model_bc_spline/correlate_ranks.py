@@ -4,11 +4,30 @@ import json
 
 from cans2.rank import correlate_ests, correlate_avgs, write_stats, mdr, mdp, mdrmdp, get_repeat_stats, get_c_of_v, plot_c_of_v
 from cans2.cans_funcs import dict_to_numpy
-from cans2.parser import get_genes
+from cans2.parser import get_plate_data2
 from cans2.process import find_best_fits, remove_edges
+from cans2.plate import Plate
 
 
-genes = np.array(get_genes("data/p15/ColonyzerOutput.txt")[:384])
+barcodes = np.array([
+    {"barcode": "K000343_027_001", "ignore_empty": False},
+    {"barcode": "K000347_027_022", "ignore_empty": True},    # Filled stripes do not have correct gene names.
+])
+
+data_path = "../data/stripes/Stripes.txt"
+plate1 = Plate(**get_plate_data2(data_path, **barcodes[0]))
+plate2 = Plate(**get_plate_data2(data_path, **barcodes[1]))
+
+genes = plate1.genes
+
+# Boolean array for non-empties
+stripes_bool = plate1.genes != "EMPTY"
+grower_genes = np.extract(stripes_bool, plate1.genes)
+
+print(stripes_bool)
+print(grower_genes)
+
+assert False
 
 best_no_bc = np.array(find_best_fits("../../results/p15_fits/full_plate/CompModel/*.json",
                                      num=0, key="obj_fun"))
