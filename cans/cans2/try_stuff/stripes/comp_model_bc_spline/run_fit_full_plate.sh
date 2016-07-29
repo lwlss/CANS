@@ -3,8 +3,8 @@
 # C_ratio
 for i in {0..9}
 do
-    # Stripes or filled plate
-    for j in {0..1}
+    # Stripes or filled plate. Just rerun 2nd plate.
+    for j in {1..1}
     do
 	# Slicing of b_values
 	for k in {0..1}

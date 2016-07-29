@@ -12,6 +12,10 @@ from cans2.cans_funcs import dict_to_json
 from cans2.make_sbml import create_sbml
 
 
+# Just rerun the filled plate.
+if int(sys.argv[2]) == 0:
+    sys.exit(0)
+
 barcodes = np.array([
     {"barcode": "K000343_027_001", "ignore_empty": False},
     {"barcode": "K000347_027_022", "ignore_empty": True},    # Filled stripes do not have correct gene names.
