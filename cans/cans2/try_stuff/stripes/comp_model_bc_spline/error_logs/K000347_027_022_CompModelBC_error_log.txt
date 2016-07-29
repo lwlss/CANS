@@ -1,0 +1,6 @@
+Full est: C_ratio index 4, b_guess 35,
+Full est: C_ratio index 6, b_guess 50,
+Full est: C_ratio index 8, b_guess 55,
+Full est: C_ratio index 4, b_guess 50,
+Full est: C_ratio index 0, b_guess 100,
+Full est: C_ratio index 2, b_guess 95,
