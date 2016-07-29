@@ -26,6 +26,10 @@ C_ratio = cell_ratios[int(sys.argv[1])]
 # Read in real data and make a plate.
 data_path = "../../../../../data/stripes/Stripes.txt"
 full_plate = Plate(**get_plate_data2(data_path, **barcode))
+# For the filled plate, the genes are not labelled properly. I could
+# add the correct gene names here, but there is not reason to do so
+# until we analyse the results. First column is "HIS3". Other columns
+# are repeated in pairs.
 barcode = barcode["barcode"]
 
 # # Temporarily work with a zone while checking script runs.

@@ -97,6 +97,7 @@ def get_plate_data2(path, barcode=None, ignore_empty=False):
 
     ignore_empty : (bool) I have some data (stripes) where cultures
     are mistakenly listed with the gene name "EMPTY". In this case
+    (True) return empties as an empty np.array.
 
     """
     data = pd.read_csv(path, sep="\t", header=0)
@@ -110,7 +111,10 @@ def get_plate_data2(path, barcode=None, ignore_empty=False):
     # Correct times to set t=0 for first observation.
     times = times - times[0]
     genes = np.array(data["Gene"][:rows*cols])
-    empties = np.array([i for i, gene in enumerate(genes) if gene == "EMPTY"])
+    if ignore_empty:
+        empties = np.array([])
+    else:
+        empties = np.array([i for i, gene in enumerate(genes) if gene == "EMPTY"])
     plate_data = {
         "rows": rows,
         "cols": cols,
