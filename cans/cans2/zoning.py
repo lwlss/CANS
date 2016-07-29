@@ -43,19 +43,33 @@ def _get_zone_indices(plate, coords, rows, cols):
     return zone_indices.flatten()
 
 
-def get_zone_amounts(plate, model, params, coords, rows, cols):
+def get_zone_amounts(amounts, plate, model, coords, rows, cols):
+    """Return amounts of a zone from a full plate array.
+
+    amounts : array (times, species)
+    i.e.
+        C_0(t0), C_1(t0), ..., N_0(t0), N_1(t0), ...
+        C_0(t1), C_1(t1), ..., N_0(t1), N_1(t1), ...
+    where C_0(t0) is cells at culture 0 at time t0.
+    """
+    zone_indices = _get_zone_indices(plate, coords, rows, cols)
+    amount_indices = []
+    for s in range(model.no_species):
+        amount_indices.append(zone_indices + s*no_cultures)
+    zone_amounts = amounts[:, list(amount_indices)]
+    return zone_amounts
+
+
+def sim_and_get_zone_amounts(plate, model, params, coords, rows, cols):
     """Get simulated amounts for a zone from full plate simulation.
 
     Simulates for the full plate using roadrunner and the supplied
     params and then returns just the amounts for the zone.
 
     """
-    sim_amounts = model.rr_solve(plate, parms)
-    zone_indices = _get_zone_indices(plate, coords, rows, cols)
-    amount_indices = []
-    for s in range(model.no_species):
-        amount_indices.append(zone_indices + s*no_cultures)
-    zone_amounts = sim_amounts[:, list(amount_indices)]
+    sim_amounts = model.rr_solve(plate, params)
+    zone_amounts = get_zone_amounts(sim_amounts, plate, model,
+                                    coords, rows, cols)
     return zone_amounts
 
 
