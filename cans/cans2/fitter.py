@@ -57,10 +57,11 @@ class Fitter(object):
         c_est = np.split(amount_est, self.model.no_species, axis=1)[0]
         # CONSIDER WHEN REFACTORING. It will probably quicker to
         # remove the cell reaction equations for empty cultures from
-        # the SMBL. Then, cell amounts will not be returned by
-        # rr_solve for empty cultures and we do not have to slice by
-        # the indices of all of the growers. Instead we would slice as
-        # cest[:, :len(plate.growers)].
+        # the SMBL rather than setting b=0 and slicing out. Then, cell
+        # amounts will not be returned by rr_solve for empty cultures
+        # and we do not have to slice by the indices of all of the
+        # growers. Instead we would slice as c_est[:,
+        # :len(plate.growers)].
         growers_c_est = c_est[:, list(plate.growers)].flatten()
         err = np.sqrt(np.sum((plate.c_meas_obj - growers_c_est)**2))
         return err
