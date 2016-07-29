@@ -49,7 +49,7 @@ full_plate.make_spline(time_points=15)
 # plotter.plot_spline(full_plate)
 
 # Errors are captured to file and iteartion skipped.
-error_file = "error_logs/" + barcode + "_CompModelBC_error_log.txt"
+error_file = "error_logs/" + barcode + "_2_CompModelBC_error_log.txt"
 b_guesses = [35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 95, 100, 150]
 for b_guess in b_guesses[int(sys.argv[3])::2]:
     # User defined/selected parameters pre guessing.
@@ -112,9 +112,9 @@ for b_guess in b_guesses[int(sys.argv[3])::2]:
     t1 = time.time()
 
     # Set out dir/files for data and plots.
-    datafile = (barcode + "/results/C_ratio_i_{0}_b_guess_{1}.json").format(sys.argv[1],
+    datafile = (barcode + "/results2/C_ratio_i_{0}_b_guess_{1}.json").format(sys.argv[1],
                                                                             b_guess)
-    sbmlfile = (barcode + "/sbml/C_ratio_i_{0}_b_guess_{1}.xml").format(sys.argv[1],
+    sbmlfile = (barcode + "/sbml2/C_ratio_i_{0}_b_guess_{1}.xml").format(sys.argv[1],
                                                                         b_guess)
     # plotfile = (barcode + "/plots/argv_{0}_b_guess_{1}.pdf").format(sys.argv[1],
     #                                                                    b_guess)
