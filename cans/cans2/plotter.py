@@ -7,6 +7,7 @@ from mpl_toolkits.axes_grid1 import AxesGrid
 
 
 from cans2.plate import Plate
+from cans2.zoning import get_plate_zone, get_zone_amounts
 
 
 def plot_scatter(x, y, title="", xlab="", ylab="", outfile=""):
@@ -105,7 +106,8 @@ class Plotter(object):
             if not sim: # and i not in plate.empties:
                 # Plot c_meas.
                 ax.plot(plate.times, plate.c_meas[i::plate.no_cultures],
-                        'x', label='Observed Cells', ms=ms, mew=mew)
+                        'x', color="black", label='Observed Cells',
+                        ms=ms, mew=mew)
             for j, species in enumerate(self.model.species):
                 ax.plot(sim_times, est_amounts[j][:, i], self.colours[j],
                         label="Est " + species, lw=lw)
@@ -172,6 +174,34 @@ class Plotter(object):
         else:
             plt.savefig(filename)
         plt.close()
+
+
+
+    def plot_zone_est(self, plate, est_params, coords, rows, cols,
+                      title="Corrected Growth", legend=False,
+                      filename=None, ms=6.0, mew=0.5, lw=1.0):
+        """Plot an estimate for a zone.
+
+        Plotting a zone from a full plate estimate requires simulating
+        for the full plate and then taking the amounts from the zone
+        rather than just simulating from the zone params.
+
+        """
+        # Smooth times for sims.
+        sim_times = np.linspace(plate.times[0], plate.times[-1], 100)
+
+        est_plate = Plate(plate.rows, plate.cols)
+        est_plate.times = sim_times
+        est_plate.set_rr_model(self.model, est_params)
+        est_amounts = self.model.rr_solve(est_plate, est_params)
+        est_amounts = np.split(est_amounts, self.model.no_species, axis=1)
+
+
+        zone = get_plate_zone(plate, coords, rows, cols)
+        zone.est_amounts = get_zone_amounts(est_plate, self.model,
+                                            est_params, coords, rows,
+                                            cols)
+
 
 
     def plot_correction(self, plate, est_params, comp_amounts,

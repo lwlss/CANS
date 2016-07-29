@@ -43,6 +43,22 @@ def _get_zone_indices(plate, coords, rows, cols):
     return zone_indices.flatten()
 
 
+def get_zone_amounts(plate, model, params, coords, rows, cols):
+    """Get simulated amounts for a zone from full plate simulation.
+
+    Simulates for the full plate using roadrunner and the supplied
+    params and then returns just the amounts for the zone.
+
+    """
+    sim_amounts = model.rr_solve(plate, parms)
+    zone_indices = _get_zone_indices(plate, coords, rows, cols)
+    amount_indices = []
+    for s in range(model.no_species):
+        amount_indices.append(zone_indices + s*no_cultures)
+    zone_amounts = sim_amounts[:, list(amount_indices)]
+    return zone_amounts
+
+
 def get_plate_zone(plate, coords, rows, cols):
     """Return a plate from a zone of a larger plate.
 
