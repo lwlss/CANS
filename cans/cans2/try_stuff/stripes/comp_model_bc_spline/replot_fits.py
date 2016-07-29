@@ -12,12 +12,12 @@ from cans2.plate import Plate
 from cans2.process import find_best_fits
 
 
-
+# Have I ignored empty the wrong way around?
 barcodes = np.array([
     {"barcode": "K000343_027_001", "ignore_empty": False, "name": "Empty"},
     {"barcode": "K000347_027_022", "ignore_empty": True, "name": "Filled"},    # Filled stripes do not have correct gene names.
 ])
-barcode = barcodes[0]    # Choose which plate to look at.
+barcode = barcodes[1]    # Choose which plate to look at.
 
 fit_path = barcode["barcode"] + "/results/*.json"
 data_path = "../data/stripes/Stripes.txt"
@@ -43,18 +43,24 @@ plotter = Plotter(model)
 plot_title = "Best {0} {1} (obj_fun: {2:})"
 plot_title = plot_title.format(model.name, barcode["name"],
                                best_fits[0]["obj_fun"])
-plotter.plot_est_rr(best_plate, best_plate.est_params,
-                    plot_title, vis_ticks=False, lw=2.0)
+# plotter.plot_est_rr(best_plate, best_plate.est_params,
+#                     plot_title, vis_ticks=False, lw=2.0)
 
 
-from can2.parser import get_plate_zone, get_zone_amounts
+
 
 coords = (5, 5)
 rows, cols = 5, 5
-zone = get_plate_zone(best_plate, coords, rows, cols)
-zone.est_amounts = get_zone_amounts(best_plate, model,
-                                    best_plate.est_params,
-                                    coords, rows, cols)
+
+# from cans2.zoning import get_plate_zone, get_zone_amounts
+# zone = get_plate_zone(best_plate, coords, rows, cols)
+# zone.est_amounts = sim_and_get_zone_amounts(best_plate, model,
+#                                             best_plate.est_params,
+#                                             coords, rows, cols)
+
+est_params = [best_plate.est_params]
+models = [model]
+plotter.plot_zone_est(best_plate, est_params, models, coords, rows, cols)
 
 assert False
 
