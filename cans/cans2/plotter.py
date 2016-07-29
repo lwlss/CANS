@@ -197,11 +197,13 @@ class Plotter(object):
         smooth_times = np.linspace(plate.times[0], plate.times[-1], 100)
 
         smooth_plate = Plate(plate.rows, plate.cols)
-        smooth_plate.times = sim_times
+        smooth_plate.times = smooth_times
         smooth_plate.smooth_amounts = []
         for params, model in zip(est_params, models):
             smooth_plate.set_rr_model(model, params)
             smooth_amounts = smooth_plate.rr_solve()
+            # print("1")
+            # print(smooth_amounts)
             # smooth_amounts = np.split(smooth_amounts, self.model.no_species,
             #                           axis=1)
             smooth_plate.smooth_amounts.append(smooth_amounts)
@@ -211,6 +213,7 @@ class Plotter(object):
         zone.smooth_amounts = []
 
         for model, smooth_amounts in zip(models, smooth_plate.smooth_amounts):
+
             smooth_zone_amounts = get_zone_amounts(smooth_amounts, plate,
                                                    model, coords, rows, cols)
             smooth_zone_amounts = np.split(smooth_zone_amounts,
@@ -234,7 +237,7 @@ class Plotter(object):
                             label="Est {0} ".format(e) + species, lw=lw)
                             # label="Est {0} ".format(model.name) + species, lw=lw)
 
-        self._hide_last_ticks(grid, plate.rows, plate.cols)
+        self._hide_last_ticks(grid, zone.rows, zone.cols)
 
         if legend:
             grid[-1].legend(loc='best')
