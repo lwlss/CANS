@@ -55,8 +55,9 @@ def get_zone_amounts(amounts, plate, model, coords, rows, cols):
     zone_indices = _get_zone_indices(plate, coords, rows, cols)
     amount_indices = []
     for s in range(model.no_species):
-        amount_indices.append(zone_indices + s*no_cultures)
-    zone_amounts = amounts[:, list(amount_indices)]
+        amount_indices.append(zone_indices + s*plate.no_cultures)
+    amount_indices = np.array(amount_indices).flatten()
+    zone_amounts = amounts[:, amount_indices]
     return zone_amounts
 
 
@@ -94,7 +95,7 @@ def get_plate_zone(plate, coords, rows, cols):
         "times": plate.times,
         "empties": np.array([z_i for z_i, p_i in enumerate(zone_indices)
                              if p_i in plate.empties]),
-        "genes": plate.genes[zone_indices],
+        # "genes": np.array(plate.genes)[zone_indices],
         }
     zone_plate = Plate(rows, cols, data=zone_data)
     return zone_plate
