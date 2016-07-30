@@ -31,6 +31,7 @@ class Plotter(object):
         self.model = model
         # Can decide on other colours when adding models with more species.
         self.colours = ['b', 'y', 'r', 'g']
+        self.linestyles = ['-', '--', '-.', ':']
 
 
     def _find_ymax(self, amounts):
@@ -238,7 +239,8 @@ class Plotter(object):
             for e, (smooth_amounts, model) in enumerate(zip(zone.smooth_amounts, models)):
                 for j, (amounts, species) in enumerate(zip(smooth_amounts, model.species)):
                     ax.plot(smooth_times, amounts[:, i], self.colours[j],
-                            label="Est {0} ".format(e) + species, lw=lw)
+                            label="Est {0} ".format(e) + species,
+                            lw=lw, ls=self.linstyles[e])
                             # label="Est {0} ".format(model.name) + species, lw=lw)
 
         self._hide_last_ticks(grid, zone.rows, zone.cols)
