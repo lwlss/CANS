@@ -4,6 +4,7 @@ import json
 # import csv
 
 
+from cans2.cans_funcs import dict_to_numpy
 from cans2.parser import get_plate_data2
 from cans2.genetic_kwargs import _get_plate_kwargs
 from cans2.plotter import Plotter
@@ -12,56 +13,66 @@ from cans2.plate import Plate
 from cans2.process import find_best_fits
 
 
-# Have I ignored empty the wrong way around?
 barcodes = np.array([
     {"barcode": "K000343_027_001", "ignore_empty": False, "name": "Empty"},
     {"barcode": "K000347_027_022", "ignore_empty": True, "name": "Filled"},    # Filled stripes do not have correct gene names.
 ])
 barcode = barcodes[1]    # Choose which plate to look at.
 
-fit_path = barcode["barcode"] + "/results/*.json"
+# Make raw data plates.
 data_path = "../data/stripes/Stripes.txt"
 
-# Plate with no fit data.
-raw_plate = Plate(**get_plate_data2(data_path, barcode["barcode"]))
+empty_bc = [bc["barcode"] for bc in barcodes if bc["name"] == "Empty"][0]
+data_plate = Plate(**get_plate_data2(data_path, empty_bc))
 
-best_paths = np.array(find_best_fits(fit_path, num=5, key="obj_fun"))
+result_paths = [bc["barcode"] + "/results/*.json" for bc in barcodes]
 
-best_fits = []
-for est in best_paths:
-    with open(est[0], "r") as f:
-        best_fits.append(json.load(f))
+best_paths = []
+for p in result_paths:
+    best_paths += find_best_fits(p, 1, "obj_fun")
 
-best_plate = Plate(**_get_plate_kwargs(best_fits[0]))
-best_plate.est_params = best_fits[0]["est_params"]
+results = []
+for bc, path in zip(barcodes, best_paths):
+    with open(path[0], "r") as f:
+        results.append(dict_to_numpy(json.load(f)))
 
-models = [CompModel(), CompModelBC()]
-model_name = best_fits[0]["model"]
-model = next((m for m in models if m.name == best_fits[0]["model"]), None)
+best_plates = []
+for r in results:
+    plate = Plate(**_get_plate_kwargs(r))
+    plate.est_params = r["est_params"]
+    best_plates.append(plate)
 
-plotter = Plotter(model)
-plot_title = "Best {0} {1} (obj_fun: {2:})"
-plot_title = plot_title.format(model.name, barcode["name"],
-                               best_fits[0]["obj_fun"])
+
+plotter = Plotter(CompModelBC())
+plot_title = "Validation of Comp Model Using Stripes Data"
+#plot_title = "Best {0} {1} (obj_fun: {2:})"
+# plot_title = plot_title.format(model.name, barcode["name"],
+#                                best_fits[0]["obj_fun"])
 # plotter.plot_est_rr(best_plate, best_plate.est_params,
 #                     plot_title, vis_ticks=False, lw=2.0)
 
+# Plot validation for a zone
+coords = (6, 6)
+rows, cols = 6, 6
 
+comp_models = [CompModel(), CompModelBC()]
+model_name = results[0]["model"]
+models = [m for m in comp_models for r in results if m.name == r["model"]]
 
+empties = data_plate.empties
 
-coords = (5, 5)
-rows, cols = 5, 5
+plot_params = []
+for bc, plate in zip(barcodes, best_plates):
+    if bc["name"] == "Filled":
+        # Set empty bs to zero
+        params = np.copy(plate.est_params)
+        params[empties - plate.no_cultures] = 0.0
+        plot_params.append(params)
+    else:
+        plot_params.append(plate.est_params)
 
-# from cans2.zoning import get_plate_zone, get_zone_amounts
-# zone = get_plate_zone(best_plate, coords, rows, cols)
-# zone.est_amounts = sim_and_get_zone_amounts(best_plate, model,
-#                                             best_plate.est_params,
-#                                             coords, rows, cols)
-
-est_params = [best_plate.est_params]
-models = [model]
-plotter.plot_zone_est(best_plate, est_params, models, coords, rows, cols)
-
+plotter.plot_zone_est(data_plate, plot_params, models, coords, rows,
+                      cols, legend=True)
 assert False
 
 
@@ -86,7 +97,8 @@ from cans2.zoning import resim_zone
 plate.sim_params = fit_data["comp_est"]
 zone = resim_zone(plate, CompModelBC(), coords=(5, 5), rows=3, cols=3)
 zone.set_rr_model(model, zone.sim_params)
-plotter.plot_est_rr(zone, zone.sim_params, ms=10.0, mew=1.5, lw=2.5, vis_ticks=True)
+plotter.plot_est_rr(zone, zone.sim_params, ms=10.0, mew=1.5, lw=2.5,
+                    vis_ticks=True, legend=True)
 
 
 
