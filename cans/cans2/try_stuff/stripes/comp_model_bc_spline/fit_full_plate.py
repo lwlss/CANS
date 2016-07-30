@@ -139,6 +139,8 @@ for b_guess in b_guesses[int(sys.argv[3])::2]:
         'cols': full_plate.cols,
         'c_meas': full_plate.c_meas,
         'times': full_plate.times,
+        'empties': full_plate.empties,
+        'growers': full_plate.growers,
         'argv': int(sys.argv[1]),
         'guess_C_ratio': C_ratio,
         'model': plate_model.name,
