@@ -180,7 +180,7 @@ class Plotter(object):
 
     # Should make without roadrunnner to plot logistic eq. and
     # competition model or just handle the models differently.
-    def plot_zone_est(self, plates, c_meas, est_params, models, coords, rows,
+    def plot_zone_est(self, plates, est_params, models, coords, rows,
                       cols, title="Zone Estimates", legend=False,
                       filename=None, ms=6.0, mew=0.5, lw=1.0):
         """Plot estimates for a zone.
@@ -204,9 +204,9 @@ class Plotter(object):
         row, cols : rows and columns for zone.
 
         """
-        smooth_times = np.linspace(plate.times[0], plate.times[-1], 100)
+        smooth_times = np.linspace(plates[0].times[0], plates[0].times[-1], 100)
 
-        smooth_plate = Plate(plate.rows, plate.cols)
+        smooth_plate = Plate(plates[0].rows, plates[0].cols)
         smooth_plate.times = smooth_times
         smooth_plate.smooth_amounts = []
         for params, model in zip(est_params, models):
