@@ -23,7 +23,10 @@ barcode = barcodes[1]    # Choose which plate to look at.
 data_path = "../data/stripes/Stripes.txt"
 
 empty_bc = [bc["barcode"] for bc in barcodes if bc["name"] == "Empty"][0]
-data_plate = Plate(**get_plate_data2(data_path, empty_bc))
+empty_plate = Plate(**get_plate_data2(data_path, empty_bc))
+filled_bc = [bc["barcode"] for bc in barcodes if bc["name"] == "Filled"][0]
+filled_plate = Plate(**get_plate_data2(data_path, filled_bc))
+data_plates = [empty_plate, filled_plate]
 
 result_paths = [bc["barcode"] + "/results/*.json" for bc in barcodes]
 
@@ -52,14 +55,14 @@ plot_title = "Validation of Comp Model Using Stripes Data"
 #                     plot_title, vis_ticks=False, lw=2.0)
 
 # Plot validation for a zone
-coords = (6, 6)
-rows, cols = 6, 6
+coords = (3, 3)
+rows, cols = 8, 8
 
 comp_models = [CompModel(), CompModelBC()]
 model_name = results[0]["model"]
 models = [m for m in comp_models for r in results if m.name == r["model"]]
 
-empties = data_plate.empties
+empties = empty_plate.empties
 
 plot_params = []
 for bc, plate in zip(barcodes, best_plates):
@@ -72,58 +75,23 @@ for bc, plate in zip(barcodes, best_plates):
         plot_params.append(plate.est_params)
         plate_lvl = plate.est_params[:-plate.no_cultures]
 
-# # Use nutrients of gaps estimate for both.
-# for params in plot_params:
-#     params[[1, 2]] = plate_lvl[[1,2]]
+# Could check the objective function for all of the below.
+
+# Use nutrients of gaps estimate for both.
+for params in plot_params:
+    params[[1, 2]] = plate_lvl[[1,2]]
 
 # # Use nutrients and kn of gaps estimate for both.
 # for params in plot_params:
 #     params[[1, 2, 3]] = plate_lvl[[1, 2, 3]]
 
+# # Only share kn? Poor.
+# for params in plot_params:
+#     params[2] = plate_lvl[3]
+
 # # Use gaps plate_lvl estimate for both.
 # for params in plot_params:
 #     params[:4] = plate_lvl[:4]
 
-
-plotter.plot_zone_est(data_plate, plot_params, models, coords, rows,
+plotter.plot_zone_est(data_plates, plot_params, models, coords, rows,
                       cols, legend=True)
-assert False
-
-
-
-
-
-plate = Plate(fit_data["rows"], fit_data["cols"])
-models = [CompModel(), CompModelBC()]
-model_name = fit_data["model"]
-model = next((m for m in models if m.name == fit_data["model"]), None)
-plotter = Plotter(model)
-
-# Add necessary data attributes to produce plots
-plate.times = fit_data['times']
-plate.c_meas = fit_data['c_meas']
-# plate.sim_params = fit_data['comp_est']
-plate.set_rr_model(model, fit_data['comp_est'])
-
-
-#temp
-from cans2.zoning import resim_zone
-plate.sim_params = fit_data["comp_est"]
-zone = resim_zone(plate, CompModelBC(), coords=(5, 5), rows=3, cols=3)
-zone.set_rr_model(model, zone.sim_params)
-plotter.plot_est_rr(zone, zone.sim_params, ms=10.0, mew=1.5, lw=2.5,
-                    vis_ticks=True, legend=True)
-
-
-
-plot_title = 'Best Competition Model BC Fit to p15' # (argv {0}; b_guess {1})'
-plot_title = plot_title.format(argv, b_guess)
-plotter.plot_est_rr(plate, fit_data["comp_est"], title=plot_title,
-                    sim=False, legend=False, ms=10.0, mew=1.5, lw=2.5,
-                    vis_ticks=True)
-
-plot_title = 'Competition Model BC init guess for p15 (argv {0}; b_guess {1})'
-plot_title = plot_title.format(argv, b_guess)
-plotter.plot_est_rr(plate, fit_data["init_guess"], title=plot_title,
-                    sim=False, legend=False, ms=10.0, mew=0.5, lw=2.5)
-from cans2.plotter import Plotte
