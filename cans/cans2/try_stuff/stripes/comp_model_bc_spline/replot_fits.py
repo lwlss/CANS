@@ -70,6 +70,20 @@ for bc, plate in zip(barcodes, best_plates):
         plot_params.append(params)
     else:
         plot_params.append(plate.est_params)
+        plate_lvl = plate.est_params[:-plate.no_cultures]
+
+# # Use nutrients of gaps estimate for both.
+# for params in plot_params:
+#     params[[1, 2]] = plate_lvl[[1,2]]
+
+# # Use nutrients and kn of gaps estimate for both.
+# for params in plot_params:
+#     params[[1, 2, 3]] = plate_lvl[[1, 2, 3]]
+
+# # Use gaps plate_lvl estimate for both.
+# for params in plot_params:
+#     params[:4] = plate_lvl[:4]
+
 
 plotter.plot_zone_est(data_plate, plot_params, models, coords, rows,
                       cols, legend=True)
