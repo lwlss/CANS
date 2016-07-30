@@ -240,7 +240,7 @@ class Plotter(object):
                 for j, (amounts, species) in enumerate(zip(smooth_amounts, model.species)):
                     ax.plot(smooth_times, amounts[:, i], self.colours[j],
                             label="Est {0} ".format(e) + species,
-                            lw=lw, ls=self.linstyles[e])
+                            lw=lw, ls=self.linestyles[e])
                             # label="Est {0} ".format(model.name) + species, lw=lw)
 
         self._hide_last_ticks(grid, zone.rows, zone.cols)
