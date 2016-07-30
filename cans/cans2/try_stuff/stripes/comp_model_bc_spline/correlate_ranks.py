@@ -7,6 +7,7 @@ from cans2.cans_funcs import dict_to_numpy
 from cans2.parser import get_plate_data2
 from cans2.process import find_best_fits, remove_edges
 from cans2.plate import Plate
+from cans2.model import CompModelBC
 
 
 def add_missing_genes(plate):
@@ -16,7 +17,6 @@ def add_missing_genes(plate):
     """
     genes = np.copy(plate.genes)
     genes.shape = (plate.rows, plate.cols)
-    print(genes)
     genes[:, 0] = 'HIS3'
     genes[:, 2::2] = genes[:, 1:-1:2]
     return genes.flatten()
@@ -40,13 +40,19 @@ barcodes = np.array([
 data_path = "../data/stripes/Stripes.txt"
 plates = [Plate(**get_plate_data2(data_path, bc["barcode"])) for bc in barcodes]
 
+rows, cols = plates[0].rows, plates[0].cols
+
 # Stripes genes
 genes = plates[0].genes
 
 # Boolean array for non-empties
 stripes_bool = genes != "EMPTY"
-grower_genes = np.extract(stripes_bool, genes)
-filled_plate_genes = add_missing_genes(plate[1])
+stripes_bool = remove_edges(stripes_bool, rows, cols)
+genes = remove_edges(genes, rows, cols)
+stripes_genes = np.extract(stripes_bool, genes)
+filled_plate_genes = add_missing_genes(plates[1])
+
+result_paths = [bc["barcode"] + "/results/*.json" for bc in barcodes]
 
 best_paths = []
 for p in result_paths:
@@ -60,43 +66,36 @@ for bc, path in zip(barcodes, best_paths):
 no_cultures = plates[0].no_cultures
 
 # For cross-plate correlations
-best_ests = []
-for est in results:
-    with open(est[0], "r") as f:
-        best_ests.append(json.load(f)["est_params"][-no_cultures:])
+b_ests = [data["est_params"] for data in results]
 
 # Removes edge cultures, usually HIS3 (internal HIS3 also exist).
-genes = remove_edges(genes, plates[0].rows, plates[0].cols)
-best_ests = [remove_edges(np.array(est), rows, cols) for est in best_ests]
+b_ests = [remove_edges(np.array(bs), rows, cols) for bs in b_ests]
 
+# Remove the empties from both b_est lists.
 ests = []
-for bc, est in zip(barcodes, bets_ests):
-    pack_est = [[bc["name"] +
-    ests +=
+for bc, est in zip(barcodes, b_ests):
+    est_name = bc["name"] + " " + bc["model"].name
+    ests.append([est_name, np.extract(stripes_bool, est)])
 
-stripes_ests = [["Stripes".format(i), est] for i, est in enumerate(bc_ests)]
-no_bc_ests = [["CompModel_{0}".format(i), est] for i, est in enumerate(no_bc_ests)]
-log_eq_ests = [["Logistic Eq. Model".format(i), est] for i, est in enumerate(log_eq_ests)]
-ests = bc_ests + no_bc_ests + log_eq_ests
+# See if there are any repeats so we can calculate coefficient of
+# variation.
+gene_counts = np.unique(stripes_genes, return_counts=True)
+rep_genes = gene_counts[0][gene_counts[1] > 1]
+rep_counts = gene_counts[1][gene_counts[1] > 1]
+print("Genes with repeats", rep_genes, rep_counts)
 
-# # Plot all genes
-# gene_set = set(genes)
+outfile = "best_stripes_and_filled_correlations.pdf"
+correlate_ests(stripes_genes, None, "", *ests)
+
+# # Plot all genes spreads
+# gene_set = set(stripes_genes)
 # for gene in list(gene_set):
-#     # correlate_ests(genes, gene,
+#     # correlate_ests(stripes_genes, gene,
 #     #                "results/variances/tops_and_log/top_ests_and_log_eq_b_{0}_var.png".format(gene),
 #     #                *ests)
-#     correlate_ests(genes, gene, "", *ests)
-
-# # Plot avgs
-correlate_avgs(genes, "best_comp_bc_and_log_eq_cor.pdf", *ests)
-assert False
-# correlate_avgs(genes, "plots/top_two_comp_and_top_three_log_eq_p15_correlations.png", *ests)
+#     correlate_ests(stripes_genes, gene, "", *ests)
 
 # write_stats(genes, "results/top_two_comp_model_bc_comp_model.csv", *ests)
 
-
 # Now get the coefficient of variation for best bc_est and log_eq_est
-plot_c_of_v(genes, *ests)
-
-# unlabelled_ests = [ests[0][1], ests[1][1]]
-# print(get_c_of_v(genes, *unlabelled_ests))
+# plot_c_of_v(stripes_genes, *ests)
