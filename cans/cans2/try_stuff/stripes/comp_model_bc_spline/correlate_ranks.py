@@ -9,71 +9,72 @@ from cans2.process import find_best_fits, remove_edges
 from cans2.plate import Plate
 
 
+def add_missing_genes(plate):
+    """Correct Colonyzer output for filled plate.
+
+    First column is HIS3. Other columns are repeats of the left.
+    """
+    genes = np.copy(plate.genes)
+    genes.shape = (plate.rows, plate.cols)
+    print(genes)
+    genes[:, 0] = 'HIS3'
+    genes[:, 2::2] = genes[:, 1:-1:2]
+    return genes.flatten()
+
+
 barcodes = np.array([
-    {"barcode": "K000343_027_001", "ignore_empty": False},
-    {"barcode": "K000347_027_022", "ignore_empty": True},    # Filled stripes do not have correct gene names.
+    {
+        "barcode": "K000343_027_001",
+        "ignore_empty": False,
+        "name": "Stripes",
+        "model": CompModelBC(),
+    },
+    {
+        "barcode": "K000347_027_022",    # Filled stripes do not have correct gene names.
+        "ignore_empty": True,
+        "name": "Filled",
+        "model": CompModelBC(),
+    },
 ])
 
 data_path = "../data/stripes/Stripes.txt"
-plate1 = Plate(**get_plate_data2(data_path, **barcodes[0]))
-plate2 = Plate(**get_plate_data2(data_path, **barcodes[1]))
+plates = [Plate(**get_plate_data2(data_path, bc["barcode"])) for bc in barcodes]
 
-genes = plate1.genes
+# Stripes genes
+genes = plates[0].genes
 
 # Boolean array for non-empties
-stripes_bool = plate1.genes != "EMPTY"
-grower_genes = np.extract(stripes_bool, plate1.genes)
+stripes_bool = genes != "EMPTY"
+grower_genes = np.extract(stripes_bool, genes)
+filled_plate_genes = add_missing_genes(plate[1])
 
-print(stripes_bool)
-print(grower_genes)
+best_paths = []
+for p in result_paths:
+    best_paths += find_best_fits(p, 1, "obj_fun")
 
-assert False
+results = []
+for bc, path in zip(barcodes, best_paths):
+    with open(path[0], "r") as f:
+        results.append(dict_to_numpy(json.load(f)))
 
-best_no_bc = np.array(find_best_fits("../../results/p15_fits/full_plate/CompModel/*.json",
-                                     num=0, key="obj_fun"))
-best_bc = np.array(find_best_fits("../../results/p15_fits/full_plate/CompModelBC/*.json",
-                                  num=1, key="obj_fun"))
-log_path = "../logistic_fit_C0_grid/results2/log_eq*.json"
-best_logs = np.array(find_best_fits(log_path, num=1, key="obj_funs_internals"))
+no_cultures = plates[0].no_cultures
 
-
-log_eq_ests = []
-log_eq_rs = []
-log_eq_Ks = []
-log_eq_mdrmdps = []
-for est in best_logs:
+# For cross-plate correlations
+best_ests = []
+for est in results:
     with open(est[0], "r") as f:
-        # Get bs
-        data = dict_to_numpy(json.load(f))
-        log_eq_ests.append(data["culture_est_params"][:, -1])
-        log_eq_rs.append(data["logistic_rs"])
-        log_eq_Ks.append(data["logistic_Ks"])
-        C_0 = data["plate_lvl_C_0"]
-        rows = data["rows"]
-        cols = data["cols"]
-        print(data.keys())
-        print(data["plate_lvl_C_0"])
-        log_eq_mdrmdps.append([mdrmdp(r, K, C_0) for r, K in zip(log_eq_rs[-1], log_eq_Ks[-1])])
-log_eq_ests = log_eq_mdrmdps
-# log_eq_ests = log_eq_rs
+        best_ests.append(json.load(f)["est_params"][-no_cultures:])
 
-bc_ests = []
-for est in best_bc:
-    with open(est[0], "r") as f:
-        bc_ests.append(json.load(f)["comp_est"][4:])
+# Removes edge cultures, usually HIS3 (internal HIS3 also exist).
+genes = remove_edges(genes, plates[0].rows, plates[0].cols)
+best_ests = [remove_edges(np.array(est), rows, cols) for est in best_ests]
 
-no_bc_ests = []
-for est in best_no_bc:
-    with open(est[0], "r") as f:
-        no_bc_ests.append(json.load(f)["comp_est"][3:])
+ests = []
+for bc, est in zip(barcodes, bets_ests):
+    pack_est = [[bc["name"] +
+    ests +=
 
-# Removees HIS3 edge cultures (other internal HIS3 exist)
-genes = remove_edges(genes, rows, cols)
-log_eq_ests = [remove_edges(np.array(est), rows, cols) for est in log_eq_ests]
-bc_ests = [remove_edges(np.array(est), rows, cols) for est in bc_ests]
-no_bc_ests = [remove_edges(np.array(est), rows, cols) for est in no_bc_ests]
-
-bc_ests = [["Compe Model".format(i), est] for i, est in enumerate(bc_ests)]
+stripes_ests = [["Stripes".format(i), est] for i, est in enumerate(bc_ests)]
 no_bc_ests = [["CompModel_{0}".format(i), est] for i, est in enumerate(no_bc_ests)]
 log_eq_ests = [["Logistic Eq. Model".format(i), est] for i, est in enumerate(log_eq_ests)]
 ests = bc_ests + no_bc_ests + log_eq_ests
