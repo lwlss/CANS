@@ -17,7 +17,6 @@ barcodes = np.array([
     {"barcode": "K000343_027_001", "ignore_empty": False, "name": "Empty"},
     {"barcode": "K000347_027_022", "ignore_empty": True, "name": "Filled"},    # Filled stripes do not have correct gene names.
 ])
-barcode = barcodes[1]    # Choose which plate to look at.
 
 # Make raw data plates.
 data_path = "../data/stripes/Stripes.txt"
@@ -75,11 +74,19 @@ for bc, plate in zip(barcodes, best_plates):
         plot_params.append(plate.est_params)
         plate_lvl = plate.est_params[:-plate.no_cultures]
 
-# Could check the objective function for all of the below.
 
-# Use nutrients of gaps estimate for both.
-for params in plot_params:
-    params[[1, 2]] = plate_lvl[[1,2]]
+# Print the plate level parmeters and average b value for both estimates.
+for bc, plate in zip(barcodes, best_plates):
+    plate_lvl = plate.est_params[:-plate.no_cultures]
+    b_mean = np.mean(plate.est_params[-plate.no_cultures:])
+    print(bc["name"])
+    print(np.append(plate_lvl, b_mean))
+
+
+# Could check the objective function for all of the below.
+# # Use nutrients of gaps estimate for both.
+# for params in plot_params:
+#     params[[1, 2]] = plate_lvl[[1,2]]
 
 # # Use nutrients and kn of gaps estimate for both.
 # for params in plot_params:
@@ -89,9 +96,10 @@ for params in plot_params:
 # for params in plot_params:
 #     params[2] = plate_lvl[3]
 
-# # Use gaps plate_lvl estimate for both.
-# for params in plot_params:
-#     params[:4] = plate_lvl[:4]
+# Use stripes plate_lvl estimate for both.
+for params in plot_params:
+    params[:4] = plate_lvl[:4]
 
 plotter.plot_zone_est(data_plates, plot_params, models, coords, rows,
                       cols, legend=True)
+
