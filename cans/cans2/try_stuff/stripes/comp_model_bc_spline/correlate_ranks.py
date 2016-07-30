@@ -85,7 +85,7 @@ rep_counts = gene_counts[1][gene_counts[1] > 1]
 print("Genes with repeats", rep_genes, rep_counts)
 
 outfile = "best_stripes_and_filled_correlations.pdf"
-correlate_ests(stripes_genes, None, "", *ests)
+correlate_ests(stripes_genes, None, outfile, *ests)
 
 # # Plot all genes spreads
 # gene_set = set(stripes_genes)
