@@ -8,7 +8,7 @@ import Bio.Cluster
 from cans2.model import CompModelBC
 from cans2.process import find_best_fits, test_bounds, spearmans_rho, mad_tril
 
-bc_index = 0    # 0 for Stripe, 1 for filled.
+bc_index = 1    # 0 for Stripe, 1 for filled.
 num_tops = 5    # Number of top fits to look at.
 
 barcodes = np.array([
