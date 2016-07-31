@@ -25,5 +25,5 @@ write.table(fit,file="P15_QFA_LogisticFitnesses.txt",sep="\t",row.names=FALSE,qu
 write.table(gfit,file="P15_QFA_GeneralisedLogisticFitnesses.txt",sep="\t",row.names=FALSE,quote=FALSE)
 # Plot growth curves.
 qfa.plot("P15_QFA_LogisticGrowthCurves.pdf",fit,raw,maxg=0.25,maxt=3.0)
-qfa.plot("P15_QFA_GeneralisedLogisticGrowthCurves.pdf",fit,raw,maxg=0.25,maxt=3.0)
+qfa.plot("P15_QFA_GeneralisedLogisticGrowthCurves.pdf",gfit,raw,maxg=0.25,maxt=3.0)
 
