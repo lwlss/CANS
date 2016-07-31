@@ -64,8 +64,8 @@ gen_log_ests = [remove_edges(np.array(est), rows, cols) for est in gen_log_ests]
 
 # Currently format does nothing but we may with to compare multiple
 # fits of the same model.
-comp_ests = [["Compe".format(i), est] for i, est in enumerate(comp_ests)]
-comp_bc_ests = [["Comp BC".format(i), est] for i, est in enumerate(comp_bc_ests)]
+comp_ests = [["Comp.".format(i), est] for i, est in enumerate(comp_ests)]
+comp_bc_ests = [["Comp. BC".format(i), est] for i, est in enumerate(comp_bc_ests)]
 log_eq_ests = [["Log. Eq.".format(i), est] for i, est in enumerate(log_eq_ests)]
 gen_log_ests = [["Gen. Log.", est] for est in gen_log_ests]
 
