@@ -138,8 +138,8 @@ def correlate_ests(genes, query_gene, filename="", *ests):
     #             plt.text(est_no, rank, "{0:.3f}".format(c_of_v), color=col)
 
 
-    plt.xticks(range(len(ests)), labels, rotation="vertical", fontsize=26)
-#     plt.xticks(range(len(ests)), labels, rotation="horizontal", fontsize=26)
+    # plt.xticks(range(len(ests)), labels, rotation="vertical", fontsize=26)
+    plt.xticks(range(len(ests)), labels, rotation="horizontal", fontsize=26)
     ax.yaxis.set_visible(False)
     plt.ylabel("Rank")
 
