@@ -86,6 +86,12 @@ def get_genes(filename):
     return genes
 
 
+def get_qfa_R_dct(path):
+    """Get data from QFA R output."""
+    data = pd.read_csv(path, sep="\t", header=0)
+    return data
+
+
 def get_mdrmdp(path):
     """Get mdr*mdp from QFA R output."""
     data = pd.read_csv(path, sep="\t", header=0)
