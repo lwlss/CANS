@@ -29,9 +29,13 @@ data_plates = [empty_plate, filled_plate]
 
 result_paths = [bc["barcode"] + "/results/*.json" for bc in barcodes]
 
+# Pick which of the top 5 estimates to compare.
+picks = (0, 0)    # Pick 1st best stripe and 1st best filled.
+
+
 best_paths = []
-for p in result_paths:
-    best_paths += find_best_fits(p, 1, "obj_fun")
+for pick, path in zip(picks, result_paths):
+    best_paths.append(find_best_fits(path, 5, "obj_fun")[pick])
 
 results = []
 for bc, path in zip(barcodes, best_paths):
@@ -104,9 +108,9 @@ for bc, plate in zip(barcodes, best_plates):
 # for params in plot_params:
 #     params[2] = plate_lvl[3]
 
-# Use stripes plate_lvl estimate for both.
-for params in plot_params:
-    params[:4] = plate_lvl[:4]
+# # Use stripes plate_lvl estimate for both.
+# for params in plot_params:
+#     params[:4] = plate_lvl[:4]
 
 plotter.plot_zone_est(data_plates, plot_params, models, coords, rows,
                       cols, legend=True)
