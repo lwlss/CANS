@@ -44,20 +44,15 @@ I use the different estimated plate level parameters, "keep", doesn't
 look very good.
 
 Below are arrays of [C_0, N_0, NE_0, kn, mean(b)] for each plate. The
-biggest difference seems to be the estimates of kn and mean(b), which
-are higher for the filled plate. The stripes plate seems to be putting
-a break on nutrient diffusion and nutrient dependent growth compared
-to the filled plate.
-
+biggest difference seems to be the estimates of kn, which
+are higher for the filled plate.
 
 ('Barcodes', set(['K000343_027_001', 'K000347_027_022']))
 ('Barcodes', set(['K000343_027_001', 'K000347_027_022']))
 Empty
-[  8.31516580e-03   8.52478747e-02   9.56422301e-02   1.92525936e+00
-   1.95479261e+01]
+[  8.31516580e-03   8.52478747e-02   9.56422301e-02   1.92525936e+00   3.94703502e+01]
 Filled
-[  6.17038651e-03   1.16606279e-01   1.83021704e-01   4.84354755e+00
-   2.99934966e+01]
+[  6.17038651e-03   1.16606279e-01   1.83021704e-01   4.84354755e+00   2.79169304e+01]
 
 Unless there are mistakes, there appears to be a fair amount of
 biological variance present. For example, the data for the culture (4,

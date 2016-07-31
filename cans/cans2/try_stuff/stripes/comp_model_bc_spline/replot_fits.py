@@ -10,7 +10,7 @@ from cans2.genetic_kwargs import _get_plate_kwargs
 from cans2.plotter import Plotter
 from cans2.model import CompModel, CompModelBC
 from cans2.plate import Plate
-from cans2.process import find_best_fits
+from cans2.process import find_best_fits, remove_edges
 
 
 barcodes = np.array([
@@ -76,9 +76,17 @@ for bc, plate in zip(barcodes, best_plates):
 
 
 # Print the plate level parmeters and average b value for both estimates.
+genes = empty_plate.genes
+# Boolean array for non-empties
+stripes_bool = genes != "EMPTY"
+
+stripes_bool = remove_edges(stripes_bool, empty_plate.rows, empty_plate.cols)
 for bc, plate in zip(barcodes, best_plates):
     plate_lvl = plate.est_params[:-plate.no_cultures]
-    b_mean = np.mean(plate.est_params[-plate.no_cultures:])
+    b_ests = plate.est_params[-plate.no_cultures:]
+    b_ests = remove_edges(b_ests, empty_plate.rows, empty_plate.cols)
+    b_ests = np.extract(stripes_bool, b_ests)
+    b_mean = np.mean(b_ests)
     print(bc["name"])
     print(np.append(plate_lvl, b_mean))
 
