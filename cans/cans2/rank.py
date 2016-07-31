@@ -170,30 +170,23 @@ def plot_c_of_v(genes, *ests):
     ordered_c_of_vs = [[cvs[gene] for gene in ordered_genes] for cvs in c_of_vs]
 
     fig, ax = plt.subplots()
-    bar_width = 0.4
+    bar_width = 0.8 / float(len(est_names))
     opacity = 0.6
-    index = np.arange(len(ordered_genes))
+    x_vals = np.arange(len(ordered_genes))
 
-    rects1 = plt.bar(index,
-                     ordered_c_of_vs[1],
-                     bar_width,
-                     alpha=opacity,
-                     color='r',
-                     label='Logistic Equivalent Fit')
+    colors = ["b", "r", "y", "g", "m"]
 
-    rects2 = plt.bar(index + bar_width,
-                     ordered_c_of_vs[0],
-                     bar_width,
-                     alpha=opacity,
-                     color='b',
-                     label='Competition Fit')
+    plot_zip = zip(est_names, colors, ordered_c_of_vs)
+    for i, (name, col, c_of_vs) in enumerate(plot_zip):
+        plt.bar(x_vals + i*bar_width, c_of_vs, bar_width,
+                alpha=opacity, label=name, color=col)
 
     italic_genes = [gene.lower()+"$\Delta$" for gene in ordered_genes]
 
     plt.xlabel('Deletion (ordered by competition b rank)', fontsize=26)
     plt.ylabel('Coefficient of Variation', fontsize=26)
     plt.title('Variation in Fitness Estimates by Model', fontsize=34)
-    plt.xticks(index + bar_width, italic_genes, rotation="vertical",
+    plt.xticks(x_vals + bar_width, italic_genes, rotation="vertical",
                style="italic", fontsize=20)
     plt.legend(loc=2, fontsize=26)
 
