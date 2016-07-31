@@ -44,7 +44,6 @@ for ds, row in zip(distances, d_tri):
     row[:len(ds)] = ds
 print(d_tri)
 
-
 # Remove stripes empties and edges from b_ests before finding the
 # average.
 data_path = "../data/stripes/Stripes.txt"
