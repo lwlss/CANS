@@ -86,6 +86,13 @@ def get_genes(filename):
     return genes
 
 
+def get_MDRMDP(path):
+    """Get mdr*mdp from QFA R output."""
+    data = pd.read_csv(filename, set="\t", header=0)
+    mdrmdp = data["MDRMDP"]
+    return mdrmdp
+
+
 # Start using ColonyzerOutput.txt files for all parsing.
 def get_plate_data2(path, barcode=None, ignore_empty=False):
     """Return data necessary to make a Plate object.
