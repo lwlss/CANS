@@ -10,12 +10,12 @@ from cans2.process import find_best_fits, remove_edges
 
 genes = np.array(get_genes("data/p15/ColonyzerOutput.txt")[:384])
 
-best_no_bc = np.array(find_best_fits("../../results/p15_fits/full_plate/CompModel/*.json",
-                                     num=0, key="obj_fun"))
-best_bc = np.array(find_best_fits("../../results/p15_fits/full_plate/CompModelBC/*.json",
-                                  num=1, key="obj_fun"))
+best_comp = np.array(find_best_fits("../../results/p15_fits/full_plate/CompModel/*.json",
+                                    num=0, key="obj_fun"))
+best_comp_bc = np.array(find_best_fits("../../results/p15_fits/full_plate/CompModelBC/*.json",
+                                       num=1, key="obj_fun"))
 log_path = "../logistic_fit_C0_grid/results2/log_eq*.json"
-best_logs = np.array(find_best_fits(log_path, num=0, key="obj_funs_internals"))
+best_log_eq = np.array(find_best_fits(log_path, num=1, key="obj_funs_internals"))
 
 # Read in MDR*MDP from QFA R output.
 qfa_R_data = "data/p15/P15_QFA_GeneralisedLogisticFitnesses.txt"
@@ -29,7 +29,7 @@ log_eq_ests = []
 log_eq_rs = []
 log_eq_Ks = []
 log_eq_mdrmdps = []
-for est in best_logs:
+for est in best_log_eq:
     with open(est[0], "r") as f:
         # Get bs
         data = dict_to_numpy(json.load(f))
@@ -45,30 +45,31 @@ for est in best_logs:
 log_eq_ests = log_eq_mdrmdps
 # log_eq_ests = log_eq_rs
 
-bc_ests = []
-for est in best_bc:
+comp_bc_ests = []
+for est in best_comp_bc:
     with open(est[0], "r") as f:
-        bc_ests.append(json.load(f)["comp_est"][4:])
+        comp_bc_ests.append(json.load(f)["comp_est"][4:])
 
-no_bc_ests = []
-for est in best_no_bc:
+comp_ests = []
+for est in best_comp:
     with open(est[0], "r") as f:
-        no_bc_ests.append(json.load(f)["comp_est"][3:])
+        comp_ests.append(json.load(f)["comp_est"][3:])
 
 # Removees HIS3 edge cultures (other internal HIS3 exist)
 genes = remove_edges(genes, rows, cols)
+comp_ests = [remove_edges(np.array(est), rows, cols) for est in comp_ests]
+comp_bc_ests = [remove_edges(np.array(est), rows, cols) for est in comp_bc_ests]
 log_eq_ests = [remove_edges(np.array(est), rows, cols) for est in log_eq_ests]
 gen_log_ests = [remove_edges(np.array(est), rows, cols) for est in gen_log_ests]
-bc_ests = [remove_edges(np.array(est), rows, cols) for est in bc_ests]
-no_bc_ests = [remove_edges(np.array(est), rows, cols) for est in no_bc_ests]
 
-bc_ests = [["Compe Model".format(i), est] for i, est in enumerate(bc_ests)]
-no_bc_ests = [["CompModel_{0}".format(i), est] for i, est in enumerate(no_bc_ests)]
-gen_log_ests = [["Generalised Logistic", est] for est in gen_log_ests]
-log_eq_ests = [["Logistic Eq. Model".format(i), est] for i, est in enumerate(log_eq_ests)]
+# Currently format does nothing but we may with to compare multiple
+# fits of the same model.
+comp_ests = [["Compe".format(i), est] for i, est in enumerate(comp_ests)]
+comp_bc_ests = [["Comp BC".format(i), est] for i, est in enumerate(comp_bc_ests)]
+log_eq_ests = [["Log. Eq.".format(i), est] for i, est in enumerate(log_eq_ests)]
+gen_log_ests = [["Gen. Log.", est] for est in gen_log_ests]
 
-
-ests = bc_ests + no_bc_ests + log_eq_ests + gen_log_ests
+ests = comp_ests + comp_bc_ests + gen_log_ests + log_eq_ests
 
 # # Plot all genes
 # gene_set = set(genes)
