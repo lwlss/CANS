@@ -4,9 +4,11 @@ import csv
 import Bio.Cluster
 
 
-
+from cans2.plate import Plate
+from cans2.parser import get_plate_data2
 from cans2.model import CompModelBC
-from cans2.process import find_best_fits, test_bounds, spearmans_rho, mad_tril
+from cans2.process import find_best_fits, remove_edges, test_bounds, spearmans_rho, mad_tril
+
 
 bc_index = 1    # 0 for Stripe, 1 for filled.
 num_tops = 5    # Number of top fits to look at.
@@ -42,6 +44,19 @@ for ds, row in zip(distances, d_tri):
     row[:len(ds)] = ds
 print(d_tri)
 
+
+# Remove stripes empties and edges from b_ests before finding the
+# average.
+data_path = "../data/stripes/Stripes.txt"
+plates = [Plate(**get_plate_data2(data_path, bc["barcode"])) for bc in barcodes]
+genes = plates[0].genes
+# Boolean array for non-empties
+stripes_bool = genes != "EMPTY"
+rows, cols = plates[0].rows, plates[0].cols
+stripes_bool = remove_edges(stripes_bool, rows, cols)
+
+b_ests = [remove_edges(bs, rows, cols) for bs in b_ests]
+b_ests = np.array([np.extract(stripes_bool, bs) for bs in b_ests])
 mads = mad_tril(b_ests)
 print(mads)
 
