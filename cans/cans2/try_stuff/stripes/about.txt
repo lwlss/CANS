@@ -63,3 +63,10 @@ I need to check the b correlation/ranking for the best fits to see if
 they are consistent for each plate. We are unlikely to be finding
 global minima. If not, I might see if I can increase the precision of
 the solver and run again.
+
+
+I also plotted comparisons of the 1st best stripes and 3rd best fitted
+estimates and 4th best stripes and 5th best filled estimates (without
+parameter sharing) because the plate level parameters were more
+similar. This did not make any significant difference over just
+plotting the 1st best estimates for both (without parameter sharing).
