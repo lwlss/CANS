@@ -150,7 +150,7 @@ def correlate_ests(genes, query_gene, filename="", *ests):
     plt.close()
 
 
-def plot_c_of_v(genes, *ests):
+def plot_c_of_v(genes, title, *ests):
     """Plot coefficient of variation.
 
     Currently only works for len(ests) == 2
@@ -185,7 +185,10 @@ def plot_c_of_v(genes, *ests):
 
     plt.xlabel('Deletion (ordered by competition b rank)', fontsize=26)
     plt.ylabel('Coefficient of Variation', fontsize=26)
-    plt.title('Variation in Fitness Estimates by Model', fontsize=34)
+    if title:
+        plt.title(title, fontsize=34)
+    else:
+        plt.title('Variation in Fitness Estimates by Model', fontsize=34)
     plt.xticks(x_vals + bar_width, italic_genes, rotation="vertical",
                style="italic", fontsize=20)
     plt.legend(loc=2, fontsize=26)
