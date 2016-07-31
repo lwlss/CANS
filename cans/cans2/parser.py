@@ -86,9 +86,9 @@ def get_genes(filename):
     return genes
 
 
-def get_MDRMDP(path):
+def get_mdrmdp(path):
     """Get mdr*mdp from QFA R output."""
-    data = pd.read_csv(filename, set="\t", header=0)
+    data = pd.read_csv(path, sep="\t", header=0)
     mdrmdp = data["MDRMDP"]
     return mdrmdp
 
