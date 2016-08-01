@@ -25,8 +25,8 @@
 \usepackage{multicol}
 \setcounter{columnbadness}{7000}
 \setcounter{finalcolumnbadness}{7000}
-% In order to use column width figures with multicol.
-\usepackage{caption}
+% In order to use column width figures with multicol
+\usepackage[font={small,it}, labelfont=bf]{caption}
 \usepackage{graphicx}
 \newenvironment{Figure}
   {\par\medskip\noindent\minipage{\linewidth}}
@@ -66,7 +66,7 @@
 \renewcommand{\footrulewidth}{0.4pt}
 
 
-% Change title fonts , sizes and spacing.
+% Change title fonts, sizes and spacing.
 \usepackage{titlesec}
 \titleformat{\chapter}[display]
 {\normalfont\sffamily\huge\uppercase\bfseries}{\chaptertitlename\ \thechapter}{20pt}{\Huge}
@@ -89,7 +89,7 @@
 \renewcommand{\refname}{REFERENCES}    % Also make references title uppercase.
 
 
-%Import the natbib package and sets a bibliography  and citation styles
+%Import the natbib package and set a bibliography and citation styles
 \usepackage{natbib}
 \bibliographystyle{bioinfo}
 % \bibliographystyle{boostyle}
