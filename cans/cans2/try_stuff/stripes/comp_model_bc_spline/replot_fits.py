@@ -48,8 +48,8 @@ for r in results:
     plate.est_params = r["est_params"]
     best_plates.append(plate)
 
-plotter = Plotter(CompModelBC(), font_size=32.0, title_font_size=36.0,
-                  lw=3.0, ms=10.0, mew=2.0)
+plotter = Plotter(CompModelBC(), lw=3.0, ms=10.0, mew=2.0, xpad=15, ypad=30)
+
 plot_title = "Validation of Comp Model Using Stripes Data"
 #plot_title = "Best {0} {1} (obj_fun: {2:})"
 # plot_title = plot_title.format(model.name, barcode["name"],
