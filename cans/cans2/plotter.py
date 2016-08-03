@@ -29,7 +29,8 @@ def plot_scatter(x, y, title="", xlab="", ylab="", outfile=""):
 class Plotter(object):
 
     def __init__(self, model, font_size=32.0, title_font_size=36.0,
-                 lw=3.0, ms=10.0, mew=2.0, labelsize=20, labelpad=20):
+                 lw=3.0, ms=10.0, mew=2.0, labelsize=20, xpad=20,
+                 ypad=20):
         self.model = model
         # Can decide on other colours when adding models with more species.
         self.colours = ['b', 'y', 'r', 'g']
@@ -41,7 +42,9 @@ class Plotter(object):
         self.ms = ms
         self.mew = mew
         self.labelsize = labelsize    # Font size of major tick labels
-        self.labelpad = labelpad    # Gap between axes and x and y labels
+        # Gap between axes and x and y labels
+        self.xpad = xpad
+        self.ypad = ypad
 
 
     def _find_ymax(self, amounts):
@@ -64,8 +67,9 @@ class Plotter(object):
         # Hide tick and tick label of the big axes.
         plt.tick_params(labelcolor='none', top='off',
                         bottom='off', left='off', right='off')
-        plt.xlabel('Time [days]', fontsize=self.font_size, labelpad=self.labelpad)
-        plt.ylabel('Amount [arb. unit]', fontsize=self.font_size, labelpad=self.labelpad)
+        plt.xlabel('Time [days]', fontsize=self.font_size, labelpad=self.xpad)
+        plt.ylabel('Amount [arb. unit]', fontsize=self.font_size,
+                   labelpad=self.ypad)
         grid = AxesGrid(fig, 111, nrows_ncols=(rows, cols),
                         axes_pad=0.1, aspect=False, share_all=True)
         for i, ax in enumerate(grid):
