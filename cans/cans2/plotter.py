@@ -30,7 +30,7 @@ class Plotter(object):
 
     def __init__(self, model, font_size=32.0, title_font_size=36.0,
                  lw=3.0, ms=10.0, mew=2.0, labelsize=20, xpad=20,
-                 ypad=20):
+                 ypad=20, units=None):
         self.model = model
         # Can decide on other colours when adding models with more species.
         self.colours = ['b', 'y', 'r', 'g']
@@ -45,7 +45,10 @@ class Plotter(object):
         # Gap between axes and x and y labels
         self.xpad = xpad
         self.ypad = ypad
-
+        if units is None:    # List of unit labels
+            self.units = ["[days]", "[arb. unit]"]
+        else:
+            self.units = units
 
     def _find_ymax(self, amounts):
         ymax = np.amax(amounts)
@@ -67,8 +70,9 @@ class Plotter(object):
         # Hide tick and tick label of the big axes.
         plt.tick_params(labelcolor='none', top='off',
                         bottom='off', left='off', right='off')
-        plt.xlabel('Time [days]', fontsize=self.font_size, labelpad=self.xpad)
-        plt.ylabel('Amount [arb. unit]', fontsize=self.font_size,
+        plt.xlabel('Time {0}'.format(self.units[0]), fontsize=self.font_size,
+                   labelpad=self.xpad)
+        plt.ylabel('Amount {0}'.format(self.units[1]), fontsize=self.font_size,
                    labelpad=self.ypad)
         grid = AxesGrid(fig, 111, nrows_ncols=(rows, cols),
                         axes_pad=0.1, aspect=False, share_all=True)
@@ -86,7 +90,7 @@ class Plotter(object):
                 plt.setp(ax.get_yticklabels(which="both"), visible=False)
 
         rc('text', usetex=True)
-        fig.suptitle(title, fontsize=self.title_font_size)
+#        fig.suptitle(title, fontsize=self.title_font_size)
 
         return fig, grid
 
