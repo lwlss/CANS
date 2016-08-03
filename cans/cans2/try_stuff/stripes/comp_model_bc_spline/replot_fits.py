@@ -48,8 +48,8 @@ for r in results:
     plate.est_params = r["est_params"]
     best_plates.append(plate)
 
-
-plotter = Plotter(CompModelBC())
+plotter = Plotter(CompModelBC(), font_size=32.0, title_font_size=36.0,
+                  lw=3.0, ms=10.0, mew=2.0)
 plot_title = "Validation of Comp Model Using Stripes Data"
 #plot_title = "Best {0} {1} (obj_fun: {2:})"
 # plot_title = plot_title.format(model.name, barcode["name"],
@@ -58,8 +58,8 @@ plot_title = "Validation of Comp Model Using Stripes Data"
 #                     plot_title, vis_ticks=False, lw=2.0)
 
 # Plot validation for a zone
-coords = (3, 3)
-rows, cols = 8, 8
+coords = (8, 9)
+rows, cols = 3, 3
 
 comp_models = [CompModel(), CompModelBC()]
 model_name = results[0]["model"]
@@ -112,6 +112,7 @@ for bc, plate in zip(barcodes, best_plates):
 # for params in plot_params:
 #     params[:4] = plate_lvl[:4]
 
-plotter.plot_zone_est(data_plates, plot_params, models, coords, rows,
-                      cols, legend=True)
-
+plot_title = "Attempted validation of the Competition Model across two plates"
+plotter.plot_zone_est(data_plates, ["Stripes", "Filled"], plot_params,
+                      models, coords, rows, cols, legend=False, title=plot_title,
+                      plot_types=["Est.", "Sim."])
