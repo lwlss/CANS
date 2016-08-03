@@ -46,7 +46,7 @@ plate = Plate(fit_data["rows"], fit_data["cols"])
 models = [CompModel(), CompModelBC()]
 model_name = fit_data["model"]
 model = next((m for m in models if m.name == fit_data["model"]), None)
-plotter = Plotter(model)
+
 
 # Add necessary data attributes to produce plots
 plate.times = fit_data['times']
@@ -54,23 +54,42 @@ plate.c_meas = fit_data['c_meas']
 # plate.sim_params = fit_data['comp_est']
 plate.set_rr_model(model, fit_data['comp_est'])
 
-
+plotter = Plotter(model, lw=3.0, ms=10.0, mew=2.0)
 #temp
 from cans2.zoning import resim_zone
 plate.sim_params = fit_data["comp_est"]
-zone = resim_zone(plate, CompModelBC(), coords=(5, 5), rows=3, cols=3)
-zone.set_rr_model(model, zone.sim_params)
-plotter.plot_est_rr(zone, zone.sim_params, ms=10.0, mew=1.5, lw=2.5, vis_ticks=True)
+# zone = resim_zone(plate, CompModelBC(), coords=(5, 5), rows=3, cols=3)
+# zone.set_rr_model(model, zone.sim_params)
+plot_title = r'Best Competition Model BC Fit to \textit{cdc13-1} P15 at 27C (R5, C18)' # (argv {0}; b_guess {1})'
+# plotter.plot_est_rr(zone, zone.sim_params, vis_ticks=True,
+#                     title=plot_title)
 
+coords = [(4, 17), (0, 0)]
+rows = [3, 16]
+cols = [3, 24]
+plot_titles = [
+    r'Best Competition Model BC Fit to \textit{cdc13-1} P15 at 27C (R5, C18)',
+    r'Best Competition Model BC Fit to \textit{cdc13-1} P15 at 27C'
+]
+vis_ticks = [True, False]
+plot_zip = zip(coords, rows, cols, plot_titles, vis_ticks)
+for coord, r, c, title, vts in plot_zip:
+    # Don't want to resim just plot the zone with the new function.
+    # "sim_params" are actually est_params
+    plotter.plot_zone_est([plate], [""],
+                          [plate.sim_params], [CompModelBC()], coord,
+                          r, c, legend=True, title=title,
+                          plot_types=["Est."], vis_ticks=vts)
 
+assert False
 
-plot_title = 'Best Competition Model BC Fit to p15' # (argv {0}; b_guess {1})'
-plot_title = plot_title.format(argv, b_guess)
+plot_title = 'Best Competition Model BC Fit to P15' # (argv {0}; b_guess {1})'
+plot_title = r'Best Competition Model BC Fit to \textit{cdc13-1} P15 at 27C' # (argv {0}; b_guess {1})'
+#plot_title = plot_title.format(argv, b_guess)
 plotter.plot_est_rr(plate, fit_data["comp_est"], title=plot_title,
-                    sim=False, legend=False, ms=10.0, mew=1.5, lw=2.5,
-                    vis_ticks=True)
+                    sim=False, legend=False, vis_ticks=False)
 
 plot_title = 'Competition Model BC init guess for p15 (argv {0}; b_guess {1})'
 plot_title = plot_title.format(argv, b_guess)
 plotter.plot_est_rr(plate, fit_data["init_guess"], title=plot_title,
-                    sim=False, legend=False, ms=10.0, mew=0.5, lw=2.5)
+                    sim=False, legend=False )
