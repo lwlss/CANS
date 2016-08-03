@@ -83,14 +83,14 @@ class Plotter(object):
             for tick in ax.xaxis.get_major_ticks():
                 tick.label.set_fontsize(self.labelsize)
             for tick in ax.yaxis.get_major_ticks():
-                    tick.label.set_fontsize(self.labelsize)
+                tick.label.set_fontsize(self.labelsize)
 
             if not vis_ticks:
                 plt.setp(ax.get_xticklabels(which="both"), visible=False)
                 plt.setp(ax.get_yticklabels(which="both"), visible=False)
 
         rc('text', usetex=True)
-#        fig.suptitle(title, fontsize=self.title_font_size)
+        fig.suptitle(title, fontsize=self.title_font_size)
 
         return fig, grid
 
@@ -268,7 +268,7 @@ class Plotter(object):
 
         fig, grid = self._make_grid(zone,
                                     np.array(zone_smooth_amounts).flatten(),
-                                    False, title, vis_ticks=True)
+                                    False, title, vis_ticks)
 
         if plot_types is None:
             plot_types = ["Est." for plate in plates]
