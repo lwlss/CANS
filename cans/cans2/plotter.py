@@ -105,8 +105,7 @@ class Plotter(object):
     # Plate may have plate.inde_est and plate.comp_est so need to pass
     # one of these.
     def plot_est_rr(self, plate, est_params, title='Estimated Growth',
-                    sim=False, filename=None, legend=False, ms=6.0,
-                    mew=0.5, lw=1.0, vis_ticks=True):
+                    sim=False, filename=None, legend=False, vis_ticks=True):
         # Smooth times for sims.
         sim_times = np.linspace(plate.times[0], plate.times[-1], 100)
         # Cannot deepcopy swig objects belonging to plate so define
@@ -129,10 +128,10 @@ class Plotter(object):
                 # Plot c_meas.
                 ax.plot(plate.times, plate.c_meas[i::plate.no_cultures],
                         'x', color="black", label='Observed Cells',
-                        ms=ms, mew=mew)
+                        ms=self.ms, mew=self.mew)
             for j, species in enumerate(self.model.species):
                 ax.plot(sim_times, est_amounts[j][:, i], self.colours[j],
-                        label="Est " + species, lw=lw)
+                        label="Est " + species, lw=self.lw)
                 if j == 0: # and i in plate.empties:
                     # Do not plot c_meas for empty cultures.
                     continue
@@ -141,7 +140,7 @@ class Plotter(object):
                     # unobservable, but known, N.)
                     ax.plot(plate.times, sim_amounts[j][:, i],
                             'x' + self.colours[j],
-                            label="True"+species, ms=ms, mew=mew)
+                            label="True"+species, ms=self.ms, mew=self.mew)
                 else:
                     continue
 
