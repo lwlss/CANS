@@ -4,6 +4,7 @@ import copy
 
 
 from mpl_toolkits.axes_grid1 import AxesGrid
+from matplotlib import rc
 
 
 from cans2.plate import Plate
@@ -28,7 +29,7 @@ def plot_scatter(x, y, title="", xlab="", ylab="", outfile=""):
 class Plotter(object):
 
     def __init__(self, model, font_size=32.0, title_font_size=36.0,
-                 lw=3.0, ms=10.0, mew=2.0):
+                 lw=3.0, ms=10.0, mew=2.0, labelsize=20, labelpad=20):
         self.model = model
         # Can decide on other colours when adding models with more species.
         self.colours = ['b', 'y', 'r', 'g']
@@ -39,6 +40,8 @@ class Plotter(object):
         self.lw = lw
         self.ms = ms
         self.mew = mew
+        self.labelsize = labelsize    # Font size of major tick labels
+        self.labelpad = labelpad    # Gap between axes and x and y labels
 
 
     def _find_ymax(self, amounts):
@@ -55,24 +58,31 @@ class Plotter(object):
         else:
             ymax = self._find_ymax(np.append(amounts, plate.c_meas))
         fig = plt.figure()
-        fig.suptitle(title, fontsize=self.title_font_size)
         # http://stackoverflow.com/a/36542971
         # Add big axes and hide frame.
         fig.add_subplot(111, frameon=False)
         # Hide tick and tick label of the big axes.
         plt.tick_params(labelcolor='none', top='off',
                         bottom='off', left='off', right='off')
-        plt.xlabel('Time [days]', fontsize=self.font_size)
-        plt.ylabel('Amount [arb. unit]', fontsize=self.font_size)
+        plt.xlabel('Time [days]', fontsize=self.font_size, labelpad=self.labelpad)
+        plt.ylabel('Amount [arb. unit]', fontsize=self.font_size, labelpad=self.labelpad)
         grid = AxesGrid(fig, 111, nrows_ncols=(rows, cols),
                         axes_pad=0.1, aspect=False, share_all=True)
         for i, ax in enumerate(grid):
             ax.set_ylim(0.0, ymax)
             ax.grid()
 
+            for tick in ax.xaxis.get_major_ticks():
+                tick.label.set_fontsize(self.labelsize)
+            for tick in ax.yaxis.get_major_ticks():
+                    tick.label.set_fontsize(self.labelsize)
+
             if not vis_ticks:
                 plt.setp(ax.get_xticklabels(which="both"), visible=False)
                 plt.setp(ax.get_yticklabels(which="both"), visible=False)
+
+        rc('text', usetex=True)
+        fig.suptitle(title, fontsize=self.title_font_size)
 
         return fig, grid
 
@@ -155,7 +165,7 @@ class Plotter(object):
             sim_amounts = np.split(plate.sim_amounts, self.model.no_species,
                                    axis=1)
 
-        fig, grid = self._make_grid(plate, amounts, sim, title, vis_ticks=True)
+        fig, grid = self._make_grid(plate, amounts, sim, title, vis_ticks)
 
         for i, ax in enumerate(grid):
             if not sim and i not in plate.empties:
@@ -188,7 +198,8 @@ class Plotter(object):
     # competition model or just handle the models differently.
     def plot_zone_est(self, plates, plate_names, est_params, models,
                       coords, rows, cols, title="Zone Estimates",
-                      legend=False, filename=None, plot_types=None):
+                      legend=False, filename=None, plot_types=None,
+                      vis_ticks=True):
         """Plot estimates for a zone.
 
         Plotting a zone from a full plate estimate requires simulating
@@ -255,19 +266,24 @@ class Plotter(object):
         if plot_types is None:
             plot_types = ["Est." for plate in plates]
 
+        species_labels = {
+            "C": "Cells",
+            "N": "Nutrients",
+            }
+
         for i, ax in enumerate(grid):
             # Plot c_meas.
             for plate_name, c, zone in zip(plate_names, self.c_meas_colors, zones):
                 ax.plot(zone.times, zone.c_meas[i::zone.no_cultures],
                         'x', color=c,
-                        label='Obs. C ({0})'.format(plate_name),
+                        label='Obs. Cells {0}'.format(plate_name),
                         ms=self.ms, mew=self.mew)
             # Plot smooth amounts for each estimate.
             plot_zip = zip(plate_names, plot_types, zone_smooth_amounts, models)
             for plate_name, plot_type, smooth_amounts, model in plot_zip:
                 for j, (amounts, species) in enumerate(zip(smooth_amounts, model.species)):
                     ax.plot(smooth_times, amounts[:, i], self.colours[j],
-                            label="{0} ".format(plot_type) + species + " ({0})".format(plate_name),
+                            label="{0} ".format(plot_type) + species_labels[species] + " {0}".format(plate_name),
                             lw=self.lw, ls=self.linestyles[plate_names.index(plate_name)])
                             # label="Est {0} ".format(model.name) + species, lw=self.lw)
 
