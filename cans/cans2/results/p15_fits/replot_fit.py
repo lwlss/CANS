@@ -47,42 +47,43 @@ models = [CompModel(), CompModelBC()]
 model_name = fit_data["model"]
 model = next((m for m in models if m.name == fit_data["model"]), None)
 
-
 # Add necessary data attributes to produce plots
 plate.times = fit_data['times']
 plate.c_meas = fit_data['c_meas']
 # plate.sim_params = fit_data['comp_est']
 plate.set_rr_model(model, fit_data['comp_est'])
-
-plotter = Plotter(model, lw=3.0, ms=10.0, mew=2.0, xpad=15, ypad=30)
-#temp
-from cans2.zoning import resim_zone
 plate.sim_params = fit_data["comp_est"]
+
+# Do not want to resimulate a zone but zoom.
+# from cans2.zoning import resim_zone
 # zone = resim_zone(plate, CompModelBC(), coords=(5, 5), rows=3, cols=3)
 # zone.set_rr_model(model, zone.sim_params)
-plot_title = r'Best Competition Model BC Fit to \textit{cdc13-1} P15 at 27C (R5, C18)' # (argv {0}; b_guess {1})'
 # plotter.plot_est_rr(zone, zone.sim_params, vis_ticks=True,
 #                     title=plot_title)
 
-coords = [(4, 17), (0, 0)]
-rows = [3, 16]
-cols = [3, 24]
-plot_titles = [
-    r'Best Competition Model BC Fit to \textit{cdc13-1} P15 at 27C (R5, C18)',
-    r'Best Competition Model BC Fit to \textit{cdc13-1} P15 at 27C'
-]
-vis_ticks = [True, False]
-plot_zip = zip(coords, rows, cols, plot_titles, vis_ticks)
-for coord, r, c, title, vts in plot_zip:
-    # Don't want to resim just plot the zone with the new function.
-    # "sim_params" are actually est_params
-    plotter.plot_zone_est([plate], [""],
-                          [plate.sim_params], [CompModelBC()], coord,
-                          r, c, legend=True, title=title,
-                          plot_types=["Est."], vis_ticks=vts)
+# coords = (4, 17)
+# rows, cols = 3, 3
+# plotter = Plotter(model, lw=3.0, ms=10.0, mew=2.0, xpad=15, ypad=30)
+# plot_title = r"Best Competition Model BC Fit to \textit{cdc13-1} P15 at 27C (R5, C18)"
+# plotter.plot_zone_est([plate], [""],
+#                       [plate.sim_params], [CompModelBC()], coords,
+#                       rows, cols, legend=True, title=plot_title,
+#                       plot_types=["Est."], vis_ticks=True)
+
+
+rows, cols = 12, 20
+coords = (2, 2)
+plot_title = r'Best Competition Model BC Fit to \textit{cdc13-1} P15 at 27C' # (R2, C2) 12x20'
+plotter = Plotter(model, lw=3.0, ms=10.0, mew=2.0, xpad=-5, ypad=-8)
+plotter.plot_zone_est([plate], [""],
+                      [plate.sim_params], [CompModelBC()], coords,
+                      rows, cols, legend=False, title=plot_title,
+                      plot_types=["Est."], vis_ticks=False)
+
 
 assert False
-
+plotter = Plotter(model, lw=3.0, ms=10.0, mew=2.0, xpad=-5, ypad=-8,
+                  units=["", ""])
 plot_title = 'Best Competition Model BC Fit to P15' # (argv {0}; b_guess {1})'
 plot_title = r'Best Competition Model BC Fit to \textit{cdc13-1} P15 at 27C' # (argv {0}; b_guess {1})'
 #plot_title = plot_title.format(argv, b_guess)
