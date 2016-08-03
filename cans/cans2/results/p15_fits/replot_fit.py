@@ -71,26 +71,33 @@ plate.sim_params = fit_data["comp_est"]
 #                       plot_types=["Est."], vis_ticks=True)
 
 
-rows, cols = 12, 20
-coords = (2, 2)
-plot_title = r'Best Competition Model BC Fit to \textit{cdc13-1} P15 at 27C' # (R2, C2) 12x20'
-plotter = Plotter(model, lw=3.0, ms=10.0, mew=2.0, xpad=-5, ypad=-8)
-plotter.plot_zone_est([plate], [""],
-                      [plate.sim_params], [CompModelBC()], coords,
-                      rows, cols, legend=False, title=plot_title,
-                      plot_types=["Est."], vis_ticks=False)
+# rows, cols = 12, 20
+# coords = (2, 2)
+# plot_title = r'Best Competition Model BC Fit to \textit{cdc13-1} P15 at 27C' # (R2, C2) 12x20'
+# plotter = Plotter(model, lw=3.0, ms=10.0, mew=2.0, xpad=-5, ypad=-8)
+# plotter.plot_zone_est([plate], [""],
+#                       [plate.sim_params], [CompModelBC()], coords,
+#                       rows, cols, legend=False, title=plot_title,
+#                       plot_types=["Est."], vis_ticks=False)
 
 
-assert False
-plotter = Plotter(model, lw=3.0, ms=10.0, mew=2.0, xpad=-5, ypad=-8,
-                  units=["", ""])
-plot_title = 'Best Competition Model BC Fit to P15' # (argv {0}; b_guess {1})'
-plot_title = r'Best Competition Model BC Fit to \textit{cdc13-1} P15 at 27C' # (argv {0}; b_guess {1})'
-#plot_title = plot_title.format(argv, b_guess)
-plotter.plot_est_rr(plate, fit_data["comp_est"], title=plot_title,
-                    sim=False, legend=False, vis_ticks=False)
 
-plot_title = 'Competition Model BC init guess for p15 (argv {0}; b_guess {1})'
-plot_title = plot_title.format(argv, b_guess)
-plotter.plot_est_rr(plate, fit_data["init_guess"], title=plot_title,
-                    sim=False, legend=False )
+# plotter = Plotter(model, lw=3.0, ms=10.0, mew=2.0, xpad=-5, ypad=-8,
+#                   units=["", ""])
+# plot_title = 'Best Competition Model BC Fit to P15' # (argv {0}; b_guess {1})'
+# plot_title = r'Best Competition Model BC Fit to \textit{cdc13-1} P15 at 27C' # (argv {0}; b_guess {1})'
+# #plot_title = plot_title.format(argv, b_guess)
+# plotter.plot_est_rr(plate, fit_data["comp_est"], title=plot_title,
+#                     sim=False, legend=False, vis_ticks=False)
+
+
+coords = (4, 17)
+rows, cols = 3, 3
+# rows, cols = 12, 20
+# coords = (2, 2)
+plot_title = r'Comp Model BC Simulation from Imaginary Neighbour Guess' # for \textit{cdc13-1} P15 at 27C (R5, C18)'
+plotter = Plotter(model, lw=3.0, ms=10.0, mew=2.0, xpad=15, ypad=30)
+plotter.plot_zone_est([plate], [""], [fit_data["init_guess"]],
+                      [CompModelBC()], coords, rows, cols,
+                      legend=True, title=plot_title,
+                      plot_types=["Sim."], vis_ticks=True)
