@@ -114,5 +114,5 @@ for bc, plate in zip(barcodes, best_plates):
 
 plot_title = "Attempted validation of the Competition Model across two plates"
 plotter.plot_zone_est(data_plates, ["Stripes", "Filled"], plot_params,
-                      models, coords, rows, cols, legend=False, title=plot_title,
-                      plot_types=["Est.", "Sim."])
+                      models, coords, rows, cols, legend=False,
+                      title=plot_title, plot_types=["Est.", "Sim."])
