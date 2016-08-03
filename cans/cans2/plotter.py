@@ -27,12 +27,18 @@ def plot_scatter(x, y, title="", xlab="", ylab="", outfile=""):
 
 class Plotter(object):
 
-    def __init__(self, model):
+    def __init__(self, model, font_size=32.0, title_font_size=36.0,
+                 lw=3.0, ms=10.0, mew=2.0):
         self.model = model
         # Can decide on other colours when adding models with more species.
         self.colours = ['b', 'y', 'r', 'g']
         self.linestyles = ['-', '--', '-.', ':']
         self.c_meas_colors = ['k', 'r', 'c', 'm']
+        self.font_size = font_size
+        self.title_font_size = title_font_size
+        self.lw = lw
+        self.ms = ms
+        self.mew = mew
 
 
     def _find_ymax(self, amounts):
@@ -49,15 +55,15 @@ class Plotter(object):
         else:
             ymax = self._find_ymax(np.append(amounts, plate.c_meas))
         fig = plt.figure()
-        fig.suptitle(title, fontsize=26)
+        fig.suptitle(title, fontsize=self.title_font_size)
         # http://stackoverflow.com/a/36542971
         # Add big axes and hide frame.
         fig.add_subplot(111, frameon=False)
         # Hide tick and tick label of the big axes.
         plt.tick_params(labelcolor='none', top='off',
                         bottom='off', left='off', right='off')
-        plt.xlabel('Time [days]', fontsize=20)
-        plt.ylabel('Amount [arb. unit]', fontsize=20)
+        plt.xlabel('Time [days]', fontsize=self.font_size)
+        plt.ylabel('Amount [arb. unit]', fontsize=self.font_size)
         grid = AxesGrid(fig, 111, nrows_ncols=(rows, cols),
                         axes_pad=0.1, aspect=False, share_all=True)
         for i, ax in enumerate(grid):
@@ -180,9 +186,9 @@ class Plotter(object):
 
     # Should make without roadrunnner to plot logistic eq. and
     # competition model or just handle the models differently.
-    def plot_zone_est(self, plates, est_params, models, coords, rows,
-                      cols, title="Zone Estimates", legend=False,
-                      filename=None, ms=6.0, mew=0.5, lw=1.0):
+    def plot_zone_est(self, plates, plate_names, est_params, models,
+                      coords, rows, cols, title="Zone Estimates",
+                      legend=False, filename=None, plot_types=None):
         """Plot estimates for a zone.
 
         Plotting a zone from a full plate estimate requires simulating
@@ -193,6 +199,9 @@ class Plotter(object):
         estimates are from the same Plate you need only provide one
         Plate in the list.
 
+        plate_neams : list of strings. Names of plates to use in
+        figure legend.
+
         est_params : list of parameter estimate from fits of different
         models.
 
@@ -202,6 +211,10 @@ class Plotter(object):
         (indices start from zero).
 
         row, cols : rows and columns for zone.
+
+        plot_types : list of strings for plot labels. If the first
+        plate is to plot the estimate and the second a simulation use
+        e.g. ["Est", "Sim"]
 
         """
         smooth_times = np.linspace(plates[0].times[0], plates[0].times[-1], 100)
@@ -239,24 +252,31 @@ class Plotter(object):
                                     np.array(zone_smooth_amounts).flatten(),
                                     False, title, vis_ticks=True)
 
+        if plot_types is None:
+            plot_types = ["Est." for plate in plates]
+
         for i, ax in enumerate(grid):
             # Plot c_meas.
-            for p, (c, zone) in enumerate(zip(self.c_meas_colors, zones)):
+            for plate_name, c, zone in zip(plate_names, self.c_meas_colors, zones):
                 ax.plot(zone.times, zone.c_meas[i::zone.no_cultures],
-                        'x', color=c, label='Observed Cells Plate {0}'.format(p),
-                        ms=ms, mew=mew)
+                        'x', color=c,
+                        label='Obs. C ({0})'.format(plate_name),
+                        ms=self.ms, mew=self.mew)
             # Plot smooth amounts for each estimate.
-            for e, (smooth_amounts, model) in enumerate(zip(zone_smooth_amounts, models)):
+            plot_zip = zip(plate_names, plot_types, zone_smooth_amounts, models)
+            for plate_name, plot_type, smooth_amounts, model in plot_zip:
                 for j, (amounts, species) in enumerate(zip(smooth_amounts, model.species)):
                     ax.plot(smooth_times, amounts[:, i], self.colours[j],
-                            label="Est {0} ".format(e) + species,
-                            lw=lw, ls=self.linestyles[e])
-                            # label="Est {0} ".format(model.name) + species, lw=lw)
+                            label="{0} ".format(plot_type) + species + " ({0})".format(plate_name),
+                            lw=self.lw, ls=self.linestyles[plate_names.index(plate_name)])
+                            # label="Est {0} ".format(model.name) + species, lw=self.lw)
 
         self._hide_last_ticks(grid, zone.rows, zone.cols)
 
+        # plt.tight_layout()
+
         if legend:
-            grid[-1].legend(loc='best')
+            grid[-1].legend(loc='best', fontsize=self.font_size)
         if filename is None:
             plt.show()
         else:
