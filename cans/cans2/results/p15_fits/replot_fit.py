@@ -54,7 +54,7 @@ plate.c_meas = fit_data['c_meas']
 # plate.sim_params = fit_data['comp_est']
 plate.set_rr_model(model, fit_data['comp_est'])
 
-plotter = Plotter(model, lw=3.0, ms=10.0, mew=2.0)
+plotter = Plotter(model, lw=3.0, ms=10.0, mew=2.0, ypad=30)
 #temp
 from cans2.zoning import resim_zone
 plate.sim_params = fit_data["comp_est"]
