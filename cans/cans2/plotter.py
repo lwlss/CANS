@@ -275,13 +275,26 @@ class Plotter(object):
             "N": "Nutrients",
             }
 
+        # Check if c_meas are equal for the plates so don't plot
+        # twice. Currently only checks for two.
+        if len(plates) > 1:
+            same_c_meas = all(plates[0].c_meas == plates[1].c_meas)
+        else:
+            same_c_meas = False
+
         for i, ax in enumerate(grid):
             # Plot c_meas.
             for plate_name, c, zone in zip(plate_names, self.c_meas_colors, zones):
-                ax.plot(zone.times, zone.c_meas[i::zone.no_cultures],
-                        'x', color=c,
-                        label='Obs. Cells {0}'.format(plate_name),
-                        ms=self.ms, mew=self.mew)
+                if same_c_meas:
+                    ax.plot(zone.times, zone.c_meas[i::zone.no_cultures],
+                            'x', color=c, label='Obs. Cells',
+                            ms=self.ms, mew=self.mew)
+                    break
+                else:
+                    ax.plot(zone.times, zone.c_meas[i::zone.no_cultures],
+                            'x', color=c,
+                            label='Obs. Cells {0}'.format(plate_name),
+                            ms=self.ms, mew=self.mew)
             # Plot smooth amounts for each estimate.
             plot_zip = zip(plate_names, plot_types, zone_smooth_amounts, models)
             for plate_name, plot_type, smooth_amounts, model in plot_zip:
