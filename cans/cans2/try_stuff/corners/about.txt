@@ -1,0 +1,4 @@
+Compare the Comp Model and Comp Model BC fits to P15 by plotting the
+top left hand corner 3x3 of each. Could do this on one plot. Also find
+the objective function for the first layer and first two layers for
+both and label.
