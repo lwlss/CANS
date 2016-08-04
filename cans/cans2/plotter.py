@@ -29,8 +29,8 @@ def plot_scatter(x, y, title="", xlab="", ylab="", outfile=""):
 class Plotter(object):
 
     def __init__(self, model, font_size=32.0, title_font_size=36.0,
-                 lw=3.0, ms=10.0, mew=2.0, labelsize=20, xpad=20,
-                 ypad=20, units=None):
+                 legend_font_size=26.0, lw=3.0, ms=10.0, mew=2.0,
+                 labelsize=20, xpad=20, ypad=20, units=None):
         self.model = model
         # Can decide on other colours when adding models with more species.
         self.colours = ['b', 'y', 'r', 'g']
@@ -38,6 +38,7 @@ class Plotter(object):
         self.c_meas_colors = ['k', 'r', 'c', 'm']
         self.font_size = font_size
         self.title_font_size = title_font_size
+        self.legend_font_size = legend_font_size
         self.lw = lw
         self.ms = ms
         self.mew = mew
@@ -277,7 +278,7 @@ class Plotter(object):
 
         # Check if c_meas are equal for the plates so don't plot
         # twice. Currently only checks for two.
-        if len(plates) > 1:
+        if len(plates) == 2:
             same_c_meas = all(plates[0].c_meas == plates[1].c_meas)
         else:
             same_c_meas = False
@@ -309,7 +310,7 @@ class Plotter(object):
         # plt.tight_layout()
 
         if legend:
-            grid[-1].legend(loc='best', fontsize=self.font_size)
+            grid[-1].legend(loc='best', fontsize=self.legend_font_size)
         if filename is None:
             plt.show()
         else:
