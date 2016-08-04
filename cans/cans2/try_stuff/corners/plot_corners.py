@@ -21,11 +21,13 @@ for plate, data in zip(plates, fit_data):
     plate.est_params = data["comp_est"]
 est_params = [plate.est_params for plate in plates]
 
-coords = (0, 0)
+corner_coords = [(0, 0), (0, 21), (13, 0), (13, 21)]
 rows, cols = 3, 3
 plotter = Plotter(CompModelBC() , lw=3.0, ms=10.0, mew=2.0, xpad=15, ypad=30)
 plot_title = r"Best Competition Fits to Corner of \textit{cdc13-1} P15 at 27C"
-plotter.plot_zone_est(plates, ["Comp. Model", "Comp. Model BC"],
-                      est_params, models, coords, rows, cols,
-                      legend=True, title=plot_title,
-                      plot_types=["Est."], vis_ticks=True)
+
+for coords in corner_coords[0]:
+    plotter.plot_zone_est(plates, ["Comp. Model", "Comp. Model BC"],
+                          est_params, models, coords, rows, cols,
+                          legend=False, title=plot_title,
+                          plot_types=["Est.", "Est."], vis_ticks=True)
