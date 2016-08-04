@@ -258,13 +258,10 @@ class Plotter(object):
 
         zone_smooth_amounts = []
         for model, smooth_amounts in zip(models, smooth_plate.smooth_amounts):
-
-            smooth_zone_amounts = get_zone_amounts(smooth_amounts, plate,
-                                                   model, coords, rows, cols)
-            smooth_zone_amounts = np.split(smooth_zone_amounts,
-                                           self.model.no_species,
-                                           axis=1)
-            zone_smooth_amounts.append(smooth_zone_amounts)
+            sim_amounts = get_zone_amounts(smooth_amounts, plate, model,
+                                           coords, rows, cols)
+            sim_amounts = np.split(sim_amounts, self.model.no_species, axis=1)
+            zone_smooth_amounts.append(sim_amounts)
 
         fig, grid = self._make_grid(zone,
                                     np.array(zone_smooth_amounts).flatten(),
