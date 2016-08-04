@@ -30,7 +30,7 @@ plot_title = r"Best Competition Fits to Corner of \textit{cdc13-1} P15 at 27C"
 assert all(plates[0].c_meas == plates[1].c_meas)
 
 for coords in corner_coords:
-    plotter.plot_zone_est(plates, ["Comp.", "Comp. BC"],
+    plotter.plot_zone_est(plates, ["(Comp.)", "(Comp. BC)"],
                           est_params, models, coords, rows, cols,
                           legend=True, title=plot_title,
                           plot_types=["Est.", "Est."], vis_ticks=True)
