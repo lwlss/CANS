@@ -20,6 +20,51 @@ models = [CompModel(), CompModelBC()]
 for plate, data in zip(plates, fit_data):
     plate.est_params = data["comp_est"]
 est_params = [plate.est_params for plate in plates]
+est_bs = [p.est_params[-p.no_cultures:] for p in plates]
+
+# 1) Obj fun for depth one and two both plates.
+
+# 2) COV between edge HIS3.
+def get_ring(array, rows, cols, depth):
+    """Get a ring of values from a square array.
+
+    array : A flat array, square-array or list.
+
+    rows, cols : the number of rows and columns in the parent
+    square array.
+
+    depth : depth of ring (0 for edges)
+
+    """
+    assert depth < min(rows, cols)/2.0
+    array = np.array(array)
+    array = array.flatten()
+    array.shape = (rows, cols)
+    if depth > 0:
+        array = array[depth:-depth, depth:-depth]
+    plate = Plate(*array.shape)
+    array = array.flatten()
+    array = array[plate.edges]
+    return array
+
+
+depth_0_bs = [get_ring(bs, p.rows, p.cols, 0) for bs, p in zip(est_bs, plates)]
+depth_1_bs = [get_ring(bs, p.rows, p.cols, 1) for bs, p in zip(est_bs, plates)]
+
+# Now need to get c_meas for all of the edges. And depth 1. Can use zoning.
+
+second_b = [get_ring(est, p.est_params[-]   # In one from the edges
+for plate in plates:
+    bs = plate.est_params[-plate.no_cultures:]
+    bs.shape = (plate.rows, plate.cols)
+    bs = bs[1:-1, 1:-1]
+    dummy_plate = Plate(*bs.shape)
+    bs = bs.flatten()
+    bs = bs[dummy_plate.edges]
+    second_b.append(edges)
+
+# Do the same for
+assert False
 
 corner_coords = [(0, 0), (0, 21), (13, 0), (13, 21)]
 rows, cols = 3, 3
