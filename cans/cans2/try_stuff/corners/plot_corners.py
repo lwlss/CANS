@@ -27,61 +27,84 @@ est_bs = [p.est_params[-p.no_cultures:] for p in plates]
 # 1) Obj fun for depth one and two both plates.
 
 # 2) COV between edge HIS3.
-def get_ring(array, rows, cols, depth):
-    """Get a ring of values from a square array.
+# def get_ring(array, rows, cols, depth):
+#     """Get a ring of values from a square array.
 
-    array : A flat array, square-array or list.
+#     array : A flat array, square-array or list.
 
-    rows, cols : the number of rows and columns in the parent
-    square array.
+#     rows, cols : the number of rows and columns in the parent
+#     square array.
 
-    depth : depth of ring (0 for edges)
+#     depth : depth of ring (0 for edges)
+
+#     """
+#     assert depth < min(rows, cols)/2.0
+#     array = np.array(array)
+#     array = array.flatten()
+#     array.shape = (rows, cols)
+#     if depth > 0:
+#         array = array[depth:-depth, depth:-depth]
+#     plate = Plate(*array.shape)
+#     array = array.flatten()
+#     array = array[plate.edges]
+#     return array
+
+
+# def get_c_meas_ring(plate, depth):
+#     """Get c_meas values from a ring of cultures.
+
+#     depth : The depth of the ring. E.g. for the cultures one in from
+#     the edge use depth 1.
+
+#     """
+#     coords = (depth, depth)
+#     rows = plate.rows - 2*depth
+#     cols = plate.cols - 2*depth
+#     zone = get_plate_zone(plate, coords, cols, rows)
+#     c_meas = zone.c_meas[:]
+#     np.rashape(c_meas (len(zone.times), zone.no_cultures), "F")
+#     c_meas = c_meas[:, zone.edges]
+#     c_meas = c_meas.flatten("F")
+#     return c_meas
+
+
+def get_outer_indices(rows, cols, depth):
+    """Get the indices of cultures at the edge.
+
+    depth : How many rows/cols in. E.g. one for just the very outer
+    indices. Two for the 1st and 2nd outers.
 
     """
-    assert depth < min(rows, cols)/2.0
-    array = np.array(array)
-    array = array.flatten()
-    array.shape = (rows, cols)
-    if depth > 0:
-        array = array[depth:-depth, depth:-depth]
-    plate = Plate(*array.shape)
-    array = array.flatten()
-    array = array[plate.edges]
-    return array
+    assert 0 < depth < min(rows, cols)/2.0
+    indices = np.arange(rows*cols)
+    indices.shape = (rows, cols)
+    inner = indices[depth:-depth, depth:-depth]
+    outer = [n for n in indices.flatten() if n not in inner.flatten()]
+    return outer
 
 
-def get_c_meas_ring(plate, depth):
-    """Get c_meas values from a ring of cultures.
+depth_1_inds = get_outer_indices(plates[0].rows, plates[0].cols, 1)
+depth_2_inds = get_outer_indices(plates[0].rows, plates[0].cols, 2)
 
-    depth : The depth of the ring. E.g. for the cultures one in from
-    the edge use depth 1.
+depth_1_bs = [bs[depth_1_inds] for bs in est_bs]
 
-    """
-    coords = (depth, depth)
-    rows = plate.rows - 2*depth
-    cols = plate.cols - 2*depth
-    zone = get_plate_zone(plate, coords, cols, rows)
-    c_meas = zone.c_meas[:]
-    np.rashape(c_meas (len(zone.times), zone.no_cultures), "F")
-    c_meas = c_meas[:, zone.edges]
-    c_meas = c_meas.flatten("F")
-    return c_meas
+# Now need to find depth 1 and depth 2 c_meas and similar for simulated cells.
 
 
-depth_0_bs = [get_ring(bs, p.rows, p.cols, 0) for bs, p in zip(est_bs, plates)]
-depth_1_bs = [get_ring(bs, p.rows, p.cols, 1) for bs, p in zip(est_bs, plates)]
+# depth_0_bs = [get_ring(bs, p.rows, p.cols, 0) for bs, p in zip(est_bs, plates)]
+# depth_1_bs = [get_ring(bs, p.rows, p.cols, 1) for bs, p in zip(est_bs, plates)]
 
-# Now need to get c_meas for all of the edges. And depth 1. Can use zoning.
+# # Now need to get c_meas for all of the edges. And depth 1. Can use zoning.
 
-second_b = [get_ring(est, p.est_params[-]   # In one from the edges
-for plate in plates:
-    bs = plate.est_params[-plate.no_cultures:]
-    bs.shape = (plate.rows, plate.cols)
-    bs = bs[1:-1, 1:-1]
-    dummy_plate = Plate(*bs.shape)
-    bs = bs.flatten()
-    bs = bs[dummy_plate.edges]
-    second_b.append(edges)
+# second_b = [get_ring(est, p.est_params[-]   # In one from the edges
+# for plate in plates:
+#     bs = plate.est_params[-plate.no_cultures:]
+#     bs.shape = (plate.rows, plate.cols)
+#     bs = bs[1:-1, 1:-1]
+#     dummy_plate = Plate(*bs.shape)
+#     bs = bs.flatten()
+#     bs = bs[dummy_plate.edges]
+#     second_b.append(edges)
 
 # Do the same for
 assert False
