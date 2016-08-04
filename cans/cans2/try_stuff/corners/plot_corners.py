@@ -51,8 +51,22 @@ def get_ring(array, rows, cols, depth):
 
 
 def get_c_meas_ring(plate, depth):
-    # Just figure out how to slice 3d arrays.
-    pass
+    """Get c_meas values from a ring of cultures.
+
+    depth : The depth of the ring. E.g. for the cultures one in from
+    the edge use depth 1.
+
+    """
+    coords = (depth, depth)
+    rows = plate.rows - 2*depth
+    cols = plate.cols - 2*depth
+    zone = get_plate_zone(plate, coords, cols, rows)
+    c_meas = zone.c_meas[:]
+    np.rashape(c_meas (len(zone.times), zone.no_cultures), "F")
+    c_meas = c_meas[:, zone.edges]
+    c_meas = c_meas.flatten("F")
+    return c_meas
+
 
 depth_0_bs = [get_ring(bs, p.rows, p.cols, 0) for bs, p in zip(est_bs, plates)]
 depth_1_bs = [get_ring(bs, p.rows, p.cols, 1) for bs, p in zip(est_bs, plates)]
