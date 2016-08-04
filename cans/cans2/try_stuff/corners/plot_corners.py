@@ -23,11 +23,14 @@ est_params = [plate.est_params for plate in plates]
 
 corner_coords = [(0, 0), (0, 21), (13, 0), (13, 21)]
 rows, cols = 3, 3
-plotter = Plotter(CompModelBC() , lw=3.0, ms=10.0, mew=2.0, xpad=15, ypad=30)
+plotter = Plotter(CompModelBC(), lw=3.0, ms=10.0, mew=2.0, xpad=15,
+                  ypad=30, legend_font_size=26.0)
 plot_title = r"Best Competition Fits to Corner of \textit{cdc13-1} P15 at 27C"
 
-for coords in corner_coords[0]:
-    plotter.plot_zone_est(plates, ["Comp. Model", "Comp. Model BC"],
+assert all(plates[0].c_meas == plates[1].c_meas)
+
+for coords in corner_coords:
+    plotter.plot_zone_est(plates, ["Comp.", "Comp. BC"],
                           est_params, models, coords, rows, cols,
-                          legend=False, title=plot_title,
+                          legend=True, title=plot_title,
                           plot_types=["Est.", "Est."], vis_ticks=True)
