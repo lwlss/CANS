@@ -8,6 +8,8 @@ from cans2.model import CompModel, CompModelBC
 from cans2.plate import Plate
 from cans2.process import find_best_fits, read_in_json
 from cans2.genetic_kwargs import _get_plate_kwargs
+from cans2.zoning import get_plate_zone
+
 
 paths = [
     "../../results/p15_fits/full_plate/CompModel/*.json",
@@ -47,6 +49,10 @@ def get_ring(array, rows, cols, depth):
     array = array[plate.edges]
     return array
 
+
+def get_c_meas_ring(plate, depth):
+    # Just figure out how to slice 3d arrays.
+    pass
 
 depth_0_bs = [get_ring(bs, p.rows, p.cols, 0) for bs, p in zip(est_bs, plates)]
 depth_1_bs = [get_ring(bs, p.rows, p.cols, 1) for bs, p in zip(est_bs, plates)]
