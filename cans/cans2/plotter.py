@@ -278,7 +278,7 @@ class Plotter(object):
 
         # Check if c_meas are equal for the plates so don't plot
         # twice. Currently only checks for two.
-        if len(plates) == 2:
+        if len(plates) == 2 and len(plates[0].c_meas) == len(plates[1].c_meas):
             same_c_meas = all(plates[0].c_meas == plates[1].c_meas)
         else:
             same_c_meas = False
@@ -296,6 +296,7 @@ class Plotter(object):
                             'x', color=c,
                             label='Obs. Cells {0}'.format(plate_name),
                             ms=self.ms, mew=self.mew)
+            # continue    # Remove this line
             # Plot smooth amounts for each estimate.
             plot_zip = zip(plate_names, plot_types, zone_smooth_amounts, models)
             for plate_name, plot_type, smooth_amounts, model in plot_zip:
