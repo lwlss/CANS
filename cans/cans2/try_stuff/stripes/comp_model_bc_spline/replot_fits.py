@@ -32,7 +32,6 @@ result_paths = [bc["barcode"] + "/results/*.json" for bc in barcodes]
 # Pick which of the top 5 estimates to compare.
 picks = (0, 0)    # Pick 1st best stripe and 1st best filled.
 
-
 best_paths = []
 for pick, path in zip(picks, result_paths):
     best_paths.append(find_best_fits(path, 5, "obj_fun")[pick])
@@ -48,8 +47,17 @@ for r in results:
     plate.est_params = r["est_params"]
     best_plates.append(plate)
 
-plotter = Plotter(CompModelBC(), lw=3.0, ms=10.0, mew=2.0, xpad=15, ypad=30)
+# Plot c_meas for both plates
+# plot_title = r"Cell Measurements for the Stripes and Filled Plates (R10, C1)"
+# plotter = Plotter(CompModelBC(), lw=3.0, ms=10.0, mew=2.0, xpad=15, ypad=30)
+# plotter.plot_zone_est(best_plates, ["Stripes", "Filled"],
+#                       [p.est_params for p in best_plates],
+#                       [CompModelBC()]*2, (9, 0), 3, 3,
+#                       plot_types=["Est.", "Est"], vis_ticks=True,
+#                       legend=True, title=plot_title)
+# assert False
 
+plotter = Plotter(CompModelBC(), lw=3.0, ms=10.0, mew=2.0, xpad=15, ypad=30)
 plot_title = "Validation of Comp Model Using Stripes Data"
 #plot_title = "Best {0} {1} (obj_fun: {2:})"
 # plot_title = plot_title.format(model.name, barcode["name"],
