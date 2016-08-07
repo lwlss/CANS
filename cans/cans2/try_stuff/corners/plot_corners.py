@@ -3,6 +3,9 @@ import numpy as np
 import json
 
 
+from scipy.stats import variation
+
+
 from cans2.plotter import Plotter
 from cans2.model import CompModel, CompModelBC
 from cans2.plate import Plate
@@ -19,8 +22,10 @@ fit_data = [read_in_json(find_best_fits(p, 1, "obj_fun")[0][0]) for p in paths]
 plates = [Plate(**_get_plate_kwargs(data)) for data in fit_data]
 models = [CompModel(), CompModelBC()]
 
+full_plate_obj_funs = []
 for plate, data in zip(plates, fit_data):
     plate.est_params = data["comp_est"]
+    full_plate_obj_funs.append(data["obj_fun"])
 est_params = [plate.est_params for plate in plates]
 est_bs = [p.est_params[-p.no_cultures:] for p in plates]
 
@@ -68,6 +73,10 @@ est_bs = [p.est_params[-p.no_cultures:] for p in plates]
 #     return c_meas
 
 
+def obj_fun(a, b):
+    assert len(a) == len(b)
+    return np.sqrt(np.sum((a - b)**2))
+
 def get_outer_indices(rows, cols, depth):
     """Get the indices of cultures at the edge.
 
@@ -87,8 +96,53 @@ depth_1_inds = get_outer_indices(plates[0].rows, plates[0].cols, 1)
 depth_2_inds = get_outer_indices(plates[0].rows, plates[0].cols, 2)
 
 depth_1_bs = [bs[depth_1_inds] for bs in est_bs]
+b_covs = [variation(bs) for bs in depth_1_bs]
+print("b_covs", b_covs)
+
+
+
 
 # Now need to find depth 1 and depth 2 c_meas and similar for simulated cells.
+c_meas = [np.reshape(p.c_meas, (len(p.times), p.no_cultures)) for p in plates]
+depth_1_c_meas = [cs[:, depth_1_inds].flatten() for cs in c_meas]
+depth_2_c_meas = [cs[:, depth_2_inds].flatten() for cs in c_meas]
+internal_c_meas = [cs[:, p.internals].flatten() for p, cs in zip(plates, c_meas)]    # i.e inside of depth1
+
+# Simulate for full plate amounts.
+for p, m in zip(plates, models):
+    p.set_rr_model(m, p.est_params)
+full_plate_amounts = [p.rr_solve() for p in plates]
+
+# Find total obj_funs
+full_plate_est_c = [a[:, :p.no_cultures].flatten() for p, a in zip(plates, full_plate_amounts)]
+obj_funs_all = [obj_fun(p.c_meas, est_c) for p, est_c in zip(plates, full_plate_est_c)]
+print("all", obj_funs_all)
+
+# from cans2.fitter import Fitter
+# fitters = [Fitter(m) for m in models]
+
+
+depth_1_est_c = [a[:, depth_1_inds].flatten() for a in full_plate_amounts]
+depth_2_est_c = [a[:, depth_2_inds].flatten() for a in full_plate_amounts]
+internal_est_c = [a[:, p.internals].flatten() for a in full_plate_amounts]
+
+internal_obj_funs = [obj_fun(c, est_c) for c, est_c in zip(internal_c_meas, internal_est_c)]
+print("internal ojb_fun", internal_obj_funs)
+
+# Now find the objective function between depth_1_ests
+depth_1_obj_funs = [obj_fun(c, est_c) for c, est_c in zip(depth_1_c_meas, depth_1_est_c)]
+depth_2_obj_funs = [obj_fun(c, est_c) for c, est_c in zip(depth_2_c_meas, depth_2_est_c)]
+print(depth_1_obj_funs)
+
+# Normalize by the number of cultures and total obj_fun.
+norm_funs = []
+for p, full_fun, d1_fun in zip(plates, full_plate_obj_funs, depth_1_obj_funs):
+    no_outers = float(len(depth_1_inds))
+    d1_norm = d1_fun/no_outers/full_fun
+    print(full_fun, d1_fun)
+    internal_norm = (full_fun - d1_fun)/(p.no_cultures - no_outers)
+    norm_funs.append((d1_norm, internal_norm))
+print(norm_funs)
 
 
 # depth_0_bs = [get_ring(bs, p.rows, p.cols, 0) for bs, p in zip(est_bs, plates)]
