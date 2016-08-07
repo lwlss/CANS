@@ -11,7 +11,6 @@ from cans2.model import CompModel, CompModelBC
 from cans2.plate import Plate
 from cans2.process import find_best_fits, read_in_json, obj_fun, get_outer_indices
 from cans2.genetic_kwargs import _get_plate_kwargs
-from cans2.zoning import get_plate_zone
 
 
 # Take best CompModel and CompModelBC fits.
@@ -55,10 +54,10 @@ depth_2_est_c = [a[:, depth_2_inds].flatten() for a in full_plate_amounts]
 internal_est_c = [a[:, p.internals].flatten() for a in full_plate_amounts]
 
 # Find obj fun for internals and edges.
-internal_obj_funs = [obj_fun(c, est_c) for c, est_c in zip(internal_c_meas, internal_est_c)]
 depth_1_obj_funs = [obj_fun(c, est_c) for c, est_c in zip(depth_1_c_meas, depth_1_est_c)]
 depth_2_obj_funs = [obj_fun(c, est_c) for c, est_c in zip(depth_2_c_meas, depth_2_est_c)]
 ring_2_obj_funs = [d2 - d1 for d2, d1 in zip(depth_2_obj_funs, depth_1_obj_funs)]
+internal_obj_funs = [obj_fun(c, est_c) for c, est_c in zip(internal_c_meas, internal_est_c)]
 
 # Check that the sums of squares are equal (obj fun takes square root).
 for d1_fun, int_fun, full_fun in zip(depth_1_obj_funs, internal_obj_funs, full_plate_obj_funs):
