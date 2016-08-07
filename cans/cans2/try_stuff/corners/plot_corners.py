@@ -9,11 +9,12 @@ from scipy.stats import variation
 from cans2.plotter import Plotter
 from cans2.model import CompModel, CompModelBC
 from cans2.plate import Plate
-from cans2.process import find_best_fits, read_in_json
+from cans2.process import find_best_fits, read_in_json, obj_fun, get_outer_indices
 from cans2.genetic_kwargs import _get_plate_kwargs
 from cans2.zoning import get_plate_zone
 
 
+# Take best CompModel and CompModelBC fits.
 paths = [
     "../../results/p15_fits/full_plate/CompModel/*.json",
     "../../results/p15_fits/full_plate/CompModelBC/*.json",
@@ -29,34 +30,14 @@ for plate, data in zip(plates, fit_data):
 est_params = [plate.est_params for plate in plates]
 est_bs = [p.est_params[-p.no_cultures:] for p in plates]
 
-
-def obj_fun(a, b):
-    assert len(a) == len(b)
-    return np.sqrt(np.sum((a - b)**2))
-
-def get_outer_indices(rows, cols, depth):
-    """Get the indices of cultures at the edge.
-
-    depth : How many rows/cols in. E.g. one for just the very outer
-    indices. Two for the 1st and 2nd outers.
-
-    """
-    assert 0 < depth < min(rows, cols)/2.0
-    indices = np.arange(rows*cols)
-    indices.shape = (rows, cols)
-    inner = indices[depth:-depth, depth:-depth]
-    outer = [n for n in indices.flatten() if n not in inner.flatten()]
-    return outer
-
-
 depth_1_inds = get_outer_indices(plates[0].rows, plates[0].cols, 1)
 depth_2_inds = get_outer_indices(plates[0].rows, plates[0].cols, 2)
 
+# Coefficient of variation for edge cultures.
 depth_1_bs = [bs[depth_1_inds] for bs in est_bs]
 b_covs = [variation(bs) for bs in depth_1_bs]
-print("b_covs", b_covs)
 
-# Now need to find depth 1 and depth 2 c_meas and similar for simulated cells.
+# Find measured cell amounts.
 c_meas = [np.reshape(p.c_meas, (len(p.times), p.no_cultures)) for p in plates]
 depth_1_c_meas = [cs[:, depth_1_inds].flatten() for cs in c_meas]
 depth_2_c_meas = [cs[:, depth_2_inds].flatten() for cs in c_meas]
@@ -67,87 +48,56 @@ for p, m in zip(plates, models):
     p.set_rr_model(m, p.est_params)
 full_plate_amounts = [p.rr_solve() for p in plates]
 
-# Find total obj_funs
+# Find estimated cell amounts.
 full_plate_est_c = [a[:, :p.no_cultures].flatten() for p, a in zip(plates, full_plate_amounts)]
-obj_funs_all = [obj_fun(p.c_meas, est_c) for p, est_c in zip(plates, full_plate_est_c)]
-print("all_obj_fun", full_plate_obj_funs, obj_funs_all)
-
-# from cans2.fitter import Fitter
-# fitters = [Fitter(m) for m in models]
-
-print(depth_1_inds)
-print(len(depth_1_inds))
-print([(p.no_cultures, len(p.internals)) for p in plates])
-
 depth_1_est_c = [a[:, depth_1_inds].flatten() for a in full_plate_amounts]
 depth_2_est_c = [a[:, depth_2_inds].flatten() for a in full_plate_amounts]
 internal_est_c = [a[:, p.internals].flatten() for a in full_plate_amounts]
 
+# Find obj fun for internals and edges.
 internal_obj_funs = [obj_fun(c, est_c) for c, est_c in zip(internal_c_meas, internal_est_c)]
-print("internal ojb_fun", internal_obj_funs)
-
-# Now find the objective function between depth_1_ests
 depth_1_obj_funs = [obj_fun(c, est_c) for c, est_c in zip(depth_1_c_meas, depth_1_est_c)]
 depth_2_obj_funs = [obj_fun(c, est_c) for c, est_c in zip(depth_2_c_meas, depth_2_est_c)]
-print(depth_1_obj_funs)
-
 ring_2_obj_funs = [d2 - d1 for d2, d1 in zip(depth_2_obj_funs, depth_1_obj_funs)]
 
-# Check that the sums are equal
-for d1_fun, int_fun, full_fun in zip(depth_1_obj_funs, internal_obj_funs, obj_funs_all):
+# Check that the sums of squares are equal (obj fun takes square root).
+for d1_fun, int_fun, full_fun in zip(depth_1_obj_funs, internal_obj_funs, full_plate_obj_funs):
     assert np.isclose((d1_fun**2 + int_fun**2), full_fun**2)
 
-# Find the obj_fun for the edges and internals for each.
+# Find the obj fun per culture for the edges and internals.
 obj_fun_zip = zip(plates, full_plate_obj_funs, depth_1_obj_funs, depth_2_obj_funs)
 avg_ints = [(full**2 - d1**2)/len(p.internals) for p, full, d1, d2 in obj_fun_zip]
 avg_d1s = [d1**2/len(depth_1_inds) for d1 in depth_1_obj_funs]
 avg_d2s = [d2**2/len(depth_2_inds) for d2 in depth_2_obj_funs]
 avg_ring2 = [(d2**2 - d1**2)/(len(depth_2_inds) - len(depth_1_inds))
              for d1, d2 in zip(depth_1_obj_funs, depth_2_obj_funs)]
+
+# Averages per cultures as a percentage of total objective function.
+avg_int_pc = [(avg/full**2)*100 for avg, full in zip(avg_ints, full_plate_obj_funs)]
+avg_d1_pc = [(avg/full**2)*100 for avg, full in zip(avg_d1s, full_plate_obj_funs)]
+avg_ring2_pc = [(avg/full**2)*100 for avg, full in zip(avg_ring2, full_plate_obj_funs)]
+
+# Total percentage edge contribution to ojb fun.
+total_edge_pc = [avg*len(depth_1_inds) for avg in avg_d1_pc]
+
+print([model.name for model in models])
+print("Edge b COVS (HIS3)", b_covs)
+
+print("Full plate obj fun", full_plate_obj_funs)
+print("Internal ojb fun", internal_obj_funs)
+print("Depth 1 obj funs", depth_1_obj_funs)
+
 print("Avg internal obj fun", avg_ints)
 print("Avg edge obj fun", avg_d1s)
-# print("Avg d2 obj fun", avg_d2s)    # Not interesting.
 print("Avg ring 2 obj fun", avg_ring2)
 
-assert False
+print("Avg percent error per culture (internal)", avg_int_pc)
+print("Avg percent error per culture (edge)", avg_d1_pc)
+# print("Avg d2 obj fun", avg_d2s)    # Not interesting.
+print("Avg percent error per culture (ring 2)", avg_ring2_pc)
 
-for p, full_fun, d1_fun in zip(plates, full_plate_obj_funs, depth_1_obj_funs):
-    print("total least squares", full_fun**2)
-    avg_internal = (full_fun**2 - d1_fun**2)/len(p.internals)
-    print("avg internal least squares", avg_internal)
-    avg_edge = d1_fun**2/len(p.edges)
-    print("avg edge least squares", avg_edge)
-    avg_int_percent = ((full_fun**2 - d1_fun**2) / full_fun**2)/len(p.internals)*100
-    avg_edge_percent = (d1_fun**2/full_fun**2)/len(p.edges)*100
-    print("average contribution to error of internal", avg_int_percent)
-    print("average contribution to error of edge", avg_edge_percent)
+print("Total percent contribution to obj fun (edge)", total_edge_pc)
 
-# Normalize by the number of cultures and total obj_fun.
-norm_funs = []
-for p, full_fun, d1_fun in zip(plates, full_plate_obj_funs, depth_1_obj_funs):
-    no_outers = float(len(depth_1_inds))
-    d1_norm = d1_fun**2/no_outers/full_fun**2
-    internal_norm = (full_fun**2 - d1_fun**2)/(p.no_cultures - no_outers)
-    norm_funs.append((d1_norm, internal_norm))
-print(norm_funs)
-
-
-# depth_0_bs = [get_ring(bs, p.rows, p.cols, 0) for bs, p in zip(est_bs, plates)]
-# depth_1_bs = [get_ring(bs, p.rows, p.cols, 1) for bs, p in zip(est_bs, plates)]
-
-# # Now need to get c_meas for all of the edges. And depth 1. Can use zoning.
-
-# second_b = [get_ring(est, p.est_params[-]   # In one from the edges
-# for plate in plates:
-#     bs = plate.est_params[-plate.no_cultures:]
-#     bs.shape = (plate.rows, plate.cols)
-#     bs = bs[1:-1, 1:-1]
-#     dummy_plate = Plate(*bs.shape)
-#     bs = bs.flatten()
-#     bs = bs[dummy_plate.edges]
-#     second_b.append(edges)
-
-# Do the same for
 assert False
 
 corner_coords = [(0, 0), (0, 21), (13, 0), (13, 21)]
