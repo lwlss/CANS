@@ -98,3 +98,25 @@ def remove_edges(array, rows, cols):
     # trimmed = array[1:-1,1:-1]
     # # Trim left and right column.
     # return trimmed.flatten()
+
+
+def obj_fun(a, b):
+    """Calculate and return the objective function."""
+    assert len(a) == len(b)
+    return np.sqrt(np.sum((a - b)**2))
+
+
+def get_outer_indices(rows, cols, depth):
+    """Get the indices of cultures up to a certain depth.
+
+    rows, cols : dimensions of the array (Plate).
+
+    depth : How many rows/cols depth. (E.g. 1 for just the edges)
+
+    """
+    assert 0 < depth < min(rows, cols)/2.0
+    indices = np.arange(rows*cols)
+    indices.shape = (rows, cols)
+    inner = indices[depth:-depth, depth:-depth]
+    outer = [n for n in indices.flatten() if n not in inner.flatten()]
+    return outer
