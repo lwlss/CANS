@@ -91,13 +91,26 @@ depth_1_obj_funs = [obj_fun(c, est_c) for c, est_c in zip(depth_1_c_meas, depth_
 depth_2_obj_funs = [obj_fun(c, est_c) for c, est_c in zip(depth_2_c_meas, depth_2_est_c)]
 print(depth_1_obj_funs)
 
+ring_2_obj_funs = [d2 - d1 for d2, d1 in zip(depth_2_obj_funs, depth_1_obj_funs)]
+
 # Check that the sums are equal
 for d1_fun, int_fun, full_fun in zip(depth_1_obj_funs, internal_obj_funs, obj_funs_all):
-    print(np.isclose((d1_fun**2 + int_fun**2), full_fun**2))
-    print(d1_fun**2 + int_fun**2)
-    print(full_fun**2)
+    assert np.isclose((d1_fun**2 + int_fun**2), full_fun**2)
 
 # Find the obj_fun for the edges and internals for each.
+obj_fun_zip = zip(plates, full_plate_obj_funs, depth_1_obj_funs, depth_2_obj_funs)
+avg_ints = [(full**2 - d1**2)/len(p.internals) for p, full, d1, d2 in obj_fun_zip]
+avg_d1s = [d1**2/len(depth_1_inds) for d1 in depth_1_obj_funs]
+avg_d2s = [d2**2/len(depth_2_inds) for d2 in depth_2_obj_funs]
+avg_ring2 = [(d2**2 - d1**2)/(len(depth_2_inds) - len(depth_1_inds))
+             for d1, d2 in zip(depth_1_obj_funs, depth_2_obj_funs)]
+print("Avg internal obj fun", avg_ints)
+print("Avg edge obj fun", avg_d1s)
+# print("Avg d2 obj fun", avg_d2s)    # Not interesting.
+print("Avg ring 2 obj fun", avg_ring2)
+
+assert False
+
 for p, full_fun, d1_fun in zip(plates, full_plate_obj_funs, depth_1_obj_funs):
     print("total least squares", full_fun**2)
     avg_internal = (full_fun**2 - d1_fun**2)/len(p.internals)
