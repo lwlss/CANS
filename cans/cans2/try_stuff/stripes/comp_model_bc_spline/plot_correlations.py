@@ -81,14 +81,33 @@ for bc, est in zip(barcodes, b_ests):
     ests.append([est_name, np.extract(stripes_bool, est)])
 
 
-# plot_scatter(ests[0][1], ests[1][1],
-#              title="Filled b vs Stripes b Comp Model BC.",
-#              xlab="Stripes b", ylab="Filled b")
+# Now convert to r and plot again. r = b(N_0 + C_0). We
+# have removed edge cultures so there should be no NE_0.
+plate_lvl = [data["est_params"][:-no_cultures] for data in results]
 
-# Now convert to r and plot again.
-# r = b(N_0 + C_0)
+def calc_r(C_0, N_0, b):
+    return (C_0 + N_0)*b
 
-plate_lvl = [r["est_params"][:-no_cultures] for r in results]
+def calc_K(C_0, N_0):
+    return C_0 + N_0
+
+comp_r = [calc_r(bs[1], p_lvl[0], p_lvl[1])
+          for bs, p_lvl in zip(ests, plate_lvl)]
+comp_K = [calc_K(p_lvl[0], p_lvl[1]) for p_lvl in plate_lvl]
+
+comp_mdr =
+
+comp_mdrmdp = []
 
 
 # Now also get r values from the QFA R fits
+
+# Plot comp b
+plot_scatter(ests[0][1], ests[1][1],
+             title="Filled b vs Stripes b Comp Model BC",
+             xlab="Stripes b", ylab="Filled b")
+
+# plot comp r
+plot_scatter(comp_r[0], comp_r[1],
+             title="Correlation of r estiamtes from Comp Model BC fit to Stripes and Filled plates",
+             xlab="Stripes r", ylab="Filled r")
