@@ -93,21 +93,37 @@ def calc_K(C_0, N_0):
 
 comp_r = [calc_r(bs[1], p_lvl[0], p_lvl[1])
           for bs, p_lvl in zip(ests, plate_lvl)]
-comp_K = [calc_K(p_lvl[0], p_lvl[1]) for p_lvl in plate_lvl]
+comp_K = [np.repeat(calc_K(p_lvl[0], p_lvl[1]), len(rs))
+          for p_lvl, rs in zip(plate_lvl, comp_r)]
+comp_C_0 = [np.repeat(p_lvl[0], len(rs)) for rs in comp_r]
 
-comp_mdr =
+comp_mdr = [mdr(r, K, C_0) for r, K, C_0 in zip(comp_r, comp_K, comp_C_0)]
 
-comp_mdrmdp = []
+comp_mdrmdp = [mdrmdp(r, K, C_0) for r, K, C_0 in zip(comp_r, comp_K, comp_C_0)]
 
 
 # Now also get r values from the QFA R fits
 
+plotdir = "plots/"
 # Plot comp b
 plot_scatter(ests[0][1], ests[1][1],
-             title="Filled b vs Stripes b Comp Model BC",
-             xlab="Stripes b", ylab="Filled b")
+             title="Correlation of b estimates from Comp Model BC fits to Stripes and Filled plates",
+             xlab="Stripes b", ylab="Filled b",
+             outfile=plotdir + "comp_b_correlation.png")
 
 # plot comp r
 plot_scatter(comp_r[0], comp_r[1],
-             title="Correlation of r estiamtes from Comp Model BC fit to Stripes and Filled plates",
-             xlab="Stripes r", ylab="Filled r")
+             title="Correlation of r estimates from Comp Model BC fits to Stripes and Filled plates",
+             xlab="Stripes r", ylab="Filled r",
+             outfile=plotdir + "comp_r_correlation.png")
+# plot comp mdr
+plot_scatter(comp_mdr[0], comp_mdr[1],
+             title="Correlation of mdr estimates from Comp Model BC fits to Stripes and Filled plates",
+             xlab="Stripes mdr", ylab="Filled mdr",
+             outfile=plotdir + "comp_mdr_correlation.png")
+
+# plot comp mdr*mdp
+plot_scatter(comp_mdrmdp[0], comp_mdrmdp[1],
+             title="Correlation of mdr*mdp estimates from Comp Model BC fits to Stripes and Filled plates",
+             xlab="Stripes mdr*mdp", ylab="Filled mdr*mdp",
+             outfile=plotdir + "comp_mdrmdp_correlation.png")
