@@ -20,9 +20,8 @@ b_guess = 45
 data_file = "full_plate/CompModelBC/argv_{0}_b_guess_{1}.json"
 data_file = data_file.format(argv, b_guess)
 
-result_path = "full_plate/CompModelBC/*.json"
-best_fit = find_best_fits(result_path, num=1, key="obj_fun")
-
+result_path = "full_plate/CompModelBC_2/*.json"
+best_fit = find_best_fits(result_path, num=1, key="internal_least_sq")
 print(best_fit)
 
 # Read in data from json file
