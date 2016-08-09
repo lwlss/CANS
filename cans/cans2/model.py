@@ -139,7 +139,7 @@ class Model(object):
     def solve(self, plate, params, times):
         init_amounts = np.repeat(params[:self.no_species], plate.no_cultures)
         # Set C(t=0) to zero for empty locations.
-        init_amounts[plate.empties] = 0.0
+        init_amounts[list(plate.empties)] = 0.0
         growth_func = self.model(params[self.param_index:], plate)
         # mxhnil is the maximum number of messages to be printed.
         sol = odeint(growth_func, init_amounts, times,
