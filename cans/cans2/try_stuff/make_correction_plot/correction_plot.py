@@ -43,7 +43,10 @@ culture_bounds = np.array([[0.0, final_cells*100],
 culture.inde_est = culture.fit_model(inde_model, culture_guess, culture_bounds,
                                      rr=False)
 
-inde_plotter = Plotter(IndeModel())
+inde_plotter = Plotter(IndeModel(), ms=10.0, mew=1.5, lw=2.5,
+                       font_size=22, title_font_size=22,
+                       legend_font_size=22, xpad=20, ypad=20,
+                       labelsize=20)
 inde_plotter.plot_est(culture, culture.inde_est.x, sim=False,
                       ms=10.0, mew=1.5, lw=2.5, legend=True,
                       title="Logistic Equivalent Fit")
