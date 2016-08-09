@@ -24,6 +24,12 @@ result_path = "full_plate/CompModelBC_2/*.json"
 best_fit = find_best_fits(result_path, num=1, key="internal_least_sq")
 print(best_fit)
 
+# # Check that not CompModel fit is better than CompModelBC
+# result_path_2 = "full_plate/CompModel_2/*.json"
+# best_fit_2 = find_best_fits(result_path_2, num=1, key="internal_least_sq")
+# print(best_fit_2)
+# assert best_fit[0][1] < best_fit_2[0][1]
+
 # Read in data from json file
 with open(best_fit[0][0], 'r') as f:
     fit_data = json.load(f)
