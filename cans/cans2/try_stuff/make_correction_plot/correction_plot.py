@@ -44,12 +44,11 @@ culture.inde_est = culture.fit_model(inde_model, culture_guess, culture_bounds,
                                      rr=False)
 
 inde_plotter = Plotter(IndeModel(), ms=10.0, mew=1.5, lw=2.5,
-                       font_size=22, title_font_size=22,
-                       legend_font_size=22, xpad=20, ypad=20,
-                       labelsize=20)
+                       font_size=18, title_font_size=20,
+                       legend_font_size=16, xpad=1, ypad=7,
+                       labelsize=12)
 inde_plotter.plot_est(culture, culture.inde_est.x, sim=False,
-                      ms=10.0, mew=1.5, lw=2.5, legend=True,
-                      title="Logistic Equivalent Fit")
+                      legend=True, title="Logistic Equivalent Fit")
 
 
 # smooth times for simulation
@@ -72,5 +71,4 @@ culture_c.comp_amounts = culture_est_amounts
 
 inde_plotter.plot_correction(culture_c, culture_c.sim_params,
                              culture_c.comp_amounts, legend=True,
-                             ms=10.0, mew=1.5, lw=2.5,
                              title="Corrected Competition Fit")
