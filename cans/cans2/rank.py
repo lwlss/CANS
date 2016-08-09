@@ -244,7 +244,6 @@ if __name__ == "__main__":
     import string
     from random import shuffle
 
-
     # Make some "genes" with repeats.
     genes = list(string.ascii_lowercase[:5]*2)
     shuffle(genes)
