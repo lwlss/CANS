@@ -30,7 +30,8 @@ class Plotter(object):
 
     def __init__(self, model, font_size=32.0, title_font_size=36.0,
                  legend_font_size=26.0, lw=3.0, ms=10.0, mew=2.0,
-                 labelsize=20, xpad=20, ypad=20, units=None):
+                 labelsize=20, xpad=20, ypad=20, units=None,
+                 species=None):
         self.model = model
         # Can decide on other colours when adding models with more species.
         self.colours = ['b', 'y', 'r', 'g']
@@ -47,9 +48,18 @@ class Plotter(object):
         self.xpad = xpad
         self.ypad = ypad
         if units is None:    # List of unit labels
-            self.units = ["[days]", "[arb. unit]"]
+            self.units = ["(days)", "(AU)"]
         else:
             self.units = units
+        if species is not None:
+            self.species = species
+        else:
+            self.species = {
+                "C": "Cells",
+                "N": "Nutrients",
+                "S": "Signal",
+            }
+
 
     def _find_ymax(self, amounts):
         ymax = np.amax(amounts)
@@ -90,7 +100,7 @@ class Plotter(object):
                 plt.setp(ax.get_xticklabels(which="both"), visible=False)
                 plt.setp(ax.get_yticklabels(which="both"), visible=False)
 
-        rc('text', usetex=True)
+        #rc('text', usetex=True)
         fig.suptitle(title, fontsize=self.title_font_size)
 
         return fig, grid
@@ -136,7 +146,7 @@ class Plotter(object):
                         ms=self.ms, mew=self.mew)
             for j, species in enumerate(self.model.species):
                 ax.plot(sim_times, est_amounts[j][:, i], self.colours[j],
-                        label="Est " + species, lw=self.lw)
+                        label="Est " + self.species[species], lw=self.lw)
                 if j == 0: # and i in plate.empties:
                     # Do not plot c_meas for empty cultures.
                     continue
@@ -145,7 +155,8 @@ class Plotter(object):
                     # unobservable, but known, N.)
                     ax.plot(plate.times, sim_amounts[j][:, i],
                             'x' + self.colours[j],
-                            label="True"+species, ms=self.ms, mew=self.mew)
+                            label="True"+self.species[species],
+                            ms=self.ms, mew=self.mew)
                 else:
                     continue
 
@@ -162,8 +173,8 @@ class Plotter(object):
 
     # Old plotter using odeint solver brought back for debugging.
     def plot_est(self, plate, est_params, title='Estimated Growth',
-                 sim=False, filename=None, legend=False, ms=6.0,
-                 mew=0.5, lw=1.0):
+                 sim=False, filename=None, legend=False,
+                 vis_ticks=True):
         # Smooth times for sims.
         sim_times = np.linspace(plate.times[0], plate.times[-1], 100)
         amounts = self.model.solve(plate, est_params, sim_times)
@@ -180,19 +191,22 @@ class Plotter(object):
                 # Plot c_meas.
                 ax.plot(plate.times, plate.c_meas[i::plate.no_cultures],
                         'x', color="black", label='Observed Cells',
-                        ms=ms, mew=mew)
+                        ms=self.ms, mew=self.mew)
             for j, species in enumerate(self.model.species):
                 ax.plot(sim_times, amounts[j][:, i], self.colours[j],
-                        label="Logistic "+species, lw=lw)
+                        label="Logistic "+self.species[species], lw=self.lw)
                 if j == 0 and i in plate.empties:
                     continue
                 if sim:
                     # Plot all true. These do not have noise added.
                     ax.plot(plate.times, sim_amounts[j][:, i],
                             'x' + self.colours[j],
-                            label="True"+species, ms=ms, mew=mew)
+                            label="True"+self.species[species], ms=self.ms, mew=self.mew)
                 else:
                     continue
+
+        self._hide_last_ticks(grid, plate.rows, plate.cols)
+
         if legend:
             grid[-1].legend(loc=2)
         if filename is None:
@@ -341,11 +355,11 @@ class Plotter(object):
                 for j, species in enumerate(self.model.species):
                     # plot comp_est_amounts
                     ax.plot(sim_times, comp_amounts[j][:, i], self.colours[j],
-                            label="Comp "+species, lw=lw)
+                            label="Competition Model "+self.species[species], lw=lw)
                     # plot correction
                     ax.plot(sim_times, corrected_amounts[j][:, i],
-                            self.colours[j] + "--", label="Corrected "
-                            + species, lw=lw)
+                            self.colours[j] + "--", label="Corrected Logistic "
+                            + self.species[species], lw=lw)
 
         if legend:
             grid[-1].legend(loc=2)
