@@ -24,6 +24,16 @@ def round_sig(x, sig=2):
     return round(x, sig-int(floor(log10(x)))-1)
 
 
+def calc_r(C_0, N_0, b):
+    """Convert CANS parameters to logistic r"""
+    return (C_0 + N_0)*b
+
+
+def calc_K(C_0, N_0):
+    """Convert CANS parameters to logistic K"""
+    return C_0 + N_0
+
+
 def find_best_fits(path, num=None, key="obj_fun"):
     """Return the best num fits by ranking key.
 
