@@ -97,7 +97,7 @@ print("Avg percent error per culture (ring 2)", avg_ring2_pc)
 
 print("Total percent contribution to obj fun (edge)", total_edge_pc)
 
-assert False
+#assert False
 
 corner_coords = [(0, 0), (0, 21), (13, 0), (13, 21)]
 rows, cols = 3, 3
@@ -107,8 +107,30 @@ plot_title = r"Best Competition Fits to Corner of \textit{cdc13-1} P15 at 27C"
 
 assert all(plates[0].c_meas == plates[1].c_meas)
 
-for coords in corner_coords:
-    plotter.plot_zone_est(plates, ["(Comp.)", "(Comp. BC)"],
-                          est_params, models, coords, rows, cols,
-                          legend=True, title=plot_title,
-                          plot_types=["Est.", "Est."], vis_ticks=True)
+# for coords in corner_coords:
+#     plotter.plot_zone_est(plates, ["(Comp.)", "(Comp. BC)"],
+#                           est_params, models, coords, rows, cols,
+#                           legend=True, title=plot_title,
+#                           plot_types=["Est.", "Est."], vis_ticks=True)
+
+import csv
+
+rows = [
+    ["", "One N_0", "Two N_0"],
+    ["Edge b COVS (HIS3)"] + b_covs,
+    ["Full plate obj fun"] + [obj**2 for obj in full_plate_obj_funs],
+    ["Internal ojb fun"] + [obj**2 for obj in internal_obj_funs],
+    ["Depth 1 obj funs"] +  [obj**2 for obj in depth_1_obj_funs],
+    ["Avg internal obj fun"] + avg_ints,
+    ["Avg edge obj fun"] + avg_d1s,
+    ["Avg ring 2 obj fun"] + avg_ring2,
+    ["Avg % error per culture (internal)"] +  avg_int_pc,
+    ["Avg % error per culture (edge)"] + avg_d1_pc,
+# print("Avg d2 obj fun", avg_d2s)    # Not interesting.
+    ["Avg % error per culture (ring 2)"] + avg_ring2_pc,
+    ["Total % contribution to obj fun (edge)"] + total_edge_pc,
+]
+
+with open("corner_stats.csv", "wb") as f:
+    writer = csv.writer(f, delimiter="\t")
+    writer.writerows(rows)
