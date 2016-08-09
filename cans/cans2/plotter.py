@@ -163,7 +163,7 @@ class Plotter(object):
         self._hide_last_ticks(grid, plate.rows, plate.cols)
 
         if legend:
-            grid[-1].legend(loc='best')
+            grid[-1].legend(loc='best', fontsize=self.legend_font_size)
         if filename is None:
             plt.show()
         else:
@@ -208,7 +208,7 @@ class Plotter(object):
         self._hide_last_ticks(grid, plate.rows, plate.cols)
 
         if legend:
-            grid[-1].legend(loc=2)
+            grid[-1].legend(loc=2, fontsize=self.legend_font_size)
         if filename is None:
             plt.show()
         else:
@@ -335,7 +335,7 @@ class Plotter(object):
 
     def plot_correction(self, plate, est_params, comp_amounts,
                         title="Corrected Growth",
-                        legend=False, filename=None, ms=6.0, mew=0.5, lw=1.0):
+                        legend=False, filename=None):
         sim_times = np.linspace(plate.times[0], plate.times[-1], 100)
         corrected_amounts = self.model.solve(plate, est_params, sim_times)
         corrected_amounts = np.split(corrected_amounts,
@@ -350,19 +350,19 @@ class Plotter(object):
             # plot c_meas
             if i not in plate.empties:
                 ax.plot(plate.times, plate.c_meas[i::plate.no_cultures],
-                        'x', color="black", label='Observed Cells', ms=ms,
-                        mew=mew)
+                        'x', color="black", label='Observed Cells', ms=self.ms,
+                        mew=self.mew)
                 for j, species in enumerate(self.model.species):
                     # plot comp_est_amounts
                     ax.plot(sim_times, comp_amounts[j][:, i], self.colours[j],
-                            label="Competition Model "+self.species[species], lw=lw)
+                            label="Competition Model "+self.species[species], lw=self.lw)
                     # plot correction
                     ax.plot(sim_times, corrected_amounts[j][:, i],
-                            self.colours[j] + "--", label="Corrected Logistic "
-                            + self.species[species], lw=lw)
+                            self.colours[j] + "--", label="Corrected "
+                            + self.species[species], lw=self.lw)
 
         if legend:
-            grid[-1].legend(loc=2)
+            grid[-1].legend(loc='best', fontsize=self.legend_font_size)
         if filename is None:
             plt.show()
         else:
