@@ -1,7 +1,7 @@
 import numpy as np
 
 from cans2.cans_funcs import dict_to_numpy, dict_to_json
-from cans2.process import read_in_json, find_best_fits
+from cans2.process import read_in_json, find_best_fits, calc_r, calc_K
 from cans2.genetic_kwargs import _get_plate_kwargs
 from cans2.zoning import get_plate_zone
 from cans2.plate import Plate
@@ -43,14 +43,6 @@ culture_bounds = np.array([[0.0, final_cells*100],
 culture.inde_est = culture.fit_model(inde_model, culture_guess, culture_bounds,
                                      rr=False)
 
-inde_plotter = Plotter(IndeModel(), ms=10.0, mew=1.5, lw=2.5,
-                       font_size=18, title_font_size=20,
-                       legend_font_size=16, xpad=1, ypad=7,
-                       labelsize=12)
-inde_plotter.plot_est(culture, culture.inde_est.x, sim=False,
-                      legend=True, title="Logistic Equivalent Fit")
-
-
 # smooth times for simulation
 smooth_plate = Plate(**_get_plate_kwargs(data))
 smooth_plate.times = np.linspace(plate.times[0], plate.times[-1], 100)    # for smooth sim
@@ -66,9 +58,29 @@ culture_est_amounts = np.dstack((c_i, n_i))[0]
 culture_c = Plate(1, 1)
 culture_c.times = culture.times
 culture_c.c_meas = culture.c_meas
-culture_c.sim_params = correction_params
+culture_c.sim_params = correction_params    # With kn removed
 culture_c.comp_amounts = culture_est_amounts
+
+# Print r and K for the logistic fit and corrected logistic fit. Also
+# print estimated kn.
+correction_r = calc_r(*correction_params)
+correction_K = calc_K(*correction_params[:-1])
+log_r = calc_r(*culture.inde_est.x)
+log_K = calc_K(*culture.inde_est.x[:-1])
+print("Standard logistic equivalent r, K", log_r, log_K)
+print("Corrected logistic equivalent r, K", correction_r, correction_K)
+print("Est kn", est_params[:-data["rows"]*data["cols"]][-1])
+
+inde_plotter = Plotter(IndeModel(), ms=10.0, mew=1.5, lw=2.5,
+                       font_size=18, title_font_size=20,
+                       legend_font_size=16, xpad=1, ypad=7,
+                       labelsize=12)
+
+inde_plotter.plot_est(culture, culture.inde_est.x, sim=False,
+                      legend=True, title="Logistic Equivalent Fit")
 
 inde_plotter.plot_correction(culture_c, culture_c.sim_params,
                              culture_c.comp_amounts, legend=True,
                              title="Corrected Competition Fit")
+
+
