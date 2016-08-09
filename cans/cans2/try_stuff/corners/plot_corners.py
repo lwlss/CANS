@@ -115,6 +115,8 @@ assert all(plates[0].c_meas == plates[1].c_meas)
 
 import csv
 
+# Use least square not obj fun with sqrt because sums are easier to
+# calculate.
 rows = [
     ["", "One N_0", "Two N_0"],
     ["Edge b COVS (HIS3)"] + b_covs,
