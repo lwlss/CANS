@@ -7,31 +7,35 @@ from cans2.cans_funcs import dict_to_numpy
 from cans2.parser import get_genes, get_mdrmdp, get_genes, get_qfa_R_dct
 from cans2.process import find_best_fits, remove_edges
 
-
-fitnesses = ["r", "MDR*MDP"]
+fitnesses = ["r", "MDR", "MDR*MDP"]
 fitness = fitnesses[0]
 
 genes = np.array(get_genes("data/p15/ColonyzerOutput.txt")[:384])
 
-best_comp = np.array(find_best_fits("../../results/p15_fits/full_plate/CompModel/*.json",
-                                    num=0, key="obj_fun"))
-best_comp_bc = np.array(find_best_fits("../../results/p15_fits/full_plate/CompModelBC/*.json",
-                                       num=1, key="obj_fun"))
+best_comp = np.array(find_best_fits("../../results/p15_fits/full_plate/CompModel_2/*.json",
+                                    num=0, key="internal_least_sq"))
+best_comp_bc = np.array(find_best_fits("../../results/p15_fits/full_plate/CompModelBC_2/*.json",
+                                       num=1, key="internal_least_sq"))
 log_path = "../logistic_fit_C0_grid/results2/log_eq*.json"
-best_log_eq = np.array(find_best_fits(log_path, num=1, key="obj_funs_internals"))
+best_log_eq = np.array(find_best_fits(log_path, num=0, key="obj_funs_internals"))
 
 # Read in MDR*MDP from QFA R output.
 qfa_R_gen_log_data = "data/p15/P15_QFA_GeneralisedLogisticFitnesses.txt"
-gen_log_mdrmdp = get_mdrmdp(qfa_R_gen_log_data)
 gen_log_r = get_qfa_R_dct(qfa_R_gen_log_data)["r"]
-# gen_log_ests = [gen_log_mdrmdp]
-gen_log_ests = [gen_log_r]
+gen_log_mdr = get_qfa_R_dct(qfa_R_gen_log_data)["MDR"]
+gen_log_mdrmdp = get_qfa_R_dct(qfa_R_gen_log_data)["MDRMDP"]
+gen_log_ests = [gen_log_r, gen_log_mdr, gen_log_mdrmdp]
+gen_log_ests = [gen_log_ests[fitnesses.index(fitness)]]
+# gen_log_ests = [gen_log_r]    # Not comparable with standard logistic r (or comp).
 assert all(genes == get_genes(qfa_R_gen_log_data))
 
 qfa_R_log_data = "data/p15/P15_QFA_LogisticFitnesses.txt"
 log_r = get_qfa_R_dct(qfa_R_log_data)["r"]
-log_mdrmdp = get_mdrmdp(qfa_R_log_data)
-log_ests = [log_r, log_mdrmdp]
+log_mdr = get_qfa_R_dct(qfa_R_log_data)["MDR"]
+log_mdrmdp = get_qfa_R_dct(qfa_R_log_data)["MDRMDP"]
+log_ests = [log_r, log_mdr, log_mdrmdp]
+#log_ests = [log_ests[fitnesses.index(fitness)]]
+log_ests = log_ests[:2]
 assert all(genes == get_genes(qfa_R_log_data))
 
 rows, cols = 16, 24
@@ -74,14 +78,14 @@ log_ests = [remove_edges(np.array(est), rows, cols) for est in log_ests]
 
 # Currently format does nothing but we may with to compare multiple
 # fits of the same model.
-comp_ests = [["Comp.".format(i), est] for i, est in enumerate(comp_ests)]
-comp_bc_ests = [["Comp. BC".format(i), est] for i, est in enumerate(comp_bc_ests)]
+comp_ests = [["Comp.".format(i), est] for i, est in enumerate(comp_ests)]    # Move to using just BC
+comp_bc_ests = [["Comp. b".format(i), est] for i, est in enumerate(comp_bc_ests)]
 log_eq_ests = [["Log. Eq.".format(i), est] for i, est in enumerate(log_eq_ests)]
-gen_log_ests = [["Gen. Log.", est] for est in gen_log_ests]
-log_ests = [["Log. {0}".format(f), est] for f, est in zip(fitnesses, log_ests)]
+gen_log_ests = [["Gen. Log. {0}".format(fitness), est] for est in gen_log_ests]
+log_ests = [["Log. {0}".format(f), est] for f, est in zip(["r", "MDR"], log_ests)]
 
-# ests = comp_ests + comp_bc_ests + log_ests + gen_log_ests + log_eq_ests
-ests = comp_ests + comp_bc_ests + log_ests# + log_eq_ests
+ests = comp_ests + comp_bc_ests + log_ests# + gen_log_ests + log_eq_ests
+# ests = comp_ests + comp_bc_ests + log_ests# + log_eq_ests
 
 # # Plot all genes
 # gene_set = set(genes)
@@ -92,7 +96,8 @@ ests = comp_ests + comp_bc_ests + log_ests# + log_eq_ests
 #     correlate_ests(genes, gene, "", *ests)
 
 # # Plot avgs
-correlate_avgs(genes, "r_correlations/log_r_and_mdrmdp.pdf", *ests)
+# correlate_avgs(genes, "r_correlations/log_r_and_mdrmdp.pdf", *ests)
+correlate_avgs(genes, "plots/comp_b_log_r_log_mdr.png", *ests)
 
 # Now get the coefficient of variation for best bc_est and log_eq_est
 c_of_v_title = "Variation in Fitness Estimates by Model"
