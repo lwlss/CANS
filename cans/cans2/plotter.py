@@ -11,14 +11,49 @@ from cans2.plate import Plate
 from cans2.zoning import get_plate_zone, sim_and_get_zone_amounts, get_zone_amounts
 
 
-def plot_scatter(x, y, title="", xlab="", ylab="", outfile=""):
+def plot_scatter(xs, ys, title="", xlab="", ylab="", outfile="",
+                 ax_multiples=None):
+    """Make scatter plots
+
+    xs : iterable of iterables of x values
+
+    ys : iterable of iterables of y values
+
+    ax_multiples : List for x and y axes. Axes will finish at the
+    first multiple of ax_multiple above the max value in the data.
+
+    """
+    if ax_multiples is None:
+        ax_multiples = [10, 10]
+    # x = np.array(xs)
+    # y = np.array(ys)
+    colors = ["r", "b", "g", "y"]
     fig = plt.figure()
     fig.suptitle(title)
-    plt.xlabel(xlab)
-    plt.ylabel(ylab)
-    plt.plot(x, y, "x", ms=6.0, mew=1.0, color="k")
-    max_val = np.ceil(np.max([x, y])/10.0)*10
+    plt.xlabel(xlab, fontsize=26, labelpad=0)
+    plt.ylabel(ylab, fontsize=26, labelpad=0)
+    for color, x, y in zip(colors, xs, ys):
+        plt.plot(x, y, "x", ms=6.0, mew=1.0, color=color)
+    max_val = np.ceil(np.max([xs, ys])/10.0)*10
     plt.plot([0, max_val], [0, max_val], color="k")
+
+    # Set max values to nearest multiple of 5.
+    try:
+        xmax = (np.max(xs)//ax_multiples + 1) * ax_multiples
+        print(xmax)
+    except ZeroDivisionError:
+        xmax = np.max(xs)*1.1
+    try:
+        ymax = (np.max(ys)//ax_multiples + 1) * ax_multiples
+        print(ymax)
+    except ZeroDivisionError:
+        ymax = np.max(ys)*1.1
+
+    plt.xlim([0.0, xmax])
+    plt.ylim([0.0, ymax])
+
+    # Need to make a legend with correlation coefficient
+
     if outfile:
         plt.savefig(outfile)
     else:
