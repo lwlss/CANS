@@ -6,7 +6,7 @@ import json
 from cans2.model import CompModelBC
 from cans2.plate import Plate
 from cans2.plotter import Plotter, plot_scatter
-from cans2.parser import get_plate_data2
+from cans2.parser import get_plate_data2, get_qfa_R_dct
 from cans2.process import find_best_fits, remove_edges
 from cans2.cans_funcs import dict_to_numpy
 from cans2.rank import correlate_ests, mdr, mdp, mdrmdp
@@ -103,27 +103,68 @@ comp_mdrmdp = [mdrmdp(r, K, C_0) for r, K, C_0 in zip(comp_r, comp_K, comp_C_0)]
 
 
 # Now also get r values from the QFA R fits
+qfa_R_path = "../data/stripes/Stripes_FIT.txt"
+
+# Use pandas to extract the r values that I want.
+log_r = np.array(get_qfa_R_dct(qfa_R_path)["r"])
+log_mdr = np.array(get_qfa_R_dct(qfa_R_path)["MDR"])
+log_bc = np.array(get_qfa_R_dct(qfa_R_path)["Barcode"])
+log_bc = np.split(log_bc, 2)
+assert len(log_bc[0]) == len(log_bc[1])
+assert all(log_bc[0] != log_bc[1])
+# Need to remove edge cultures from QFA R data. They count rows and
+# colums from zero.
+log_rows = np.array(get_qfa_R_dct(qfa_R_path)["Row"])
+log_cols = np.array(get_qfa_R_dct(qfa_R_path)["Column"])
+log_r = np.array([r for i, j, r in zip(log_rows, log_cols, log_r)
+                  if i not in [1, 16] and j not in [1, 24]])
+log_r = np.split(log_r, 2)
+log_mdr = np.array([mdr for i, j, mdr in zip(log_rows, log_cols, log_mdr)
+                    if i not in [1, 16] and j not in [1, 24]])
+log_mdr = np.split(log_mdr, 2)
+assert len(log_r[0]) == len(comp_r[0])
+
+# Check QFA R initial C_0s which they call g
+g = np.array(get_qfa_R_dct(qfa_R_path)["g"])
+g = np.split(g, 2)
+tally = 0
+for g1, g2 in zip(g[0], g[1]):
+    tally += int(g1 == g2)
+print("Fraction of g the same", tally/float(len(g[0])))
 
 plotdir = "plots/"
-# Plot comp b
-plot_scatter(ests[0][1], ests[1][1],
-             title="Correlation of b estimates from Comp Model BC fits to Stripes and Filled plates",
-             xlab="Stripes b", ylab="Filled b",
-             outfile=plotdir + "comp_b_correlation.png")
+# # Plot comp b
+# plot_scatter(ests[0][1], ests[1][1],
+#              title="Correlation of b estimates from competition model fits to Stripes and Filled plates",
+#              xlab="Stripes b", ylab="Filled b",
+#              outfile=plotdir + "comp_b_correlation.png")
 
-# plot comp r
-plot_scatter(comp_r[0], comp_r[1],
-             title="Correlation of r estimates from Comp Model BC fits to Stripes and Filled plates",
-             xlab="Stripes r", ylab="Filled r",
-             outfile=plotdir + "comp_r_correlation.png")
-# plot comp mdr
-plot_scatter(comp_mdr[0], comp_mdr[1],
-             title="Correlation of mdr estimates from Comp Model BC fits to Stripes and Filled plates",
-             xlab="Stripes mdr", ylab="Filled mdr",
-             outfile=plotdir + "comp_mdr_correlation.png")
+# # plot comp r
+# plot_scatter(comp_r[0], comp_r[1],
+#              title="Correlation of r estimates from competition model fits to Stripes and Filled plates",
+#              xlab="Stripes r", ylab="Filled r",
+#              outfile=plotdir + "comp_r_correlation.png")
+# # plot comp mdr
+# plot_scatter(comp_mdr[0], comp_mdr[1],
+#              title="Correlation of mdr estimates from competition model fits to Stripes and Filled plates",
+#              xlab="Stripes mdr", ylab="Filled mdr",
+#              outfile=plotdir + "comp_mdr_correlation.png")
 
-# plot comp mdr*mdp
-plot_scatter(comp_mdrmdp[0], comp_mdrmdp[1],
-             title="Correlation of mdr*mdp estimates from Comp Model BC fits to Stripes and Filled plates",
-             xlab="Stripes mdr*mdp", ylab="Filled mdr*mdp",
-             outfile=plotdir + "comp_mdrmdp_correlation.png")
+# # plot comp mdr*mdp
+# plot_scatter(comp_mdrmdp[0], comp_mdrmdp[1],
+#              title="Correlation of mdr*mdp estimates from competition model fits to Stripes and Filled plates",
+#              xlab="Stripes mdr*mdp", ylab="Filled mdr*mdp",
+#              outfile=plotdir + "comp_mdrmdp_correlation.png")
+
+
+# plot log r
+plot_scatter([log_r[0], comp_r[0]], [log_r[1], comp_r[1]],
+             title="Correlation of r estimates between Stripes and Filled plates",
+             xlab="Stripes r", ylab="Filled r",)
+             # outfile=plotdir + "log_r_correlation.png")
+
+# plot log mdr
+plot_scatter([log_mdr[0], comp_mdr[0]], [log_mdr[1], comp_mdr[1]],
+             title="Correlation of mdr estimates from logistic model fits to Stripes and Filled plates",
+             xlab="Stripes mdr", ylab="Filled mdr",)
+             # outfile=plotdir + "log_mdr_correlation.png")
