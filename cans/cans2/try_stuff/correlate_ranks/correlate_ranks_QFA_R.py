@@ -79,10 +79,10 @@ log_ests = [remove_edges(np.array(est), rows, cols) for est in log_ests]
 # Currently format does nothing but we may with to compare multiple
 # fits of the same model.
 comp_ests = [["Comp.".format(i), est] for i, est in enumerate(comp_ests)]    # Move to using just BC
-comp_bc_ests = [["Comp. b".format(i), est] for i, est in enumerate(comp_bc_ests)]
+comp_bc_ests = [["Competition b".format(i), est] for i, est in enumerate(comp_bc_ests)]
 log_eq_ests = [["Log. Eq.".format(i), est] for i, est in enumerate(log_eq_ests)]
 gen_log_ests = [["Gen. Log. {0}".format(fitness), est] for est in gen_log_ests]
-log_ests = [["Log. {0}".format(f), est] for f, est in zip(["r", "MDR"], log_ests)]
+log_ests = [["Logistic {0}".format(f), est] for f, est in zip(["r", "MDR"], log_ests)]
 
 ests = comp_ests + comp_bc_ests + log_ests# + gen_log_ests + log_eq_ests
 # ests = comp_ests + comp_bc_ests + log_ests# + log_eq_ests
@@ -96,11 +96,12 @@ ests = comp_ests + comp_bc_ests + log_ests# + gen_log_ests + log_eq_ests
 #     correlate_ests(genes, gene, "", *ests)
 
 # # Plot avgs
-correlate_avgs(genes, "r_rank/comp_b_log_r.png", 0.15, *ests)
+# correlate_avgs(genes, "r_rank/comp_b_log_r.png", 0.15, *ests)
 # correlate_avgs(genes, "", 0.1, *ests)
-assert False
+
 # Now get the coefficient of variation for best bc_est and log_eq_est
-c_of_v_title = "Variation in Fitness Estimates by Model"
+# c_of_v_title = "Variation in Fitness Estimates by Model"
+c_of_v_title = ""
 plot_c_of_v(genes, c_of_v_title, *ests)
 
 # write_stats(genes, "results/top_two_comp_model_bc_comp_model.csv", *ests)
