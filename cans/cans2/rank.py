@@ -202,10 +202,7 @@ def plot_c_of_v(genes, title, *ests):
 
     plt.xlabel('Deletion (ordered by competition b rank)', fontsize=26)
     plt.ylabel('Coefficient of Variation', fontsize=26)
-    if title:
-        plt.title(title, fontsize=34)
-    else:
-        plt.title('Variation in Fitness Estimates by Model', fontsize=34)
+    plt.title(title, fontsize=34)
     plt.xticks(x_vals + bar_width, italic_genes, rotation="vertical",
                style="italic", fontsize=20)
     plt.legend(loc=2, fontsize=26)
