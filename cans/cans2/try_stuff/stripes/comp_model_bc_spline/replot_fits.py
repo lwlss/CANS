@@ -79,6 +79,7 @@ plot_params = []
 for bc, plate in zip(barcodes, best_plates):
     if bc["name"] == "Filled":
         # Set empty bs to zero
+        plot_params.append(plate.est_params)
         params = np.copy(plate.est_params)
         params[empties - plate.no_cultures] = 0.0
         plot_params.append(params)
@@ -87,21 +88,20 @@ for bc, plate in zip(barcodes, best_plates):
         plate_lvl = plate.est_params[:-plate.no_cultures]
 
 
-# Print the plate level parmeters and average b value for both estimates.
 genes = empty_plate.genes
 # Boolean array for non-empties
 stripes_bool = genes != "EMPTY"
-
 stripes_bool = remove_edges(stripes_bool, empty_plate.rows, empty_plate.cols)
-for bc, plate in zip(barcodes, best_plates):
-    plate_lvl = plate.est_params[:-plate.no_cultures]
-    b_ests = plate.est_params[-plate.no_cultures:]
-    b_ests = remove_edges(b_ests, empty_plate.rows, empty_plate.cols)
-    b_ests = np.extract(stripes_bool, b_ests)
-    b_mean = np.mean(b_ests)
-    print(bc["name"])
-    print(np.append(plate_lvl, b_mean))
 
+# # Print plate level and average b for each estimate.
+# for bc, plate in zip(barcodes, best_plates):
+#     plate_lvl = plate.est_params[:-plate.no_cultures]
+#     b_ests = plate.est_params[-plate.no_cultures:]
+#     b_ests = remove_edges(b_ests, empty_plate.rows, empty_plate.cols)
+#     b_ests = np.extract(stripes_bool, b_ests)
+#     b_mean = np.mean(b_ests)
+#     print(bc["name"])
+#     print(np.append(plate_lvl, b_mean))
 
 # Could check the objective function for all of the below.
 # # Use nutrients of gaps estimate for both.
@@ -120,7 +120,14 @@ for bc, plate in zip(barcodes, best_plates):
 # for params in plot_params:
 #     params[:4] = plate_lvl[:4]
 
-plot_title = "Attempted validation of the Competition Model across two plates"
-plotter.plot_zone_est(data_plates, ["Stripes", "Filled"], plot_params,
-                      models, coords, rows, cols, legend=False,
-                      title=plot_title, plot_types=["Est.", "Sim."])
+models.append(models[-1])
+print(models)
+data_plates.append(data_plates[-1])
+print(data_plates)
+
+plot_title = "Callibration and Validation of the Competition Model"
+plot_title = ""
+plotter.plot_zone_est(data_plates, ["(Stripes)", "(Filled)", "(Validation)"],
+                      plot_params, models, coords, rows, cols, legend=True,
+                      # title=plot_title, plot_types=["Est.", "Est.", "Sim."])
+                      title=plot_title, plot_types=["Estimated", "Estimated", "Simulated"])
