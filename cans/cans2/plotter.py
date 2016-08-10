@@ -297,35 +297,58 @@ class Plotter(object):
         else:
             same_c_meas = False
 
+        colors = {
+            "C": ["b", "r", "b"],
+            "N": ["y", "g", "g"],
+            }
+        lines = ["-", "-", "--"]
+
         for i, ax in enumerate(grid):
             # Plot c_meas.
-            for plate_name, c, zone in zip(plate_names, self.c_meas_colors, zones):
+            # for plate_name, c, zone in zip(plate_names, self.c_meas_colors, zones):
+            for plate_name, c, zone in zip(plate_names, colors["C"][:-1], zones):
                 if same_c_meas:
                     ax.plot(zone.times, zone.c_meas[i::zone.no_cultures],
-                            'x', color=c, label='Obs. Cells',
+                            'x', color=c, label='Observed Cells',
                             ms=self.ms, mew=self.mew)
                     break
                 else:
                     ax.plot(zone.times, zone.c_meas[i::zone.no_cultures],
                             'x', color=c,
-                            label='Obs. Cells {0}'.format(plate_name),
+                            label='Observed Cells {0}'.format(plate_name),
                             ms=self.ms, mew=self.mew)
             # continue    # Remove this line
             # Plot smooth amounts for each estimate.
             plot_zip = zip(plate_names, plot_types, zone_smooth_amounts, models)
-            for plate_name, plot_type, smooth_amounts, model in plot_zip:
+            for k, (plate_name, plot_type, smooth_amounts, model) in enumerate(plot_zip):
                 for j, (amounts, species) in enumerate(zip(smooth_amounts, model.species)):
-                    ax.plot(smooth_times, amounts[:, i], self.colours[j],
+                    if j==1: break
+                    ax.plot(smooth_times, amounts[:, i], colors[species][k],
                             label="{0} ".format(plot_type) + species_labels[species] + " {0}".format(plate_name),
-                            lw=self.lw, ls=self.linestyles[plate_names.index(plate_name)])
-                            # label="Est {0} ".format(model.name) + species, lw=self.lw)
+                            # lw=self.lw, ls=self.linestyles[plate_names.index(plate_name)])
+                            lw=self.lw, ls=lines[k])
 
         self._hide_last_ticks(grid, zone.rows, zone.cols)
 
         # plt.tight_layout()
 
+        # # Change order of labels.
+        # ax = grid[-1]
+        # handles, labels = ax.get_legend_handles_labels()
+        # new_order = [0, 2, 3, 1, 4, 5, 6, 7]
+        # handles2 = [handles[i] for i in new_order]
+        # labels2 = [labels[i] for i in new_order]
+
+        # # Change order of labels.
+        ax = grid[-1]
+        handles, labels = ax.get_legend_handles_labels()
+        new_order = [0, 2, 1, 3, 4]
+        handles2 = [handles[i] for i in new_order]
+        labels2 = [labels[i] for i in new_order]
+
         if legend:
-            grid[-1].legend(loc='best', fontsize=self.legend_font_size)
+            grid[1].legend(handles2, labels2, loc='best', fontsize=self.legend_font_size)
+            # grid[1].legend(loc='best', fontsize=self.legend_font_size)
         if filename is None:
             plt.show()
         else:
