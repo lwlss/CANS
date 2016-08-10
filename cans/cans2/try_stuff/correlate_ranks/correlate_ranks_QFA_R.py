@@ -35,7 +35,7 @@ log_mdr = get_qfa_R_dct(qfa_R_log_data)["MDR"]
 log_mdrmdp = get_qfa_R_dct(qfa_R_log_data)["MDRMDP"]
 log_ests = [log_r, log_mdr, log_mdrmdp]
 #log_ests = [log_ests[fitnesses.index(fitness)]]
-log_ests = log_ests[:2]
+log_ests = log_ests[:1]
 assert all(genes == get_genes(qfa_R_log_data))
 
 rows, cols = 16, 24
@@ -96,8 +96,8 @@ ests = comp_ests + comp_bc_ests + log_ests# + gen_log_ests + log_eq_ests
 #     correlate_ests(genes, gene, "", *ests)
 
 # # Plot avgs
-# correlate_avgs(genes, "r_correlations/log_r_and_mdrmdp.pdf", *ests)
-correlate_avgs(genes, "", 0.1, *ests)
+correlate_avgs(genes, "r_rank/comp_b_log_r.png", 0.15, *ests)
+# correlate_avgs(genes, "", 0.1, *ests)
 assert False
 # Now get the coefficient of variation for best bc_est and log_eq_est
 c_of_v_title = "Variation in Fitness Estimates by Model"
