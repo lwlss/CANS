@@ -70,7 +70,7 @@ def get_repeat_stats(genes, *ests):
              for gene, reps in repeats.items()} for est in ests]
 
 
-def correlate_avgs(genes, filename="", *ests):
+def correlate_avgs(genes, filename="", eps=0.12, *ests):
     """Plot correlations in rank of averaged parameter values.
 
     Averages are taken for repeats on the same plate.
@@ -88,10 +88,10 @@ def correlate_avgs(genes, filename="", *ests):
 #    c_of_vs = [np.array(est.values())[:, 2] for est in gene_stats]
     labels = [est[0] for est in ests]    # est name (x label).
     labelled_avgs = [(lab, avgs) for lab, avgs in zip(labels, averages)]
-    correlate_ests(gene_set, None, filename, *labelled_avgs)
+    correlate_ests(gene_set, None, filename, eps, *labelled_avgs)
 
 
-def correlate_ests(genes, query_gene, filename="", *ests):
+def correlate_ests(genes, query_gene, filename="", eps=0.12, *ests):
     """Plot correlations in rank of parameter values.
 
     genes : A list of gene names.
@@ -99,6 +99,9 @@ def correlate_ests(genes, query_gene, filename="", *ests):
     *ests : Estimated parameter values corresponding to the genes in
     genes. Each a tuple containing a label for the estimate and list
     of estimated values.
+
+    eps : Gap in x in start- and end-points of lines to avoid overlap
+    with gene names.
 
     """
     labels, ests = zip(*ests)
@@ -108,16 +111,17 @@ def correlate_ests(genes, query_gene, filename="", *ests):
     fig = plt.figure(figsize=(len(ests)*4, 20), dpi=100,
                      facecolor='0.6', edgecolor='k')
 
-
     ax = plt.axes(frameon=False)
     ax.get_xaxis().tick_bottom()
     cols = coolwarm(np.linspace(0, 1, len(genes)))
     cols = rainbow(np.linspace(0, 1, len(genes)))
 
     for gene_ranks, col in zip(ranks, cols):
-        plt.plot(gene_ranks, color=col)
+        pairs = [gene_ranks[i:i+2] for i in range(len(gene_ranks)-1)]
+        positions = [[i, i+1] for i in range(len(gene_ranks)-1)]
+        for pair, pos in zip(pairs, positions):
+            plt.plot([pos[0]+eps, pos[1]-eps], pair, color=col)
 
-    # Add gene names to right most estimate.
     for est_no in range(len(ests)):
         for gene, col, rank, in zip(genes, cols, ranks[:, est_no]):
             if gene == query_gene:
@@ -127,8 +131,18 @@ def correlate_ests(genes, query_gene, filename="", *ests):
                          fontweight="bold")
             else:
                 # continue
-                plt.text(est_no-0.1, rank + 0.1, gene.lower()+"$\Delta$",
-                         color=col, style="italic", fontsize=18)
+                if est_no == 0:
+                    alignment = "right"
+                    x_pos = est_no + eps
+                elif est_no == len(ests)-1:
+                    alignment = "left"
+                    x_pos = est_no - eps
+                else:
+                    alignment = "center"
+                    x_pos = est_no
+                plt.text(x_pos, rank-0.5, gene.lower()+"$\Delta$",
+                         color=col, style="italic", fontsize=18,
+                         horizontalalignment=alignment)
 
                 
     # # Add coef of variation label

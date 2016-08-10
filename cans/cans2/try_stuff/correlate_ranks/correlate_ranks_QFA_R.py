@@ -97,8 +97,8 @@ ests = comp_ests + comp_bc_ests + log_ests# + gen_log_ests + log_eq_ests
 
 # # Plot avgs
 # correlate_avgs(genes, "r_correlations/log_r_and_mdrmdp.pdf", *ests)
-correlate_avgs(genes, "plots/comp_b_log_r_log_mdr.png", *ests)
-
+correlate_avgs(genes, "", 0.1, *ests)
+assert False
 # Now get the coefficient of variation for best bc_est and log_eq_est
 c_of_v_title = "Variation in Fitness Estimates by Model"
 plot_c_of_v(genes, c_of_v_title, *ests)
