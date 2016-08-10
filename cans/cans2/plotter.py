@@ -20,7 +20,8 @@ def plot_scatter(xs, ys, title="", xlab="", ylab="", outfile="",
     ys : iterable of iterables of y values
 
     ax_multiples : List for x and y axes. Axes will finish at the
-    first multiple of ax_multiple above the max value in the data.
+    first multiple of (the corresponding value in) ax_multiples above
+    the max value in the data.
 
     """
     if ax_multiples is None:
@@ -39,13 +40,11 @@ def plot_scatter(xs, ys, title="", xlab="", ylab="", outfile="",
 
     # Set max values to nearest multiple of 5.
     try:
-        xmax = (np.max(xs)//ax_multiples + 1) * ax_multiples
-        print(xmax)
+        xmax = (np.max(xs)//ax_multiples[0] + 1) * ax_multiples[0]
     except ZeroDivisionError:
         xmax = np.max(xs)*1.1
     try:
-        ymax = (np.max(ys)//ax_multiples + 1) * ax_multiples
-        print(ymax)
+        ymax = (np.max(ys)//ax_multiples[1] + 1) * ax_multiples[1]
     except ZeroDivisionError:
         ymax = np.max(ys)*1.1
 
