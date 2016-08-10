@@ -103,12 +103,14 @@ def correlate_ests(genes, query_gene, filename="", eps=0.12, *ests):
     eps : Gap in x in start- and end-points of lines to avoid overlap
     with gene names.
 
+    # tightness : How close together are the rows of gene names.
+
     """
     labels, ests = zip(*ests)
     ranks = np.array([rankdata(est) for est in ests]).T
 
     #fig = plt.figure(facecolor="0.6")
-    fig = plt.figure(figsize=(len(ests)*4, 20), dpi=100,
+    fig = plt.figure(figsize=(len(ests)*4, 25), dpi=100,
                      facecolor='0.6', edgecolor='k')
 
     ax = plt.axes(frameon=False)
@@ -120,12 +122,13 @@ def correlate_ests(genes, query_gene, filename="", eps=0.12, *ests):
         pairs = [gene_ranks[i:i+2] for i in range(len(gene_ranks)-1)]
         positions = [[i, i+1] for i in range(len(gene_ranks)-1)]
         for pair, pos in zip(pairs, positions):
-            plt.plot([pos[0]+eps, pos[1]-eps], pair, color=col)
+            plt.plot([pos[0]+eps, pos[1]-eps],
+                      pair, color=col)
 
-    for est_no in range(len(ests)):
+    for est_no in np.arange(len(ests)):
         for gene, col, rank, in zip(genes, cols, ranks[:, est_no]):
             if gene == query_gene:
-                plt.text(est_no-0.1, rank,
+                plt.text(est_no-eps, rank,
                          gene.lower()+"$\Delta$", color="black",
                          style="italic", fontsize=20,
                          fontweight="bold")
@@ -144,7 +147,6 @@ def correlate_ests(genes, query_gene, filename="", eps=0.12, *ests):
                          color=col, style="italic", fontsize=18,
                          horizontalalignment=alignment)
 
-                
     # # Add coef of variation label
     # if coef_of_vars:
     #     for est_no, c_of_vs in zip(range(len(ests)), coef_of_vars):
@@ -152,8 +154,9 @@ def correlate_ests(genes, query_gene, filename="", eps=0.12, *ests):
     #             plt.text(est_no, rank, "{0:.3f}".format(c_of_v), color=col)
 
 
-    # plt.xticks(range(len(ests)), labels, rotation="vertical", fontsize=26)
-    plt.xticks(range(len(ests)), labels, rotation="horizontal", fontsize=26)
+    # plt.xticks(np.arange(len(ests)), labels, rotation="vertical", fontsize=26)
+    plt.xticks(np.arange(len(ests)), labels,
+               rotation="horizontal", fontsize=26)
     ax.yaxis.set_visible(False)
     plt.ylabel("Rank")
 
