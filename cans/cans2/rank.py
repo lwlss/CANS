@@ -110,7 +110,7 @@ def correlate_ests(genes, query_gene, filename="", eps=0.12, *ests):
     ranks = np.array([rankdata(est) for est in ests]).T
 
     #fig = plt.figure(facecolor="0.6")
-    fig = plt.figure(figsize=(len(ests)*4, 25), dpi=100,
+    fig = plt.figure(figsize=(len(ests)*6, 30), dpi=500,
                      facecolor='0.6', edgecolor='k')
 
     ax = plt.axes(frameon=False)
@@ -123,7 +123,7 @@ def correlate_ests(genes, query_gene, filename="", eps=0.12, *ests):
         positions = [[i, i+1] for i in range(len(gene_ranks)-1)]
         for pair, pos in zip(pairs, positions):
             plt.plot([pos[0]+eps, pos[1]-eps],
-                      pair, color=col)
+                      pair, color=col, lw=2.0)
 
     for est_no in np.arange(len(ests)):
         for gene, col, rank, in zip(genes, cols, ranks[:, est_no]):
@@ -143,8 +143,8 @@ def correlate_ests(genes, query_gene, filename="", eps=0.12, *ests):
                 else:
                     alignment = "center"
                     x_pos = est_no
-                plt.text(x_pos, rank-0.5, gene.lower()+"$\Delta$",
-                         color=col, style="italic", fontsize=18,
+                plt.text(x_pos, rank-0.25, gene.lower()+"$\Delta$",
+                         color=col, style="italic", fontsize=30,
                          horizontalalignment=alignment)
 
     # # Add coef of variation label
@@ -156,7 +156,7 @@ def correlate_ests(genes, query_gene, filename="", eps=0.12, *ests):
 
     # plt.xticks(np.arange(len(ests)), labels, rotation="vertical", fontsize=26)
     plt.xticks(np.arange(len(ests)), labels,
-               rotation="horizontal", fontsize=26)
+               rotation="horizontal", fontsize=40)
     ax.yaxis.set_visible(False)
     plt.ylabel("Rank")
 
