@@ -200,12 +200,14 @@ def plot_c_of_v(genes, title, *ests):
 
     italic_genes = [gene.lower()+"$\Delta$" for gene in ordered_genes]
 
-    plt.xlabel('Deletion (ordered by competition b rank)', fontsize=26)
-    plt.ylabel('Coefficient of Variation', fontsize=26)
+    plt.xlabel('Deletion (ordered by competition b rank)', fontsize=28)
+    plt.ylabel('Coefficient of Variation', fontsize=28)
     plt.title(title, fontsize=34)
     plt.xticks(x_vals + bar_width, italic_genes, rotation="vertical",
-               style="italic", fontsize=20)
-    plt.legend(loc=2, fontsize=26)
+               style="italic", fontsize=22)
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label.set_fontsize(14)
+    plt.legend(loc=2, fontsize=28)
 
     plt.tight_layout()
     plt.show()
