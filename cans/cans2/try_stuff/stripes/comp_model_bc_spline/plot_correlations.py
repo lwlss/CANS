@@ -160,11 +160,11 @@ plotdir = "plots/"
 # plot log r
 plot_scatter([log_r[0], comp_r[0]], [log_r[1], comp_r[1]],
              title="Correlation of r estimates between Stripes and Filled plates",
-             xlab="Stripes r", ylab="Filled r",)
+             xlab="Stripes r", ylab="Filled r", ax_multiples=[5, 5])
              # outfile=plotdir + "log_r_correlation.png")
 
 # plot log mdr
 plot_scatter([log_mdr[0], comp_mdr[0]], [log_mdr[1], comp_mdr[1]],
              title="Correlation of mdr estimates from logistic model fits to Stripes and Filled plates",
-             xlab="Stripes mdr", ylab="Filled mdr",)
+             xlab="Stripes MDR", ylab="Filled MDR", ax_multiples=[2, 2])
              # outfile=plotdir + "log_mdr_correlation.png")
