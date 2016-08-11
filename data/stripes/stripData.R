@@ -9,7 +9,7 @@ raw=fread(rawfile,sep="\t",stringsAsFactors=FALSE)
 barcs=c("K000343_027_001","K000347_027_022")
 fitkeeps=fit$Barcode%in%barcs
 fit=fit[fitkeeps,]
-rawkeeps=fit$Barcode%in%barcs
+rawkeeps=raw$Barcode%in%barcs
 raw=raw[rawkeeps,]
 
 write.table(fit,file="Stripes_FIT.txt",quote=FALSE,row.names=FALSE,sep="\t")
