@@ -11,8 +11,6 @@ from cans2.plate import Plate
 from cans2.zoning import get_plate_zone, sim_and_get_zone_amounts, get_zone_amounts
 
 
-
-
 class Plotter(object):
 
     def __init__(self, model, font_size=32.0, title_font_size=36.0,
@@ -452,8 +450,8 @@ class Plotter(object):
         plt.close()
 
 
-    def plot_scatter(xs, ys, labels, title="", xlab="", ylab="",
-                     outfile="", ax_multiples=None, legend=True, ):
+    def plot_scatter(self, xs, ys, labels, title="", xlab="", ylab="",
+                     outfile="", ax_multiples=None, legend=True, corrcoef=True):
         """Make scatter plots
 
         xs : iterable of iterables of x values
@@ -469,18 +467,30 @@ class Plotter(object):
 
         legend : (bool) Whether or not to show a legend.
 
+        corrcoef : (bool) Whether or not to show Pearson correlation
+        coefficient in the legend.
+
         """
         if ax_multiples is None:
             ax_multiples = [10, 10]
-        # x = np.array(xs)
-        # y = np.array(ys)
+        colors = ["r", "b", "m", "g", "c"]
         fig = plt.figure()
         fig.suptitle(title, fontsize=self.title_font_size)
-        plt.xlabel(xlab, fontsize=self.fontsize, labelpad=self.xpad)
-        plt.ylabel(ylab, fontsize=self.fontsize, labelpad=self.ypad)
-        for color, x, y in zip(self.colours, xs, ys):
+        plt.xlabel(xlab, fontsize=self.font_size, labelpad=self.xpad)
+        plt.ylabel(ylab, fontsize=self.font_size, labelpad=self.ypad)
+
+        if corrcoef:
+            ccoefs = []
+            for x, y in zip(xs, ys):
+                m = np.vstack((x, y))
+                ccoef_m = np.corrcoef(m)
+                ccoef = ccoef_m[0, 1]
+                ccoefs.append(" (" + r"$\rho = {0:.3f}$".format(ccoef) + ")")
+            labels = [lab + ccoef for lab, ccoef in zip(labels, ccoefs)]
+
+        for color, x, y, lab in zip(colors, xs, ys, labels):
             plt.plot(x, y, "x", ms=self.ms, mew=self.mew, color=color,
-                     label=)
+                     label=lab)
         max_val = np.ceil(np.max([xs, ys])/10.0)*10
         plt.plot([0, max_val], [0, max_val], color="k")
 
@@ -497,9 +507,10 @@ class Plotter(object):
         plt.xlim([0.0, xmax])
         plt.ylim([0.0, ymax])
 
+
         # Need to make a legend with correlation coefficient
         if legend:
-            plt.legend(loc="best", fontsize=legend_font_size)
+            plt.legend(loc="best", fontsize=self.legend_font_size)
 
         if outfile:
             plt.savefig(outfile)
