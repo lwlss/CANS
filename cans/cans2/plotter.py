@@ -475,6 +475,13 @@ class Plotter(object):
             ax_multiples = [10, 10]
         colors = ["r", "b", "m", "g", "c"]
         fig = plt.figure()
+
+        ax = plt.gca()
+        for tick in ax.xaxis.get_major_ticks():
+            tick.label.set_fontsize(self.labelsize)
+        for tick in ax.yaxis.get_major_ticks():
+            tick.label.set_fontsize(self.labelsize)
+
         fig.suptitle(title, fontsize=self.title_font_size)
         plt.xlabel(xlab, fontsize=self.font_size, labelpad=self.xpad)
         plt.ylabel(ylab, fontsize=self.font_size, labelpad=self.ypad)
