@@ -11,53 +11,6 @@ from cans2.plate import Plate
 from cans2.zoning import get_plate_zone, sim_and_get_zone_amounts, get_zone_amounts
 
 
-def plot_scatter(xs, ys, title="", xlab="", ylab="", outfile="",
-                 ax_multiples=None):
-    """Make scatter plots
-
-    xs : iterable of iterables of x values
-
-    ys : iterable of iterables of y values
-
-    ax_multiples : List for x and y axes. Axes will finish at the
-    first multiple of (the corresponding value in) ax_multiples above
-    the max value in the data.
-
-    """
-    if ax_multiples is None:
-        ax_multiples = [10, 10]
-    # x = np.array(xs)
-    # y = np.array(ys)
-    colors = ["r", "b", "g", "y"]
-    fig = plt.figure()
-    fig.suptitle(title)
-    plt.xlabel(xlab, fontsize=26, labelpad=0)
-    plt.ylabel(ylab, fontsize=26, labelpad=0)
-    for color, x, y in zip(colors, xs, ys):
-        plt.plot(x, y, "x", ms=6.0, mew=1.0, color=color)
-    max_val = np.ceil(np.max([xs, ys])/10.0)*10
-    plt.plot([0, max_val], [0, max_val], color="k")
-
-    # Set max values to nearest multiple of 5.
-    try:
-        xmax = (np.max(xs)//ax_multiples[0] + 1) * ax_multiples[0]
-    except ZeroDivisionError:
-        xmax = np.max(xs)*1.1
-    try:
-        ymax = (np.max(ys)//ax_multiples[1] + 1) * ax_multiples[1]
-    except ZeroDivisionError:
-        ymax = np.max(ys)*1.1
-
-    plt.xlim([0.0, xmax])
-    plt.ylim([0.0, ymax])
-
-    # Need to make a legend with correlation coefficient
-
-    if outfile:
-        plt.savefig(outfile)
-    else:
-        plt.show()
-    plt.close()
 
 
 class Plotter(object):
@@ -496,6 +449,62 @@ class Plotter(object):
             plt.show()
         else:
             plt.savefig(filename)
+        plt.close()
+
+
+    def plot_scatter(xs, ys, labels, title="", xlab="", ylab="",
+                     outfile="", ax_multiples=None, legend=True, ):
+        """Make scatter plots
+
+        xs : iterable of iterables of x values
+
+        ys : iterable of iterables of y values
+
+        labels : list of names for distiributions
+        (e.g. ["Logistic r", "Competition Model r"])
+
+        ax_multiples : List for x and y axes. Axes will finish at the
+        first multiple of (the corresponding value in) ax_multiples
+        above the max value in the data.
+
+        legend : (bool) Whether or not to show a legend.
+
+        """
+        if ax_multiples is None:
+            ax_multiples = [10, 10]
+        # x = np.array(xs)
+        # y = np.array(ys)
+        fig = plt.figure()
+        fig.suptitle(title, fontsize=self.title_font_size)
+        plt.xlabel(xlab, fontsize=self.fontsize, labelpad=self.xpad)
+        plt.ylabel(ylab, fontsize=self.fontsize, labelpad=self.ypad)
+        for color, x, y in zip(self.colours, xs, ys):
+            plt.plot(x, y, "x", ms=self.ms, mew=self.mew, color=color,
+                     label=)
+        max_val = np.ceil(np.max([xs, ys])/10.0)*10
+        plt.plot([0, max_val], [0, max_val], color="k")
+
+        # Set max values to nearest multiple of 5.
+        try:
+            xmax = (np.max(xs)//ax_multiples[0] + 1) * ax_multiples[0]
+        except ZeroDivisionError:
+            xmax = np.max(xs)*1.1
+        try:
+            ymax = (np.max(ys)//ax_multiples[1] + 1) * ax_multiples[1]
+        except ZeroDivisionError:
+            ymax = np.max(ys)*1.1
+
+        plt.xlim([0.0, xmax])
+        plt.ylim([0.0, ymax])
+
+        # Need to make a legend with correlation coefficient
+        if legend:
+            plt.legend(loc="best", fontsize=legend_font_size)
+
+        if outfile:
+            plt.savefig(outfile)
+        else:
+            plt.show()
         plt.close()
 
 
