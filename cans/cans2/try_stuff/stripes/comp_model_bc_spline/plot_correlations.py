@@ -5,7 +5,7 @@ import json
 
 from cans2.model import CompModelBC
 from cans2.plate import Plate
-from cans2.plotter import Plotter, plot_scatter
+from cans2.plotter import Plotter#, plot_scatter
 from cans2.parser import get_plate_data2, get_qfa_R_dct
 from cans2.process import find_best_fits, remove_edges
 from cans2.cans_funcs import dict_to_numpy
@@ -132,6 +132,10 @@ for g1, g2 in zip(g[0], g[1]):
     tally += int(g1 == g2)
 print("Fraction of g the same", tally/float(len(g[0])))
 
+
+plotter = Plotter(CompModelBC(), font_size=30, title_font_size=30,
+                  legend_font_size=26, labelsize=18, xpad=0, ypad=0,
+                  ms=10, mew=2, lw=3.0)
 plotdir = "plots/"
 # # Plot comp b
 # plot_scatter(ests[0][1], ests[1][1],
@@ -157,14 +161,31 @@ plotdir = "plots/"
 #              outfile=plotdir + "comp_mdrmdp_correlation.png")
 
 
-# plot log r
-plot_scatter([log_r[0], comp_r[0]], [log_r[1], comp_r[1]],
-             title="Correlation of r estimates between Stripes and Filled plates",
-             xlab="Stripes r", ylab="Filled r", ax_multiples=[5, 5])
-             # outfile=plotdir + "log_r_correlation.png")
+# Make format strings for plots.
+format_titles = {
+    "xlab": "Stripes {0}",
+    "ylab": "Filled {0}",
+    "title": "Correlation of {0} estimates between Stripes and Filled plates",
+    }
+format_labels = ["Logistic Model", "Competition Model"]
 
-# plot log mdr
-plot_scatter([log_mdr[0], comp_mdr[0]], [log_mdr[1], comp_mdr[1]],
-             title="Correlation of mdr estimates from logistic model fits to Stripes and Filled plates",
-             xlab="Stripes MDR", ylab="Filled MDR", ax_multiples=[2, 2])
-             # outfile=plotdir + "log_mdr_correlation.png")
+# plot both rs
+f_meas = "r"
+titles = {k: v.format(f_meas) for k, v in format_titles.items()}
+print(titles)
+labels = [lab.format(f_meas) for lab in format_labels]
+plotter.plot_scatter([log_r[0], comp_r[0]], [log_r[1], comp_r[1]],
+                     labels, title=titles["title"], xlab=titles["xlab"],
+                     ylab=titles["ylab"], ax_multiples=[2, 2],
+                     legend=True, corrcoef=True,)
+#                     outfile=plotdir + "r_correlations.png")
+
+# # plot both MDRs
+# f_meas = "MDR"
+# titles = {k: v.format(f_meas) for k, v in format_titles.items()}
+# labels = [lab.format(f_meas) for lab in format_labels]
+# plotter.plot_scatter([log_mdr[0], comp_mdr[0]], [log_mdr[1], comp_mdr[1]],
+#                      labels, title=titles["title"], xlab=titles["xlab"],
+#                      ylab=titles["ylab"], ax_multiples=[2, 2],
+#                      legend=True, corrcoef=True,)
+#                      # outfile=plotdir + "log_mdr_correlation.png")
