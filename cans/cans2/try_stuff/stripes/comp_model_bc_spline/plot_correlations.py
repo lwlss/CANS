@@ -105,7 +105,7 @@ comp_mdrmdp = [mdrmdp(r, K, C_0) for r, K, C_0 in zip(comp_r, comp_K, comp_C_0)]
 # Now also get r values from the QFA R fits
 qfa_R_path = "../data/stripes/Stripes_FIT.txt"
 
-# Use pandas to extract the r values that I want.
+# Use pandas to extract the r values that I want
 log_r = np.array(get_qfa_R_dct(qfa_R_path)["r"])
 log_mdr = np.array(get_qfa_R_dct(qfa_R_path)["MDR"])
 log_bc = np.array(get_qfa_R_dct(qfa_R_path)["Barcode"])
@@ -123,6 +123,16 @@ log_mdr = np.array([mdr for i, j, mdr in zip(log_rows, log_cols, log_mdr)
                     if i not in [1, 16] and j not in [1, 24]])
 log_mdr = np.split(log_mdr, 2)
 assert len(log_r[0]) == len(comp_r[0])
+
+# Check that we are slicing QFA R and compeition model estimates to
+# get the same gene order.
+comp_genes = stripes_genes
+qfa_R_genes = np.array(get_qfa_R_dct(qfa_R_path)["Gene"])
+qfa_R_genes = np.array([gene for i, j, gene in zip(log_rows, log_cols, qfa_R_genes)
+                        if i not in [1, 16] and j not in [1, 24]])
+qfa_R_genes = np.split(qfa_R_genes, 2)
+assert all(comp_genes == qfa_R_genes[0])
+assert all(qfa_R_genes[0] == qfa_R_genes[1])
 
 # Check QFA R initial C_0s which they call g
 g = np.array(get_qfa_R_dct(qfa_R_path)["g"])
@@ -161,6 +171,7 @@ plotdir = "plots/"
 #              outfile=plotdir + "comp_mdrmdp_correlation.png")
 
 
+### Plot correlations of same model between plates ###
 # Make format strings for plots.
 format_titles = {
     "xlab": "Stripes {0}",
@@ -178,7 +189,26 @@ plotter.plot_scatter([log_r[0], comp_r[0]], [log_r[1], comp_r[1]],
                      labels, title=titles["title"], xlab=titles["xlab"],
                      ylab=titles["ylab"], ax_multiples=[2, 2],
                      legend=True, corrcoef=True,)
-#                     outfile=plotdir + "r_correlations.png")
+#                     outfile=plotdir + "r_correlations_between_plates.png")
+
+
+### Plot correlations of different models for each plate ###
+format_titles = {
+    "xlab": "Logistic {0}",
+    "ylab": "Competition {0}",
+    "title": "Correlation of {0} estimates between models",
+    }
+format_labels = ["Stripes Plate", "Filled Plate"]
+# plot both rs
+f_meas = "r"
+titles = {k: v.format(f_meas) for k, v in format_titles.items()}
+print(titles)
+labels = [lab.format(f_meas) for lab in format_labels]
+plotter.plot_scatter([log_r[0], log_r[1]], [comp_r[0], comp_r[1]],
+                     labels, title=titles["title"], xlab=titles["xlab"],
+                     ylab=titles["ylab"], ax_multiples=[2, 2],
+                     legend=True, corrcoef=True,)
+#                     outfile=plotdir + "r_correlations_between_models.png")
 
 # # plot both MDRs
 # f_meas = "MDR"
