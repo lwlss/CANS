@@ -176,7 +176,7 @@ plotdir = "plots/"
 format_titles = {
     "xlab": "Stripes {0}",
     "ylab": "Filled {0}",
-    "title": "Correlation of {0} estimates between Stripes and Filled plates",
+    "title": "A) Correlation of {0} estimates between plates for each model",
     }
 format_labels = ["Logistic Model", "Competition Model"]
 
@@ -188,15 +188,15 @@ labels = [lab.format(f_meas) for lab in format_labels]
 plotter.plot_scatter([log_r[0], comp_r[0]], [log_r[1], comp_r[1]],
                      labels, title=titles["title"], xlab=titles["xlab"],
                      ylab=titles["ylab"], ax_multiples=[2, 2],
-                     legend=True, corrcoef=True,)
-#                     outfile=plotdir + "r_correlations_between_plates.png")
+                     legend=True, corrcoef=True,
+                     outfile=plotdir + "new/r_correlations_between_plates_0.png")
 
 
 ### Plot correlations of different models for each plate ###
 format_titles = {
     "xlab": "Logistic {0}",
     "ylab": "Competition {0}",
-    "title": "Correlation of {0} estimates between models",
+    "title": "B) Correlation of {0} estimates between models for each plate",
     }
 format_labels = ["Stripes Plate", "Filled Plate"]
 # plot both rs
@@ -207,8 +207,8 @@ labels = [lab.format(f_meas) for lab in format_labels]
 plotter.plot_scatter([log_r[0], log_r[1]], [comp_r[0], comp_r[1]],
                      labels, title=titles["title"], xlab=titles["xlab"],
                      ylab=titles["ylab"], ax_multiples=[2, 2],
-                     legend=True, corrcoef=True,)
-#                     outfile=plotdir + "r_correlations_between_models.png")
+                     legend=True, corrcoef=True,
+                     outfile=plotdir + "new/r_correlations_between_models_0.png")
 
 # # plot both MDRs
 # f_meas = "MDR"
