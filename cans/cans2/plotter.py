@@ -474,7 +474,7 @@ class Plotter(object):
         if ax_multiples is None:
             ax_multiples = [10, 10]
         colors = ["r", "b", "m", "g", "c"]
-        fig = plt.figure()
+        fig = plt.figure(figsize=(16, 11), dpi=500)
 
         ax = plt.gca()
         for tick in ax.xaxis.get_major_ticks():
