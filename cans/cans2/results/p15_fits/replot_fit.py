@@ -118,8 +118,19 @@ coords = (4, 17)
 rows, cols = 3, 3
 # rows, cols = 12, 20
 # coords = (2, 2)
+fig_settings = {
+    "figsize": [16.0, 12.0],
+    "dpi": 100.0,
+    }
 plot_title = r'Fit of the competition model to P15 (R5, C18)' # for \textit{cdc13-1} P15 at 27C (R5, C18)'
-plotter = Plotter(model, lw=3.0, ms=10.0, mew=2.0, xpad=15, ypad=30)
+plotter = Plotter(model, lw=3.0, ms=12.0, mew=2.0, xpad=5, ypad=17,
+                  font_size=28.0, title_font_size=36.0,
+                  legend_font_size=14.0, labelsize=14,
+                  fig_settings=fig_settings, legend_cols=5)
 plotter.plot_zone_est(plates, plate_names, est_params, models, coords,
                       rows, cols, legend=True, title=plot_title,
                       plot_types=plot_types, vis_ticks=True)
+# plotter = Plotter(model, lw=3.0, ms=10.0, mew=2.0, xpad=15, ypad=30)
+# plotter.plot_zone_est(plates, plate_names, est_params, models, coords,
+#                       rows, cols, legend=True, title=plot_title,
+#                       plot_types=plot_types, vis_ticks=True)

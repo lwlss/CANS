@@ -16,11 +16,13 @@ class Plotter(object):
     def __init__(self, model, font_size=32.0, title_font_size=36.0,
                  legend_font_size=26.0, lw=3.0, ms=10.0, mew=2.0,
                  labelsize=20, xpad=20, ypad=20, units=None,
-                 species=None, fig_settings=None):
+                 species=None, fig_settings=None, legend_cols=1):
         """Initialise plotter and settings.
 
         figure_setting : (dict) kwargs (figsize, etc.) to be unpacked
         and passed plt.figure().
+
+        legend_cols : (int) number of columns to use in legend.
 
         """
         self.model = model
@@ -39,7 +41,7 @@ class Plotter(object):
         self.xpad = xpad
         self.ypad = ypad
         if units is None:    # List of unit labels
-            self.units = ["(days)", "(AU)"]
+            self.units = ["(d)", "(AU)"]
         else:
             self.units = units
         if species is not None:
@@ -51,7 +53,7 @@ class Plotter(object):
                 "S": "Signal",
             }
         self.fig_settings = fig_settings
-
+        self.legend_cols = legend_cols
 
     def _find_ymax(self, amounts):
         ymax = np.amax(amounts)
@@ -348,9 +350,15 @@ class Plotter(object):
         # handles2 = [handles[i] for i in new_order]
         # labels2 = [labels[i] for i in new_order]
 
+        ax = grid[-1]
+        handles, labels = ax.get_legend_handles_labels()
+
         if legend:
             # grid[1].legend(handles2, labels2, loc='best', fontsize=self.legend_font_size)
-            grid[-1].legend(loc='best', fontsize=self.legend_font_size)
+            grid[-1].legend(loc='best',
+                            fontsize=self.legend_font_size,
+                            ncol=self.legend_cols,
+                            bbox_to_anchor=(1.0, -0.2))
         if filename is None:
             plt.show()
         else:
@@ -443,7 +451,7 @@ class Plotter(object):
                 culture_amounts = culture_amounts[:, [2, 3]]
             # Plot c_meas
             ax.plot(zone.times, zone.c_meas[i::zone.no_cultures], 'x',
-                    label='Observed Cells', ms=ms, mew=mew)
+                    label='Observed Cells', ms=ms, mew=mew, color='r')
 
             for j, species in enumerate(model.species):
                 # Plot estimated amounts
