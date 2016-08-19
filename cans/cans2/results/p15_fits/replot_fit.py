@@ -96,13 +96,30 @@ plate.sim_params = fit_data["comp_est"]
 #                     sim=False, legend=False, vis_ticks=False)
 
 
+# coords = (4, 17)
+# rows, cols = 3, 3
+# # rows, cols = 12, 20
+# # coords = (2, 2)
+# plot_title = r'Comp Model BC Simulation from Imaginary Neighbour Guess' # for \textit{cdc13-1} P15 at 27C (R5, C18)'
+# plotter = Plotter(model, lw=3.0, ms=10.0, mew=2.0, xpad=15, ypad=30)
+# plotter.plot_zone_est([plate], [""], [fit_data["init_guess"]],
+#                       [CompModelBC()], coords, rows, cols,
+#                       legend=True, title=plot_title,
+#                       plot_types=["Sim."], vis_ticks=True)
+
+
+# Plot the guess and fit on the same Figure.
+plates = [plate, plate]
+plate_names = ["", ""]
+est_params = [fit_data["comp_est"], fit_data["init_guess"]]
+models = [CompModelBC(), CompModelBC()]
+plot_types = ["Estimated", "Guessed"]
 coords = (4, 17)
 rows, cols = 3, 3
 # rows, cols = 12, 20
 # coords = (2, 2)
-plot_title = r'Comp Model BC Simulation from Imaginary Neighbour Guess' # for \textit{cdc13-1} P15 at 27C (R5, C18)'
+plot_title = r'Fit of the competition model to P15 (R5, C18)' # for \textit{cdc13-1} P15 at 27C (R5, C18)'
 plotter = Plotter(model, lw=3.0, ms=10.0, mew=2.0, xpad=15, ypad=30)
-plotter.plot_zone_est([plate], [""], [fit_data["init_guess"]],
-                      [CompModelBC()], coords, rows, cols,
-                      legend=True, title=plot_title,
-                      plot_types=["Sim."], vis_ticks=True)
+plotter.plot_zone_est(plates, plate_names, est_params, models, coords,
+                      rows, cols, legend=True, title=plot_title,
+                      plot_types=plot_types, vis_ticks=True)
