@@ -278,20 +278,20 @@ class Plotter(object):
         # Check if c_meas are equal for the plates so don't plot
         # twice. Currently only checks for two.
         if len(plates) == 2 and len(plates[0].c_meas) == len(plates[1].c_meas):
-            same_c_meas = all(plates[0].c_meas == plates[1].c_meas)
+            same_c_meas = np.array_equal(plates[0].c_meas, plates[1].c_meas)
         else:
             same_c_meas = False
 
         colors = {
-            "C": ["b", "r", "b"],
-            "N": ["y", "g", "g"],
+            "C": ["b", "b", "b"],
+            "N": ["y", "y", "g"],
             }
-        lines = ["-", "-", "--"]
+        lines = ["-", "--", "--"]
 
         for i, ax in enumerate(grid):
             # Plot c_meas.
-            # for plate_name, c, zone in zip(plate_names, self.c_meas_colors, zones):
-            for plate_name, c, zone in zip(plate_names, colors["C"][:-1], zones):
+            for plate_name, c, zone in zip(plate_names, self.c_meas_colors, zones):
+            # for plate_name, c, zone in zip(plate_names, colors["C"][:-1], zones):
                 if same_c_meas:
                     ax.plot(zone.times, zone.c_meas[i::zone.no_cultures],
                             'x', color=c, label='Observed Cells',
@@ -307,7 +307,7 @@ class Plotter(object):
             plot_zip = zip(plate_names, plot_types, zone_smooth_amounts, models)
             for k, (plate_name, plot_type, smooth_amounts, model) in enumerate(plot_zip):
                 for j, (amounts, species) in enumerate(zip(smooth_amounts, model.species)):
-                    if j==1: break
+                    # if j==1: break
                     ax.plot(smooth_times, amounts[:, i], colors[species][k],
                             label="{0} ".format(plot_type) + species_labels[species] + " {0}".format(plate_name),
                             # lw=self.lw, ls=self.linestyles[plate_names.index(plate_name)])
@@ -325,15 +325,15 @@ class Plotter(object):
         # labels2 = [labels[i] for i in new_order]
 
         # # Change order of labels.
-        ax = grid[-1]
-        handles, labels = ax.get_legend_handles_labels()
-        new_order = [0, 2, 1, 3, 4]
-        handles2 = [handles[i] for i in new_order]
-        labels2 = [labels[i] for i in new_order]
+        # ax = grid[-1]
+        # handles, labels = ax.get_legend_handles_labels()
+        # new_order = [0, 2, 1, 3, 4]
+        # handles2 = [handles[i] for i in new_order]
+        # labels2 = [labels[i] for i in new_order]
 
         if legend:
-            grid[1].legend(handles2, labels2, loc='best', fontsize=self.legend_font_size)
-            # grid[1].legend(loc='best', fontsize=self.legend_font_size)
+            # grid[1].legend(handles2, labels2, loc='best', fontsize=self.legend_font_size)
+            grid[-1].legend(loc='best', fontsize=self.legend_font_size)
         if filename is None:
             plt.show()
         else:
@@ -474,6 +474,9 @@ class Plotter(object):
         if ax_multiples is None:
             ax_multiples = [10, 10]
         colors = ["r", "b", "m", "g", "c"]
+        colors = ["#00FF00", "#FFFF00", "c"]
+        markers = ["x", "^", "+", "o", "v", "D"]
+
         fig = plt.figure(figsize=(16, 11), dpi=500)
 
         ax = plt.gca()
@@ -495,7 +498,7 @@ class Plotter(object):
                 ccoefs.append(" (" + r"$\rho = {0:.3f}$".format(ccoef) + ")")
             labels = [lab + ccoef for lab, ccoef in zip(labels, ccoefs)]
 
-        for color, x, y, lab in zip(colors, xs, ys, labels):
+        for marker, color, x, y, lab in zip(markers, colors, xs, ys, labels):
             plt.plot(x, y, "x", ms=self.ms, mew=self.mew, color=color,
                      label=lab)
         max_val = np.ceil(np.max([xs, ys])/10.0)*10
