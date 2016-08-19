@@ -52,7 +52,18 @@ class Plotter(object):
         return ymax
 
 
-    def _make_grid(self, plate, amounts, sim, title, vis_ticks):
+    def _make_grid(self, plate, amounts, sim, title, vis_ticks,
+                   figure_settings=None):
+        """Make a ractangular grid of axes.
+
+        Each axis may represent a culture in an QFA array.
+
+        vis_ticks : (bool) Whether to plot values on axes. For large
+        arrays becomes cluttered.
+
+        figure_setting : (dict) Disctionary of kwargs (figsize, etc.)
+        to be unpacked and passed plt.figure().
+        """
         rows = plate.rows
         cols = plate.cols
         if sim:
