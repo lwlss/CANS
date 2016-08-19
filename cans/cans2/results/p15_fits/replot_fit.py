@@ -126,10 +126,10 @@ plot_title = r'Fit of the competition model to P15 (R5, C18)' # for \textit{cdc1
 plotter = Plotter(model, lw=3.0, ms=12.0, mew=2.0, xpad=5, ypad=17,
                   font_size=30.0, title_font_size=38.0,
                   legend_font_size=22.0, labelsize=16,
-                  fig_settings=fig_settings, legend_cols=3, bbox=(1,0))
+                  fig_settings=fig_settings, legend_cols=3, bbox=(1.0, 0.0))
 plotter.plot_zone_est(plates, plate_names, est_params, models, coords,
-                      rows, cols, legend=False, title=plot_title,
-                      plot_types=plot_types, vis_ticks=True)
+                      rows, cols, legend=True, title=plot_title,
+                      plot_types=plot_types, vis_ticks=False)
 # plotter = Plotter(model, lw=3.0, ms=10.0, mew=2.0, xpad=15, ypad=30)
 # plotter.plot_zone_est(plates, plate_names, est_params, models, coords,
 #                       rows, cols, legend=True, title=plot_title,

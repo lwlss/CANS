@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import copy
+import itertools
 
 
 from mpl_toolkits.axes_grid1 import AxesGrid
@@ -355,15 +356,22 @@ class Plotter(object):
         # handles2 = [handles[i] for i in new_order]
         # labels2 = [labels[i] for i in new_order]
 
+        # For multiple columns reorder the axis labels by row
+        def flip(items, ncol):
+            """http://stackoverflow.com/a/10101532"""
+            return itertools.chain(*[items[i::ncol] for i in range(ncol)])
         ax = grid[-1]
         handles, labels = ax.get_legend_handles_labels()
+        handles = flip(handles, self.legend_cols)
+        labels = flip(labels, self.legend_cols)
 
         if legend:
             # grid[1].legend(handles2, labels2, loc='best', fontsize=self.legend_font_size)
-            grid[-1].legend(loc='best',
+            grid[-1].legend(handles, labels, loc='best',
                             fontsize=self.legend_font_size,
                             ncol=self.legend_cols,
                             bbox_to_anchor=self.bbox)
+
         if filename is None:
             plt.show()
         else:
