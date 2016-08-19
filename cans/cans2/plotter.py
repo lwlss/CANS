@@ -16,7 +16,13 @@ class Plotter(object):
     def __init__(self, model, font_size=32.0, title_font_size=36.0,
                  legend_font_size=26.0, lw=3.0, ms=10.0, mew=2.0,
                  labelsize=20, xpad=20, ypad=20, units=None,
-                 species=None):
+                 species=None, fig_settings=None):
+        """Initialise plotter and settings.
+
+        figure_setting : (dict) kwargs (figsize, etc.) to be unpacked
+        and passed plt.figure().
+
+        """
         self.model = model
         # Can decide on other colours when adding models with more species.
         self.colours = ['b', 'y', 'r', 'g']
@@ -44,6 +50,7 @@ class Plotter(object):
                 "N": "Nutrients",
                 "S": "Signal",
             }
+        self.fig_settings = fig_settings
 
 
     def _find_ymax(self, amounts):
@@ -52,17 +59,13 @@ class Plotter(object):
         return ymax
 
 
-    def _make_grid(self, plate, amounts, sim, title, vis_ticks,
-                   figure_settings=None):
+    def _make_grid(self, plate, amounts, sim, title, vis_ticks):
         """Make a ractangular grid of axes.
 
         Each axis may represent a culture in an QFA array.
 
         vis_ticks : (bool) Whether to plot values on axes. For large
         arrays becomes cluttered.
-
-        figure_setting : (dict) Disctionary of kwargs (figsize, etc.)
-        to be unpacked and passed plt.figure().
         """
         rows = plate.rows
         cols = plate.cols
@@ -70,7 +73,10 @@ class Plotter(object):
             ymax = self._find_ymax(np.append(amounts, plate.sim_amounts))
         else:
             ymax = self._find_ymax(np.append(amounts, plate.c_meas))
-        fig = plt.figure()
+        if self.fig_settings is None:
+            fig = plt.figure()
+        else:
+            fig = plt.figure(**self.fig_settings)
         # http://stackoverflow.com/a/36542971
         # Add big axes and hide frame.
         fig.add_subplot(111, frameon=False)
