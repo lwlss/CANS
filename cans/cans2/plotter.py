@@ -16,7 +16,8 @@ class Plotter(object):
     def __init__(self, model, font_size=32.0, title_font_size=36.0,
                  legend_font_size=26.0, lw=3.0, ms=10.0, mew=2.0,
                  labelsize=20, xpad=20, ypad=20, units=None,
-                 species=None, fig_settings=None, legend_cols=1):
+                 species=None, fig_settings=None, legend_cols=1,
+                 bbox=(1.0, -0.2), title_height=0.955):
         """Initialise plotter and settings.
 
         figure_setting : (dict) kwargs (figsize, etc.) to be unpacked
@@ -24,6 +25,7 @@ class Plotter(object):
 
         legend_cols : (int) number of columns to use in legend.
 
+        bbox : (tup) bbox_to_anchor setting for legend position.
         """
         self.model = model
         # Can decide on other colours when adding models with more species.
@@ -54,6 +56,9 @@ class Plotter(object):
             }
         self.fig_settings = fig_settings
         self.legend_cols = legend_cols
+        self.bbox = bbox
+        self.title_height = title_height
+
 
     def _find_ymax(self, amounts):
         ymax = np.amax(amounts)
@@ -105,7 +110,7 @@ class Plotter(object):
                 plt.setp(ax.get_yticklabels(which="both"), visible=False)
 
         #rc('text', usetex=True)
-        fig.suptitle(title, fontsize=self.title_font_size)
+        fig.suptitle(title, fontsize=self.title_font_size, y=self.title_height)
 
         return fig, grid
 
@@ -358,7 +363,7 @@ class Plotter(object):
             grid[-1].legend(loc='best',
                             fontsize=self.legend_font_size,
                             ncol=self.legend_cols,
-                            bbox_to_anchor=(1.0, -0.2))
+                            bbox_to_anchor=self.bbox)
         if filename is None:
             plt.show()
         else:
