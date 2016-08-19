@@ -334,7 +334,7 @@ class Plotter(object):
                 for j, (amounts, species) in enumerate(zip(smooth_amounts, model.species)):
                     # if j==1: break
                     ax.plot(smooth_times, amounts[:, i], colors[species][k],
-                            label="{0} ".format(plot_type) + species_labels[species] + " {0}".format(plate_name),
+                            label="{0} ".format(plot_type) + species_labels[species] + ": {0}".format(plate_name),
                             # lw=self.lw, ls=self.linestyles[plate_names.index(plate_name)])
                             lw=self.lw, ls=lines[k])
 
