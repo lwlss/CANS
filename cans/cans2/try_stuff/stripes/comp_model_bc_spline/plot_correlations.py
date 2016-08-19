@@ -173,23 +173,21 @@ plotdir = "plots/"
 
 ### Plot correlations of same model between plates ###
 # Make format strings for plots.
-format_titles = {
-    "xlab": "Stripes {0}",
-    "ylab": "Filled {0}",
-    "title": "A) Correlation of {0} estimates between plates for each model",
-    }
-format_labels = ["Logistic Model", "Competition Model"]
-
-# plot both rs
-f_meas = "r"
-titles = {k: v.format(f_meas) for k, v in format_titles.items()}
-print(titles)
-labels = [lab.format(f_meas) for lab in format_labels]
-plotter.plot_scatter([log_r[0], comp_r[0]], [log_r[1], comp_r[1]],
-                     labels, title=titles["title"], xlab=titles["xlab"],
-                     ylab=titles["ylab"], ax_multiples=[2, 2],
-                     legend=True, corrcoef=True,
-                     outfile=plotdir + "new/r_correlations_between_plates_0.png")
+# format_titles = {
+#     "xlab": "Stripes {0}",
+#     "ylab": "Filled {0}",
+#     "title": "A) Correlation of {0} estimates between plates for each model",
+#     }
+# format_labels = ["Logistic Model", "Competition Model"]
+# f_meas = "r"
+# titles = {k: v.format(f_meas) for k, v in format_titles.items()}
+# print(titles)
+# labels = [lab.format(f_meas) for lab in format_labels]
+# plotter.plot_scatter([log_r[0], comp_r[0]], [log_r[1], comp_r[1]],
+#                      labels, title=titles["title"], xlab=titles["xlab"],
+#                      ylab=titles["ylab"], ax_multiples=[2, 2],
+#                      legend=True, corrcoef=True,
+#                      outfile=plotdir + "new/r_correlations_between_plates_0.png")
 
 
 ### Plot correlations of different models for each plate ###
@@ -199,7 +197,6 @@ format_titles = {
     "title": "B) Correlation of {0} estimates between models for each plate",
     }
 format_labels = ["Stripes Plate", "Filled Plate"]
-# plot both rs
 f_meas = "r"
 titles = {k: v.format(f_meas) for k, v in format_titles.items()}
 print(titles)
