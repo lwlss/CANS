@@ -47,6 +47,7 @@ for r in results:
     plate.est_params = r["est_params"]
     best_plates.append(plate)
 
+print([plate.est_params[0:4] for plate in best_plates]); assert False
 # Plot c_meas for both plates
 # plot_title = r"Cell Measurements for the Stripes and Filled Plates (R10, C1)"
 # plotter = Plotter(CompModelBC(), lw=3.0, ms=10.0, mew=2.0, xpad=15, ypad=30)
