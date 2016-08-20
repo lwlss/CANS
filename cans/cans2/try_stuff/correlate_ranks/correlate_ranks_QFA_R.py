@@ -70,6 +70,7 @@ for est in best_comp:
 
 # Removees HIS3 edge cultures (other internal HIS3 exist)
 genes = remove_edges(genes, rows, cols)
+# print(len(np.where(genes == "HIS3")[0])); assert False
 comp_ests = [remove_edges(np.array(est), rows, cols) for est in comp_ests]
 comp_bc_ests = [remove_edges(np.array(est), rows, cols) for est in comp_bc_ests]
 log_eq_ests = [remove_edges(np.array(est), rows, cols) for est in log_eq_ests]
