@@ -7,7 +7,7 @@ from cans2.model import CompModelBC
 from cans2.plate import Plate
 from cans2.plotter import Plotter#, plot_scatter
 from cans2.parser import get_plate_data2, get_qfa_R_dct
-from cans2.process import find_best_fits, remove_edges
+from cans2.process import find_best_fits, remove_edges, spearmans_rho
 from cans2.cans_funcs import dict_to_numpy
 from cans2.rank import correlate_ests, mdr, mdp, mdrmdp
 
@@ -141,6 +141,25 @@ comp_mdr_medians = [get_avgs(mdrs, genes, gene_set, "median")[0] for mdrs in com
 log_C_0 = qfa_R_dct["g"]
 from collections import Counter
 print("QFA_R_C_0_counter", Counter(log_C_0))
+
+# Print Spearmans for cultures, mean, and median.
+comparisons = [
+    ("all_r", np.array([log_r[0], comp_r[0]])),
+    ("mean_r", np.array([log_r_means[0], comp_r_means[0]])),
+    ("median_r", np.array([log_r_medians[0], comp_r_medians[0]])),
+    ("all_mdr", np.array([log_mdr[0], comp_mdr[0]])),
+    ("mean_mdr", np.array([log_mdr_means[0], comp_mdr_means[0]])),
+    ("median_mdr", np.array([log_mdr_medians[0], comp_mdr_medians[0]])),
+]
+spearmans = [(name, spearmans_rho(comparison)) for name, comparison in comparisons]
+for name, spear in spearmans:
+    print(name)
+    print(spear)
+    print("")
+    print(spear[-1][0])
+assert False
+
+
 
 fig_settings = {
     "figsize" : (14, 10),
