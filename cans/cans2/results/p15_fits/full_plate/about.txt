@@ -1,0 +1,4 @@
+CompModel_2 and CompModelBC_2 are the same fits as the orginals (without 2)
+but has information about the objective function of internals.
+
+BC refers to the two N_0 model.

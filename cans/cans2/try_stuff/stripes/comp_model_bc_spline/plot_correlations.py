@@ -1,4 +1,4 @@
-"""Plot correlation of fitness estimates between plates with Spearmans'."""
+"""Plot correlation of fitness estimates between plates."""
 import numpy as np
 import json
 
@@ -7,7 +7,7 @@ from cans2.model import CompModelBC
 from cans2.plate import Plate
 from cans2.plotter import Plotter#, plot_scatter
 from cans2.parser import get_plate_data2, get_qfa_R_dct
-from cans2.process import find_best_fits, remove_edges
+from cans2.process import find_best_fits, remove_edges, spearmans_rho
 from cans2.cans_funcs import dict_to_numpy
 from cans2.rank import correlate_ests, mdr, mdp, mdrmdp
 
@@ -69,7 +69,7 @@ for bc, path in zip(barcodes, best_paths):
 no_cultures = plates[0].no_cultures
 
 # For cross-plate correlations
-b_ests = [data["est_params"] for data in results]
+b_ests = [data["est_params"][-rows*cols:] for data in results]
 
 # Removes edge cultures, usually HIS3 (internal HIS3 also exist).
 b_ests = [remove_edges(np.array(bs), rows, cols) for bs in b_ests]
@@ -143,10 +143,26 @@ for g1, g2 in zip(g[0], g[1]):
 print("Fraction of g the same", tally/float(len(g[0])))
 
 
-plotter = Plotter(CompModelBC(), font_size=30, title_font_size=30,
-                  legend_font_size=26, labelsize=18, xpad=0, ypad=0,
-                  ms=10, mew=2, lw=3.0)
-plotdir = "plots/"
+# Spearmans rho
+comparisons = [
+    ("stripes_log_r_comp_r", np.array([log_r[0], comp_r[0]])),
+    ("filled_log_r_comp_r", np.array([log_r[1], comp_r[1]])),
+    ("stripes_filled_log_r", np.array([log_r[0], log_r[1]])),
+    ("stripes_filled_comp_r", np.array([comp_r[0], comp_r[1]])),
+]
+spearmans = [(name, spearmans_rho(comparison)) for name, comparison in comparisons]
+for name, spear in spearmans:
+    print(name)
+    print(spear)
+    print("")
+
+fig_settings = {
+    "figsize" : (14, 10),
+    }
+plotter = Plotter(CompModelBC(), font_size=24, title_font_size=28,
+                  legend_font_size=21, labelsize=18, xpad=0, ypad=0,
+                  ms=10, mew=2, lw=3.0, fig_settings=fig_settings)
+plotdir = "plots/slice_right/"
 # # Plot comp b
 # plot_scatter(ests[0][1], ests[1][1],
 #              title="Correlation of b estimates from competition model fits to Stripes and Filled plates",
@@ -179,8 +195,6 @@ format_titles = {
     "title": "A) Correlation of {0} estimates between plates for each model",
     }
 format_labels = ["Logistic Model", "Competition Model"]
-
-# plot both rs
 f_meas = "r"
 titles = {k: v.format(f_meas) for k, v in format_titles.items()}
 print(titles)
@@ -188,8 +202,8 @@ labels = [lab.format(f_meas) for lab in format_labels]
 plotter.plot_scatter([log_r[0], comp_r[0]], [log_r[1], comp_r[1]],
                      labels, title=titles["title"], xlab=titles["xlab"],
                      ylab=titles["ylab"], ax_multiples=[2, 2],
-                     legend=True, corrcoef=True,
-                     outfile=plotdir + "new/r_correlations_between_plates_0.png")
+                     legend=True, pearson=True, spearman=True,
+                     outfile=plotdir + "r_correlations_between_plates.png")
 
 
 ### Plot correlations of different models for each plate ###
@@ -199,7 +213,6 @@ format_titles = {
     "title": "B) Correlation of {0} estimates between models for each plate",
     }
 format_labels = ["Stripes Plate", "Filled Plate"]
-# plot both rs
 f_meas = "r"
 titles = {k: v.format(f_meas) for k, v in format_titles.items()}
 print(titles)
@@ -207,8 +220,8 @@ labels = [lab.format(f_meas) for lab in format_labels]
 plotter.plot_scatter([log_r[0], log_r[1]], [comp_r[0], comp_r[1]],
                      labels, title=titles["title"], xlab=titles["xlab"],
                      ylab=titles["ylab"], ax_multiples=[2, 2],
-                     legend=True, corrcoef=True,
-                     outfile=plotdir + "new/r_correlations_between_models_0.png")
+                     legend=True, pearson=True, spearman=True,
+                     outfile=plotdir + "r_correlations_between_models.png")
 
 # # plot both MDRs
 # f_meas = "MDR"
@@ -217,5 +230,5 @@ plotter.plot_scatter([log_r[0], log_r[1]], [comp_r[0], comp_r[1]],
 # plotter.plot_scatter([log_mdr[0], comp_mdr[0]], [log_mdr[1], comp_mdr[1]],
 #                      labels, title=titles["title"], xlab=titles["xlab"],
 #                      ylab=titles["ylab"], ax_multiples=[2, 2],
-#                      legend=True, corrcoef=True,)
+#                      legend=True, pearson=True, spearman=True,)
 #                      # outfile=plotdir + "log_mdr_correlation.png")

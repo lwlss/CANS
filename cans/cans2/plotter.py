@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import copy
+import itertools
 
 
 from mpl_toolkits.axes_grid1 import AxesGrid
@@ -9,6 +10,7 @@ from matplotlib import rc
 
 from cans2.plate import Plate
 from cans2.zoning import get_plate_zone, sim_and_get_zone_amounts, get_zone_amounts
+from cans2.process import spearmans_rho
 
 
 class Plotter(object):
@@ -16,7 +18,17 @@ class Plotter(object):
     def __init__(self, model, font_size=32.0, title_font_size=36.0,
                  legend_font_size=26.0, lw=3.0, ms=10.0, mew=2.0,
                  labelsize=20, xpad=20, ypad=20, units=None,
-                 species=None):
+                 species=None, fig_settings=None, legend_cols=1,
+                 bbox=(1.0, -0.2), title_height=0.955):
+        """Initialise plotter and settings.
+
+        figure_setting : (dict) kwargs (figsize, etc.) to be unpacked
+        and passed plt.figure().
+
+        legend_cols : (int) number of columns to use in legend.
+
+        bbox : (tup) bbox_to_anchor setting for legend position.
+        """
         self.model = model
         # Can decide on other colours when adding models with more species.
         self.colours = ['b', 'y', 'r', 'g']
@@ -33,7 +45,7 @@ class Plotter(object):
         self.xpad = xpad
         self.ypad = ypad
         if units is None:    # List of unit labels
-            self.units = ["(days)", "(AU)"]
+            self.units = ["(d)", "(AU)"]
         else:
             self.units = units
         if species is not None:
@@ -44,6 +56,10 @@ class Plotter(object):
                 "N": "Nutrients",
                 "S": "Signal",
             }
+        self.fig_settings = fig_settings
+        self.legend_cols = legend_cols
+        self.bbox = bbox
+        self.title_height = title_height
 
 
     def _find_ymax(self, amounts):
@@ -53,13 +69,23 @@ class Plotter(object):
 
 
     def _make_grid(self, plate, amounts, sim, title, vis_ticks):
+        """Make a ractangular grid of axes.
+
+        Each axis may represent a culture in an QFA array.
+
+        vis_ticks : (bool) Whether to plot values on axes. For large
+        arrays becomes cluttered.
+        """
         rows = plate.rows
         cols = plate.cols
         if sim:
             ymax = self._find_ymax(np.append(amounts, plate.sim_amounts))
         else:
             ymax = self._find_ymax(np.append(amounts, plate.c_meas))
-        fig = plt.figure()
+        if self.fig_settings is None:
+            fig = plt.figure()
+        else:
+            fig = plt.figure(**self.fig_settings)
         # http://stackoverflow.com/a/36542971
         # Add big axes and hide frame.
         fig.add_subplot(111, frameon=False)
@@ -86,7 +112,7 @@ class Plotter(object):
                 plt.setp(ax.get_yticklabels(which="both"), visible=False)
 
         #rc('text', usetex=True)
-        fig.suptitle(title, fontsize=self.title_font_size)
+        fig.suptitle(title, fontsize=self.title_font_size, y=self.title_height)
 
         return fig, grid
 
@@ -278,20 +304,20 @@ class Plotter(object):
         # Check if c_meas are equal for the plates so don't plot
         # twice. Currently only checks for two.
         if len(plates) == 2 and len(plates[0].c_meas) == len(plates[1].c_meas):
-            same_c_meas = all(plates[0].c_meas == plates[1].c_meas)
+            same_c_meas = np.array_equal(plates[0].c_meas, plates[1].c_meas)
         else:
             same_c_meas = False
 
         colors = {
-            "C": ["b", "r", "b"],
-            "N": ["y", "g", "g"],
+            "C": ["b", "b", "b"],
+            "N": ["y", "y", "g"],
             }
-        lines = ["-", "-", "--"]
+        lines = ["-", "--", "--"]
 
         for i, ax in enumerate(grid):
             # Plot c_meas.
-            # for plate_name, c, zone in zip(plate_names, self.c_meas_colors, zones):
-            for plate_name, c, zone in zip(plate_names, colors["C"][:-1], zones):
+            for plate_name, c, zone in zip(plate_names, self.c_meas_colors, zones):
+            # for plate_name, c, zone in zip(plate_names, colors["C"][:-1], zones):
                 if same_c_meas:
                     ax.plot(zone.times, zone.c_meas[i::zone.no_cultures],
                             'x', color=c, label='Observed Cells',
@@ -307,9 +333,9 @@ class Plotter(object):
             plot_zip = zip(plate_names, plot_types, zone_smooth_amounts, models)
             for k, (plate_name, plot_type, smooth_amounts, model) in enumerate(plot_zip):
                 for j, (amounts, species) in enumerate(zip(smooth_amounts, model.species)):
-                    if j==1: break
+                    # if j==1: break
                     ax.plot(smooth_times, amounts[:, i], colors[species][k],
-                            label="{0} ".format(plot_type) + species_labels[species] + " {0}".format(plate_name),
+                            label="{0} ".format(plot_type) + species_labels[species] + ": {0}".format(plate_name),
                             # lw=self.lw, ls=self.linestyles[plate_names.index(plate_name)])
                             lw=self.lw, ls=lines[k])
 
@@ -325,15 +351,28 @@ class Plotter(object):
         # labels2 = [labels[i] for i in new_order]
 
         # # Change order of labels.
+        # ax = grid[-1]
+        # handles, labels = ax.get_legend_handles_labels()
+        # new_order = [0, 2, 1, 3, 4]
+        # handles2 = [handles[i] for i in new_order]
+        # labels2 = [labels[i] for i in new_order]
+
+        # For multiple columns reorder the axis labels by row
+        def flip(items, ncol):
+            """http://stackoverflow.com/a/10101532"""
+            return itertools.chain(*[items[i::ncol] for i in range(ncol)])
         ax = grid[-1]
         handles, labels = ax.get_legend_handles_labels()
-        new_order = [0, 2, 1, 3, 4]
-        handles2 = [handles[i] for i in new_order]
-        labels2 = [labels[i] for i in new_order]
+        handles = flip(handles, self.legend_cols)
+        labels = flip(labels, self.legend_cols)
 
         if legend:
-            grid[1].legend(handles2, labels2, loc='best', fontsize=self.legend_font_size)
-            # grid[1].legend(loc='best', fontsize=self.legend_font_size)
+            # grid[1].legend(handles2, labels2, loc='best', fontsize=self.legend_font_size)
+            grid[-1].legend(handles, labels, loc='best',
+                            fontsize=self.legend_font_size,
+                            ncol=self.legend_cols,
+                            bbox_to_anchor=self.bbox)
+
         if filename is None:
             plt.show()
         else:
@@ -426,7 +465,7 @@ class Plotter(object):
                 culture_amounts = culture_amounts[:, [2, 3]]
             # Plot c_meas
             ax.plot(zone.times, zone.c_meas[i::zone.no_cultures], 'x',
-                    label='Observed Cells', ms=ms, mew=mew)
+                    label='Observed Cells', ms=ms, mew=mew, color='r')
 
             for j, species in enumerate(model.species):
                 # Plot estimated amounts
@@ -451,7 +490,8 @@ class Plotter(object):
 
 
     def plot_scatter(self, xs, ys, labels, title="", xlab="", ylab="",
-                     outfile="", ax_multiples=None, legend=True, corrcoef=True):
+                     outfile="", ax_multiples=None, legend=True,
+                     pearson=True, spearman=True):
         """Make scatter plots
 
         xs : iterable of iterables of x values
@@ -467,14 +507,17 @@ class Plotter(object):
 
         legend : (bool) Whether or not to show a legend.
 
-        corrcoef : (bool) Whether or not to show Pearson correlation
+        pearson : (bool) Whether or not to show Pearson correlation
         coefficient in the legend.
 
         """
         if ax_multiples is None:
             ax_multiples = [10, 10]
-        colors = ["r", "b", "m", "g", "c"]
-        fig = plt.figure(figsize=(16, 11), dpi=500)
+        colors = ["k", "r", "b", "m", "g", "c"]
+        # colors = ["#00FF00", "#FFFF00", "c"]
+        markers = ["x", "^", "+", "o", "v", "D"]
+
+        fig = plt.figure(figsize=self.fig_settings["figsize"], dpi=500)
 
         ax = plt.gca()
         for tick in ax.xaxis.get_major_ticks():
@@ -486,34 +529,57 @@ class Plotter(object):
         plt.xlabel(xlab, fontsize=self.font_size, labelpad=self.xpad)
         plt.ylabel(ylab, fontsize=self.font_size, labelpad=self.ypad)
 
-        if corrcoef:
+        if spearman:
+            spearmans = [r"$r_s = {0:.3f}$".format(spearmans_rho([x, y])[-1][0])
+                         for x, y in zip(xs, ys)]
+        if pearson:
             ccoefs = []
             for x, y in zip(xs, ys):
                 m = np.vstack((x, y))
                 ccoef_m = np.corrcoef(m)
                 ccoef = ccoef_m[0, 1]
-                ccoefs.append(" (" + r"$\rho = {0:.3f}$".format(ccoef) + ")")
-            labels = [lab + ccoef for lab, ccoef in zip(labels, ccoefs)]
+                ccoefs.append(r"$\rho = {0:.3f}$".format(ccoef))
+        if spearman or pearson:
+            labels = [lab + " (" for lab in labels]
+            if pearson:
+                labels = [lab + ccoef for lab, ccoef in zip(labels, ccoefs)]
+            if pearson and spearman:
+                labels = [lab + ", " for lab in labels]
+            if spearman:
+                labels = [lab + rs for lab, rs in zip(labels, spearmans)]
+            labels = [lab + ")" for lab in labels]
 
-        for color, x, y, lab in zip(colors, xs, ys, labels):
+        for marker, color, x, y, lab in zip(markers, colors, xs, ys, labels):
             plt.plot(x, y, "x", ms=self.ms, mew=self.mew, color=color,
                      label=lab)
-        max_val = np.ceil(np.max([xs, ys])/10.0)*10
-        plt.plot([0, max_val], [0, max_val], color="k")
 
-        # Set max values to nearest multiple of 5.
+        # Change to cope with different size arrays (temporary
+        # fix). Range dicided by first set of values in outer except.
         try:
-            xmax = (np.max(xs)//ax_multiples[0] + 1) * ax_multiples[0]
-        except ZeroDivisionError:
-            xmax = np.max(xs)*1.1
-        try:
-            ymax = (np.max(ys)//ax_multiples[1] + 1) * ax_multiples[1]
-        except ZeroDivisionError:
-            ymax = np.max(ys)*1.1
+            max_val = np.ceil(np.max([xs, ys])/10.0)*10
+            plt.plot([0, max_val], [0, max_val], color="k")
+            try:
+                xmax = (np.max(xs)//ax_multiples[0] + 1) * ax_multiples[0]
+            except ZeroDivisionError:
+                xmax = np.max(xs)*1.1
+            try:
+                ymax = (np.max(ys)//ax_multiples[1] + 1) * ax_multiples[1]
+            except ZeroDivisionError:
+                ymax = np.max(ys)*1.1
+        except ValueError:
+            max_val = np.ceil(np.max([xs[0], ys[0]])/10.0)*10
+            plt.plot([0, max_val], [0, max_val], color="k")
+            try:
+                xmax = (np.max(xs[0])//ax_multiples[0] + 1) * ax_multiples[0]
+            except ZeroDivisionError:
+                xmax = np.max(xs[0])*1.1
+            try:
+                ymax = (np.max(ys[0])//ax_multiples[1] + 1) * ax_multiples[1]
+            except ZeroDivisionError:
+                ymax = np.max(ys[0])*1.1
 
         plt.xlim([0.0, xmax])
         plt.ylim([0.0, ymax])
-
 
         # Need to make a legend with correlation coefficient
         if legend:

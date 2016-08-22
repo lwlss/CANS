@@ -114,9 +114,10 @@ def get_plate_data2(path, barcode=None, ignore_empty=False):
 
     """
     data = pd.read_csv(path, sep="\t", header=0)
-    print("Barcodes", set(data["Barcode"]))
-    assert barcode in set(data["Barcode"])
-    data = data.loc[data["Barcode"] == barcode]
+    if barcode is not None:
+        print("Barcodes", set(data["Barcode"]))
+        assert barcode in set(data["Barcode"])
+        data = data.loc[data["Barcode"] == barcode]
     rows = max(data["Row"])
     cols = max(data["Column"])
     c_meas = np.array(data["Intensity"])

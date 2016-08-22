@@ -1,6 +1,7 @@
 """Script to replot fits in matplotlib window to save manually."""
 import numpy as np
 import json
+import csv
 
 
 from scipy.stats import variation
@@ -101,38 +102,49 @@ print("Total percent contribution to obj fun (edge)", total_edge_pc)
 
 corner_coords = [(0, 0), (0, 21), (13, 0), (13, 21)]
 rows, cols = 3, 3
-plotter = Plotter(CompModelBC(), lw=3.0, ms=10.0, mew=2.0, xpad=15,
-                  ypad=30, legend_font_size=26.0)
-plot_title = r"Best Competition Fits to Corner of \textit{cdc13-1} P15 at 27C"
+# plotter = Plotter(CompModelBC(), lw=3.0, ms=10.0, mew=2.0, xpad=15,
+#                   ypad=30, legend_font_size=26.0)
+
 
 assert all(plates[0].c_meas == plates[1].c_meas)
+plate_names = ["One N(0)", r"Two N(0)"]
+plot_types = ["", ""]
+fig_settings = {
+    "figsize": [16.0, 12.0],
+    "dpi": 100.0,
+    }
+plot_title = r"One and two N(0) parameter fits to corner of P15"
+plot_title = r"Fits of the competition model to a corner of P15"
+plotter = Plotter(CompModelBC(), lw=3.0, ms=12.0, mew=2.0, xpad=5, ypad=17,
+                  font_size=30.0, title_font_size=38.0,
+                  legend_font_size=22.0, labelsize=16,
+                  fig_settings=fig_settings, legend_cols=3, bbox=(1.0, 0.0))
+for coords in corner_coords:
+    plotter.plot_zone_est(plates, plate_names,
+                          est_params, models, coords, rows, cols,
+                          legend=True, title=plot_title,
+                          plot_types=plot_types, vis_ticks=False)
 
-# for coords in corner_coords:
-#     plotter.plot_zone_est(plates, ["(Comp.)", "(Comp. BC)"],
-#                           est_params, models, coords, rows, cols,
-#                           legend=True, title=plot_title,
-#                           plot_types=["Est.", "Est."], vis_ticks=True)
 
-import csv
+# # Save stats table:
+# # Use least square not obj fun with sqrt because sums are easier to
+# # calculate.
+# rows = [
+#     ["", "One N_0", "Two N_0"],
+#     ["Edge b COVS (HIS3)"] + b_covs,
+#     ["Full plate obj fun"] + [obj**2 for obj in full_plate_obj_funs],
+#     ["Internal ojb fun"] + [obj**2 for obj in internal_obj_funs],
+#     ["Depth 1 obj funs"] +  [obj**2 for obj in depth_1_obj_funs],
+#     ["Avg internal obj fun"] + avg_ints,
+#     ["Avg edge obj fun"] + avg_d1s,
+#     ["Avg ring 2 obj fun"] + avg_ring2,
+#     ["Avg % error per culture (internal)"] +  avg_int_pc,
+#     ["Avg % error per culture (edge)"] + avg_d1_pc,
+# # print("Avg d2 obj fun", avg_d2s)    # Not interesting.
+#     ["Avg % error per culture (ring 2)"] + avg_ring2_pc,
+#     ["Total % contribution to obj fun (edge)"] + total_edge_pc,
+# ]
 
-# Use least square not obj fun with sqrt because sums are easier to
-# calculate.
-rows = [
-    ["", "One N_0", "Two N_0"],
-    ["Edge b COVS (HIS3)"] + b_covs,
-    ["Full plate obj fun"] + [obj**2 for obj in full_plate_obj_funs],
-    ["Internal ojb fun"] + [obj**2 for obj in internal_obj_funs],
-    ["Depth 1 obj funs"] +  [obj**2 for obj in depth_1_obj_funs],
-    ["Avg internal obj fun"] + avg_ints,
-    ["Avg edge obj fun"] + avg_d1s,
-    ["Avg ring 2 obj fun"] + avg_ring2,
-    ["Avg % error per culture (internal)"] +  avg_int_pc,
-    ["Avg % error per culture (edge)"] + avg_d1_pc,
-# print("Avg d2 obj fun", avg_d2s)    # Not interesting.
-    ["Avg % error per culture (ring 2)"] + avg_ring2_pc,
-    ["Total % contribution to obj fun (edge)"] + total_edge_pc,
-]
-
-with open("corner_stats.csv", "wb") as f:
-    writer = csv.writer(f, delimiter="\t")
-    writer.writerows(rows)
+# with open("corner_stats.csv", "wb") as f:
+#     writer = csv.writer(f, delimiter="\t")
+#     writer.writerows(rows)
