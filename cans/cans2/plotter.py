@@ -511,11 +511,11 @@ class Plotter(object):
         """
         if ax_multiples is None:
             ax_multiples = [10, 10]
-        colors = ["r", "b", "m", "g", "c"]
-        colors = ["#00FF00", "#FFFF00", "c"]
+        colors = ["k", "r", "b", "m", "g", "c"]
+        # colors = ["#00FF00", "#FFFF00", "c"]
         markers = ["x", "^", "+", "o", "v", "D"]
 
-        fig = plt.figure(figsize=(16, 11), dpi=500)
+        fig = plt.figure(figsize=self.fig_settings["figsize"], dpi=500)
 
         ax = plt.gca()
         for tick in ax.xaxis.get_major_ticks():
@@ -539,18 +539,32 @@ class Plotter(object):
         for marker, color, x, y, lab in zip(markers, colors, xs, ys, labels):
             plt.plot(x, y, "x", ms=self.ms, mew=self.mew, color=color,
                      label=lab)
-        max_val = np.ceil(np.max([xs, ys])/10.0)*10
-        plt.plot([0, max_val], [0, max_val], color="k")
 
-        # Set max values to nearest multiple of 5.
+        # Change to cope with different size array (temporary
+        # fix). Range dicided by first set of values.
+        max_val = np.ceil(np.max([xs[0], ys[0]])/10.0)*10
+        plt.plot([0, max_val], [0, max_val], color="k")
         try:
-            xmax = (np.max(xs)//ax_multiples[0] + 1) * ax_multiples[0]
+            xmax = (np.max(xs[0])//ax_multiples[0] + 1) * ax_multiples[0]
         except ZeroDivisionError:
-            xmax = np.max(xs)*1.1
+            xmax = np.max(xs[0])*1.1
         try:
-            ymax = (np.max(ys)//ax_multiples[1] + 1) * ax_multiples[1]
+            ymax = (np.max(ys[0])//ax_multiples[1] + 1) * ax_multiples[1]
         except ZeroDivisionError:
-            ymax = np.max(ys)*1.1
+            ymax = np.max(ys[0])*1.1
+
+        # Use this version if arrays are the same size
+        # max_val = np.ceil(np.max([xs, ys])/10.0)*10
+        # plt.plot([0, max_val], [0, max_val], color="k")
+        # try:
+        #     xmax = (np.max(xs)//ax_multiples[0] + 1) * ax_multiples[0]
+        # except ZeroDivisionError:
+        #     xmax = np.max(xs)*1.1
+        # try:
+        #     ymax = (np.max(ys)//ax_multiples[1] + 1) * ax_multiples[1]
+        # except ZeroDivisionError:
+        #     ymax = np.max(ys)*1.1
+
 
         plt.xlim([0.0, xmax])
         plt.ylim([0.0, ymax])
