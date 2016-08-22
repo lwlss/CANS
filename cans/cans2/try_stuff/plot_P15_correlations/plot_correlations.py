@@ -18,19 +18,6 @@ from cans2.rank import correlate_ests, mdr, mdp, mdrmdp
 
 # Remove all edge cultures
 
-
-def add_missing_genes(plate):
-    """Correct Colonyzer output for filled plate.
-
-    First column is HIS3. Other columns are repeats of the left.
-    """
-    genes = np.copy(plate.genes)
-    genes.shape = (plate.rows, plate.cols)
-    genes[:, 0] = 'HIS3'
-    genes[:, 2::2] = genes[:, 1:-1:2]
-    return genes.flatten()
-
-
 barcodes = np.array([
     {
         "barcode": "DLR00012733",
@@ -53,7 +40,7 @@ result_paths = ["../../results/p15_fits/full_plate/CompModelBC_2/*.json"]
 
 best_paths = []
 for p in result_paths:
-    best_paths += find_best_fits(p, 5, "internal_least_sq")
+    best_paths += find_best_fits(p, 1, "internal_least_sq")
 
 results = []
 for bc, path in zip(barcodes, best_paths):
@@ -63,8 +50,7 @@ for bc, path in zip(barcodes, best_paths):
 no_cultures = plates[0].no_cultures
 
 # For cross-plate correlations
-b_ests = [data["est_params"] for data in results]
-
+b_ests = [data["comp_est"][-rows*cols:] for data in results]
 
 # Removes edge cultures, usually HIS3 (internal HIS3 also exist).
 b_ests = [remove_edges(np.array(bs), rows, cols) for bs in b_ests]
@@ -74,7 +60,6 @@ ests = []
 for bc, est in zip(barcodes, b_ests):
     est_name = bc["name"] + " " + bc["model"].name
     ests.append([est_name, est])
-
 
 # Now convert to r and plot again. r = b(N_0 + C_0). We
 # have removed edge cultures so there should be no NE_0.
@@ -97,50 +82,72 @@ comp_mdr = [mdr(r, K, C_0) for r, K, C_0 in zip(comp_r, comp_K, comp_C_0)]
 comp_mdrmdp = [mdrmdp(r, K, C_0) for r, K, C_0 in zip(comp_r, comp_K, comp_C_0)]
 
 
-# Now also get r values from the QFA R fits
-qfa_R_path = "../data/stripes/Stripes_FIT.txt"
-
-# Use pandas to extract the r values that I want
-log_r = np.array(get_qfa_R_dct(qfa_R_path)["r"])
-log_mdr = np.array(get_qfa_R_dct(qfa_R_path)["MDR"])
-log_bc = np.array(get_qfa_R_dct(qfa_R_path)["Barcode"])
-log_bc = np.split(log_bc, 2)
-assert len(log_bc[0]) == len(log_bc[1])
-assert all(log_bc[0] != log_bc[1])
-# Need to remove edge cultures from QFA R data. They count rows and
-# colums from zero.
-log_rows = np.array(get_qfa_R_dct(qfa_R_path)["Row"])
-log_cols = np.array(get_qfa_R_dct(qfa_R_path)["Column"])
-log_r = np.array([r for i, j, r in zip(log_rows, log_cols, log_r)
-                  if i not in [1, 16] and j not in [1, 24]])
-log_r = np.split(log_r, 2)
-log_mdr = np.array([mdr for i, j, mdr in zip(log_rows, log_cols, log_mdr)
-                    if i not in [1, 16] and j not in [1, 24]])
-log_mdr = np.split(log_mdr, 2)
+# Get logistic QFA R r values and remove edges
+qfa_R_path = "data/p15/P15_QFA_LogisticFitnesses.txt"
+qfa_R_dct = get_qfa_R_dct(qfa_R_path)
+log_r = [remove_edges(np.array(qfa_R_dct["r"]), rows, cols)]
+log_mdr = [remove_edges(np.array(qfa_R_dct["MDR"]), rows, cols)]
+qfa_R_genes = remove_edges(np.array(qfa_R_dct["Gene"]), rows, cols)
 assert len(log_r[0]) == len(comp_r[0])
-
 # Check that we are slicing QFA R and compeition model estimates to
 # get the same gene order.
-comp_genes = stripes_genes
-qfa_R_genes = np.array(get_qfa_R_dct(qfa_R_path)["Gene"])
-qfa_R_genes = np.array([gene for i, j, gene in zip(log_rows, log_cols, qfa_R_genes)
-                        if i not in [1, 16] and j not in [1, 24]])
-qfa_R_genes = np.split(qfa_R_genes, 2)
-assert all(comp_genes == qfa_R_genes[0])
-assert all(qfa_R_genes[0] == qfa_R_genes[1])
+assert all(genes == qfa_R_genes)
 
-# Check QFA R initial C_0s which they call g
-g = np.array(get_qfa_R_dct(qfa_R_path)["g"])
-g = np.split(g, 2)
-tally = 0
-for g1, g2 in zip(g[0], g[1]):
-    tally += int(g1 == g2)
-print("Fraction of g the same", tally/float(len(g[0])))
+# Find mean and medians for each gene
+
+gene_set = list(set(genes))
+print(gene_set)
+means = []
+medians = []
+
+def get_avgs(vals, genes, gene_set, avg="median"):
+    """Get the mean for each gene and return with the order of genes.
+
+    vals: list of values
+
+    genes : a list of genes
+
+    gene_set : genes in order
+
+    avg : "median" or "mean"
+
+    """
+    avgs = []
+    if avg == "mean":
+        for gene in gene_set:
+            mean = np.mean([vals[i] for i in np.where(genes == gene)[0]])
+            avgs.append(mean)
+    elif avg == "median":
+        for gene in gene_set:
+            median = np.median([vals[i] for i in np.where(genes == gene)[0]])
+            avgs.append(median)
+    return avgs, gene_set
+
+log_r_means = [get_avgs(rs, genes, gene_set, "mean")[0] for rs in log_r]
+log_r_medians = [get_avgs(rs, genes, gene_set, "median")[0] for rs in log_r]
+comp_r_means = [get_avgs(rs, genes, gene_set, "mean")[0] for rs in comp_r]
+comp_r_medians = [get_avgs(rs, genes, gene_set, "median")[0] for rs in comp_r]
 
 
-plotter = Plotter(CompModelBC(), font_size=30, title_font_size=30,
-                  legend_font_size=26, labelsize=18, xpad=0, ypad=0,
-                  ms=10, mew=2, lw=3.0)
+log_mdr_means = [get_avgs(mdrs, genes, gene_set, "mean")[0] for mdrs in log_mdr]
+log_mdr_medians = [get_avgs(mdrs, genes, gene_set, "median")[0] for mdrs in log_mdr]
+comp_mdr_means = [get_avgs(mdrs, genes, gene_set, "mean")[0] for mdrs in comp_mdr]
+comp_mdr_medians = [get_avgs(mdrs, genes, gene_set, "median")[0] for mdrs in comp_mdr]
+
+# Check that we get the expected gene ranks based on previous work.
+# print([(r, gene) for (r, gene) in sorted(zip(comp_r_medians[0], gene_set))])
+
+# Check QFA R initial C_0s (they call g)
+log_C_0 = qfa_R_dct["g"]
+from collections import Counter
+print("QFA_R_C_0_counter", Counter(log_C_0))
+
+fig_settings = {
+    "figsize" : (12, 10),
+    }
+plotter = Plotter(CompModelBC(), font_size=22, title_font_size=26,
+                  legend_font_size=20, labelsize=18, xpad=0, ypad=0,
+                  ms=10, mew=2, lw=3.0, fig_settings=fig_settings)
 plotdir = "plots/"
 # # Plot comp b
 # plot_scatter(ests[0][1], ests[1][1],
@@ -186,21 +193,153 @@ plotdir = "plots/"
 
 
 ### Plot correlations of different models for each plate ###
+
+# Locations r between models (locations and medians)
 format_titles = {
     "xlab": "Logistic {0}",
     "ylab": "Competition {0}",
-    "title": "B) Correlation of {0} estimates between models for each plate",
+    "title": "Correlation of {0} estimates between models for P15",
     }
-format_labels = ["Stripes Plate", "Filled Plate"]
+format_labels = ["Locations", "Medians"]
 f_meas = "r"
 titles = {k: v.format(f_meas) for k, v in format_titles.items()}
-print(titles)
 labels = [lab.format(f_meas) for lab in format_labels]
-plotter.plot_scatter([log_r[0], log_r[1]], [comp_r[0], comp_r[1]],
+plotter.plot_scatter([log_r[0], log_r_medians[0]], [comp_r[0], comp_r_medians[0]],
                      labels, title=titles["title"], xlab=titles["xlab"],
                      ylab=titles["ylab"], ax_multiples=[2, 2],
                      legend=True, corrcoef=True,
-                     outfile=plotdir + "new/r_correlations_between_models_0.png")
+                     outfile=plotdir + "r_correlations_log_v_comp_p15_locations_and_median.png")
+
+# Locations r between models (locations and means)
+format_titles = {
+    "xlab": "Logistic {0}",
+    "ylab": "Competition {0}",
+    "title": "Correlation of {0} estimates between models for P15",
+    }
+format_labels = ["Locations", "Means"]
+f_meas = "r"
+titles = {k: v.format(f_meas) for k, v in format_titles.items()}
+labels = [lab.format(f_meas) for lab in format_labels]
+plotter.plot_scatter([log_r[0], log_r_means[0]], [comp_r[0], comp_r_means[0]],
+                     labels, title=titles["title"], xlab=titles["xlab"],
+                     ylab=titles["ylab"], ax_multiples=[2, 2],
+                     legend=True, corrcoef=True,
+                     outfile=plotdir + "r_correlations_log_v_comp_p15_locations_and_mean.png")
+
+# Locations r between models (locations and means)
+format_titles = {
+    "xlab": "Logistic {0}",
+    "ylab": "Competition {0}",
+    "title": "Correlation of {0} estimates between models for P15",
+    }
+format_labels = ["Locations", "Medians", "Means"]
+f_meas = "r"
+titles = {k: v.format(f_meas) for k, v in format_titles.items()}
+labels = [lab.format(f_meas) for lab in format_labels]
+plotter.plot_scatter([log_r[0], log_r_medians[0], log_r_means[0]], [comp_r[0], comp_r_medians[0], comp_r_means[0]],
+                     labels, title=titles["title"], xlab=titles["xlab"],
+                     ylab=titles["ylab"], ax_multiples=[2, 2],
+                     legend=True, corrcoef=True,
+                     outfile=plotdir + "r_correlations_log_v_comp_p15_locations_median_and_mean.png")
+
+
+# Locations r between models
+format_titles = {
+    "xlab": "Logistic {0}",
+    "ylab": "Competition {0}",
+    "title": "Correlation of {0} estimates between models for P15",
+    }
+format_labels = ["Locations"]
+f_meas = "r"
+titles = {k: v.format(f_meas) for k, v in format_titles.items()}
+labels = [lab.format(f_meas) for lab in format_labels]
+plotter.plot_scatter([log_r[0]], [comp_r[0]],
+                     labels, title=titles["title"], xlab=titles["xlab"],
+                     ylab=titles["ylab"], ax_multiples=[2, 2],
+                     legend=True, corrcoef=True,
+                     outfile=plotdir + "r_correlations_log_v_comp_p15_locations.png")
+
+# Median r between models
+format_titles = {
+    "xlab": "Logistic {0}",
+    "ylab": "Competition {0}",
+    "title": "Correlation of median {0} estimates between models for P15",
+    }
+format_labels = ["Medians P15"]
+f_meas = "r"
+titles = {k: v.format(f_meas) for k, v in format_titles.items()}
+labels = [lab.format(f_meas) for lab in format_labels]
+plotter.plot_scatter([log_r_medians[0]], [comp_r_medians[0]],
+                     labels, title=titles["title"], xlab=titles["xlab"],
+                     ylab=titles["ylab"], ax_multiples=[2, 2],
+                     legend=True, corrcoef=True,
+                     outfile=plotdir + "r_correlations_log_v_comp_p15_medians.png")
+# Mean r between models
+format_titles = {
+    "xlab": "Logistic {0}",
+    "ylab": "Competition {0}",
+    "title": "Correlation of mean {0} estimates between models for P15",
+    }
+format_labels = ["Means P15"]
+f_meas = "r"
+titles = {k: v.format(f_meas) for k, v in format_titles.items()}
+labels = [lab.format(f_meas) for lab in format_labels]
+plotter.plot_scatter([log_r_means[0]], [comp_r_means[0]],
+                     labels, title=titles["title"], xlab=titles["xlab"],
+                     ylab=titles["ylab"], ax_multiples=[2, 2],
+                     legend=True, corrcoef=True,
+                     outfile=plotdir + "r_correlations_log_v_comp_p15_means.png")
+
+
+# Locations MDR between models
+format_titles = {
+    "xlab": "Logistic {0}",
+    "ylab": "Competition {0}",
+    "title": "Correlation of {0} estimates between models for P15",
+    }
+format_labels = ["Locations P15"]
+f_meas = "MDR"
+titles = {k: v.format(f_meas) for k, v in format_titles.items()}
+labels = [lab.format(f_meas) for lab in format_labels]
+plotter.plot_scatter([log_mdr[0]], [comp_mdr[0]],
+                     labels, title=titles["title"], xlab=titles["xlab"],
+                     ylab=titles["ylab"], ax_multiples=[2, 2],
+                     legend=True, corrcoef=True,
+                     outfile=plotdir + "mdr_correlations_log_v_comp_p15_locations.png")
+
+# Median MDR between models
+format_titles = {
+    "xlab": "Logistic {0}",
+    "ylab": "Competition {0}",
+    "title": "Correlation of median {0} estimates between models for P15",
+    }
+format_labels = ["Medians P15"]
+f_meas = "MDR"
+titles = {k: v.format(f_meas) for k, v in format_titles.items()}
+labels = [lab.format(f_meas) for lab in format_labels]
+plotter.plot_scatter([log_mdr_medians[0]], [comp_mdr_medians[0]],
+                     labels, title=titles["title"], xlab=titles["xlab"],
+                     ylab=titles["ylab"], ax_multiples=[2, 2],
+                     legend=True, corrcoef=True,
+                     outfile=plotdir + "mdr_correlations_log_v_comp_p15_medians.png")
+
+# Mean MDR between models
+format_titles = {
+    "xlab": "Logistic {0}",
+    "ylab": "Competition {0}",
+    "title": "Correlation of mean {0} estimates between models for P15",
+    }
+format_labels = ["Means P15"]
+f_meas = "MDR"
+titles = {k: v.format(f_meas) for k, v in format_titles.items()}
+labels = [lab.format(f_meas) for lab in format_labels]
+plotter.plot_scatter([log_mdr_means[0]], [comp_mdr_means[0]],
+                     labels, title=titles["title"], xlab=titles["xlab"],
+                     ylab=titles["ylab"], ax_multiples=[2, 2],
+                     legend=True, corrcoef=True,
+                     outfile=plotdir + "mdr_correlations_log_v_comp_p15_means.png")
+
+
 
 # # plot both MDRs
 # f_meas = "MDR"
