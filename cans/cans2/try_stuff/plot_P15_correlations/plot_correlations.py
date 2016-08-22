@@ -307,6 +307,39 @@ plotter.plot_scatter([log_r_means[0]], [comp_r_means[0]],
                      outfile=plotdir + "r_correlations_log_v_comp_p15_means.png")
 
 
+# Cultures mdr between models (locations and means)
+format_titles = {
+    "xlab": "Logistic {0}",
+    "ylab": "Competition {0}",
+    "title": "Correlation of {0} estimates between models for P15",
+    }
+format_labels = ["Cultures", "Means"]
+f_meas = "MDR"
+titles = {k: v.format(f_meas) for k, v in format_titles.items()}
+labels = [lab.format(f_meas) for lab in format_labels]
+plotter.plot_scatter([log_mdr[0], log_mdr_means[0]], [comp_mdr[0], comp_mdr_means[0]],
+                     labels, title=titles["title"], xlab=titles["xlab"],
+                     ylab=titles["ylab"], ax_multiples=[2, 2],
+                     legend=True, pearson=True, spearman=True,
+                     outfile=plotdir + "mdr_correlations_log_v_comp_p15_locations_and_mean.png")
+
+# Cultures MDR between models (locations and means)
+format_titles = {
+    "xlab": "Logistic {0}",
+    "ylab": "Competition {0}",
+    "title": "Correlation of {0} estimates between models for P15",
+    }
+format_labels = ["Cultures", "Medians"]
+f_meas = "MDR"
+titles = {k: v.format(f_meas) for k, v in format_titles.items()}
+labels = [lab.format(f_meas) for lab in format_labels]
+plotter.plot_scatter([log_mdr[0], log_mdr_medians[0]], [comp_mdr[0], comp_mdr_medians[0]],
+                     labels, title=titles["title"], xlab=titles["xlab"],
+                     ylab=titles["ylab"], ax_multiples=[2, 2],
+                     legend=True, pearson=True, spearman=True,
+                     outfile=plotdir + "mdr_correlations_log_v_comp_p15_locations_and_median.png")
+
+
 # Cultures MDR between models
 format_titles = {
     "xlab": "Logistic {0}",

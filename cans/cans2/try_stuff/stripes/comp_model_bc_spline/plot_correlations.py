@@ -156,13 +156,11 @@ for name, spear in spearmans:
     print(spear)
     print("")
 
-assert False
-
 fig_settings = {
     "figsize" : (14, 10),
     }
 plotter = Plotter(CompModelBC(), font_size=24, title_font_size=28,
-                  legend_font_size=24, labelsize=18, xpad=0, ypad=0,
+                  legend_font_size=21, labelsize=18, xpad=0, ypad=0,
                   ms=10, mew=2, lw=3.0, fig_settings=fig_settings)
 plotdir = "plots/slice_right/"
 # # Plot comp b
@@ -191,21 +189,21 @@ plotdir = "plots/slice_right/"
 
 ### Plot correlations of same model between plates ###
 # Make format strings for plots.
-# format_titles = {
-#     "xlab": "Stripes {0}",
-#     "ylab": "Filled {0}",
-#     "title": "A) Correlation of {0} estimates between plates for each model",
-#     }
-# format_labels = ["Logistic Model", "Competition Model"]
-# f_meas = "r"
-# titles = {k: v.format(f_meas) for k, v in format_titles.items()}
-# print(titles)
-# labels = [lab.format(f_meas) for lab in format_labels]
-# plotter.plot_scatter([log_r[0], comp_r[0]], [log_r[1], comp_r[1]],
-#                      labels, title=titles["title"], xlab=titles["xlab"],
-#                      ylab=titles["ylab"], ax_multiples=[2, 2],
-#                      legend=True, corrcoef=True,
-#                      outfile=plotdir + "r_correlations_between_plates.png")
+format_titles = {
+    "xlab": "Stripes {0}",
+    "ylab": "Filled {0}",
+    "title": "A) Correlation of {0} estimates between plates for each model",
+    }
+format_labels = ["Logistic Model", "Competition Model"]
+f_meas = "r"
+titles = {k: v.format(f_meas) for k, v in format_titles.items()}
+print(titles)
+labels = [lab.format(f_meas) for lab in format_labels]
+plotter.plot_scatter([log_r[0], comp_r[0]], [log_r[1], comp_r[1]],
+                     labels, title=titles["title"], xlab=titles["xlab"],
+                     ylab=titles["ylab"], ax_multiples=[2, 2],
+                     legend=True, pearson=True, spearman=True,
+                     outfile=plotdir + "r_correlations_between_plates.png")
 
 
 ### Plot correlations of different models for each plate ###
@@ -222,7 +220,7 @@ labels = [lab.format(f_meas) for lab in format_labels]
 plotter.plot_scatter([log_r[0], log_r[1]], [comp_r[0], comp_r[1]],
                      labels, title=titles["title"], xlab=titles["xlab"],
                      ylab=titles["ylab"], ax_multiples=[2, 2],
-                     legend=True, corrcoef=True,
+                     legend=True, pearson=True, spearman=True,
                      outfile=plotdir + "r_correlations_between_models.png")
 
 # # plot both MDRs
@@ -232,5 +230,5 @@ plotter.plot_scatter([log_r[0], log_r[1]], [comp_r[0], comp_r[1]],
 # plotter.plot_scatter([log_mdr[0], comp_mdr[0]], [log_mdr[1], comp_mdr[1]],
 #                      labels, title=titles["title"], xlab=titles["xlab"],
 #                      ylab=titles["ylab"], ax_multiples=[2, 2],
-#                      legend=True, corrcoef=True,)
+#                      legend=True, pearson=True, spearman=True,)
 #                      # outfile=plotdir + "log_mdr_correlation.png")

@@ -544,13 +544,13 @@ class Plotter(object):
             if pearson:
                 labels = [lab + ccoef for lab, ccoef in zip(labels, ccoefs)]
             if pearson and spearman:
-                label = [lab + " " for lab in labels]
+                labels = [lab + ", " for lab in labels]
             if spearman:
-                label = [lab + rs for lab, rs in zip(labels, spearmans)]
+                labels = [lab + rs for lab, rs in zip(labels, spearmans)]
             labels = [lab + ")" for lab in labels]
 
         for marker, color, x, y, lab in zip(markers, colors, xs, ys, labels):
-            plt.plot(x, y, "+", ms=self.ms, mew=self.mew, color=color,
+            plt.plot(x, y, "x", ms=self.ms, mew=self.mew, color=color,
                      label=lab)
 
         # Change to cope with different size arrays (temporary
