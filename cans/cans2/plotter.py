@@ -10,6 +10,7 @@ from matplotlib import rc
 
 from cans2.plate import Plate
 from cans2.zoning import get_plate_zone, sim_and_get_zone_amounts, get_zone_amounts
+from cans2.process import spearmans_rho
 
 
 class Plotter(object):
@@ -489,7 +490,8 @@ class Plotter(object):
 
 
     def plot_scatter(self, xs, ys, labels, title="", xlab="", ylab="",
-                     outfile="", ax_multiples=None, legend=True, corrcoef=True):
+                     outfile="", ax_multiples=None, legend=True,
+                     pearson=True, spearman=True):
         """Make scatter plots
 
         xs : iterable of iterables of x values
@@ -505,7 +507,7 @@ class Plotter(object):
 
         legend : (bool) Whether or not to show a legend.
 
-        corrcoef : (bool) Whether or not to show Pearson correlation
+        pearson : (bool) Whether or not to show Pearson correlation
         coefficient in the legend.
 
         """
@@ -527,17 +529,28 @@ class Plotter(object):
         plt.xlabel(xlab, fontsize=self.font_size, labelpad=self.xpad)
         plt.ylabel(ylab, fontsize=self.font_size, labelpad=self.ypad)
 
-        if corrcoef:
+        if spearman:
+            spearmans = [r"$r_{s} = {0:.3f}$".format(spearsmans_rho(x, y)[-1][0])
+                         for x, y in zip(xs, ys)]
+        if pearson:
             ccoefs = []
             for x, y in zip(xs, ys):
                 m = np.vstack((x, y))
                 ccoef_m = np.corrcoef(m)
                 ccoef = ccoef_m[0, 1]
-                ccoefs.append(" (" + r"$\rho = {0:.3f}$".format(ccoef) + ")")
-            labels = [lab + ccoef for lab, ccoef in zip(labels, ccoefs)]
+                ccoefs.append(r"$\rho = {0:.3f}$".format(ccoef))
+        if spearman or pearson:
+            labels = [lab + " (" for lab in labels]
+            if pearson:
+                labels = [lab + ccoef for lab, ccoef in zip(labels, ccoefs)]
+            if pearson and spearman:
+                label = [lab + " " for lab in labels]
+            if spearman:
+                label = [lab + rs for lab, rs in zip(labels, spearmans)]
+            labels = [lab + ")" for lab in labels]
 
         for marker, color, x, y, lab in zip(markers, colors, xs, ys, labels):
-            plt.plot(x, y, "x", ms=self.ms, mew=self.mew, color=color,
+            plt.plot(x, y, "+", ms=self.ms, mew=self.mew, color=color,
                      label=lab)
 
         # Change to cope with different size arrays (temporary
