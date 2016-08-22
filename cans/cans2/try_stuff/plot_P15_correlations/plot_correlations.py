@@ -143,10 +143,10 @@ from collections import Counter
 print("QFA_R_C_0_counter", Counter(log_C_0))
 
 fig_settings = {
-    "figsize" : (12, 10),
+    "figsize" : (14, 10),
     }
-plotter = Plotter(CompModelBC(), font_size=22, title_font_size=26,
-                  legend_font_size=20, labelsize=18, xpad=0, ypad=0,
+plotter = Plotter(CompModelBC(), font_size=24, title_font_size=28,
+                  legend_font_size=24, labelsize=18, xpad=0, ypad=0,
                   ms=10, mew=2, lw=3.0, fig_settings=fig_settings)
 plotdir = "plots/"
 # # Plot comp b
@@ -200,7 +200,7 @@ format_titles = {
     "ylab": "Competition {0}",
     "title": "Correlation of {0} estimates between models for P15",
     }
-format_labels = ["Locations", "Medians"]
+format_labels = ["Cultures", "Medians"]
 f_meas = "r"
 titles = {k: v.format(f_meas) for k, v in format_titles.items()}
 labels = [lab.format(f_meas) for lab in format_labels]
@@ -210,13 +210,13 @@ plotter.plot_scatter([log_r[0], log_r_medians[0]], [comp_r[0], comp_r_medians[0]
                      legend=True, corrcoef=True,
                      outfile=plotdir + "r_correlations_log_v_comp_p15_locations_and_median.png")
 
-# Locations r between models (locations and means)
+# Cultures r between models (locations and means)
 format_titles = {
     "xlab": "Logistic {0}",
     "ylab": "Competition {0}",
     "title": "Correlation of {0} estimates between models for P15",
     }
-format_labels = ["Locations", "Means"]
+format_labels = ["Cultures", "Means"]
 f_meas = "r"
 titles = {k: v.format(f_meas) for k, v in format_titles.items()}
 labels = [lab.format(f_meas) for lab in format_labels]
@@ -226,13 +226,13 @@ plotter.plot_scatter([log_r[0], log_r_means[0]], [comp_r[0], comp_r_means[0]],
                      legend=True, corrcoef=True,
                      outfile=plotdir + "r_correlations_log_v_comp_p15_locations_and_mean.png")
 
-# Locations r between models (locations and means)
+# Cultures r between models (locations and means)
 format_titles = {
     "xlab": "Logistic {0}",
     "ylab": "Competition {0}",
     "title": "Correlation of {0} estimates between models for P15",
     }
-format_labels = ["Locations", "Medians", "Means"]
+format_labels = ["Cultures", "Medians", "Means"]
 f_meas = "r"
 titles = {k: v.format(f_meas) for k, v in format_titles.items()}
 labels = [lab.format(f_meas) for lab in format_labels]
@@ -243,13 +243,13 @@ plotter.plot_scatter([log_r[0], log_r_medians[0], log_r_means[0]], [comp_r[0], c
                      outfile=plotdir + "r_correlations_log_v_comp_p15_locations_median_and_mean.png")
 
 
-# Locations r between models
+# Cultures r between models
 format_titles = {
     "xlab": "Logistic {0}",
     "ylab": "Competition {0}",
     "title": "Correlation of {0} estimates between models for P15",
     }
-format_labels = ["Locations"]
+format_labels = ["Cultures"]
 f_meas = "r"
 titles = {k: v.format(f_meas) for k, v in format_titles.items()}
 labels = [lab.format(f_meas) for lab in format_labels]
@@ -291,13 +291,13 @@ plotter.plot_scatter([log_r_means[0]], [comp_r_means[0]],
                      outfile=plotdir + "r_correlations_log_v_comp_p15_means.png")
 
 
-# Locations MDR between models
+# Cultures MDR between models
 format_titles = {
     "xlab": "Logistic {0}",
     "ylab": "Competition {0}",
     "title": "Correlation of {0} estimates between models for P15",
     }
-format_labels = ["Locations P15"]
+format_labels = ["Cultures P15"]
 f_meas = "MDR"
 titles = {k: v.format(f_meas) for k, v in format_titles.items()}
 labels = [lab.format(f_meas) for lab in format_labels]
