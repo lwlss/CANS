@@ -7,7 +7,7 @@ from cans2.model import CompModelBC
 from cans2.plate import Plate
 from cans2.plotter import Plotter#, plot_scatter
 from cans2.parser import get_plate_data2, get_qfa_R_dct
-from cans2.process import find_best_fits, remove_edges
+from cans2.process import find_best_fits, remove_edges, spearmans_rho
 from cans2.cans_funcs import dict_to_numpy
 from cans2.rank import correlate_ests, mdr, mdp, mdrmdp
 
@@ -143,6 +143,21 @@ for g1, g2 in zip(g[0], g[1]):
 print("Fraction of g the same", tally/float(len(g[0])))
 
 
+# Spearmans rho
+comparisons = [
+    ("stripes_log_r_comp_r", np.array([log_r[0], comp_r[0]])),
+    ("filled_log_r_comp_r", np.array([log_r[1], comp_r[1]])),
+    ("stripes_filled_log_r", np.array([log_r[0], log_r[1]])),
+    ("stripes_filled_comp_r", np.array([comp_r[0], comp_r[1]])),
+]
+spearmans = [(name, spearmans_rho(comparison)) for name, comparison in comparisons]
+for name, spear in spearmans:
+    print(name)
+    print(spear)
+    print("")
+
+assert False
+
 fig_settings = {
     "figsize" : (14, 10),
     }
@@ -176,21 +191,21 @@ plotdir = "plots/slice_right/"
 
 ### Plot correlations of same model between plates ###
 # Make format strings for plots.
-format_titles = {
-    "xlab": "Stripes {0}",
-    "ylab": "Filled {0}",
-    "title": "A) Correlation of {0} estimates between plates for each model",
-    }
-format_labels = ["Logistic Model", "Competition Model"]
-f_meas = "r"
-titles = {k: v.format(f_meas) for k, v in format_titles.items()}
-print(titles)
-labels = [lab.format(f_meas) for lab in format_labels]
-plotter.plot_scatter([log_r[0], comp_r[0]], [log_r[1], comp_r[1]],
-                     labels, title=titles["title"], xlab=titles["xlab"],
-                     ylab=titles["ylab"], ax_multiples=[2, 2],
-                     legend=True, corrcoef=True,
-                     outfile=plotdir + "r_correlations_between_plates.png")
+# format_titles = {
+#     "xlab": "Stripes {0}",
+#     "ylab": "Filled {0}",
+#     "title": "A) Correlation of {0} estimates between plates for each model",
+#     }
+# format_labels = ["Logistic Model", "Competition Model"]
+# f_meas = "r"
+# titles = {k: v.format(f_meas) for k, v in format_titles.items()}
+# print(titles)
+# labels = [lab.format(f_meas) for lab in format_labels]
+# plotter.plot_scatter([log_r[0], comp_r[0]], [log_r[1], comp_r[1]],
+#                      labels, title=titles["title"], xlab=titles["xlab"],
+#                      ylab=titles["ylab"], ax_multiples=[2, 2],
+#                      legend=True, corrcoef=True,
+#                      outfile=plotdir + "r_correlations_between_plates.png")
 
 
 ### Plot correlations of different models for each plate ###
