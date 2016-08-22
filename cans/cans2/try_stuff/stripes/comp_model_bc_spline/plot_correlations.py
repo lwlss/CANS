@@ -1,4 +1,4 @@
-"""Plot correlation of fitness estimates between plates with Spearmans'."""
+"""Plot correlation of fitness estimates between plates."""
 import numpy as np
 import json
 
