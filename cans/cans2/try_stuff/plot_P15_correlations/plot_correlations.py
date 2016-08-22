@@ -46,17 +46,14 @@ rows, cols = plates[0].rows, plates[0].cols
 
 # Stripes genes
 genes = plates[0].genes
-
 genes = remove_edges(genes, rows, cols)
 
-print(genes)
-print(p15_plate_genes);assert False
-
-result_paths = [bc["barcode"] + "/results/*.json" for bc in barcodes]
+# Just use fits of the two N_0 model.
+result_paths = ["../../results/p15_fits/full_plate/CompModelBC_2/*.json"]
 
 best_paths = []
 for p in result_paths:
-    best_paths += find_best_fits(p, 1, "obj_fun")
+    best_paths += find_best_fits(p, 5, "internal_least_sq")
 
 results = []
 for bc, path in zip(barcodes, best_paths):
@@ -68,6 +65,7 @@ no_cultures = plates[0].no_cultures
 # For cross-plate correlations
 b_ests = [data["est_params"] for data in results]
 
+
 # Removes edge cultures, usually HIS3 (internal HIS3 also exist).
 b_ests = [remove_edges(np.array(bs), rows, cols) for bs in b_ests]
 
@@ -75,7 +73,7 @@ b_ests = [remove_edges(np.array(bs), rows, cols) for bs in b_ests]
 ests = []
 for bc, est in zip(barcodes, b_ests):
     est_name = bc["name"] + " " + bc["model"].name
-    ests.append([est_name, np.extract(stripes_bool, est)])
+    ests.append([est_name, est])
 
 
 # Now convert to r and plot again. r = b(N_0 + C_0). We
