@@ -157,9 +157,6 @@ for name, spear in spearmans:
     print(spear)
     print("")
     print(spear[-1][0])
-assert False
-
-
 
 fig_settings = {
     "figsize" : (14, 10),
@@ -167,7 +164,7 @@ fig_settings = {
 plotter = Plotter(CompModelBC(), font_size=24, title_font_size=28,
                   legend_font_size=24, labelsize=18, xpad=0, ypad=0,
                   ms=10, mew=2, lw=3.0, fig_settings=fig_settings)
-plotdir = "plots/"
+plotdir = "plots/with_spearmans/"
 # # Plot comp b
 # plot_scatter(ests[0][1], ests[1][1],
 #              title="Correlation of b estimates from competition model fits to Stripes and Filled plates",
@@ -226,7 +223,7 @@ labels = [lab.format(f_meas) for lab in format_labels]
 plotter.plot_scatter([log_r[0], log_r_medians[0]], [comp_r[0], comp_r_medians[0]],
                      labels, title=titles["title"], xlab=titles["xlab"],
                      ylab=titles["ylab"], ax_multiples=[2, 2],
-                     legend=True, corrcoef=True,
+                     legend=True, pearson=True, spearman=True,
                      outfile=plotdir + "r_correlations_log_v_comp_p15_locations_and_median.png")
 
 # Cultures r between models (locations and means)
@@ -242,7 +239,7 @@ labels = [lab.format(f_meas) for lab in format_labels]
 plotter.plot_scatter([log_r[0], log_r_means[0]], [comp_r[0], comp_r_means[0]],
                      labels, title=titles["title"], xlab=titles["xlab"],
                      ylab=titles["ylab"], ax_multiples=[2, 2],
-                     legend=True, corrcoef=True,
+                     legend=True, pearson=True, spearman=True,
                      outfile=plotdir + "r_correlations_log_v_comp_p15_locations_and_mean.png")
 
 # Cultures r between models (locations and means)
@@ -258,7 +255,7 @@ labels = [lab.format(f_meas) for lab in format_labels]
 plotter.plot_scatter([log_r[0], log_r_medians[0], log_r_means[0]], [comp_r[0], comp_r_medians[0], comp_r_means[0]],
                      labels, title=titles["title"], xlab=titles["xlab"],
                      ylab=titles["ylab"], ax_multiples=[2, 2],
-                     legend=True, corrcoef=True,
+                     legend=True, pearson=True, spearman=True,
                      outfile=plotdir + "r_correlations_log_v_comp_p15_locations_median_and_mean.png")
 
 
@@ -275,7 +272,7 @@ labels = [lab.format(f_meas) for lab in format_labels]
 plotter.plot_scatter([log_r[0]], [comp_r[0]],
                      labels, title=titles["title"], xlab=titles["xlab"],
                      ylab=titles["ylab"], ax_multiples=[2, 2],
-                     legend=True, corrcoef=True,
+                     legend=True, pearson=True, spearman=True,
                      outfile=plotdir + "r_correlations_log_v_comp_p15_locations.png")
 
 # Median r between models
@@ -291,7 +288,7 @@ labels = [lab.format(f_meas) for lab in format_labels]
 plotter.plot_scatter([log_r_medians[0]], [comp_r_medians[0]],
                      labels, title=titles["title"], xlab=titles["xlab"],
                      ylab=titles["ylab"], ax_multiples=[2, 2],
-                     legend=True, corrcoef=True,
+                     legend=True, pearson=True, spearman=True,
                      outfile=plotdir + "r_correlations_log_v_comp_p15_medians.png")
 # Mean r between models
 format_titles = {
@@ -306,7 +303,7 @@ labels = [lab.format(f_meas) for lab in format_labels]
 plotter.plot_scatter([log_r_means[0]], [comp_r_means[0]],
                      labels, title=titles["title"], xlab=titles["xlab"],
                      ylab=titles["ylab"], ax_multiples=[2, 2],
-                     legend=True, corrcoef=True,
+                     legend=True, pearson=True, spearman=True,
                      outfile=plotdir + "r_correlations_log_v_comp_p15_means.png")
 
 
@@ -323,7 +320,7 @@ labels = [lab.format(f_meas) for lab in format_labels]
 plotter.plot_scatter([log_mdr[0]], [comp_mdr[0]],
                      labels, title=titles["title"], xlab=titles["xlab"],
                      ylab=titles["ylab"], ax_multiples=[2, 2],
-                     legend=True, corrcoef=True,
+                     legend=True, pearson=True, spearman=True,
                      outfile=plotdir + "mdr_correlations_log_v_comp_p15_locations.png")
 
 # Median MDR between models
@@ -339,7 +336,7 @@ labels = [lab.format(f_meas) for lab in format_labels]
 plotter.plot_scatter([log_mdr_medians[0]], [comp_mdr_medians[0]],
                      labels, title=titles["title"], xlab=titles["xlab"],
                      ylab=titles["ylab"], ax_multiples=[2, 2],
-                     legend=True, corrcoef=True,
+                     legend=True, pearson=True, spearman=True,
                      outfile=plotdir + "mdr_correlations_log_v_comp_p15_medians.png")
 
 # Mean MDR between models
@@ -355,7 +352,7 @@ labels = [lab.format(f_meas) for lab in format_labels]
 plotter.plot_scatter([log_mdr_means[0]], [comp_mdr_means[0]],
                      labels, title=titles["title"], xlab=titles["xlab"],
                      ylab=titles["ylab"], ax_multiples=[2, 2],
-                     legend=True, corrcoef=True,
+                     legend=True, pearson=True, spearman=True,
                      outfile=plotdir + "mdr_correlations_log_v_comp_p15_means.png")
 
 
@@ -367,5 +364,5 @@ plotter.plot_scatter([log_mdr_means[0]], [comp_mdr_means[0]],
 # plotter.plot_scatter([log_mdr[0], comp_mdr[0]], [log_mdr[1], comp_mdr[1]],
 #                      labels, title=titles["title"], xlab=titles["xlab"],
 #                      ylab=titles["ylab"], ax_multiples=[2, 2],
-#                      legend=True, corrcoef=True,)
+#                      legend=True, pearson=True, spearman=True,)
 #                      # outfile=plotdir + "log_mdr_correlation.png")

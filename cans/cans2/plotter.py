@@ -530,7 +530,7 @@ class Plotter(object):
         plt.ylabel(ylab, fontsize=self.font_size, labelpad=self.ypad)
 
         if spearman:
-            spearmans = [r"$r_{s} = {0:.3f}$".format(spearsmans_rho(x, y)[-1][0])
+            spearmans = [r"$r_s = {0:.3f}$".format(spearmans_rho([x, y])[-1][0])
                          for x, y in zip(xs, ys)]
         if pearson:
             ccoefs = []
@@ -566,7 +566,7 @@ class Plotter(object):
                 ymax = (np.max(ys)//ax_multiples[1] + 1) * ax_multiples[1]
             except ZeroDivisionError:
                 ymax = np.max(ys)*1.1
-        except TypeError:
+        except ValueError:
             max_val = np.ceil(np.max([xs[0], ys[0]])/10.0)*10
             plt.plot([0, max_val], [0, max_val], color="k")
             try:
