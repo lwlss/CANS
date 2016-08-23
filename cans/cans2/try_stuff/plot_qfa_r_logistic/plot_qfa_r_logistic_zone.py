@@ -7,7 +7,7 @@ import csv
 from cans2.plotter import Plotter
 from cans2.model import CompModel, CompModelBC, IndeModel
 from cans2.plate import Plate, Culture
-from cans2.process import read_in_json, remove_edges
+from cans2.process import read_in_json, remove_edges, calc_b, calc_N_0, least_sq
 from cans2.parser import get_qfa_R_dct
 from cans2.genetic_kwargs import _get_plate_kwargs
 
