@@ -5,19 +5,26 @@ import csv
 
 
 from cans2.plotter import Plotter
-from cans2.model import CompModel, CompModelBC
-from cans2.plate import Plate
-from cans2.process import read_in_json
+from cans2.model import CompModel, CompModelBC, IndeModel
+from cans2.plate import Plate, Culture
+from cans2.process import read_in_json, remove_edges
 from cans2.parser import get_qfa_R_dct
+from cans2.genetic_kwargs import _get_plate_kwargs
 
 
-def convert_to_b(r, K):
+def convert_to_b(r, K, C_0):
     """Convert logistic r and K to competition K"""
     return r/K
 
-def convert_to_N_0(K, C_0):
+def convert_to_N_0(r, K, C_0):
     """Convert logistic K and C_0 (g) competition N_0"""
     N_0 = K - C_0
+    return N_0
+
+def least_sq(a, b):
+    """Calculate and return the objective function."""
+    assert len(a) == len(b)
+    return np.sum((a - b)**2)
 
 
 plate_path = "data/ColonyzerOutput.txt"
@@ -28,6 +35,8 @@ comp_path = "data/best_comp.json"
 comp_data = read_in_json(comp_path)
 comp_plate = Plate(**_get_plate_kwargs(comp_data))
 
+rows, cols = comp_plate.rows, comp_plate.cols
+
 # Read in the logistic model data.
 log_data = get_qfa_R_dct(log_path)
 qfa_R_params = {
@@ -35,9 +44,36 @@ qfa_R_params = {
     "r": np.array(log_data["r"]),
     "K": np.array(log_data["K"]),
     }
+# Convert logistic model params to competiton model params
+log_C_0 = qfa_R_params["C_0"]
+log_N_0 = convert_to_N_0(**qfa_R_params)
+log_b = convert_to_b(**qfa_R_params)
 
-print(comp_data.keys())
-print(qfa_R_params)
+assert len(log_C_0) == rows*cols; assert len(log_C_0) == len(log_b); assert len(log_C_0) == len(log_N_0)
+
+# Add all of these parameters to Cultures on a Plate
+log_plate = Plate(**_get_plate_kwargs(comp_data)) # Get the c_meas for each culture
+for C_0, N_0, b, culture in zip(log_C_0, log_N_0, log_b, log_plate.cultures):
+    culture.log_params = [C_0, N_0, b]
+
+# Calculate the obective function for each culture and save as an attribute
+log_model = IndeModel()
+for culture in log_plate.cultures:
+    culture.log_amounts = log_model.solve(culture, culture.log_params, culture.times)
+    culture.c_log = culture.log_amounts[:, 0]
+    culture.least_sq = least_sq(culture.c_log, culture.c_meas)
+
+
+log_least_sqs = [culture.least_sq for culture in log_plate.cultures]
+internal_log_least_sqs = remove_edges(log_least_sqs, rows, cols)
+
+print("All log least sqs", np.sum(log_least_sqs))
+print("Internal log least sqs", np.sum(internal_log_least_sqs))
+
+print(log_plate.cultures[66].log_amounts)
+# Pass the plate to a plotter as a speacial argument. Simulate each
+# culture separately and plot the amounts for the zone from values
+# stored in each culture.
 
 assert False
 
