@@ -530,7 +530,7 @@ class Plotter(object):
         plt.ylabel(ylab, fontsize=self.font_size, labelpad=self.ypad)
 
         if spearman:
-            spearmans = [r"$r_s = {0:.3f}$".format(spearmans_rho([x, y])[-1][0])
+            spearmans = [r"$\rho_S = {0:.3f}$".format(spearmans_rho([x, y])[-1][0])
                          for x, y in zip(xs, ys)]
         if pearson:
             ccoefs = []
@@ -538,7 +538,7 @@ class Plotter(object):
                 m = np.vstack((x, y))
                 ccoef_m = np.corrcoef(m)
                 ccoef = ccoef_m[0, 1]
-                ccoefs.append(r"$\rho = {0:.3f}$".format(ccoef))
+                ccoefs.append(r"$\rho_P = {0:.3f}$".format(ccoef))
         if spearman or pearson:
             labels = [lab + " (" for lab in labels]
             if pearson:
