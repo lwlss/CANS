@@ -74,6 +74,16 @@ print(log_plate.cultures[66].log_amounts)
 # Pass the plate to a plotter as a speacial argument. Simulate each
 # culture separately and plot the amounts for the zone from values
 # stored in each culture.
+fig_settings = {
+    "figsize": [16.0, 12.0],
+    "dpi": 100.0,
+    }
+plotter = Plotter(log_model, lw=3.0, ms=12.0, mew=2.0, xpad=5, ypad=17,
+                  font_size=30.0, title_font_size=38.0,
+                  legend_font_size=22.0, labelsize=16,
+                  fig_settings=fig_settings, legend_cols=3, bbox=(1.0, 0.0))
+plotter.plot_qfa_R_logistic_fit(log_plate, qfa_R_params)
+
 
 assert False
 
