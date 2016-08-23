@@ -11,6 +11,7 @@ from matplotlib import rc
 from cans2.plate import Plate
 from cans2.zoning import get_plate_zone, sim_and_get_zone_amounts, get_zone_amounts
 from cans2.process import spearmans_rho
+from cans2.model import IndeModel
 
 
 class Plotter(object):
@@ -126,6 +127,64 @@ class Plotter(object):
             if not i % cols:
                 # Then in first column.
                 plt.setp(ax.get_yticklabels(which="both")[-1], visible=False)
+
+
+    def plot_qfa_R_logistic_fit(self, log_plate, log_params):
+        """Plot logistic model fits from the QFA R package.
+
+        This model has parameters for culture level C_0. I pass these
+        values to each culture on a Plate and simulate individually
+        using the IndeModel (i.e. can't use a plate level C_0.
+
+        log_plate : A Plate object containing Cultures, each with cell
+        observations and times.
+
+        log_params : A dictionary of logistic model parameters, keys
+        "C_0", "K", and "r" to convert to C_0, N_0, and b and store as
+        attributes of each culture.
+
+        """
+        def convert_to_b(r, K, C_0):
+            """Convert logistic r and K to competition K"""
+            return r/K
+
+        def convert_to_N_0(r, K, C_0):
+            """Convert logistic K and C_0 (g) competition N_0"""
+            N_0 = K - C_0
+            return N_0
+
+        log_C_0 = log_params["C_0"]
+        log_N_0 = convert_to_N_0(**log_params)
+        log_b = convert_to_b(**log_params)
+
+        for C_0, N_0, b, culture in zip(log_C_0, log_N_0, log_b, log_plate.cultures):
+            culture.log_params = [C_0, N_0, b]
+
+        log_model = IndeModel()
+        for culture in log_plate.cultures:
+            culture.est_amounts = log_model.solve(culture, culture.log_params, culture.times)
+            culture.c_est = culture.est_amounts[:, 0]
+            # culture.least_sq = least_sq(culture.c_est, culture.c_meas)
+
+        smooth_times = np.linspace(log_plate.times[0], log_plate.times[-1], 100)
+        for culture in log_plate.cultures:
+            culture.smooth_amounts = log_model.solve(culture,
+                                                     culture.log_params,
+                                                     smooth_times)
+            culture.c_smooth = culture.smooth_amounts[:, 0]
+
+        title = "QFA R logistic fit"
+        fig, grid = self._make_grid(log_plate, log_plate.c_meas,
+                                    False, title, vis_ticks=True)
+
+        for i, ax in enumerate(grid):
+            ax.plot(log_plate.times, log_plate.c_meas[i::log_plate.no_cultures],
+                    'x', label='Observed Cells', ms=self.ms, mew=self.mew)
+        for ax, culture in zip(grid, log_plate.cultures):
+            ax.plot(smooth_times, culture.c_smooth,
+                    '-', label='Logistic Cells', ms=self.ms, mew=self.mew)
+        plt.show()
+        plt.close()
 
 
     # Plate may have plate.inde_est and plate.comp_est so need to pass
