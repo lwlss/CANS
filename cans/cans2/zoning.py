@@ -4,6 +4,8 @@ import json
 
 from cans2.plate import Plate
 from cans2.cans_funcs import dict_to_json
+from cans2.process import calc_b, calc_N_0, least_sq
+from cans2.model import IndeModel
 
 
 def _get_zone(array, coords, rows, cols):
@@ -74,6 +76,8 @@ def sim_and_get_zone_amounts(plate, model, params, coords, rows, cols):
     return zone_amounts
 
 
+# Would be good to slice and keep the same Cultures for plotting QFA R
+# logistic fits or Initial guesses.
 def get_plate_zone(plate, coords, rows, cols):
     """Return a plate from a zone of a larger plate.
 
@@ -99,6 +103,62 @@ def get_plate_zone(plate, coords, rows, cols):
         }
     zone_plate = Plate(rows, cols, data=zone_data)
     return zone_plate
+
+
+def get_qfa_R_zone(plate, params, coords, rows, cols,
+                   smooth_times=None):
+    """Return a zone with from QFA R logistic parameters.
+
+    Reuturned Cultures contain the attributes log_eq_params,
+    est_amounts, c_est, c_smooth, and least_sq.
+
+    The QFA R model has parameters for culture level C_0. I pass
+    these values to each culture on a Plate and simulate
+    individually using IndeModel (i.e. can't use a plate level
+    C_0.)
+
+    plate : A Plate object containing Cultures, each with cell
+    observations and times.
+
+    params : A dictionary of logistic model parameters, keys
+    "C_0", "K", and "r" to convert to C_0, N_0, and b and store as
+    attributes of each culture.
+
+    coords : Top left coordinate of the zone (starting (0, 0))
+
+    rows, cols : rows and columns for the zone
+
+    smooth_times : Timepoints to use for a smooth simulation
+    """
+    log_C_0 = params["C_0"]
+    log_N_0 = calc_N_0(**params)
+    log_b = calc_b(**params)
+
+    for C_0, N_0, b, culture in zip(log_C_0, log_N_0, log_b, plate.cultures):
+        culture.log_eq_params = [C_0, N_0, b]
+
+    log_model = IndeModel()
+    for culture in plate.cultures:
+        culture.est_amounts = log_model.solve(culture, culture.log_eq_params, culture.times)
+        culture.c_est = culture.est_amounts[:, 0]
+        culture.least_sq = least_sq(culture.c_est, culture.c_meas)
+
+    if smooth_times is not None:
+        smooth_times = np.linspace(plate.times[0], plate.times[-1], 100)
+        for culture in plate.cultures:
+            culture.smooth_amounts = log_model.solve(culture,
+                                                     culture.log_eq_params,
+                                                     smooth_times)
+            culture.c_smooth = culture.smooth_amounts[:, 0]
+
+    # Get indicies of zone and slice those cultures into a zone list.
+    culture_inds = _get_zone_indices(plate, coords, rows, cols)
+    zone_cultures = [culture for i, culture in enumerate(plate.cultures)
+                     if i in culture_inds]
+
+    zone = get_plate_zone(plate, coords, rows, cols)
+    zone.cultures = zone_cultures
+    return zone
 
 
 def get_zone_bs(plate_bs, big_rows, big_cols, coords, rows, cols):
