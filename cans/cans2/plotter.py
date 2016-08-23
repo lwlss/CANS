@@ -10,7 +10,7 @@ from matplotlib import rc
 
 from cans2.plate import Plate
 from cans2.zoning import get_plate_zone, sim_and_get_zone_amounts, get_zone_amounts
-from cans2.process import spearmans_rho
+from cans2.process import spearmans_rho, calc_b, calc_N_0, least_sq
 from cans2.model import IndeModel
 
 
@@ -144,18 +144,9 @@ class Plotter(object):
         attributes of each culture.
 
         """
-        def convert_to_b(r, K, C_0):
-            """Convert logistic r and K to competition K"""
-            return r/K
-
-        def convert_to_N_0(r, K, C_0):
-            """Convert logistic K and C_0 (g) competition N_0"""
-            N_0 = K - C_0
-            return N_0
-
         log_C_0 = log_params["C_0"]
-        log_N_0 = convert_to_N_0(**log_params)
-        log_b = convert_to_b(**log_params)
+        log_N_0 = calc_N_0(**log_params)
+        log_b = calc_b(**log_params)
 
         for C_0, N_0, b, culture in zip(log_C_0, log_N_0, log_b, log_plate.cultures):
             culture.log_params = [C_0, N_0, b]
@@ -164,7 +155,7 @@ class Plotter(object):
         for culture in log_plate.cultures:
             culture.est_amounts = log_model.solve(culture, culture.log_params, culture.times)
             culture.c_est = culture.est_amounts[:, 0]
-            # culture.least_sq = least_sq(culture.c_est, culture.c_meas)
+            culture.least_sq = least_sq(culture.c_est, culture.c_meas)
 
         smooth_times = np.linspace(log_plate.times[0], log_plate.times[-1], 100)
         for culture in log_plate.cultures:
