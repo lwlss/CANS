@@ -34,6 +34,22 @@ def calc_K(C_0, N_0):
     return C_0 + N_0
 
 
+def calc_b(r, K, C_0):
+    """Convert logistic r and K to competition K"""
+    return r/K
+
+
+def calc_N_0(r, K, C_0):
+    """Convert logistic K and C_0 (g) competition N_0"""
+    return K - C_0
+
+
+def least_sq(a, b):
+    """Calculate and return the objective function."""
+    assert len(a) == len(b)
+    return np.sum((a - b)**2)
+
+
 def find_best_fits(path, num=None, key="obj_fun"):
     """Return the best num fits by ranking key.
 
