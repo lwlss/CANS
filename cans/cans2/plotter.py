@@ -9,7 +9,7 @@ from matplotlib import rc
 
 
 from cans2.plate import Plate
-from cans2.zoning import get_plate_zone, sim_and_get_zone_amounts, get_zone_amounts
+from cans2.zoning import get_plate_zone, sim_and_get_zone_amounts, get_zone_amounts, _get_zone_indices
 from cans2.process import spearmans_rho, calc_b, calc_N_0, least_sq
 from cans2.model import IndeModel
 
@@ -129,7 +129,8 @@ class Plotter(object):
                 plt.setp(ax.get_yticklabels(which="both")[-1], visible=False)
 
 
-    def plot_qfa_R_logistic_fit(self, log_plate, log_params):
+    def plot_qfa_R_logistic_fit(self, log_plate, log_params, coords,
+                                rows, cols):
         """Plot logistic model fits from the QFA R package.
 
         This model has parameters for culture level C_0. I pass these
@@ -164,14 +165,22 @@ class Plotter(object):
                                                      smooth_times)
             culture.c_smooth = culture.smooth_amounts[:, 0]
 
+        # Get indicies of zone and slice those cultures into a zone list.
+        culture_inds = _get_zone_indices(log_plate, coords, rows, cols)
+        zone_cultures = [culture for i, culture in enumerate(log_plate.cultures)
+                         if i in culture_inds]
+
+        zone = get_plate_zone(log_plate, coords, rows, cols)
+
         title = "QFA R logistic fit"
-        fig, grid = self._make_grid(log_plate, log_plate.c_meas,
-                                    False, title, vis_ticks=True)
+        fig, grid = self._make_grid(zone, zone.c_meas, False, title,
+                                    vis_ticks=True)
 
         for i, ax in enumerate(grid):
-            ax.plot(log_plate.times, log_plate.c_meas[i::log_plate.no_cultures],
-                    'x', label='Observed Cells', ms=self.ms, mew=self.mew)
-        for ax, culture in zip(grid, log_plate.cultures):
+            ax.plot(zone.times, zone.c_meas[i::zone.no_cultures],
+                    'x', label='Observed Cells', color="b",
+                    ms=self.ms, mew=self.mew)
+        for ax, culture in zip(grid, zone_cultures):
             ax.plot(smooth_times, culture.c_smooth,
                     '-', label='Logistic Cells', ms=self.ms, mew=self.mew)
         plt.show()
@@ -282,7 +291,7 @@ class Plotter(object):
     def plot_zone_est(self, plates, plate_names, est_params, models,
                       coords, rows, cols, title="Zone Estimates",
                       legend=False, filename=None, plot_types=None,
-                      vis_ticks=True):
+                      vis_ticks=True, log_plate=None):
         """Plot estimates for a zone.
 
         Plotting a zone from a full plate estimate requires simulating
@@ -309,6 +318,8 @@ class Plotter(object):
         plot_types : list of strings for plot labels. If the first
         plate is to plot the estimate and the second a simulation use
         e.g. ["Est", "Sim"]
+
+        log_plate : A plate from a QFA R logistic fit.
 
         """
         smooth_times = np.linspace(plates[0].times[0], plates[0].times[-1], 100)
