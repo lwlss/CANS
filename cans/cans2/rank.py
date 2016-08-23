@@ -182,16 +182,18 @@ def correlate_ests(genes, query_gene, filename="", eps=0.15, *ests):
     plt.close()
 
 
-def plot_c_of_v(genes, title, *ests):
+def plot_c_of_v(genes, avg, title, *ests):
     """Plot coefficient of variation.
 
-    Currently only works for len(ests) == 2
     http://matplotlib.org/examples/pylab_examples/barchart_demo.html
+
+    avg : ("median" or "mean") Orders by the rank of average
+    estimates for the first argument in ests.
 
     """
     est_names = [est[0] for est in ests]
     # List of dicts with genes as keys.
-    stats = get_repeat_stats(genes, "median", *[est[1] for est in ests])
+    stats = get_repeat_stats(genes, avg, *[est[1] for est in ests])
 
     # Use gene rankings of first estimate as order for all.
     first_avgs = [(gene, stat[0]) for gene, stat in stats[0].items()]
@@ -219,7 +221,7 @@ def plot_c_of_v(genes, title, *ests):
     plt.ylabel('Coefficient of Variation', fontsize=28)
     plt.title(title, fontsize=34)
     plt.xticks(x_vals + bar_width, italic_genes, rotation="vertical",
-               style="italic", fontsize=22)
+               style="italic", fontweight="bold", fontsize=22)
     for tick in ax.yaxis.get_major_ticks():
         tick.label.set_fontsize(14)
     plt.legend(loc=2, fontsize=28)
