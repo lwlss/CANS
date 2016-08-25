@@ -35,7 +35,7 @@ log_mdr = get_qfa_R_dct(qfa_R_log_data)["MDR"]
 log_mdrmdp = get_qfa_R_dct(qfa_R_log_data)["MDRMDP"]
 log_ests = [log_r, log_mdr, log_mdrmdp]
 #log_ests = [log_ests[fitnesses.index(fitness)]]
-log_ests = log_ests[:1]
+log_ests = log_ests[:2]
 assert all(genes == get_genes(qfa_R_log_data))
 
 rows, cols = 16, 24
@@ -85,7 +85,7 @@ log_eq_ests = [["Log. Eq.".format(i), est] for i, est in enumerate(log_eq_ests)]
 gen_log_ests = [["Gen. Log. {0}".format(fitness), est] for est in gen_log_ests]
 log_ests = [["Logistic {0}".format(f), est] for f, est in zip(["r", "MDR"], log_ests)]
 
-ests = comp_ests + comp_bc_ests + log_ests# + gen_log_ests + log_eq_ests
+ests = comp_bc_ests + log_ests# + gen_log_ests + log_eq_ests
 # ests = comp_ests + comp_bc_ests + log_ests# + log_eq_ests
 
 # # Plot all genes
@@ -97,12 +97,13 @@ ests = comp_ests + comp_bc_ests + log_ests# + gen_log_ests + log_eq_ests
 #     correlate_ests(genes, gene, "", *ests)
 
 # # Plot avgs
-# correlate_avgs(genes, "r_rank/comp_b_log_r.png", 0.15, *ests)
+# correlate_avgs(genes, "median", "r_rank_median/comp_b_log_r_log_mdr_median.png", 0.14, *ests)
+# correlate_avgs(genes, "mean", "r_rank_mean/comp_b_log_r_log_mdr_mean.png", 0.14, *ests)
 # correlate_avgs(genes, "", 0.1, *ests)
 
 # Now get the coefficient of variation for best bc_est and log_eq_est
 # c_of_v_title = "Variation in Fitness Estimates by Model"
 c_of_v_title = ""
-plot_c_of_v(genes, c_of_v_title, *ests)
+plot_c_of_v(genes, "median", c_of_v_title, *ests[:-1])
 
 # write_stats(genes, "results/top_two_comp_model_bc_comp_model.csv", *ests)

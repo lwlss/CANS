@@ -9,8 +9,10 @@ from matplotlib import rc
 
 
 from cans2.plate import Plate
-from cans2.zoning import get_plate_zone, sim_and_get_zone_amounts, get_zone_amounts
-from cans2.process import spearmans_rho
+from cans2.zoning import get_plate_zone, sim_and_get_zone_amounts, get_zone_amounts, get_qfa_R_zone
+from cans2.process import spearmans_rho, calc_b, calc_N_0, least_sq
+from cans2.model import IndeModel
+
 
 
 class Plotter(object):
@@ -128,6 +130,38 @@ class Plotter(object):
                 plt.setp(ax.get_yticklabels(which="both")[-1], visible=False)
 
 
+    def plot_qfa_R_logistic_fit(self, log_plate, log_params, coords,
+                                rows, cols, title="QFA R logistic fit"):
+        """Plot logistic model fits from the QFA R package.
+
+        This model has parameters for culture level C_0. I pass these
+        values to each culture on a Plate and simulate individually
+        using the IndeModel (i.e. can't use a plate level C_0.
+
+        log_plate : A Plate object containing Cultures, each with cell
+        observations and times.
+
+        log_params : A dictionary of logistic model parameters, keys
+        "C_0", "K", and "r" to convert to C_0, N_0, and b and store as
+        attributes of each culture.
+
+        """
+        smooth_times = np.linspace(log_plate.times[0], log_plate.times[-1], 100)
+        zone = get_qfa_R_zone(log_plate, log_params, coords, rows, cols, smooth_times)
+
+        fig, grid = self._make_grid(zone, zone.c_meas, False, title,
+                                    vis_ticks=True)
+        for i, ax in enumerate(grid):
+            ax.plot(zone.times, zone.c_meas[i::zone.no_cultures],
+                    'x', label='Observed Cells', color="b",
+                    ms=self.ms, mew=self.mew)
+        for ax, culture in zip(grid, zone.cultures):
+            ax.plot(smooth_times, culture.c_smooth,
+                    '-', label='Logistic Cells', ms=self.ms, mew=self.mew)
+        plt.show()
+        plt.close()
+
+
     # Plate may have plate.inde_est and plate.comp_est so need to pass
     # one of these.
     def plot_est_rr(self, plate, est_params, title='Estimated Growth',
@@ -232,7 +266,7 @@ class Plotter(object):
     def plot_zone_est(self, plates, plate_names, est_params, models,
                       coords, rows, cols, title="Zone Estimates",
                       legend=False, filename=None, plot_types=None,
-                      vis_ticks=True):
+                      vis_ticks=True, log_plate=None, log_params=None):
         """Plot estimates for a zone.
 
         Plotting a zone from a full plate estimate requires simulating
@@ -260,8 +294,14 @@ class Plotter(object):
         plate is to plot the estimate and the second a simulation use
         e.g. ["Est", "Sim"]
 
+        log_plate : A plate from a QFA R logistic fit.
+
         """
         smooth_times = np.linspace(plates[0].times[0], plates[0].times[-1], 100)
+
+        if log_plate is not None:
+            log_zone = get_qfa_R_zone(log_plate, log_params, coords,
+                                      rows, cols, smooth_times)
 
         smooth_plate = Plate(plates[0].rows, plates[0].cols)
         smooth_plate.times = smooth_times
@@ -275,12 +315,24 @@ class Plotter(object):
             #                           axis=1)
             smooth_plate.smooth_amounts.append(smooth_amounts)
 
+        plates[0].amounts = []
+        # Simulate comp model at observed timepoints and get the amounts for the zone
+        plates[0].set_rr_model(models[0], est_params[0])
+        plates[0].amounts = plates[0].rr_solve()
+        zone_amounts = get_zone_amounts(plates[0].amounts, plates[0],
+                                        models[0], coords, rows, cols)
 
         zones = []
         for plate in plates:
             zone = get_plate_zone(plate, coords, rows, cols)
             zone.times = plate.times
             zones.append(zone)
+
+        # Caclulate objective function for comp model
+        comp_obj_funs = []
+        for i, culture in enumerate(zone.cultures):
+            comp_obj_funs.append(least_sq(culture.c_meas, zone_amounts[:, i]))
+        print(np.sum(comp_obj_funs))
 
         zone_smooth_amounts = []
         for model, smooth_amounts in zip(models, smooth_plate.smooth_amounts):
@@ -314,30 +366,77 @@ class Plotter(object):
             }
         lines = ["-", "--", "--"]
 
+        # for i, ax in enumerate(grid):
+        #     # Plot c_meas.
+        #     for plate_name, c, zone in zip(plate_names, self.c_meas_colors, zones):
+        #     # for plate_name, c, zone in zip(plate_names, colors["C"][:-1], zones):
+        #         if same_c_meas:
+        #             ax.plot(zone.times, zone.c_meas[i::zone.no_cultures],
+        #                     'x', color=c, label='Observed Cells',
+        #                     ms=self.ms, mew=self.mew)
+        #             break
+        #         else:
+        #             ax.plot(zone.times, zone.c_meas[i::zone.no_cultures],
+        #                     'x', color=c,
+        #                     label='Observed Cells {0}'.format(plate_name),
+        #                     ms=self.ms, mew=self.mew)
+        #     # continue    # Remove this line
+        #     # Plot smooth amounts for each estimate.
+        #     plot_zip = zip(plate_names, plot_types, zone_smooth_amounts, models)
+        #     for k, (plate_name, plot_type, smooth_amounts, model) in enumerate(plot_zip):
+        #         for j, (amounts, species) in enumerate(zip(smooth_amounts, model.species)):
+        #             # if j==1: break
+        #             ax.plot(smooth_times, amounts[:, i], colors[species][k],
+        #                     label="{0} ".format(plot_type) + species_labels[species] + " {0}".format(plate_name),
+        #                     # lw=self.lw, ls=self.linestyles[plate_names.index(plate_name)])
+        #                     lw=self.lw, ls=lines[k])
+        # if log_zone is not None:
+        #     # for ax, culture in zip(grid, log_zone.cultures):
+        #     #     ax.plot(smooth_times, culture.c_smooth, '-',
+        #     #             label='Logistic Cells', color="r", lw=self.lw)
+        #     for ax, culture in zip(grid, log_zone.cultures):
+        #         ax.plot(smooth_times, culture.c_smooth, '-',
+        #                 label="Log. obj. {0:.3f}".format(culture.least_sq*1000),
+        #                 color="r", lw=self.lw)
+        #         ax.legend(loc='best', fontsize=self.legend_font_size)
+
+        # Add text to plots with objective fuction values
+
+        # Alternative labels objective function.
         for i, ax in enumerate(grid):
             # Plot c_meas.
             for plate_name, c, zone in zip(plate_names, self.c_meas_colors, zones):
             # for plate_name, c, zone in zip(plate_names, colors["C"][:-1], zones):
                 if same_c_meas:
-                    ax.plot(zone.times, zone.c_meas[i::zone.no_cultures],
-                            'x', color=c, label='Observed Cells',
-                            ms=self.ms, mew=self.mew)
+                    ax.plot(zone.times,
+                            zone.c_meas[i::zone.no_cultures], 'x',
+                            color=c, ms=self.ms, mew=self.mew)
                     break
                 else:
-                    ax.plot(zone.times, zone.c_meas[i::zone.no_cultures],
-                            'x', color=c,
-                            label='Observed Cells {0}'.format(plate_name),
-                            ms=self.ms, mew=self.mew)
+                    ax.plot(zone.times,
+                            zone.c_meas[i::zone.no_cultures], 'x',
+                            color=c, ms=self.ms, mew=self.mew)
             # continue    # Remove this line
             # Plot smooth amounts for each estimate.
             plot_zip = zip(plate_names, plot_types, zone_smooth_amounts, models)
             for k, (plate_name, plot_type, smooth_amounts, model) in enumerate(plot_zip):
                 for j, (amounts, species) in enumerate(zip(smooth_amounts, model.species)):
-                    # if j==1: break
-                    ax.plot(smooth_times, amounts[:, i], colors[species][k],
-                            label="{0} ".format(plot_type) + species_labels[species] + ": {0}".format(plate_name),
-                            # lw=self.lw, ls=self.linestyles[plate_names.index(plate_name)])
-                            lw=self.lw, ls=lines[k])
+                    if j==0 and k==0:
+                        ax.plot(smooth_times, amounts[:, i], colors[species][k],
+                                label="Obj. {0:.2f}".format(comp_obj_funs[i]*10000),
+                                # lw=self.lw, ls=self.linestyles[plate_names.index(plate_name)])
+                                lw=self.lw, ls=lines[k])
+                    else:
+                        ax.plot(smooth_times, amounts[:, i], colors[species][k],
+                                # lw=self.lw, ls=self.linestyles[plate_names.index(plate_name)])
+                                lw=self.lw, ls=lines[k])
+        if log_zone is not None:
+            for ax, culture in zip(grid, log_zone.cultures):
+                ax.plot(smooth_times, culture.c_smooth, '-',
+                        label="Obj. {0:.2f}".format(culture.least_sq*10000),
+                        color="r", lw=self.lw)
+                ax.legend(loc=2, fontsize=self.legend_font_size)
+
 
         self._hide_last_ticks(grid, zone.rows, zone.cols)
 
@@ -530,7 +629,7 @@ class Plotter(object):
         plt.ylabel(ylab, fontsize=self.font_size, labelpad=self.ypad)
 
         if spearman:
-            spearmans = [r"$r_s = {0:.3f}$".format(spearmans_rho([x, y])[-1][0])
+            spearmans = [r"$\rho_S = {0:.3f}$".format(spearmans_rho([x, y])[-1][0])
                          for x, y in zip(xs, ys)]
         if pearson:
             ccoefs = []
@@ -538,7 +637,7 @@ class Plotter(object):
                 m = np.vstack((x, y))
                 ccoef_m = np.corrcoef(m)
                 ccoef = ccoef_m[0, 1]
-                ccoefs.append(r"$\rho = {0:.3f}$".format(ccoef))
+                ccoefs.append(r"$\rho_P = {0:.3f}$".format(ccoef))
         if spearman or pearson:
             labels = [lab + " (" for lab in labels]
             if pearson:

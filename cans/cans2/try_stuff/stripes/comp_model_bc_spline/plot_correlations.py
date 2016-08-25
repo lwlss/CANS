@@ -159,10 +159,10 @@ for name, spear in spearmans:
 fig_settings = {
     "figsize" : (14, 10),
     }
-plotter = Plotter(CompModelBC(), font_size=24, title_font_size=28,
-                  legend_font_size=21, labelsize=18, xpad=0, ypad=0,
+plotter = Plotter(CompModelBC(), font_size=24, title_font_size=26,
+                  legend_font_size=23, labelsize=18, xpad=0, ypad=0,
                   ms=10, mew=2, lw=3.0, fig_settings=fig_settings)
-plotdir = "plots/slice_right/"
+plotdir = "plots/spearman/"
 # # Plot comp b
 # plot_scatter(ests[0][1], ests[1][1],
 #              title="Correlation of b estimates from competition model fits to Stripes and Filled plates",
@@ -202,7 +202,7 @@ labels = [lab.format(f_meas) for lab in format_labels]
 plotter.plot_scatter([log_r[0], comp_r[0]], [log_r[1], comp_r[1]],
                      labels, title=titles["title"], xlab=titles["xlab"],
                      ylab=titles["ylab"], ax_multiples=[2, 2],
-                     legend=True, pearson=True, spearman=True,
+                     legend=True, pearson=False, spearman=True,
                      outfile=plotdir + "r_correlations_between_plates.png")
 
 
@@ -220,7 +220,7 @@ labels = [lab.format(f_meas) for lab in format_labels]
 plotter.plot_scatter([log_r[0], log_r[1]], [comp_r[0], comp_r[1]],
                      labels, title=titles["title"], xlab=titles["xlab"],
                      ylab=titles["ylab"], ax_multiples=[2, 2],
-                     legend=True, pearson=True, spearman=True,
+                     legend=True, pearson=False, spearman=True,
                      outfile=plotdir + "r_correlations_between_models.png")
 
 # # plot both MDRs
