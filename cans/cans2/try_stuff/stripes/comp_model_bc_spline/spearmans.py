@@ -11,7 +11,7 @@ from cans2.process import find_best_fits, remove_edges, test_bounds, spearmans_r
 
 
 bc_index = 1    # 0 for Stripe, 1 for filled.
-num_tops = 5    # Number of top fits to look at.
+num_tops = 1    # Number of top fits to look at.
 
 barcodes = np.array([
     {"barcode": "K000343_027_001", "ignore_empty": False, "name": "Empty"},
@@ -22,11 +22,19 @@ res_path = barcode + "/results/*.json"
 
 best_fits = np.array(find_best_fits(res_path, num=num_tops, key="obj_fun"))
 
+# for fit in best_fits:
+#     print(float(fit[-1])**2)
+
 data = []
 for filename in best_fits[:, 0]:
     with open(filename, 'r') as f:
         d = json.load(f)
     data.append(d)
+
+# bs = data[0]["est_params"][-384:]
+# print(len(bs))
+# print(np.mean(bs))
+# assert False
 
 at_bounds = [any(test_bounds(d["est_params"][:4], d["bounds"][:4])) for d in data]
 print(at_bounds)
@@ -59,15 +67,15 @@ b_ests = np.array([np.extract(stripes_bool, bs) for bs in b_ests])
 mads = mad_tril(b_ests)
 print(mads)
 
-outfile = barcode + "_spearmans.csv"
-with open(outfile, 'ab') as f:
-    writer = csv.writer(f, delimiter="\t")
-    writer.writerow(["Spearmans for top {0} fits {1}.".format(num_tops, barcode)])
-    for r in d_tri:
-        writer.writerow(r)
-    writer.writerow(["b parameter MADs for top {0} fits {1}.".format(num_tops, barcode)])
-    for r in mads:
-        writer.writerow(r)
-    writer.writerow(["Plate level parameter ests for top {0} fits {1}.".format(num_tops, barcode)])
-    for r in plate_lvl_ests:
-        writer.writerow(r)
+# outfile = barcode + "_spearmans.csv"
+# with open(outfile, 'ab') as f:
+#     writer = csv.writer(f, delimiter="\t")
+#     writer.writerow(["Spearmans for top {0} fits {1}.".format(num_tops, barcode)])
+#     for r in d_tri:
+#         writer.writerow(r)
+#     writer.writerow(["b parameter MADs for top {0} fits {1}.".format(num_tops, barcode)])
+#     for r in mads:
+#         writer.writerow(r)
+#     writer.writerow(["Plate level parameter ests for top {0} fits {1}.".format(num_tops, barcode)])
+#     for r in plate_lvl_ests:
+#         writer.writerow(r)
