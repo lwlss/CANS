@@ -248,8 +248,8 @@ class Guesser(object):
         """Return bounds for estimated parameters."""
         amount_bounds = self._bound_init_amounts(params, C_doubt, N_doubt)
         kn_bound = [(0, kn_max)]
-        r_bounds = [(0, None) for i in range(self.plate.no_cultures)]
-        bounds = amount_bounds + kn_bound + r_bounds
+        b_bounds = [(0, None) for i in range(self.plate.no_cultures)]
+        bounds = amount_bounds + kn_bound + b_bounds
         return np.array(bounds)
 
 
