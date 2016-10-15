@@ -299,8 +299,11 @@ def P15():
     dirname="AllStrains"
     make_sure_path_exists(dirname)
     print(fname)
-    M=hierarchy_inf(raw,par,iter=101000,burn=1000,thin=1000)
+    M=hierarchy_inf(raw,par,iter=1010,burn=10,thin=10)
     plot(M,path=dirname)
+
+if __name__ =="__main__":
+    P15()
 
 ##if __name__ == "__main__":
 ##    colnum=1
